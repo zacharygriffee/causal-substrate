@@ -28,6 +28,9 @@ The current repository posture is intentionally conservative. The kernel encodes
 - [`docs/doctrine-holes.md`](./docs/doctrine-holes.md): current logical pressure points and recommended doctrine-first responses
 - [`docs/doctrine-notes/`](./docs/doctrine-notes/README.md): ordered focused doctrine notes that tighten each hole enough for lab and implementation work
 - [`docs/working-defaults.md`](./docs/working-defaults.md): current lab defaults to use unless an experiment explicitly models an exception
+- [`docs/post-lab-synthesis.md`](./docs/post-lab-synthesis.md): what the completed lab program established and what it still leaves open
+- [`docs/next-phases.md`](./docs/next-phases.md): recommended phases after the initial lab program
+- [`labs/`](./labs/README.md): lab scaffold, registry, template, and starter specs for the local lab program
 - [`docs/doctrine-roadmap.md`](./docs/doctrine-roadmap.md): phased doctrine work sequence
 - [`docs/kernel.md`](./docs/kernel.md): minimal kernel design and invariants
 - [`docs/open-questions.md`](./docs/open-questions.md): unresolved questions preserved on purpose

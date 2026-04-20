@@ -16,9 +16,10 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "check": "tsc -p tsconfig.json --noEmit",
+    "check": "tsc -p tsconfig.json --noEmit && npm run labs:validate",
     "example": "tsx examples/minimal-continuity.ts",
-    "test": "tsx --test test/kernel.test.ts"
+    "labs:validate": "tsx scripts/validate-labs.ts",
+    "test": "tsx --test test/kernel.test.ts test/core-labs.test.ts"
   },
   "keywords": [
     "causality",

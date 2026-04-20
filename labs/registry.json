@@ -1,0 +1,105 @@
+{
+  "phaseCount": 4,
+  "labs": [
+    {
+      "id": "lab-01",
+      "title": "Wake/Sleep Continuity Lab",
+      "slug": "01-wake-sleep-continuity",
+      "priority": "now",
+      "phase": 2,
+      "status": "completed",
+      "implementationBoundary": "doc-plus-code",
+      "path": "labs/01-wake-sleep-continuity/README.md"
+    },
+    {
+      "id": "lab-02",
+      "title": "Referent Persistence Across Absence Lab",
+      "slug": "02-referent-persistence-across-absence",
+      "priority": "now",
+      "phase": 2,
+      "status": "completed",
+      "implementationBoundary": "doc-plus-code",
+      "path": "labs/02-referent-persistence-across-absence/README.md"
+    },
+    {
+      "id": "lab-03",
+      "title": "Primary Context and Directional Portal Lab",
+      "slug": "03-primary-context-directional-portal",
+      "priority": "now",
+      "phase": 2,
+      "status": "completed",
+      "implementationBoundary": "doc-plus-code",
+      "path": "labs/03-primary-context-directional-portal/README.md"
+    },
+    {
+      "id": "lab-04",
+      "title": "Degraded Basis Re-identification Lab",
+      "slug": "04-degraded-basis-reidentification",
+      "priority": "now",
+      "phase": 2,
+      "status": "completed",
+      "implementationBoundary": "doc-plus-code",
+      "path": "labs/04-degraded-basis-reidentification/README.md"
+    },
+    {
+      "id": "lab-05",
+      "title": "Trigger to Happening Clustering Lab",
+      "slug": "05-trigger-to-happening-clustering",
+      "priority": "now",
+      "phase": 2,
+      "status": "completed",
+      "implementationBoundary": "doc-plus-code",
+      "path": "labs/05-trigger-to-happening-clustering/README.md"
+    },
+    {
+      "id": "lab-06",
+      "title": "Boundary Ambiguity Lab",
+      "slug": "06-boundary-ambiguity",
+      "priority": "next",
+      "phase": 3,
+      "status": "completed",
+      "implementationBoundary": "doc-plus-code",
+      "path": "labs/06-boundary-ambiguity/README.md"
+    },
+    {
+      "id": "lab-07",
+      "title": "Two-Portal Mutual Exposure Lab",
+      "slug": "07-two-portal-mutual-exposure",
+      "priority": "next",
+      "phase": 3,
+      "status": "completed",
+      "implementationBoundary": "doc-plus-code",
+      "path": "labs/07-two-portal-mutual-exposure/README.md"
+    },
+    {
+      "id": "lab-08",
+      "title": "Local Artifact Emission Lab",
+      "slug": "08-local-artifact-emission",
+      "priority": "next",
+      "phase": 3,
+      "status": "completed",
+      "implementationBoundary": "doc-plus-code",
+      "path": "labs/08-local-artifact-emission/README.md"
+    },
+    {
+      "id": "lab-09",
+      "title": "Split/Merge Pressure Lab",
+      "slug": "09-split-merge-pressure",
+      "priority": "later",
+      "phase": 4,
+      "status": "completed",
+      "implementationBoundary": "doc-plus-code",
+      "path": "labs/09-split-merge-pressure/README.md"
+    },
+    {
+      "id": "lab-10",
+      "title": "Multi-Observer Non-Agreement Lab",
+      "slug": "10-multi-observer-non-agreement",
+      "priority": "later",
+      "phase": 4,
+      "status": "completed",
+      "implementationBoundary": "doc-plus-code",
+      "path": "labs/10-multi-observer-non-agreement/README.md"
+    }
+  ]
+}
