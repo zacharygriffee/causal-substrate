@@ -3,4 +3,6 @@ export * from "./kernel/substrate.js";
 export * from "./backends/filesystem.js";
 export * from "./backends/corestore.js";
 export * from "./backends/corestore-layout.js";
+export * from "./backends/corestore-records.js";
+export * from "./backends/corestore-first-serious-lab.js";
 export * from "./prototypes/continuity-workstation.js";

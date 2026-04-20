@@ -35,40 +35,67 @@
 
 ### Now
 
-- [ ] define the first serious Corestore lab record schema
-  - [ ] branch happenings
-  - [ ] sleep capsules / segments
-  - [ ] referent anchors / persistence state estimates
-  - [ ] views / bindings / lineage claims / receipts
-- [ ] build a first serious Corestore lab adapter on top of the managed backend
-  - [ ] use one deterministic concern namespace for the lab
-  - [ ] provide typed append helpers per stream
-  - [ ] provide readback helpers per stream
-- [ ] implement the first real Corestore lab
-  - [ ] wake activity on a branch stream
-  - [ ] sleep capsule emission on a segment stream
-  - [ ] referent persistence estimate emission on a referent stream
-  - [ ] derived artifact emission on an exchange stream
-  - [ ] readback proving the continuity/artifact split is workable
-- [ ] add proof tests for the first real Corestore lab
-  - [ ] append-only ordering
-  - [ ] local continuity vs shared artifact separation
-  - [ ] structured record readback consistency across streams
-  - [ ] clean reopen after close using the lab adapter
+- [x] define the first serious Corestore lab record schema
+  - [x] branch happenings
+  - [x] sleep capsules / segments
+  - [x] referent anchors / persistence state estimates
+  - [x] views / bindings / lineage claims / receipts
+- [x] build a first serious Corestore lab adapter on top of the managed backend
+  - [x] use one deterministic concern namespace for the lab
+  - [x] provide typed append helpers per stream
+  - [x] provide readback helpers per stream
+- [x] implement the first real Corestore lab
+  - [x] wake activity on a branch stream
+  - [x] sleep capsule emission on a segment stream
+  - [x] referent persistence estimate emission on a referent stream
+  - [x] derived artifact emission on an exchange stream
+  - [x] readback proving the continuity/artifact split is workable
+- [x] add proof tests for the first real Corestore lab
+  - [x] append-only ordering
+  - [x] local continuity vs shared artifact separation
+  - [x] structured record readback consistency across streams
+  - [x] clean reopen after close using the lab adapter
 
 ### Next
 
-- [ ] decide whether Hyperbee is actually needed
+- [ ] consolidate the Corestore-only path
+  - [ ] keep serious substrate work on Corestore/Hypercore only
+  - [ ] avoid Hyperbee unless concrete lookup or registry pressure appears
+  - [ ] treat known-core access and stream replay as the default posture
+- [ ] harden the Corestore record model
+  - [ ] stabilize branch happening records
+  - [ ] stabilize sleep capsule records
+  - [ ] stabilize referent state estimate records
+  - [ ] stabilize exchange artifact records
+  - [ ] decide whether JSON remains sufficient or stricter schema validation is needed
+- [ ] implement a multi-segment continuity lab on Hypercores
+  - [ ] append multiple wake/sleep cycles for one observer branch
+  - [ ] prove carried nuclei across several sealed segments
+  - [ ] verify continuation history remains readable without an index layer
+- [ ] implement a referent tracking lab on Hypercores
+  - [ ] append successive referent state estimates over time
+  - [ ] represent `continuing`, `ambiguous`, and `broken` as stream history
+  - [ ] prove absence and contradiction pressure can be read from append-only records
+- [ ] implement an exchange artifact lab on Hypercores
+  - [ ] emit views as explicit exchange records
+  - [ ] emit bindings as explicit exchange records
+  - [ ] emit lineage claims as explicit exchange records
+  - [ ] emit receipts as explicit exchange records
+  - [ ] prove exchange surfaces remain derived and replaceable
+- [ ] implement a cross-core reconstruction pass
+  - [ ] reconstruct a local picture by reading the four working cores together
+  - [ ] measure where known-core replay stays tractable
+  - [ ] note any lookup pain precisely instead of assuming an index is needed
+- [ ] formalize artifact envelopes for Corestore-backed emission
+
+### Later
+
+- [ ] make the Hyperbee decision only after Corestore-only pressure is demonstrated
   - [ ] branch id -> core references
   - [ ] referent id -> anchor references
   - [ ] context id -> member references
   - [ ] named artifact lookup
   - [ ] concern indexing
-- [ ] formalize artifact envelopes for Corestore-backed emission
-- [ ] decide whether the first serious lab should stay JSON-encoded or move to a stricter schema format
-
-### Later
-
 - [ ] replication labs
 - [ ] NoiseSecretStream majority experiments
 - [ ] fakeswarm-based swarm testing

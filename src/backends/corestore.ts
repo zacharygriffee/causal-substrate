@@ -22,8 +22,8 @@ export interface ManagedCorestoreLease {
 export interface OpenConcernOptions {
   storageDir: string;
   concern: string;
-  namespaceParts?: string[];
-  layout?: PlannedCoreLayout[];
+  namespaceParts?: string[] | undefined;
+  layout?: PlannedCoreLayout[] | undefined;
 }
 
 export interface OpenConcernHandle {
