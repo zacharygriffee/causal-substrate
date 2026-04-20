@@ -178,6 +178,8 @@ The substrate should prefer preserving ancestry relations and ambiguity over fla
 
 Current lab defaults are captured separately in [`./working-defaults.md`](./working-defaults.md). When doctrine is broader than the current implementation posture, labs should follow those defaults unless they are explicitly modeling an exception.
 
+Post-lab consolidation currently lives in [`./doctrine-consolidation.md`](./doctrine-consolidation.md).
+
 ### What code may assume
 
 Code may assume:

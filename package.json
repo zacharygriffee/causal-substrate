@@ -19,7 +19,8 @@
     "check": "tsc -p tsconfig.json --noEmit && npm run labs:validate",
     "example": "tsx examples/minimal-continuity.ts",
     "labs:validate": "tsx scripts/validate-labs.ts",
-    "test": "tsx --test test/kernel.test.ts test/core-labs.test.ts"
+    "prototype:workstation": "tsx prototypes/continuity-workstation.ts",
+    "test": "tsx --test test/kernel.test.ts test/core-labs.test.ts test/next-phases.test.ts test/corestore-backend.test.ts"
   },
   "keywords": [
     "causality",
@@ -33,5 +34,8 @@
     "@types/node": "^24.5.2",
     "tsx": "^4.19.3",
     "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "corestore": "7.9.2"
   }
 }

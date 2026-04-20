@@ -25,12 +25,16 @@ The current repository posture is intentionally conservative. The kernel encodes
 
 - [`docs/ontology.md`](./docs/ontology.md): conceptual posture, non-goals, and load-bearing distinctions
 - [`docs/doctrine.md`](./docs/doctrine.md): doctrinal commitments and repository rules
+- [`docs/doctrine-consolidation.md`](./docs/doctrine-consolidation.md): tightened doctrine after completing the initial lab program
 - [`docs/doctrine-holes.md`](./docs/doctrine-holes.md): current logical pressure points and recommended doctrine-first responses
 - [`docs/doctrine-notes/`](./docs/doctrine-notes/README.md): ordered focused doctrine notes that tighten each hole enough for lab and implementation work
 - [`docs/working-defaults.md`](./docs/working-defaults.md): current lab defaults to use unless an experiment explicitly models an exception
 - [`docs/post-lab-synthesis.md`](./docs/post-lab-synthesis.md): what the completed lab program established and what it still leaves open
+- [`docs/corestore-hypercore-plan.md`](./docs/corestore-hypercore-plan.md): current implementation posture for serious substrate labs
+- [`docs/shared-artifacts.md`](./docs/shared-artifacts.md): current artifact formalization for local-first and pre-backend work
 - [`docs/next-phases.md`](./docs/next-phases.md): recommended phases after the initial lab program
 - [`labs/`](./labs/README.md): lab scaffold, registry, template, and starter specs for the local lab program
+- [`prototypes/`](./prototypes/README.md): local-first prototype entrypoints built on top of the kernel
 - [`docs/doctrine-roadmap.md`](./docs/doctrine-roadmap.md): phased doctrine work sequence
 - [`docs/kernel.md`](./docs/kernel.md): minimal kernel design and invariants
 - [`docs/open-questions.md`](./docs/open-questions.md): unresolved questions preserved on purpose
@@ -55,6 +59,12 @@ The current proof of concept includes:
 - optional inertia/volatility/state-estimate hooks
 
 The implementation remains local-first and backend-agnostic. It uses an in-memory store today so later persistence backends can be added without changing the ontology.
+
+Current implementation bias:
+
+- the in-memory kernel remains the ontology scaffold
+- the first serious substrate labs should bias toward Corestore and Hypercore
+- Hyperbee should remain secondary unless indexing needs force it
 
 ## Quick start
 

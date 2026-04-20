@@ -4,7 +4,17 @@ This document lists the recommended phases after the initial lab program.
 
 The lab program is complete. The next work should tighten the pressured doctrine where needed and begin building more serious local prototypes without rushing into decentralized backends.
 
+Status note:
+
+- the phases listed below have now been implemented in an initial pass
+- the document is retained as the record of what those phases were meant to accomplish
+- further phase planning now depends on choosing the next product or research direction explicitly
+
 ## Phase 5: Post-Lab Doctrine Consolidation
+
+Status:
+
+- initial pass completed
 
 Goal:
 
@@ -31,6 +41,10 @@ Success condition:
 
 ## Phase 6: Kernel Refinement For Local Prototypes
 
+Status:
+
+- initial pass completed
+
 Goal:
 
 - add the smallest useful helpers and structures needed to support richer local prototypes
@@ -55,6 +69,10 @@ Success condition:
 
 ## Phase 7: Local Prototype Track
 
+Status:
+
+- initial pass completed
+
 Goal:
 
 - build one or more serious local prototypes that exercise the substrate beyond isolated lab scenarios
@@ -77,6 +95,10 @@ Success condition:
 - at least one local prototype uses multiple substrate concepts together under realistic pressure
 
 ## Phase 8: Shared Artifact Formalization
+
+Status:
+
+- initial pass completed
 
 Goal:
 
@@ -101,6 +123,10 @@ Success condition:
 - the repo has a coherent shared-artifact layer without implying global truth or mandatory convergence
 
 ## Phase 9: Backend and Exchange Exploration
+
+Status:
+
+- initial pass completed
 
 Goal:
 
@@ -131,3 +157,24 @@ Work the next phases in this order:
 3. Phase 7: local prototype track
 4. Phase 8: shared artifact formalization
 5. Phase 9: backend and exchange exploration
+
+## What Happens Next
+
+The current phase list is exhausted in initial form.
+
+The next round needs an explicit choice about which direction to optimize for:
+
+- deeper doctrine closure
+- stronger local prototype productization
+- artifact and exchange standardization
+- decentralized backend experimentation
+
+## Current Bias
+
+Current implementation bias:
+
+- keep the in-memory kernel small and subordinate
+- bias the first serious substrate lab toward Corestore and Hypercore
+- add Hyperbee only when indexing and catalog pressure becomes real
+
+See [`./corestore-hypercore-plan.md`](./corestore-hypercore-plan.md).

@@ -134,3 +134,9 @@ The repo has crossed an important threshold.
 It no longer has only doctrine text and a minimal kernel. It now has an executable local lab program that validates the current defaults and exposes the remaining open questions in concrete form.
 
 That means the next phase should not be more abstract doctrine alone. The next phase should be targeted synthesis and prototype work informed by the specific pressure points the labs exposed.
+
+Current implementation direction after that threshold:
+
+- keep the in-memory kernel as ontology scaffold
+- bias the first serious substrate lab toward Corestore and Hypercore
+- defer Hyperbee until indexing pressure is concrete

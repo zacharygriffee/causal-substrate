@@ -1,8 +1,10 @@
 import {
+  ArtifactEnvelope,
   BasisDescriptor,
   Binding,
   Branch,
   CarryForwardPackage,
+  ComparisonSurface,
   Context,
   Happening,
   InertiaModel,
@@ -17,6 +19,7 @@ import {
   Trigger,
   View,
   VolatilityModel,
+  SubstrateSnapshot,
 } from "./types.js";
 
 export interface SubstrateOptions {
@@ -113,6 +116,27 @@ export interface CreateViewInput {
   metadata?: Record<string, unknown>;
 }
 
+export interface CreateArtifactEnvelopeInput {
+  kind: ArtifactEnvelope["kind"];
+  label: string;
+  sourceIds: string[];
+  payloadIds?: string[];
+  locality?: ArtifactEnvelope["locality"];
+  provenance: Omit<ArtifactEnvelope["provenance"], "emittedAt"> & { emittedAt?: string };
+  metadata?: Record<string, unknown>;
+}
+
+export interface CreateComparisonSurfaceInput {
+  label: string;
+  sourceIds: string[];
+  basisId?: string;
+  comparability: ComparisonSurface["comparability"];
+  compatibility: ComparisonSurface["compatibility"];
+  convergence: ComparisonSurface["convergence"];
+  summary: string;
+  metadata?: Record<string, unknown>;
+}
+
 export interface CreateLineageInput {
   relation: LineageEdge["relation"];
   fromId: string;
@@ -133,6 +157,31 @@ export interface CreateStateEstimateInput {
   metadata?: Record<string, unknown>;
 }
 
+export interface ForkBranchInput {
+  sourceBranchId: string;
+  label: string;
+  relation?: LineageEdge["relation"];
+  basisId?: string;
+  role?: Branch["role"];
+  observerId?: string;
+  referentId?: string;
+  contextId?: string;
+  metadata?: Record<string, unknown>;
+  lineageEvidence?: string;
+}
+
+export interface CreateMergeSuccessorInput {
+  label: string;
+  role: Branch["role"];
+  basisId: string;
+  sourceBranchIds: string[];
+  inheritedNucleusIds?: string[];
+  summary?: string;
+  metadata?: Record<string, unknown>;
+  segmentMetadata?: Record<string, unknown>;
+  relation?: LineageEdge["relation"];
+}
+
 export class Substrate {
   readonly state: SubstrateState;
   private readonly now: () => string;
@@ -149,6 +198,29 @@ export class Substrate {
         return `${prefix}_${counter}`;
       });
     this.state = createEmptyState();
+  }
+
+  static fromSnapshot(snapshot: SubstrateSnapshot, options: SubstrateOptions = {}) {
+    const substrate = new Substrate(options);
+    substrate.state.basis = mapById(snapshot.basis);
+    substrate.state.observers = mapById(snapshot.observers);
+    substrate.state.branches = mapById(snapshot.branches);
+    substrate.state.segments = mapById(snapshot.segments);
+    substrate.state.triggers = mapById(snapshot.triggers);
+    substrate.state.happenings = mapById(snapshot.happenings);
+    substrate.state.nuclei = mapById(snapshot.nuclei);
+    substrate.state.inertiaModels = mapById(snapshot.inertiaModels);
+    substrate.state.volatilityModels = mapById(snapshot.volatilityModels);
+    substrate.state.referents = mapById(snapshot.referents);
+    substrate.state.bindings = mapById(snapshot.bindings);
+    substrate.state.contexts = mapById(snapshot.contexts);
+    substrate.state.portals = mapById(snapshot.portals);
+    substrate.state.views = mapById(snapshot.views);
+    substrate.state.artifacts = mapById(snapshot.artifacts);
+    substrate.state.comparisonSurfaces = mapById(snapshot.comparisonSurfaces);
+    substrate.state.lineage = mapById(snapshot.lineage);
+    substrate.state.stateEstimates = mapById(snapshot.stateEstimates);
+    return substrate;
   }
 
   createBasis(input: Omit<BasisDescriptor, "id"> & { id?: string }): BasisDescriptor {
@@ -471,6 +543,57 @@ export class Substrate {
     return view;
   }
 
+  createArtifactEnvelope(input: CreateArtifactEnvelopeInput): ArtifactEnvelope {
+    this.requireKnownIds(input.sourceIds, "artifact source");
+    this.requireKnownIds(input.payloadIds ?? [], "artifact payload");
+    if (input.provenance.basisId) {
+      this.requireBasis(input.provenance.basisId);
+    }
+    if (input.provenance.emitterId) {
+      this.requireKnownId(input.provenance.emitterId, "artifact emitter");
+    }
+
+    const artifact = compact<ArtifactEnvelope>({
+      id: this.idFactory("artifact"),
+      kind: input.kind,
+      label: input.label,
+      sourceIds: [...input.sourceIds],
+      payloadIds: [...(input.payloadIds ?? [])],
+      locality: input.locality ?? "shared-candidate",
+      provenance: compact({
+        emittedAt: input.provenance.emittedAt ?? this.now(),
+        basisId: input.provenance.basisId,
+        emitterId: input.provenance.emitterId,
+        source: input.provenance.source,
+        note: input.provenance.note,
+      }),
+      metadata: input.metadata,
+    });
+    this.state.artifacts.set(artifact.id, artifact);
+    return artifact;
+  }
+
+  createComparisonSurface(input: CreateComparisonSurfaceInput): ComparisonSurface {
+    this.requireKnownIds(input.sourceIds, "comparison surface source");
+    if (input.basisId) {
+      this.requireBasis(input.basisId);
+    }
+
+    const surface = compact<ComparisonSurface>({
+      id: this.idFactory("comparison"),
+      label: input.label,
+      sourceIds: [...input.sourceIds],
+      basisId: input.basisId,
+      comparability: input.comparability,
+      compatibility: input.compatibility,
+      convergence: input.convergence,
+      summary: input.summary,
+      metadata: input.metadata,
+    });
+    this.state.comparisonSurfaces.set(surface.id, surface);
+    return surface;
+  }
+
   createLineageEdge(input: CreateLineageInput): LineageEdge {
     const edge = compact<LineageEdge>({
       id: this.idFactory("lineage"),
@@ -514,6 +637,64 @@ export class Substrate {
     return estimate;
   }
 
+  forkBranch(input: ForkBranchInput) {
+    const sourceBranch = this.requireEntity(this.state.branches, input.sourceBranchId, "branch");
+    if (input.basisId) {
+      this.requireBasis(input.basisId);
+    }
+    const branch = this.createBranch(compact<CreateBranchInput>({
+      role: input.role ?? sourceBranch.role,
+      label: input.label,
+      basisId: input.basisId ?? sourceBranch.basisId,
+      observerId: input.observerId ?? sourceBranch.observerId,
+      referentId: input.referentId ?? sourceBranch.referentId,
+      contextId: input.contextId ?? sourceBranch.contextId,
+      parentBranchIds: [sourceBranch.id],
+      metadata: input.metadata,
+    }));
+    const lineage = this.createLineageEdge(compact<CreateLineageInput>({
+      relation: input.relation ?? "split",
+      fromId: sourceBranch.id,
+      toId: branch.id,
+      basisId: branch.basisId,
+      evidence: input.lineageEvidence,
+    }));
+    return { branch, lineage };
+  }
+
+  createMergeSuccessor(input: CreateMergeSuccessorInput) {
+    this.requireBasis(input.basisId);
+    for (const sourceBranchId of input.sourceBranchIds) {
+      this.requireEntity(this.state.branches, sourceBranchId, "branch");
+    }
+    for (const nucleusId of input.inheritedNucleusIds ?? []) {
+      this.requireEntity(this.state.nuclei, nucleusId, "nucleus");
+    }
+
+    const branch = this.createBranch(compact<CreateBranchInput>({
+      role: input.role,
+      label: input.label,
+      basisId: input.basisId,
+      parentBranchIds: [...input.sourceBranchIds],
+      metadata: input.metadata,
+    }));
+    const segment = this.openSegment(compact<OpenSegmentInput>({
+      branchId: branch.id,
+      inheritedNucleusIds: input.inheritedNucleusIds,
+      summary: input.summary,
+      metadata: input.segmentMetadata,
+    }));
+    const lineage = input.sourceBranchIds.map((sourceBranchId) =>
+      this.createLineageEdge({
+        relation: input.relation ?? "merge",
+        fromId: sourceBranchId,
+        toId: branch.id,
+        basisId: input.basisId,
+      }),
+    );
+    return { branch, segment, lineage };
+  }
+
   materializeBranchTimeline(branchId: string) {
     const branch = this.requireEntity(this.state.branches, branchId, "branch");
     const segments = this.listSegmentsForBranch(branch.id);
@@ -534,8 +715,66 @@ export class Substrate {
       .sort((left, right) => left.index - right.index);
   }
 
+  snapshot(): SubstrateSnapshot {
+    return {
+      basis: [...this.state.basis.values()],
+      observers: [...this.state.observers.values()],
+      branches: [...this.state.branches.values()],
+      segments: [...this.state.segments.values()],
+      triggers: [...this.state.triggers.values()],
+      happenings: [...this.state.happenings.values()],
+      nuclei: [...this.state.nuclei.values()],
+      inertiaModels: [...this.state.inertiaModels.values()],
+      volatilityModels: [...this.state.volatilityModels.values()],
+      referents: [...this.state.referents.values()],
+      bindings: [...this.state.bindings.values()],
+      contexts: [...this.state.contexts.values()],
+      portals: [...this.state.portals.values()],
+      views: [...this.state.views.values()],
+      artifacts: [...this.state.artifacts.values()],
+      comparisonSurfaces: [...this.state.comparisonSurfaces.values()],
+      lineage: [...this.state.lineage.values()],
+      stateEstimates: [...this.state.stateEstimates.values()],
+    };
+  }
+
   private requireBasis(basisId: string): BasisDescriptor {
     return this.requireEntity(this.state.basis, basisId, "basis");
+  }
+
+  private requireKnownIds(ids: string[], kind: string) {
+    for (const id of ids) {
+      this.requireKnownId(id, kind);
+    }
+  }
+
+  private requireKnownId(id: string, kind: string) {
+    if (!this.hasKnownId(id)) {
+      throw new Error(`unknown ${kind}: ${id}`);
+    }
+  }
+
+  private hasKnownId(id: string) {
+    return (
+      this.state.basis.has(id) ||
+      this.state.observers.has(id) ||
+      this.state.branches.has(id) ||
+      this.state.segments.has(id) ||
+      this.state.triggers.has(id) ||
+      this.state.happenings.has(id) ||
+      this.state.nuclei.has(id) ||
+      this.state.inertiaModels.has(id) ||
+      this.state.volatilityModels.has(id) ||
+      this.state.referents.has(id) ||
+      this.state.bindings.has(id) ||
+      this.state.contexts.has(id) ||
+      this.state.portals.has(id) ||
+      this.state.views.has(id) ||
+      this.state.artifacts.has(id) ||
+      this.state.comparisonSurfaces.has(id) ||
+      this.state.lineage.has(id) ||
+      this.state.stateEstimates.has(id)
+    );
   }
 
   private requireEntity<T>(map: Map<string, T>, id: string, kind: string): T {
@@ -563,6 +802,8 @@ function createEmptyState(): SubstrateState {
     contexts: new Map(),
     portals: new Map(),
     views: new Map(),
+    artifacts: new Map(),
+    comparisonSurfaces: new Map(),
     lineage: new Map(),
     stateEstimates: new Map(),
   };
@@ -572,4 +813,8 @@ function compact<T extends object>(value: Record<string, unknown>): T {
   return Object.fromEntries(
     Object.entries(value).filter(([, entry]) => entry !== undefined),
   ) as T;
+}
+
+function mapById<T extends { id: string }>(values: T[]) {
+  return new Map(values.map((value) => [value.id, value]));
 }

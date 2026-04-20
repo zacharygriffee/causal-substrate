@@ -1,5 +1,6 @@
 export type EntityId = string;
 export type Timestamp = string;
+export type Locality = "local" | "shared-candidate";
 
 export type BranchRole =
   | "observer"
@@ -32,6 +33,18 @@ export type ViewKind =
   | "context-surface"
   | "referent-index"
   | "binding-map";
+
+export type ArtifactKind =
+  | "binding"
+  | "lineage-claim"
+  | "view"
+  | "state-estimate"
+  | "comparability-surface"
+  | "receipt";
+
+export type ComparabilityLevel = "none" | "partial" | "strong";
+export type CompatibilityLevel = "unknown" | "compatible" | "incompatible" | "unresolved";
+export type ConvergenceLevel = "not-forced" | "clustered" | "divergent" | "unresolved";
 
 export interface BasisDescriptor {
   id: EntityId;
@@ -177,6 +190,37 @@ export interface View {
   metadata?: Record<string, unknown>;
 }
 
+export interface Provenance {
+  emittedAt: Timestamp;
+  basisId?: EntityId;
+  emitterId?: EntityId;
+  source?: string;
+  note?: string;
+}
+
+export interface ArtifactEnvelope {
+  id: EntityId;
+  kind: ArtifactKind;
+  label: string;
+  sourceIds: EntityId[];
+  payloadIds: EntityId[];
+  locality: Locality;
+  provenance: Provenance;
+  metadata?: Record<string, unknown>;
+}
+
+export interface ComparisonSurface {
+  id: EntityId;
+  label: string;
+  sourceIds: EntityId[];
+  basisId?: EntityId;
+  comparability: ComparabilityLevel;
+  compatibility: CompatibilityLevel;
+  convergence: ConvergenceLevel;
+  summary: string;
+  metadata?: Record<string, unknown>;
+}
+
 export interface LineageEdge {
   id: EntityId;
   relation: LineageRelation;
@@ -221,6 +265,29 @@ export interface SubstrateState {
   contexts: Map<EntityId, Context>;
   portals: Map<EntityId, Portal>;
   views: Map<EntityId, View>;
+  artifacts: Map<EntityId, ArtifactEnvelope>;
+  comparisonSurfaces: Map<EntityId, ComparisonSurface>;
   lineage: Map<EntityId, LineageEdge>;
   stateEstimates: Map<EntityId, StateEstimate>;
+}
+
+export interface SubstrateSnapshot {
+  basis: BasisDescriptor[];
+  observers: Observer[];
+  branches: Branch[];
+  segments: Segment[];
+  triggers: Trigger[];
+  happenings: Happening[];
+  nuclei: Nucleus[];
+  inertiaModels: InertiaModel[];
+  volatilityModels: VolatilityModel[];
+  referents: Referent[];
+  bindings: Binding[];
+  contexts: Context[];
+  portals: Portal[];
+  views: View[];
+  artifacts: ArtifactEnvelope[];
+  comparisonSurfaces: ComparisonSurface[];
+  lineage: LineageEdge[];
+  stateEstimates: StateEstimate[];
 }
