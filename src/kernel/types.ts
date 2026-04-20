@@ -1,0 +1,226 @@
+export type EntityId = string;
+export type Timestamp = string;
+
+export type BranchRole =
+  | "observer"
+  | "referent"
+  | "context"
+  | "portal"
+  | "composite"
+  | "derived";
+
+export type SegmentStatus = "wake" | "sleep";
+
+export type LineageRelation =
+  | "continuation"
+  | "split"
+  | "merge"
+  | "seed-origin"
+  | "projection"
+  | "inheritance";
+
+export type BindingKind =
+  | "tracking"
+  | "situational"
+  | "projective"
+  | "comparative"
+  | "causal";
+
+export type ViewKind =
+  | "branch-timeline"
+  | "segment-summary"
+  | "context-surface"
+  | "referent-index"
+  | "binding-map";
+
+export interface BasisDescriptor {
+  id: EntityId;
+  label: string;
+  dimensions: string[];
+  partial?: boolean;
+  compositional?: boolean;
+  degradedFrom?: EntityId[];
+  projectedFrom?: EntityId[];
+  revisedFrom?: EntityId[];
+  notes?: string;
+}
+
+export interface Observer {
+  id: EntityId;
+  label: string;
+  basisId: EntityId;
+  saliencePolicy?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface Branch {
+  id: EntityId;
+  role: BranchRole;
+  label: string;
+  basisId: EntityId;
+  observerId?: EntityId;
+  referentId?: EntityId;
+  contextId?: EntityId;
+  parentBranchIds: EntityId[];
+  activeSegmentId?: EntityId;
+  metadata?: Record<string, unknown>;
+}
+
+export interface Trigger {
+  id: EntityId;
+  label: string;
+  threshold: string;
+  observedAt: Timestamp;
+  basisId?: EntityId;
+  inferred?: boolean;
+  metadata?: Record<string, unknown>;
+}
+
+export interface Happening {
+  id: EntityId;
+  branchId: EntityId;
+  segmentId: EntityId;
+  label: string;
+  triggerIds: EntityId[];
+  salience?: number;
+  observedAt: Timestamp;
+  summary?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface Nucleus {
+  id: EntityId;
+  branchId: EntityId;
+  sourceSegmentId: EntityId;
+  inheritedNucleusIds: EntityId[];
+  anchor: string;
+  notes?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface Segment {
+  id: EntityId;
+  branchId: EntityId;
+  index: number;
+  status: SegmentStatus;
+  openedAt: Timestamp;
+  closedAt?: Timestamp;
+  inheritedNucleusIds: EntityId[];
+  happeningIds: EntityId[];
+  summary?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface InertiaModel {
+  id: EntityId;
+  label: string;
+  strategy: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface VolatilityModel {
+  id: EntityId;
+  label: string;
+  expectedRate: "low" | "medium" | "high" | "unknown";
+  metadata?: Record<string, unknown>;
+}
+
+export interface Referent {
+  id: EntityId;
+  label: string;
+  anchor: string;
+  branchId: EntityId;
+  nucleusId?: EntityId;
+  inertiaModelId?: EntityId;
+  volatilityModelId?: EntityId;
+  metadata?: Record<string, unknown>;
+}
+
+export interface Binding {
+  id: EntityId;
+  kind: BindingKind;
+  observerBranchId: EntityId;
+  referentBranchId: EntityId;
+  referentId: EntityId;
+  contextId?: EntityId;
+  strength?: number;
+  metadata?: Record<string, unknown>;
+}
+
+export interface Context {
+  id: EntityId;
+  branchId: EntityId;
+  label: string;
+  parentContextId?: EntityId;
+  containmentPolicy?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface Portal {
+  id: EntityId;
+  branchId: EntityId;
+  label: string;
+  sourceContextId: EntityId;
+  targetContextId: EntityId;
+  exposureRule: string;
+  transform?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface View {
+  id: EntityId;
+  kind: ViewKind;
+  label: string;
+  sourceIds: EntityId[];
+  projection: string;
+  replaceable: true;
+  metadata?: Record<string, unknown>;
+}
+
+export interface LineageEdge {
+  id: EntityId;
+  relation: LineageRelation;
+  fromId: EntityId;
+  toId: EntityId;
+  basisId?: EntityId;
+  evidence?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface StateEstimate {
+  id: EntityId;
+  referentId: EntityId;
+  branchId: EntityId;
+  estimatedAt: Timestamp;
+  continuity: "continuing" | "ambiguous" | "broken";
+  reasoning: string;
+  basedOnBindingIds: EntityId[];
+  inertiaModelId?: EntityId;
+  volatilityModelId?: EntityId;
+  metadata?: Record<string, unknown>;
+}
+
+export interface CarryForwardPackage {
+  branchId: EntityId;
+  segmentId: EntityId;
+  nucleus: Nucleus;
+}
+
+export interface SubstrateState {
+  basis: Map<EntityId, BasisDescriptor>;
+  observers: Map<EntityId, Observer>;
+  branches: Map<EntityId, Branch>;
+  segments: Map<EntityId, Segment>;
+  triggers: Map<EntityId, Trigger>;
+  happenings: Map<EntityId, Happening>;
+  nuclei: Map<EntityId, Nucleus>;
+  inertiaModels: Map<EntityId, InertiaModel>;
+  volatilityModels: Map<EntityId, VolatilityModel>;
+  referents: Map<EntityId, Referent>;
+  bindings: Map<EntityId, Binding>;
+  contexts: Map<EntityId, Context>;
+  portals: Map<EntityId, Portal>;
+  views: Map<EntityId, View>;
+  lineage: Map<EntityId, LineageEdge>;
+  stateEstimates: Map<EntityId, StateEstimate>;
+}
