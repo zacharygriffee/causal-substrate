@@ -181,6 +181,45 @@ The short-term implementation lean is:
 
 Multi-writer support remains an allowed future capability, but it should be introduced only where a concrete surface truly requires shared authorship. The default continuity substrate should not be designed around it.
 
+### Peer, observer, operator boundary
+
+The repository should keep transport/runtime placement distinct from continuity and from higher-order coordination.
+
+The current doctrinal line is:
+
+- a `peer` is a runtime or transport participant
+- an `observer` is a locus that preserves distinctions
+- a `branch` is the continuity-bearing history
+- an `operator` is a custody or coordination role over one or more peers, observers, branches, or lower-order operators
+
+This means:
+
+- one peer may host many branches
+- one branch may replicate across many peers
+- one operator may coordinate many observers
+- nesting on the coordination side should not automatically rewrite continuity or identity
+
+Swarm topology should not silently become continuity topology.
+
+### Preservation versus branch promotion
+
+The repository should preserve more than it branchifies.
+
+The current doctrinal line is:
+
+- some data is important enough to preserve durably
+- some preserved data affects continuity judgments
+- only some of that deserves its own branch
+
+So:
+
+- preserve broadly when future meaning may matter
+- promote to branch narrowly when independent continuity matters
+
+Not every threshold-bearing process should become a branch.
+
+Branch promotion should remain deliberate and comparatively sparse.
+
 ### Inspectability and opacity
 
 The repository should not require full introspection of every inner heuristic process.

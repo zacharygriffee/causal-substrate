@@ -30,6 +30,8 @@ The current repository posture is intentionally conservative. The kernel encodes
 - [`docs/doctrine-notes/`](./docs/doctrine-notes/README.md): ordered focused doctrine notes that tighten each hole enough for lab and implementation work
 - [`docs/stable-posture.md`](./docs/stable-posture.md): current settled, open, and deferred posture in one teachable entrypoint
 - [`docs/inspectability-contract.md`](./docs/inspectability-contract.md): current bounded explanation contract and the remaining inspectability gaps
+- [`docs/doctrine-notes/15-peer-observer-operator-boundary.md`](./docs/doctrine-notes/15-peer-observer-operator-boundary.md): transport/runtime versus continuity versus coordination boundary
+- [`docs/doctrine-notes/16-preservation-vs-branch-promotion.md`](./docs/doctrine-notes/16-preservation-vs-branch-promotion.md): preserve broadly, branch narrowly
 - [`docs/working-defaults.md`](./docs/working-defaults.md): current lab defaults to use unless an experiment explicitly models an exception
 - [`docs/post-lab-synthesis.md`](./docs/post-lab-synthesis.md): what the completed lab program established and what it still leaves open
 - [`docs/corestore-hypercore-plan.md`](./docs/corestore-hypercore-plan.md): current implementation posture for serious substrate labs

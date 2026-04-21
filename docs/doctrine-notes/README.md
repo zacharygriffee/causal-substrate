@@ -20,6 +20,8 @@ Order:
 12. [Emergence, Seed, Seat, Materialization](./12-emergence-materialization.md)
 13. [Inertia And Volatility Pressure](./13-inertia-volatility-pressure.md)
 14. [Inspectability Boundary](./14-inspectability-boundary.md)
+15. [Peer, Observer, Operator Boundary](./15-peer-observer-operator-boundary.md)
+16. [Preservation Versus Branch Promotion](./16-preservation-vs-branch-promotion.md)
 
 Practical rule:
 

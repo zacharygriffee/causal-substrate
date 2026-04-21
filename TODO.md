@@ -195,6 +195,8 @@ Done when:
 - [x] deeper `fakeswarm`-based swarm testing
 - [ ] transport concerns
 - [ ] Autobase or higher-order shared surfaces
+- [x] define peer / observer / operator boundary doctrine
+- [x] define preservation versus branch promotion doctrine
 - [x] add an explicit branch capability evolution lab
   - [x] model basis degradation or gain within one continuing branch
   - [x] prove continuity can survive capability change without forced fork
