@@ -152,6 +152,19 @@ When splits, merges, or ambiguous re-identification occur, lineage is often the 
 
 The substrate should prefer preserving ancestry relations and ambiguity over flattening multiple continuities into one name too early.
 
+### Writer and injection posture
+
+The repository should not treat `writer` as a universal substrate primitive.
+
+The short-term implementation lean is:
+
+- continuity-bearing branches should not need multi-writer support
+- source continuity should remain local or custody-bound by default
+- replication does not imply shared authorship
+- injection should be exceptional, explicit, and policy-bearing
+
+Multi-writer support remains an allowed future capability, but it should be introduced only where a concrete surface truly requires shared authorship. The default continuity substrate should not be designed around it.
+
 ## Epistemic doctrine
 
 ### Comparability

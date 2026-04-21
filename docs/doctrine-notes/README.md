@@ -16,6 +16,7 @@ Order:
 8. [Trigger, Salience, Happening](./08-trigger-salience-happening.md)
 9. [Local and Shared Artifacts](./09-local-shared-artifacts.md)
 10. [View Boundary](./10-view-boundary.md)
+11. [Writer And Injection Boundary](./11-writer-injection-boundary.md)
 
 Practical rule:
 
