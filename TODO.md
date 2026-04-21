@@ -348,6 +348,23 @@ Done when:
 - [ ] topic derivation remains inspectable and versioned
 - [ ] the repo can state exactly when asserted registries are still needed
 
+### Phase 20: Capability Surfaces
+
+- [ ] define capability-surface doctrine between rendezvous and exchange
+- [ ] add minimal type shapes for:
+  - [ ] capability surface
+  - [ ] exchange offer
+  - [ ] exchange request
+  - [ ] bounded exchange decision
+- [ ] keep capability surfaces session-scoped first rather than prematurely durable
+- [ ] add one minimal lab proving capability-limited exchange narrowing
+- [ ] decide whether first transport prototype should use raw `protomux` or `neonplex`
+
+Done when:
+- [ ] the repo can describe a compact post-rendezvous negotiation layer
+- [ ] capability mismatch narrows exchange without being mistaken for continuity breakage
+- [ ] transport-specific implementation remains optional at doctrine level
+
 ## Rules
 
 - never reopen the same Corestore root independently in-process
@@ -358,4 +375,5 @@ Done when:
 - keep views derived and replaceable
 - do not let indexing layers replace continuity-bearing Hypercores as the primary substrate
 - do not let discovery topics substitute for branch continuity
+- do not let capability handshakes substitute for continuity-bearing branches or artifacts
 - do not require multi-writer support in short-term implementation work

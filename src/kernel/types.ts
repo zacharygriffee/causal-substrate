@@ -63,6 +63,33 @@ export type DiscoveryScopeKind =
   | "concern"
   | "peer";
 
+export type CapabilityPeerRole =
+  | "observer-witness"
+  | "custodian"
+  | "relay"
+  | "operator"
+  | "translator";
+
+export type ExchangeMode =
+  | "raw-witness"
+  | "view-only"
+  | "state-estimate"
+  | "receipt-only";
+
+export interface CapabilityOffer {
+  artifactKinds: ArtifactKind[];
+  exchangeModes: ExchangeMode[];
+  branchRoles?: BranchRole[];
+  concernTags?: string[];
+}
+
+export interface CapabilityRequest {
+  artifactKinds: ArtifactKind[];
+  preferredExchangeModes?: ExchangeMode[];
+  branchRoles?: BranchRole[];
+  concernTags?: string[];
+}
+
 export interface BasisDescriptor {
   id: EntityId;
   label: string;
@@ -239,6 +266,28 @@ export interface DiscoveryProjection {
   quantization?: string;
   sourceIds: EntityId[];
   metadata?: Record<string, unknown>;
+}
+
+export interface CapabilitySurface {
+  id: EntityId;
+  peerRole: CapabilityPeerRole;
+  basisId?: EntityId;
+  sourceBranchId?: EntityId;
+  primaryContextId?: EntityId;
+  visibleContextIds: EntityId[];
+  supportedDimensions?: string[];
+  missingDimensions?: string[];
+  offer: CapabilityOffer;
+  request?: CapabilityRequest;
+  metadata?: Record<string, unknown>;
+}
+
+export interface CapabilityExchangeDecision {
+  accepted: boolean;
+  reason: string;
+  matchedArtifactKinds: ArtifactKind[];
+  matchedExchangeModes: ExchangeMode[];
+  requiresMediation: boolean;
 }
 
 export interface ComparisonSurface {

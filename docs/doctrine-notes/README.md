@@ -23,6 +23,7 @@ Order:
 15. [Peer, Observer, Operator Boundary](./15-peer-observer-operator-boundary.md)
 16. [Preservation Versus Branch Promotion](./16-preservation-vs-branch-promotion.md)
 17. [Discovery-Bearing Branches](./17-discovery-bearing-branches.md)
+18. [Capability Surfaces](./18-capability-surfaces.md)
 
 Practical rule:
 

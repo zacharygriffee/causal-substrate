@@ -33,6 +33,7 @@ The current repository posture is intentionally conservative. The kernel encodes
 - [`docs/doctrine-notes/15-peer-observer-operator-boundary.md`](./docs/doctrine-notes/15-peer-observer-operator-boundary.md): transport/runtime versus continuity versus coordination boundary
 - [`docs/doctrine-notes/16-preservation-vs-branch-promotion.md`](./docs/doctrine-notes/16-preservation-vs-branch-promotion.md): preserve broadly, branch narrowly
 - [`docs/doctrine-notes/17-discovery-bearing-branches.md`](./docs/doctrine-notes/17-discovery-bearing-branches.md): derive bounded discovery join sets from branch structure before registries
+- [`docs/doctrine-notes/18-capability-surfaces.md`](./docs/doctrine-notes/18-capability-surfaces.md): compact negotiation between rendezvous and continuity exchange
 - [`docs/working-defaults.md`](./docs/working-defaults.md): current lab defaults to use unless an experiment explicitly models an exception
 - [`docs/post-lab-synthesis.md`](./docs/post-lab-synthesis.md): what the completed lab program established and what it still leaves open
 - [`docs/corestore-hypercore-plan.md`](./docs/corestore-hypercore-plan.md): current implementation posture for serious substrate labs

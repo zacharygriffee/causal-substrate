@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { Substrate } from "../src/index.js";
+import { negotiateCapabilityExchange, Substrate } from "../src/index.js";
 
 function createSubstrate() {
   let tick = 0;
@@ -771,4 +771,97 @@ test("lab-10: multi-observer non-agreement can coexist without forced convergenc
   assert.equal(comparabilityView.metadata?.comparability, "partial");
   assert.equal(comparabilityView.metadata?.convergence, "not-forced");
   assert.ok((bindingA.strength ?? 0) > (bindingB.strength ?? 0));
+});
+
+test("lab-11: capability mismatch can narrow exchange to a mediated view without being mistaken for a continuity break", () => {
+  const substrate = createSubstrate();
+  const fullBasis = substrate.createBasis({
+    label: "camera-full",
+    dimensions: ["red", "green", "blue", "position"],
+  });
+  const limitedBasis = substrate.createBasis({
+    label: "camera-rb-only",
+    dimensions: ["red", "blue", "position"],
+    partial: true,
+    degradedFrom: [fullBasis.id],
+  });
+  const roomBranch = substrate.createBranch({
+    role: "context",
+    label: "room-context-branch",
+    basisId: fullBasis.id,
+  });
+  const room = substrate.createContext({
+    label: "room",
+    branchId: roomBranch.id,
+  });
+  const fullObserver = substrate.createObserver({
+    label: "full-camera",
+    basisId: fullBasis.id,
+  });
+  const limitedObserver = substrate.createObserver({
+    label: "limited-camera",
+    basisId: limitedBasis.id,
+  });
+  const fullBranch = substrate.createBranch({
+    role: "observer",
+    label: "full-camera-branch",
+    basisId: fullBasis.id,
+    observerId: fullObserver.id,
+    contextId: room.id,
+  });
+  const limitedBranch = substrate.createBranch({
+    role: "observer",
+    label: "limited-camera-branch",
+    basisId: limitedBasis.id,
+    observerId: limitedObserver.id,
+    contextId: room.id,
+  });
+
+  const decision = negotiateCapabilityExchange(
+    {
+      id: "cap-limited",
+      peerRole: "observer-witness",
+      basisId: limitedBasis.id,
+      sourceBranchId: limitedBranch.id,
+      primaryContextId: room.id,
+      visibleContextIds: [],
+      supportedDimensions: ["red", "blue", "position"],
+      missingDimensions: ["green"],
+      offer: {
+        artifactKinds: ["receipt"],
+        exchangeModes: ["receipt-only"],
+        branchRoles: ["observer"],
+      },
+      request: {
+        artifactKinds: ["view", "receipt"],
+        preferredExchangeModes: ["view-only", "receipt-only"],
+        branchRoles: ["observer"],
+      },
+    },
+    {
+      id: "cap-full",
+      peerRole: "observer-witness",
+      basisId: fullBasis.id,
+      sourceBranchId: fullBranch.id,
+      primaryContextId: room.id,
+      visibleContextIds: [],
+      supportedDimensions: ["red", "green", "blue", "position"],
+      offer: {
+        artifactKinds: ["view", "receipt"],
+        exchangeModes: ["raw-witness", "view-only", "receipt-only"],
+        branchRoles: ["observer"],
+      },
+      request: {
+        artifactKinds: ["receipt"],
+        preferredExchangeModes: ["receipt-only"],
+        branchRoles: ["observer"],
+      },
+    },
+  );
+
+  assert.equal(decision.accepted, true);
+  assert.equal(decision.requiresMediation, true);
+  assert.deepEqual(decision.matchedArtifactKinds, ["view", "receipt"]);
+  assert.deepEqual(decision.matchedExchangeModes, ["view-only", "receipt-only"]);
+  assert.match(decision.reason, /mediated artifacts/);
 });

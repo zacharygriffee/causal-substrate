@@ -240,6 +240,25 @@ The current discovery lean is:
 
 This keeps discovery local-first, inspectable, and doctrine-aligned without making a volatile registry the default substrate posture.
 
+### Capability surfaces
+
+The repository should keep a compact negotiation layer between rendezvous and exchange.
+
+The current doctrinal line is:
+
+- topics are rendezvous projections
+- capability surfaces are bounded exchange posture declarations
+- branches and artifacts remain the continuity-bearing material
+
+The current capability lean is:
+
+- use capability surfaces to declare witness limits, offered artifact kinds, requested artifact kinds, and basis constraints
+- keep them compact and versionable
+- allow mediated views or receipts when raw witness continuity is not mutually usable
+- do not treat capability declarations as continuity, identity, or authority
+
+This keeps topics coarse, exchange selective, and continuity history separate from the handshake layer.
+
 ### Inspectability and opacity
 
 The repository should not require full introspection of every inner heuristic process.
