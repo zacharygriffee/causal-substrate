@@ -17,6 +17,9 @@ Order:
 9. [Local and Shared Artifacts](./09-local-shared-artifacts.md)
 10. [View Boundary](./10-view-boundary.md)
 11. [Writer And Injection Boundary](./11-writer-injection-boundary.md)
+12. [Emergence, Seed, Seat, Materialization](./12-emergence-materialization.md)
+13. [Inertia And Volatility Pressure](./13-inertia-volatility-pressure.md)
+14. [Inspectability Boundary](./14-inspectability-boundary.md)
 
 Practical rule:
 

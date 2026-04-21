@@ -28,9 +28,15 @@ The current repository posture is intentionally conservative. The kernel encodes
 - [`docs/doctrine-consolidation.md`](./docs/doctrine-consolidation.md): tightened doctrine after completing the initial lab program
 - [`docs/doctrine-holes.md`](./docs/doctrine-holes.md): current logical pressure points and recommended doctrine-first responses
 - [`docs/doctrine-notes/`](./docs/doctrine-notes/README.md): ordered focused doctrine notes that tighten each hole enough for lab and implementation work
+- [`docs/stable-posture.md`](./docs/stable-posture.md): current settled, open, and deferred posture in one teachable entrypoint
+- [`docs/inspectability-contract.md`](./docs/inspectability-contract.md): current bounded explanation contract and the remaining inspectability gaps
 - [`docs/working-defaults.md`](./docs/working-defaults.md): current lab defaults to use unless an experiment explicitly models an exception
 - [`docs/post-lab-synthesis.md`](./docs/post-lab-synthesis.md): what the completed lab program established and what it still leaves open
 - [`docs/corestore-hypercore-plan.md`](./docs/corestore-hypercore-plan.md): current implementation posture for serious substrate labs
+- [`docs/corestore-record-schema-v1.md`](./docs/corestore-record-schema-v1.md): current versioned record model and schema evolution posture
+- [`docs/adjacent-boundaries.md`](./docs/adjacent-boundaries.md): ownership lines with Virtualia, mesh layers, and adjacent control-plane repos
+- [`docs/consumer-adoption.md`](./docs/consumer-adoption.md): teachable adoption seams, patterns, and anti-patterns for consumers
+- [`docs/multiwriter-boundary.md`](./docs/multiwriter-boundary.md): exact line between continuity-bearing histories and any future shared-writer surfaces
 - [`docs/shared-artifacts.md`](./docs/shared-artifacts.md): current artifact formalization for local-first and pre-backend work
 - [`docs/next-phases.md`](./docs/next-phases.md): recommended phases after the initial lab program
 - [`labs/`](./labs/README.md): lab scaffold, registry, template, and starter specs for the local lab program

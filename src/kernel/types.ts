@@ -36,7 +36,9 @@ export type ViewKind =
 
 export type ArtifactKind =
   | "binding"
+  | "context-surface"
   | "lineage-claim"
+  | "portal-surface"
   | "view"
   | "state-estimate"
   | "comparability-surface"

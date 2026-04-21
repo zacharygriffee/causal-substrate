@@ -1,9 +1,11 @@
 import {
   ArtifactEnvelope,
   Binding,
+  Context,
   Happening,
   LineageEdge,
   Nucleus,
+  Portal,
   Referent,
   Segment,
   StateEstimate,
@@ -80,6 +82,18 @@ export interface FirstSeriousCorestoreLabHandle {
     artifact: ArtifactEnvelope;
     binding: Binding;
   }) => Promise<ExchangeArtifactRecord>;
+  appendContextArtifact: (input: {
+    recordId?: string | undefined;
+    recordedAt?: string | undefined;
+    artifact: ArtifactEnvelope;
+    context: Context;
+  }) => Promise<ExchangeArtifactRecord>;
+  appendPortalArtifact: (input: {
+    recordId?: string | undefined;
+    recordedAt?: string | undefined;
+    artifact: ArtifactEnvelope;
+    portal: Portal;
+  }) => Promise<ExchangeArtifactRecord>;
   appendLineageClaimArtifact: (input: {
     recordId?: string | undefined;
     recordedAt?: string | undefined;
@@ -128,7 +142,7 @@ export async function openFirstSeriousCorestoreLab(
       await handle.close();
     },
     appendBranchHappening: async (input) => {
-      const record: BranchHappeningRecord = {
+      const record = assertBranchHappeningRecord({
         schema: CORESTORE_RECORD_SCHEMA,
         schemaVersion: 1,
         recordId: input.recordId ?? input.happening.id,
@@ -137,12 +151,12 @@ export async function openFirstSeriousCorestoreLab(
         branchId: input.branchId,
         segmentId: input.segmentId,
         happening: input.happening,
-      };
+      });
       await appendConcernRecord(handle, "branch-happenings", record);
       return record;
     },
     appendSleepCapsule: async (input) => {
-      const record: SleepCapsuleRecord = {
+      const record = assertSleepCapsuleRecord({
         schema: CORESTORE_RECORD_SCHEMA,
         schemaVersion: 1,
         recordId: input.recordId ?? input.nucleus.id,
@@ -153,12 +167,12 @@ export async function openFirstSeriousCorestoreLab(
         nucleusId: input.nucleus.id,
         segment: input.segment,
         nucleus: input.nucleus,
-      };
+      });
       await appendConcernRecord(handle, "segments", record);
       return record;
     },
     appendReferentState: async (input) => {
-      const record: ReferentStateRecord = {
+      const record = assertReferentStateRecord({
         schema: CORESTORE_RECORD_SCHEMA,
         schemaVersion: 1,
         recordId: input.recordId ?? input.estimate.id,
@@ -170,12 +184,12 @@ export async function openFirstSeriousCorestoreLab(
         continuity: input.estimate.continuity,
         referent: input.referent,
         estimate: input.estimate,
-      };
+      });
       await appendConcernRecord(handle, "referent-state", record);
       return record;
     },
     appendExchangeArtifact: async (input) => {
-      const record: ExchangeArtifactRecord = {
+      const record = assertExchangeArtifactRecord({
         schema: CORESTORE_RECORD_SCHEMA,
         schemaVersion: 1,
         recordId: input.recordId ?? input.artifact.id,
@@ -183,7 +197,7 @@ export async function openFirstSeriousCorestoreLab(
         recordedAt: input.recordedAt ?? input.artifact.provenance.emittedAt,
         artifact: input.artifact,
         payload: input.payload,
-      };
+      });
       await appendConcernRecord(handle, "exchange-artifacts", record);
       return record;
     },
@@ -205,6 +219,26 @@ export async function openFirstSeriousCorestoreLab(
         payload: {
           payloadType: "binding",
           binding: input.binding,
+        },
+      }),
+    appendContextArtifact: async (input) =>
+      appendExchangeArtifact(handle, {
+        recordId: input.recordId,
+        recordedAt: input.recordedAt,
+        artifact: input.artifact,
+        payload: {
+          payloadType: "context",
+          context: input.context,
+        },
+      }),
+    appendPortalArtifact: async (input) =>
+      appendExchangeArtifact(handle, {
+        recordId: input.recordId,
+        recordedAt: input.recordedAt,
+        artifact: input.artifact,
+        payload: {
+          payloadType: "portal",
+          portal: input.portal,
         },
       }),
     appendLineageClaimArtifact: async (input) =>
@@ -395,7 +429,7 @@ async function appendExchangeArtifact(
     payload: ExchangeArtifactPayload;
   },
 ) {
-  const record: ExchangeArtifactRecord = {
+  const record = assertExchangeArtifactRecord({
     schema: CORESTORE_RECORD_SCHEMA,
     schemaVersion: 1,
     recordId: input.recordId ?? input.artifact.id,
@@ -403,7 +437,7 @@ async function appendExchangeArtifact(
     recordedAt: input.recordedAt ?? input.artifact.provenance.emittedAt,
     artifact: input.artifact,
     payload: input.payload,
-  };
+  });
   await appendConcernRecord(handle, "exchange-artifacts", record);
   return record;
 }

@@ -1,6 +1,6 @@
 # Corestore / Hypercore Plan
 
-This document sets the current implementation posture for `causal-substrate`.
+This document sets the current stable implementation posture for `causal-substrate`.
 
 The repo remains ontology-first, but the first serious substrate labs should now bias toward Corestore and Hypercore rather than stopping at in-memory object structures.
 

@@ -1,10 +1,11 @@
 import { Substrate as SubstrateKernel } from "../kernel/substrate.js";
 import { StateEstimate } from "../kernel/types.js";
 import {
+  BranchHappeningRecord,
   ExchangeArtifactPayload,
-  ExchangeArtifactRecord,
   ReceiptPayload,
   ReferentStateRecord,
+  SleepCapsuleRecord,
 } from "./corestore-records.js";
 import {
   FirstSeriousCorestoreLabHandle,
@@ -22,6 +23,154 @@ export interface CorestoreReplaySummary {
   referentIds: string[];
   exchangePayloadKinds: ExchangeArtifactPayload["payloadType"][];
   latestContinuityByReferentId: Record<string, StateEstimate["continuity"]>;
+  branchSurfaces: ReplayBranchSurface[];
+  referentSurfaces: ReplayReferentSurface[];
+  artifactSurfaces: ReplayArtifactSurface[];
+  contextSurfaces: ReplayContextSurface[];
+  portalSurfaces: ReplayPortalSurface[];
+}
+
+export interface ReplayBranchSurface {
+  branchId: string;
+  segmentIds: string[];
+  branchHappeningIds: string[];
+  sleepCapsuleIds: string[];
+  branchHappeningCount: number;
+  sleepCapsuleCount: number;
+  latestSegmentId?: string;
+  latestHappeningLabel?: string;
+  latestHappeningObservedAt?: string;
+  latestSleepAnchor?: string;
+}
+
+export interface ReplayReferentSurface {
+  referentId: string;
+  branchId: string;
+  anchor: string;
+  estimateIds: string[];
+  continuityHistory: StateEstimate["continuity"][];
+  latestContinuity: StateEstimate["continuity"];
+  reasoningHistory: string[];
+  latestReasoning: string;
+  latestEstimatedAt: string;
+  latestBasedOnBindingIds: string[];
+}
+
+export interface ReplayArtifactSurface {
+  artifactId: string;
+  kind: string;
+  payloadType: ExchangeArtifactPayload["payloadType"];
+  payloadId: string;
+  sourceIds: string[];
+  payloadSourceIds: string[];
+  locality: string;
+  emittedAt: string;
+  emitterId?: string;
+  basisId?: string;
+  provenanceSource?: string;
+  provenanceNote?: string;
+  summary?: string;
+}
+
+export interface ReplayContextSurface {
+  contextId: string;
+  branchId: string;
+  label: string;
+  parentContextId?: string;
+  containmentPolicy?: string;
+  artifactId: string;
+}
+
+export interface ReplayPortalSurface {
+  portalId: string;
+  branchId: string;
+  label: string;
+  sourceContextId: string;
+  targetContextId: string;
+  exposureRule: string;
+  transform?: string;
+  artifactId: string;
+}
+
+export interface BranchReplayPicture {
+  branchId: string;
+  happenings: BranchHappeningRecord[];
+  sleepCapsules: SleepCapsuleRecord[];
+  latestSegmentId?: string;
+}
+
+export interface ReferentReplayPicture {
+  referentId: string;
+  branchId: string;
+  anchor: string;
+  estimates: ReferentStateRecord[];
+  continuityHistory: StateEstimate["continuity"][];
+  latestContinuity: StateEstimate["continuity"];
+}
+
+export interface BranchInspectabilitySurface {
+  branchId: string;
+  latestSegmentId?: string;
+  latestHappeningId?: string;
+  latestHappeningLabel?: string;
+  latestHappeningObservedAt?: string;
+  latestSleepCapsuleId?: string;
+  latestSleepAnchor?: string;
+}
+
+export interface ReferentInspectabilitySurface {
+  referentId: string;
+  branchId: string;
+  anchor: string;
+  continuity: StateEstimate["continuity"];
+  reasoning: string;
+  estimatedAt: string;
+  basedOnBindingIds: string[];
+  sourceRecordId: string;
+}
+
+export interface ArtifactInspectabilitySurface {
+  artifactId: string;
+  kind: string;
+  payloadType: ExchangeArtifactPayload["payloadType"];
+  payloadId: string;
+  emittedAt: string;
+  sourceIds: string[];
+  payloadSourceIds: string[];
+  emitterId?: string;
+  basisId?: string;
+  provenanceSource?: string;
+  provenanceNote?: string;
+  summary: string;
+}
+
+export interface InspectabilityPicture {
+  namespaceParts: string[];
+  branchClaims: BranchInspectabilitySurface[];
+  referentClaims: ReferentInspectabilitySurface[];
+  contextClaims: ContextInspectabilitySurface[];
+  portalClaims: PortalInspectabilitySurface[];
+  artifactClaims: ArtifactInspectabilitySurface[];
+}
+
+export interface ContextInspectabilitySurface {
+  contextId: string;
+  branchId: string;
+  label: string;
+  artifactId: string;
+  parentContextId?: string;
+  containmentPolicy?: string;
+}
+
+export interface PortalInspectabilitySurface {
+  portalId: string;
+  branchId: string;
+  label: string;
+  sourceContextId: string;
+  targetContextId: string;
+  exposureRule: string;
+  artifactId: string;
+  transform?: string;
 }
 
 export interface FollowOnLabOptions {
@@ -357,20 +506,84 @@ export async function reconstructLocalPicture(
   const segmentIds = new Set<string>();
   const referentIds = new Set<string>();
   const latestContinuityByReferentId = new Map<string, StateEstimate["continuity"]>();
+  const branchSurfaces = new Map<string, ReplayBranchSurface>();
+  const referentSurfaces = new Map<string, ReplayReferentSurface>();
 
   for (const record of branchHappenings) {
     branchIds.add(record.branchId);
     segmentIds.add(record.segmentId);
+    const branchSurface = getOrCreateBranchSurface(branchSurfaces, record.branchId);
+    branchSurface.segmentIds.push(record.segmentId);
+    branchSurface.branchHappeningIds.push(record.happening.id);
+    branchSurface.branchHappeningCount += 1;
+    branchSurface.latestSegmentId = record.segmentId;
+    branchSurface.latestHappeningLabel = record.happening.label;
+    branchSurface.latestHappeningObservedAt = record.happening.observedAt;
   }
   for (const record of sleepCapsules) {
     branchIds.add(record.branchId);
     segmentIds.add(record.segmentId);
+    const branchSurface = getOrCreateBranchSurface(branchSurfaces, record.branchId);
+    if (!branchSurface.segmentIds.includes(record.segmentId)) {
+      branchSurface.segmentIds.push(record.segmentId);
+    }
+    branchSurface.sleepCapsuleIds.push(record.nucleusId);
+    branchSurface.sleepCapsuleCount += 1;
+    branchSurface.latestSegmentId = record.segmentId;
+    branchSurface.latestSleepAnchor = record.nucleus.anchor;
   }
   for (const record of referentState) {
     branchIds.add(record.branchId);
     referentIds.add(record.referentId);
     latestContinuityByReferentId.set(record.referentId, record.continuity);
+    const referentSurface = getOrCreateReferentSurface(referentSurfaces, record);
+    referentSurface.estimateIds.push(record.estimate.id);
+    referentSurface.continuityHistory.push(record.continuity);
+    referentSurface.reasoningHistory.push(record.estimate.reasoning);
+    referentSurface.latestContinuity = record.continuity;
+    referentSurface.latestReasoning = record.estimate.reasoning;
+    referentSurface.latestEstimatedAt = record.estimate.estimatedAt;
+    referentSurface.latestBasedOnBindingIds = [...record.estimate.basedOnBindingIds];
   }
+
+  const artifactSurfaces = exchangeArtifacts.map((record) => {
+    const surface: ReplayArtifactSurface = {
+      artifactId: record.artifact.id,
+      kind: record.artifact.kind,
+      payloadType: record.payload.payloadType,
+      payloadId: getPayloadId(record.payload),
+      sourceIds: [...record.artifact.sourceIds],
+      payloadSourceIds: getPayloadSourceIds(record.payload),
+      locality: record.artifact.locality,
+      emittedAt: record.artifact.provenance.emittedAt,
+      summary: describeArtifactPayload(record.payload),
+    };
+
+    if (record.artifact.provenance.emitterId) {
+      surface.emitterId = record.artifact.provenance.emitterId;
+    }
+    if (record.artifact.provenance.basisId) {
+      surface.basisId = record.artifact.provenance.basisId;
+    }
+    if (record.artifact.provenance.source) {
+      surface.provenanceSource = record.artifact.provenance.source;
+    }
+    if (record.artifact.provenance.note) {
+      surface.provenanceNote = record.artifact.provenance.note;
+    }
+
+    return surface;
+  });
+  const contextSurfaces = exchangeArtifacts.flatMap((record) =>
+    record.payload.payloadType === "context"
+      ? [toReplayContextSurface(record.artifact.id, record.payload.context)]
+      : [],
+  );
+  const portalSurfaces = exchangeArtifacts.flatMap((record) =>
+    record.payload.payloadType === "portal"
+      ? [toReplayPortalSurface(record.artifact.id, record.payload.portal)]
+      : [],
+  );
 
   return {
     namespaceParts: lab.handle.namespaceParts,
@@ -383,5 +596,373 @@ export async function reconstructLocalPicture(
     referentIds: [...referentIds],
     exchangePayloadKinds: exchangeArtifacts.map((record) => record.payload.payloadType),
     latestContinuityByReferentId: Object.fromEntries(latestContinuityByReferentId),
+    branchSurfaces: [...branchSurfaces.values()],
+    referentSurfaces: [...referentSurfaces.values()],
+    artifactSurfaces,
+    contextSurfaces,
+    portalSurfaces,
   };
+}
+
+export async function reconstructBranchPicture(
+  lab: Pick<FirstSeriousCorestoreLabHandle, "readBranchHappenings" | "readSleepCapsules">,
+  branchId: string,
+): Promise<BranchReplayPicture> {
+  const happenings = (await lab.readBranchHappenings()).filter(
+    (record) => record.branchId === branchId,
+  );
+  const sleepCapsules = (await lab.readSleepCapsules()).filter(
+    (record) => record.branchId === branchId,
+  );
+
+  const latestSegmentId =
+    sleepCapsules.at(-1)?.segmentId ?? happenings.at(-1)?.segmentId;
+
+  const picture: BranchReplayPicture = {
+    branchId,
+    happenings,
+    sleepCapsules,
+  };
+  if (latestSegmentId) {
+    picture.latestSegmentId = latestSegmentId;
+  }
+  return picture;
+}
+
+export async function reconstructReferentPicture(
+  lab: Pick<FirstSeriousCorestoreLabHandle, "readReferentState">,
+  referentId: string,
+): Promise<ReferentReplayPicture | undefined> {
+  const estimates = (await lab.readReferentState()).filter(
+    (record) => record.referentId === referentId,
+  );
+  const first = estimates[0];
+  const latest = estimates.at(-1);
+
+  if (!first || !latest) {
+    return undefined;
+  }
+
+  return {
+    referentId,
+    branchId: first.branchId,
+    anchor: first.anchor,
+    estimates,
+    continuityHistory: estimates.map((record) => record.continuity),
+    latestContinuity: latest.continuity,
+  };
+}
+
+export async function reconstructInspectabilityPicture(
+  lab: Pick<
+    FirstSeriousCorestoreLabHandle,
+    | "handle"
+    | "readBranchHappenings"
+    | "readSleepCapsules"
+    | "readReferentState"
+    | "readExchangeArtifacts"
+  >,
+): Promise<InspectabilityPicture> {
+  const branchHappenings = await lab.readBranchHappenings();
+  const sleepCapsules = await lab.readSleepCapsules();
+  const referentState = await lab.readReferentState();
+  const exchangeArtifacts = await lab.readExchangeArtifacts();
+
+  const branchClaimsById = new Map<string, BranchInspectabilitySurface>();
+  for (const record of branchHappenings) {
+    const existing = branchClaimsById.get(record.branchId) ?? { branchId: record.branchId };
+    existing.latestSegmentId = record.segmentId;
+    existing.latestHappeningId = record.happening.id;
+    existing.latestHappeningLabel = record.happening.label;
+    existing.latestHappeningObservedAt = record.happening.observedAt;
+    branchClaimsById.set(record.branchId, existing);
+  }
+  for (const record of sleepCapsules) {
+    const existing = branchClaimsById.get(record.branchId) ?? { branchId: record.branchId };
+    existing.latestSegmentId = record.segmentId;
+    existing.latestSleepCapsuleId = record.nucleusId;
+    existing.latestSleepAnchor = record.nucleus.anchor;
+    branchClaimsById.set(record.branchId, existing);
+  }
+
+  const referentClaims = referentState.map((record) => ({
+    referentId: record.referentId,
+    branchId: record.branchId,
+    anchor: record.anchor,
+    continuity: record.continuity,
+    reasoning: record.estimate.reasoning,
+    estimatedAt: record.estimate.estimatedAt,
+    basedOnBindingIds: [...record.estimate.basedOnBindingIds],
+    sourceRecordId: record.recordId,
+  }));
+
+  const artifactClaims = exchangeArtifacts.map((record) => {
+    const claim: ArtifactInspectabilitySurface = {
+      artifactId: record.artifact.id,
+      kind: record.artifact.kind,
+      payloadType: record.payload.payloadType,
+      payloadId: getPayloadId(record.payload),
+      emittedAt: record.artifact.provenance.emittedAt,
+      sourceIds: [...record.artifact.sourceIds],
+      payloadSourceIds: getPayloadSourceIds(record.payload),
+      summary: describeArtifactPayload(record.payload),
+    };
+
+    if (record.artifact.provenance.emitterId) {
+      claim.emitterId = record.artifact.provenance.emitterId;
+    }
+    if (record.artifact.provenance.basisId) {
+      claim.basisId = record.artifact.provenance.basisId;
+    }
+    if (record.artifact.provenance.source) {
+      claim.provenanceSource = record.artifact.provenance.source;
+    }
+    if (record.artifact.provenance.note) {
+      claim.provenanceNote = record.artifact.provenance.note;
+    }
+
+    return claim;
+  });
+  const contextClaims = exchangeArtifacts.flatMap((record) =>
+    record.payload.payloadType === "context"
+      ? [toContextInspectabilitySurface(record.artifact.id, record.payload.context)]
+      : [],
+  );
+  const portalClaims = exchangeArtifacts.flatMap((record) =>
+    record.payload.payloadType === "portal"
+      ? [toPortalInspectabilitySurface(record.artifact.id, record.payload.portal)]
+      : [],
+  );
+
+  return {
+    namespaceParts: lab.handle.namespaceParts,
+    branchClaims: [...branchClaimsById.values()],
+    referentClaims,
+    contextClaims,
+    portalClaims,
+    artifactClaims,
+  };
+}
+
+function getOrCreateBranchSurface(
+  surfaces: Map<string, ReplayBranchSurface>,
+  branchId: string,
+): ReplayBranchSurface {
+  const existing = surfaces.get(branchId);
+  if (existing) {
+    return existing;
+  }
+
+  const created: ReplayBranchSurface = {
+    branchId,
+    segmentIds: [],
+    branchHappeningIds: [],
+    sleepCapsuleIds: [],
+    branchHappeningCount: 0,
+    sleepCapsuleCount: 0,
+  };
+  surfaces.set(branchId, created);
+  return created;
+}
+
+function getOrCreateReferentSurface(
+  surfaces: Map<string, ReplayReferentSurface>,
+  record: {
+    referentId: string;
+    branchId: string;
+    anchor: string;
+    estimate: {
+      id: string;
+      reasoning: string;
+      estimatedAt: string;
+      basedOnBindingIds: string[];
+    };
+    continuity: StateEstimate["continuity"];
+  },
+): ReplayReferentSurface {
+  const existing = surfaces.get(record.referentId);
+  if (existing) {
+    return existing;
+  }
+
+  const created: ReplayReferentSurface = {
+    referentId: record.referentId,
+    branchId: record.branchId,
+    anchor: record.anchor,
+    estimateIds: [],
+    continuityHistory: [],
+    reasoningHistory: [],
+    latestContinuity: record.continuity,
+    latestReasoning: record.estimate.reasoning,
+    latestEstimatedAt: record.estimate.estimatedAt,
+    latestBasedOnBindingIds: [...record.estimate.basedOnBindingIds],
+  };
+  surfaces.set(record.referentId, created);
+  return created;
+}
+
+function getPayloadId(payload: ExchangeArtifactPayload): string {
+  switch (payload.payloadType) {
+    case "view":
+      return payload.view.id;
+    case "binding":
+      return payload.binding.id;
+    case "context":
+      return payload.context.id;
+    case "portal":
+      return payload.portal.id;
+    case "lineage-claim":
+      return payload.lineage.id;
+    case "receipt":
+      return payload.receipt.id;
+  }
+}
+
+function getPayloadSourceIds(payload: ExchangeArtifactPayload): string[] {
+  switch (payload.payloadType) {
+    case "view":
+      return [...payload.view.sourceIds];
+    case "binding":
+      return [
+        payload.binding.observerBranchId,
+        payload.binding.referentBranchId,
+        payload.binding.referentId,
+      ];
+    case "context":
+      return [
+        payload.context.branchId,
+        ...(payload.context.parentContextId ? [payload.context.parentContextId] : []),
+      ];
+    case "portal":
+      return [
+        payload.portal.branchId,
+        payload.portal.sourceContextId,
+        payload.portal.targetContextId,
+      ];
+    case "lineage-claim":
+      return [payload.lineage.fromId, payload.lineage.toId];
+    case "receipt":
+      return [...payload.receipt.sourceIds];
+  }
+}
+
+function describeArtifactPayload(payload: ExchangeArtifactPayload): string {
+  switch (payload.payloadType) {
+    case "view":
+      return `derived view: ${payload.view.label}`;
+    case "binding":
+      return `binding from ${payload.binding.observerBranchId} to ${payload.binding.referentId}`;
+    case "context":
+      return `context declaration: ${payload.context.label}`;
+    case "portal":
+      return `portal declaration: ${payload.portal.label}`;
+    case "lineage-claim":
+      return `lineage ${payload.lineage.relation} from ${payload.lineage.fromId} to ${payload.lineage.toId}`;
+    case "receipt":
+      return payload.receipt.summary;
+  }
+}
+
+function toReplayContextSurface(
+  artifactId: string,
+  context: {
+    id: string;
+    branchId: string;
+    label: string;
+    parentContextId?: string;
+    containmentPolicy?: string;
+  },
+): ReplayContextSurface {
+  const surface: ReplayContextSurface = {
+    contextId: context.id,
+    branchId: context.branchId,
+    label: context.label,
+    artifactId,
+  };
+  if (context.parentContextId) {
+    surface.parentContextId = context.parentContextId;
+  }
+  if (context.containmentPolicy) {
+    surface.containmentPolicy = context.containmentPolicy;
+  }
+  return surface;
+}
+
+function toReplayPortalSurface(
+  artifactId: string,
+  portal: {
+    id: string;
+    branchId: string;
+    label: string;
+    sourceContextId: string;
+    targetContextId: string;
+    exposureRule: string;
+    transform?: string;
+  },
+): ReplayPortalSurface {
+  const surface: ReplayPortalSurface = {
+    portalId: portal.id,
+    branchId: portal.branchId,
+    label: portal.label,
+    sourceContextId: portal.sourceContextId,
+    targetContextId: portal.targetContextId,
+    exposureRule: portal.exposureRule,
+    artifactId,
+  };
+  if (portal.transform) {
+    surface.transform = portal.transform;
+  }
+  return surface;
+}
+
+function toContextInspectabilitySurface(
+  artifactId: string,
+  context: {
+    id: string;
+    branchId: string;
+    label: string;
+    parentContextId?: string;
+    containmentPolicy?: string;
+  },
+): ContextInspectabilitySurface {
+  const surface: ContextInspectabilitySurface = {
+    contextId: context.id,
+    branchId: context.branchId,
+    label: context.label,
+    artifactId,
+  };
+  if (context.parentContextId) {
+    surface.parentContextId = context.parentContextId;
+  }
+  if (context.containmentPolicy) {
+    surface.containmentPolicy = context.containmentPolicy;
+  }
+  return surface;
+}
+
+function toPortalInspectabilitySurface(
+  artifactId: string,
+  portal: {
+    id: string;
+    branchId: string;
+    label: string;
+    sourceContextId: string;
+    targetContextId: string;
+    exposureRule: string;
+    transform?: string;
+  },
+): PortalInspectabilitySurface {
+  const surface: PortalInspectabilitySurface = {
+    portalId: portal.id,
+    branchId: portal.branchId,
+    label: portal.label,
+    sourceContextId: portal.sourceContextId,
+    targetContextId: portal.targetContextId,
+    exposureRule: portal.exposureRule,
+    artifactId,
+  };
+  if (portal.transform) {
+    surface.transform = portal.transform;
+  }
+  return surface;
 }

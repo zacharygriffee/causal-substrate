@@ -145,12 +145,28 @@ The current doctrine is minimal:
 - absence is not automatically breakage
 - negative evidence is not naive absence counting
 - expectations about persistence depend on both what is being tracked and the conditions around it
+- contradiction pressure is distinct from mere non-observation
+- current labs may use explicit heuristics here without treating them as universal law
 
 ### Lineage over forced identity
 
 When splits, merges, or ambiguous re-identification occur, lineage is often the safer representation than forced identity claims.
 
 The substrate should prefer preserving ancestry relations and ambiguity over flattening multiple continuities into one name too early.
+
+### Emergence and materialization
+
+The repository should prefer explicit emergence paths over magical appearance.
+
+The current doctrinal lean is:
+
+- `Seed` is precursor structure or latent continuity potential
+- `Seat` is a special seed or prepared locus for observer continuity
+- `Materialization` is an emergence process rather than a sudden unexplained insertion
+- observer emergence and non-observer emergence are related but not identical
+- normal emergence should not require injection
+
+This keeps continuity local-first while still allowing entities to become tracked, inherited, cultivated, or adopted over time.
 
 ### Writer and injection posture
 
@@ -164,6 +180,22 @@ The short-term implementation lean is:
 - injection should be exceptional, explicit, and policy-bearing
 
 Multi-writer support remains an allowed future capability, but it should be introduced only where a concrete surface truly requires shared authorship. The default continuity substrate should not be designed around it.
+
+### Inspectability and opacity
+
+The repository should not require full introspection of every inner heuristic process.
+
+It should require inspectable durable continuity boundaries.
+
+The current doctrinal line is:
+
+- source continuity should remain replayable
+- durable emitted claims should remain inspectable enough to explain
+- provenance should remain explicit on durable outputs
+- derived views should not overwrite source continuity
+- opaque inner search is acceptable, but opaque durable continuity claims are not
+
+This keeps the substrate useful for rich local interpretation without turning continuity itself into a black box.
 
 ## Epistemic doctrine
 

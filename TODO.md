@@ -45,142 +45,142 @@
 
 ### Phase 1: Emergence Doctrine
 
-- [ ] write focused doctrine for:
-  - [ ] `Seed`
-  - [ ] `Seat`
-  - [ ] `Adoption`
-  - [ ] `Cultivation`
-  - [ ] `Materialization`
-  - [ ] `Custody`
-- [ ] make explicit that normal emergence should not require injection
-- [ ] make explicit that observer emergence and non-observer emergence are related but not identical
+- [x] write focused doctrine for:
+  - [x] `Seed`
+  - [x] `Seat`
+  - [x] `Adoption`
+  - [x] `Cultivation`
+  - [x] `Materialization`
+  - [x] `Custody`
+- [x] make explicit that normal emergence should not require injection
+- [x] make explicit that observer emergence and non-observer emergence are related but not identical
 
 Done when:
-- [ ] the repo can explain how a non-observer like a ball emerges without magical appearance
-- [ ] the repo can explain how an observer takes a seat or grows from a prepared continuity
-- [ ] the repo can explain why multi-writer is not required for normal emergence
+- [x] the repo can explain how a non-observer like a ball emerges without magical appearance
+- [x] the repo can explain how an observer takes a seat or grows from a prepared continuity
+- [x] the repo can explain why multi-writer is not required for normal emergence
 
 ### Phase 2: Observer / Referent Pressure Labs
 
-- [ ] implement a mutual observer / mediated self-access lab
-  - [ ] two cameras facing each other
-  - [ ] each is both observer and referent
-  - [ ] externally sourced self-view remains artifact, not source continuity
-- [ ] implement a shared ball / co-observed non-observer lab
-  - [ ] two cameras both observe a ball
-  - [ ] the ball materializes through tracked history rather than magical appearance
-  - [ ] no observer owns the ball
-- [ ] implement an orthogonal cameras / divergent ball interpretation lab
-  - [ ] cameras do not observe each other
-  - [ ] both observe the same ball differently
-  - [ ] co-reference remains basis-limited and does not force consensus
+- [x] implement a mutual observer / mediated self-access lab
+  - [x] two cameras facing each other
+  - [x] each is both observer and referent
+  - [x] externally sourced self-view remains artifact, not source continuity
+- [x] implement a shared ball / co-observed non-observer lab
+  - [x] two cameras both observe a ball
+  - [x] the ball materializes through tracked history rather than magical appearance
+  - [x] no observer owns the ball
+- [x] implement an orthogonal cameras / divergent ball interpretation lab
+  - [x] cameras do not observe each other
+  - [x] both observe the same ball differently
+  - [x] co-reference remains basis-limited and does not force consensus
 
 Done when:
-- [ ] observer/referent overlap works cleanly
-- [ ] non-observer materialization works without hand-waving
-- [ ] divergence around a shared candidate referent is representable without collapse
+- [x] observer/referent overlap works cleanly
+- [x] non-observer materialization works without hand-waving
+- [x] divergence around a shared candidate referent is representable without collapse
 
 ### Phase 3: Inertia / Volatility Doctrine
 
-- [ ] move `inertia` beyond a named hook and minimal interpretive concept
-- [ ] define stronger doctrine for continuity under absence
-- [ ] define stronger doctrine for absence vs contradiction
-- [ ] define how inertia and volatility pressure `continuing / ambiguous / broken`
-- [ ] pressure inertia with the camera/ball loss-of-sight cases
+- [x] move `inertia` beyond a named hook and minimal interpretive concept
+- [x] define stronger doctrine for continuity under absence
+- [x] define stronger doctrine for absence vs contradiction
+- [x] define how inertia and volatility pressure `continuing / ambiguous / broken`
+- [x] pressure inertia with the camera/ball loss-of-sight cases
 
 Done when:
-- [ ] continuity under absence is explainable without naive persistence
-- [ ] contradiction pressure is distinct from mere non-observation
-- [ ] inertia is operational enough for future labs
+- [x] continuity under absence is explainable without naive persistence
+- [x] contradiction pressure is distinct from mere non-observation
+- [x] inertia is operational enough for future labs
 
 ### Phase 4: Schema Discipline
 
-- [ ] harden the Corestore record model fully
+- [x] harden the Corestore record model fully
   - [x] stabilize branch happening records
   - [x] stabilize sleep capsule records
   - [x] stabilize referent state estimate records
   - [x] stabilize exchange artifact records
-- [ ] decide whether JSON remains sufficient or stricter schema validation is needed
-- [ ] formalize artifact envelopes for Corestore-backed emission
-- [ ] make append-time validation explicit and complete
-- [ ] make read-time validation explicit and complete
-- [ ] document schema evolution posture for `v1` to future `v2`
+- [x] decide whether JSON remains sufficient or stricter schema validation is needed
+- [x] formalize artifact envelopes for Corestore-backed emission
+- [x] make append-time validation explicit and complete
+- [x] make read-time validation explicit and complete
+- [x] document schema evolution posture for `v1` to future `v2`
 
 Done when:
-- [ ] persisted records are strictly validated
-- [ ] `v1` is clearly documented
-- [ ] schema can evolve without pretending the current format is final
+- [x] persisted records are strictly validated
+- [x] `v1` is clearly documented
+- [x] schema can evolve without pretending the current format is final
 
 ### Phase 5: Corestore Model Refinement
 
 - [x] keep serious substrate work on Corestore/Hypercore only
 - [x] avoid Hyperbee unless concrete lookup or registry pressure appears
 - [x] treat known-core access and stream replay as the default posture
-- [ ] improve replay and reconstruction ergonomics if needed
-- [ ] continue proving known-core replay before introducing index layers
+- [x] improve replay and reconstruction ergonomics if needed
+- [x] continue proving known-core replay before introducing index layers
 
 Done when:
-- [ ] replay remains tractable at current scale
-- [ ] reconstruction is good enough for consumers without hidden indexing assumptions
+- [x] replay remains tractable at current scale
+- [x] reconstruction is good enough for consumers without hidden indexing assumptions
 
 ### Phase 6: Adjacent Boundary Documentation
 
-- [ ] document the boundary with `Virtualia`
-- [ ] document the boundary with `mesh-ecology-edge`
-- [ ] document the boundary with mesh integration generally
-- [ ] state clearly what pressure adjacent repos contribute
-- [ ] state clearly what assumptions are not imported into this repo
+- [x] document the boundary with `Virtualia`
+- [x] document the boundary with `mesh-ecology-edge`
+- [x] document the boundary with mesh integration generally
+- [x] state clearly what pressure adjacent repos contribute
+- [x] state clearly what assumptions are not imported into this repo
 
 Done when:
-- [ ] it is clear what `causal-substrate` owns
-- [ ] it is clear what adjacent repos must continue to own themselves
+- [x] it is clear what `causal-substrate` owns
+- [x] it is clear what adjacent repos must continue to own themselves
 
 ### Phase 7: Consumer Adoption Surface
 
-- [ ] write a consumer guide
-- [ ] add example adoption patterns for at least two adjacent repo types
-- [ ] document anti-patterns for misuse
-- [ ] make the integration seam teachable without forcing app-specific assumptions into core doctrine
+- [x] write a consumer guide
+- [x] add example adoption patterns for at least two adjacent repo types
+- [x] document anti-patterns for misuse
+- [x] make the integration seam teachable without forcing app-specific assumptions into core doctrine
 
 Done when:
-- [ ] an adjacent repo can adopt the substrate without guessing the boundary
+- [x] an adjacent repo can adopt the substrate without guessing the boundary
 
 ### Phase 8: Multi-Writer Boundary Clarification
 
 - [x] establish doctrine that multi-writer is not required by default
 - [x] establish doctrine that writerhood is optional and surface-specific
 - [x] establish doctrine that injection is exceptional and policy-bearing
-- [ ] document exactly where multi-writer may still be justified
-  - [ ] shared artifact surfaces
-  - [ ] shared coordination surfaces
-  - [ ] explicitly injectible branches or contexts
-- [ ] document exactly what should remain single-writer or custody-bound
+- [x] document exactly where multi-writer may still be justified
+  - [x] shared artifact surfaces
+  - [x] shared coordination surfaces
+  - [x] explicitly injectible branches or contexts
+- [x] document exactly what should remain single-writer or custody-bound
 
 Done when:
-- [ ] the line between continuity-bearing branches and shared coordination surfaces is explicit
+- [x] the line between continuity-bearing branches and shared coordination surfaces is explicit
 
 ### Phase 9: Optional Multi-Writer / Autobase Exploration
 
-- [ ] only proceed if later pressure still justifies it
-- [ ] keep any first use to shared artifact or shared coordination surfaces
-- [ ] do not use it first for core continuity-bearing histories
-- [ ] revisit optimistic writing only in provisional/shared-claim lanes
+- [x] only proceed if later pressure still justifies it
+- [x] keep any first use to shared artifact or shared coordination surfaces
+- [x] do not use it first for core continuity-bearing histories
+- [x] revisit optimistic writing only in provisional/shared-claim lanes
 
 Done when:
 - [ ] either a narrow multi-writer pattern is proven
-- [ ] or it is clearly deferred as not needed
+- [x] or it is clearly deferred as not needed
 
 ### Phase 10: Finish-Line Consolidation
 
-- [ ] compress doctrine into a teachable stable posture
-- [ ] stabilize schema docs
-- [ ] stabilize implementation docs
-- [ ] mark what is settled, what is open, and what is intentionally deferred
+- [x] compress doctrine into a teachable stable posture
+- [x] stabilize schema docs
+- [x] stabilize implementation docs
+- [x] mark what is settled, what is open, and what is intentionally deferred
 
 Done when:
-- [ ] the repo is stable enough to teach
-- [ ] adjacent repos can adopt it
-- [ ] unresolved questions are explicit rather than accidental
+- [x] the repo is stable enough to teach
+- [x] adjacent repos can adopt it
+- [x] unresolved questions are explicit rather than accidental
 
 ## Deferred / Pressure-Gated Work
 
@@ -190,11 +190,123 @@ Done when:
   - [ ] context id -> member references
   - [ ] named artifact lookup
   - [ ] concern indexing
-- [ ] extend replication beyond the current single-writer proof
+- [x] extend replication beyond the current single-writer proof
 - [ ] NoiseSecretStream majority experiments
-- [ ] deeper `fakeswarm`-based swarm testing
+- [x] deeper `fakeswarm`-based swarm testing
 - [ ] transport concerns
 - [ ] Autobase or higher-order shared surfaces
+
+## Next Phases
+
+### Phase 11: Compact Inspectability Surface
+
+- [ ] build one compact replay-backed continuity situation surface
+- [ ] keep it consumer-agnostic and substrate-native
+- [ ] derive it from persisted records rather than ephemeral process state
+- [ ] include the minimal bounded fields needed for inspection
+  - [ ] `primaryBranchId`
+  - [ ] `primaryContextId`
+  - [ ] `portalVisibleContextIds`
+  - [ ] `activeReferentIds`
+  - [ ] `continuityState`
+  - [ ] `ambiguityState`
+  - [ ] `reasonCodes`
+  - [ ] `evidenceSourceIds`
+
+Done when:
+- [ ] the surface is derivable from persisted records
+- [ ] it remains consumer-agnostic
+- [ ] it does not replace underlying history
+
+### Phase 12: Transition Decision Surfaces
+
+- [ ] add a compact transition decision surface over continuity changes
+- [ ] classify transitions without importing app-specific policy
+  - [ ] `stay`
+  - [ ] `branch`
+  - [ ] `cross-context`
+  - [ ] `ambiguous`
+- [ ] emit bounded reasons and evidence ids for each decision
+- [x] preserve the doctrine that bounded explanation is required but full internal heuristic exposure is not
+
+Done when:
+- [ ] a consumer can inspect why a transition was emitted
+- [ ] explanations are compact and replayable
+- [ ] no requirement exists to expose every internal heuristic
+
+### Phase 13: Inspectability Labs
+
+- [ ] add a same-branch same-context continuation lab
+- [ ] add a new-branch opening lab
+- [ ] add a portal-visible cross-context interpretation lab
+- [ ] add an unresolved ambiguous placement lab
+- [ ] add a shared referent active-across-context-shift lab
+
+Done when:
+- [ ] each lab emits a compact inspectability surface
+- [ ] each lab proves the surface matches persisted history
+- [ ] tests show no hidden dependency on in-memory-only state
+
+### Phase 14: Context / Portal Temporal Replay
+
+- [ ] strengthen replay for context transition history over time
+- [ ] strengthen replay for portal exposure history over time
+- [ ] define current primary context resolution across segment boundaries
+- [x] preserve ambiguity without forcing multi-primary context
+
+Done when:
+- [ ] context and portal claims replay as a time-ordered story
+- [ ] current context is explainable from records alone
+- [ ] ambiguity remains first-class
+
+### Phase 15: Inertia-Aware Referent Continuity
+
+- [ ] add a referent absent but plausibly continuing lab
+- [ ] add a referent absent under high volatility lab
+- [ ] add a reappearance under degraded basis lab
+- [ ] add a conflicting multi-observer persistence judgment lab
+- [ ] add a co-observed non-observer with diverging persistence judgment lab
+
+Done when:
+- [ ] `continuing / ambiguous / broken` is pressure-tested under multi-observer conditions
+- [ ] reasoning remains inspectable without pretending global identity is solved
+
+### Phase 16: Schema Evolution Posture
+
+- [x] keep versioned schema envelopes explicit
+- [ ] tighten record encodings where that improves interoperability
+- [ ] define more sharply what belongs in durable records vs derived views
+- [ ] document the threshold for introducing stricter encodings beyond the current `v1` posture
+
+Done when:
+- [ ] schemas are stricter where they help interoperability
+- [x] versioning remains open-ended
+- [ ] doctrine is not prematurely locked
+
+### Phase 17: Multi-Observer Replication Interpretation
+
+- [ ] reproduce compact inspectability surfaces on replicated stores
+- [ ] prove a receiving observer can reconstruct branch, referent, and continuity situation surfaces
+- [ ] verify provenance survives exchange for inspectability purposes
+- [ ] note any concrete lookup pressure that suggests indexing, without introducing Hyperbee yet
+
+Done when:
+- [ ] replicated stores reproduce bounded interpretation surfaces
+- [ ] provenance remains explicit
+- [ ] any Hyperbee pressure is concrete rather than speculative
+
+### Phase 18: Hyperbee Decision Gate
+
+- [ ] decide on Hyperbee only after the above pressures are tested
+- [ ] evaluate branch lookup pressure
+- [ ] evaluate referent lookup pressure
+- [ ] evaluate context membership lookup pressure
+- [ ] evaluate artifact discovery pressure
+- [ ] evaluate concern indexing pressure
+
+Done when:
+- [ ] the exact lookup pressure Hyperbee would solve is named
+- [ ] or Hyperbee is explicitly deferred again
 
 ## Rules
 

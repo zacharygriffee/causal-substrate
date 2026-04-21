@@ -6,6 +6,7 @@ import test from "node:test";
 
 import {
   activeManagedCorestoreCount,
+  appendConcernRecord,
   openFirstSeriousCorestoreLab,
   runFirstSeriousCorestoreLab,
   Substrate,
@@ -158,4 +159,97 @@ test("first serious Corestore lab adapter reopens cleanly after close", async ()
   }
 
   assert.equal(activeManagedCorestoreCount(), 0);
+});
+
+test("first serious Corestore lab rejects append-time record mismatches", async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), "causal-substrate-serious-lab-"));
+  const lab = await openFirstSeriousCorestoreLab({
+    storageDir: directory,
+    namespaceParts: ["validation-append"],
+  });
+  const substrate = new Substrate({
+    now: () => "2026-04-21T00:00:00.000Z",
+  });
+
+  try {
+    const basis = substrate.createBasis({
+      label: "validation-basis",
+      dimensions: ["position"],
+    });
+    const observer = substrate.createObserver({
+      label: "validation-observer",
+      basisId: basis.id,
+    });
+    const branch = substrate.createBranch({
+      role: "observer",
+      label: "validation-branch",
+      basisId: basis.id,
+      observerId: observer.id,
+    });
+    const segment = substrate.openSegment({
+      branchId: branch.id,
+    });
+    const happening = substrate.createHappening({
+      branchId: branch.id,
+      segmentId: segment.id,
+      label: "validated-happening",
+    });
+
+    await assert.rejects(
+      lab.appendBranchHappening({
+        branchId: "different-branch",
+        segmentId: segment.id,
+        happening,
+      }),
+      /branchId must match happening.branchId/,
+    );
+  } finally {
+    await lab.close();
+  }
+});
+
+test("first serious Corestore lab rejects invalid stored records at read-time", async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), "causal-substrate-serious-lab-"));
+  const lab = await openFirstSeriousCorestoreLab({
+    storageDir: directory,
+    namespaceParts: ["validation-read"],
+  });
+
+  try {
+    await appendConcernRecord(lab.handle, "exchange-artifacts", {
+      schema: "causal-substrate/corestore-record/v1",
+      schemaVersion: 1,
+      recordId: "artifact-record-1",
+      recordType: "exchange-artifact",
+      recordedAt: "2026-04-21T00:00:00.000Z",
+      artifact: {
+        id: "artifact-1",
+        kind: "view",
+        label: "bad-artifact",
+        sourceIds: ["branch-1"],
+        payloadIds: ["view-1"],
+        locality: "shared-candidate",
+        provenance: {
+          emittedAt: "2026-04-21T00:00:00.000Z",
+        },
+      },
+      payload: {
+        payloadType: "binding",
+        binding: {
+          id: "binding-1",
+          kind: "tracking",
+          observerBranchId: "branch-1",
+          referentBranchId: "branch-2",
+          referentId: "referent-1",
+        },
+      },
+    });
+
+    await assert.rejects(
+      lab.readExchangeArtifacts(),
+      /artifact kind view does not match payload type binding/,
+    );
+  } finally {
+    await lab.close();
+  }
 });

@@ -147,3 +147,5 @@ The current repository line should be:
 - writerhood is optional and surface-specific
 - injection is exceptional and policy-bearing
 - short-term implementation should assume multi-writer is not required
+
+Further clarification on exactly where multi-writer may still be justified now lives in [`../multiwriter-boundary.md`](../multiwriter-boundary.md).
