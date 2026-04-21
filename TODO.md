@@ -20,6 +20,7 @@
 - [x] local prototype and filesystem backend exploration
 - [x] Corestore/Hypercore implementation posture document
 - [x] verify latest `corestore` version and pin it
+- [x] verify latest `hyperswarm` version and pin it
 - [x] add managed Corestore backend with deterministic namespaces
 - [x] avoid duplicate in-process Corestore root opens per storage path
 - [x] ensure namespaced sessions and managed roots close cleanly
@@ -40,6 +41,7 @@
 - [x] stabilize the current `v1` record classes enough for replay and replication
 - [x] implement multi-segment continuity, referent history, exchange artifact, and reconstruction labs
 - [x] prove two-Corestore replication over Hypercore using `fakeswarm`
+- [x] add an opt-in real `hyperswarm` direct-peer replication lane
 
 ## Finish-Line Phases
 
@@ -194,6 +196,9 @@ Done when:
 - [ ] NoiseSecretStream majority experiments
 - [x] deeper `fakeswarm`-based swarm testing
 - [ ] transport concerns
+  - [x] initial real `hyperswarm` direct-peer replication proof with liberal timeouts
+  - [ ] topic-based DHT discovery proof over real `hyperswarm`
+  - [ ] broader multi-peer and explicit bootstrap transport hardening
 - [ ] Autobase or higher-order shared surfaces
 - [x] define peer / observer / operator boundary doctrine
 - [x] define preservation versus branch promotion doctrine

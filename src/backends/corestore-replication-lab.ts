@@ -24,13 +24,30 @@ export interface FakeSwarmLike {
   on: (event: "connection", listener: (socket: unknown, peerInfo: unknown) => void) => void;
 }
 
+export interface ReplicationDiscoveryLike {
+  flushed?: () => Promise<void>;
+}
+
+export interface ReplicationSwarmLike {
+  id?: string;
+  join: (topic: Buffer, opts?: Record<string, unknown>) => ReplicationDiscoveryLike | void;
+  flush: (timeoutMs?: number) => Promise<void>;
+  close: () => Promise<void>;
+  on: (event: "connection", listener: (socket: unknown, peerInfo: unknown) => void) => void;
+}
+
 export interface MultipleObserverReplicationLabOptions {
   storageDirA: string;
   storageDirB: string;
-  createSwarm: (seedOrOpts?: Buffer, topics?: Map<string, unknown>) => FakeSwarmLike;
+  createSwarm: (
+    seedOrOpts?: Buffer,
+    topics?: Map<string, unknown>,
+  ) => ReplicationSwarmLike | Promise<ReplicationSwarmLike>;
   topics?: Map<string, unknown> | undefined;
   namespaceParts?: string[] | undefined;
   now?: (() => string) | undefined;
+  flushTimeoutMs?: number | undefined;
+  replicationTimeoutMs?: number | undefined;
 }
 
 export interface MultipleObserverReplicationLabReport {
@@ -58,6 +75,13 @@ export interface IncrementalReplicationCatchupLabReport {
   finalInspectability: InspectabilityPicture;
 }
 
+const DEFAULT_SWARM_FLUSH_TIMEOUT_MS = 30_000;
+const DEFAULT_REPLICATION_TIMEOUT_MS = 60_000;
+const DEFAULT_SWARM_JOIN_OPTIONS = {
+  client: true,
+  server: true,
+} satisfies Record<string, boolean>;
+
 export async function runMultipleObserverReplicationLab(
   options: MultipleObserverReplicationLabOptions,
 ): Promise<MultipleObserverReplicationLabReport> {
@@ -82,22 +106,24 @@ export async function runMultipleObserverReplicationLab(
     },
   });
 
+  const flushTimeoutMs = options.flushTimeoutMs ?? DEFAULT_SWARM_FLUSH_TIMEOUT_MS;
+  const replicationTimeoutMs = options.replicationTimeoutMs ?? DEFAULT_REPLICATION_TIMEOUT_MS;
   const topics = options.topics ?? new Map<string, unknown>();
-  const swarmA = options.createSwarm(Buffer.alloc(32, 1), topics);
-  const swarmB = options.createSwarm(Buffer.alloc(32, 2), topics);
+  const swarmA = await options.createSwarm(Buffer.alloc(32, 1), topics);
+  const swarmB = await options.createSwarm(Buffer.alloc(32, 2), topics);
 
   try {
-    swarmA.on("connection", (socket) => {
-      first.handle.session.replicate(socket);
-    });
-    swarmB.on("connection", (socket) => {
-      second.handle.session.replicate(socket);
-    });
+    wireReplicationSockets(first, second, swarmA, swarmB);
 
     const topic = createReplicationTopic(options.namespaceParts ?? []);
-    swarmA.join(topic);
-    swarmB.join(topic);
-    await Promise.all([swarmA.flush(500), swarmB.flush(500)]);
+    await connectReplicationPeers({
+      first,
+      second,
+      swarmA,
+      swarmB,
+      topic,
+      timeoutMs: flushTimeoutMs,
+    });
 
     const substrate = new SubstrateKernel(options.now ? { now: options.now } : {});
     const basis = substrate.createBasis({
@@ -228,13 +254,14 @@ export async function runMultipleObserverReplicationLab(
     });
 
     await waitFor(async () => {
+      await refreshReplicaCores(second);
       return (
         second.handle.cores["branch-happenings"].length === 2 &&
         second.handle.cores.segments.length === 2 &&
         second.handle.cores["referent-state"].length === 1 &&
         second.handle.cores["exchange-artifacts"].length === 1
       );
-    }, 4000);
+    }, replicationTimeoutMs);
 
     const remoteBranchHappenings = await second.readBranchHappenings();
     const remoteSleepCapsules = await second.readSleepCapsules();
@@ -259,12 +286,7 @@ export async function runMultipleObserverReplicationLab(
       replicaInspectability,
     };
   } finally {
-    await Promise.allSettled([
-      swarmA.close(),
-      swarmB.close(),
-      first.close(),
-      second.close(),
-    ]);
+    await closeReplicationPair({ first, second, swarmA, swarmB });
   }
 }
 
@@ -282,6 +304,8 @@ export async function runIncrementalReplicationCatchupLab(
     throw new Error("missing primaryKey on source Corestore");
   }
 
+  const flushTimeoutMs = options.flushTimeoutMs ?? DEFAULT_SWARM_FLUSH_TIMEOUT_MS;
+  const replicationTimeoutMs = options.replicationTimeoutMs ?? DEFAULT_REPLICATION_TIMEOUT_MS;
   const topics = options.topics ?? new Map<string, unknown>();
   const topic = createReplicationTopic(options.namespaceParts ?? []);
   const substrate = new SubstrateKernel(options.now ? { now: options.now } : {});
@@ -321,15 +345,22 @@ export async function runIncrementalReplicationCatchupLab(
   let second:
     | Awaited<ReturnType<typeof openFirstSeriousCorestoreLab>>
     | undefined;
-  let swarmA: FakeSwarmLike | undefined;
-  let swarmB: FakeSwarmLike | undefined;
+  let swarmA: ReplicationSwarmLike | undefined;
+  let swarmB: ReplicationSwarmLike | undefined;
 
   try {
     second = await openReadonlyReplica(options.storageDirB, primaryKey, options.namespaceParts);
-    swarmA = options.createSwarm(Buffer.alloc(32, 11), topics);
-    swarmB = options.createSwarm(Buffer.alloc(32, 12), topics);
-    bindReplication(first, second, swarmA, swarmB, topic);
-    await Promise.all([swarmA.flush(500), swarmB.flush(500)]);
+    swarmA = await options.createSwarm(Buffer.alloc(32, 11), topics);
+    swarmB = await options.createSwarm(Buffer.alloc(32, 12), topics);
+    wireReplicationSockets(first, second, swarmA, swarmB);
+    await connectReplicationPeers({
+      first,
+      second,
+      swarmA,
+      swarmB,
+      topic,
+      timeoutMs: flushTimeoutMs,
+    });
 
     const firstSegment = substrate.openSegment({
       branchId: observerBranch.id,
@@ -402,19 +433,22 @@ export async function runIncrementalReplicationCatchupLab(
     });
 
     await waitFor(async () => {
+      await refreshReplicaCores(second);
       return (
         second?.handle.cores["branch-happenings"].length === 1 &&
         second?.handle.cores.segments.length === 1 &&
         second?.handle.cores["referent-state"].length === 1 &&
         second?.handle.cores["exchange-artifacts"].length === 1
       );
-    }, 4000);
+    }, replicationTimeoutMs);
 
     const initialReplay = await reconstructLocalPicture(second);
     const initialSituation = await reconstructContinuitySituation(second);
     const initialInspectability = await reconstructInspectabilityPicture(second);
 
-    await Promise.allSettled([swarmA.close(), swarmB.close(), second.close()]);
+    await closeSwarmQuietly(swarmA);
+    await closeSwarmQuietly(swarmB);
+    await closeLabQuietly(second);
     second = undefined;
     swarmA = undefined;
     swarmB = undefined;
@@ -490,19 +524,27 @@ export async function runIncrementalReplicationCatchupLab(
     });
 
     second = await openReadonlyReplica(options.storageDirB, primaryKey, options.namespaceParts);
-    swarmA = options.createSwarm(Buffer.alloc(32, 14), topics);
-    swarmB = options.createSwarm(Buffer.alloc(32, 13), topics);
-    bindReplication(first, second, swarmA, swarmB, topic);
-    await Promise.all([swarmA.flush(500), swarmB.flush(500)]);
+    swarmA = await options.createSwarm(Buffer.alloc(32, 14), topics);
+    swarmB = await options.createSwarm(Buffer.alloc(32, 13), topics);
+    wireReplicationSockets(first, second, swarmA, swarmB);
+    await connectReplicationPeers({
+      first,
+      second,
+      swarmA,
+      swarmB,
+      topic,
+      timeoutMs: flushTimeoutMs,
+    });
 
     await waitFor(async () => {
+      await refreshReplicaCores(second);
       return (
         second?.handle.cores["branch-happenings"].length === 2 &&
         second?.handle.cores.segments.length === 2 &&
         second?.handle.cores["referent-state"].length === 2 &&
         second?.handle.cores["exchange-artifacts"].length === 2
       );
-    }, 4000);
+    }, replicationTimeoutMs);
 
     const finalReplay = await reconstructLocalPicture(second);
     const finalSituation = await reconstructContinuitySituation(second);
@@ -519,12 +561,7 @@ export async function runIncrementalReplicationCatchupLab(
       finalInspectability,
     };
   } finally {
-    await Promise.allSettled([
-      swarmA?.close(),
-      swarmB?.close(),
-      first.close(),
-      second?.close(),
-    ]);
+    await closeReplicationPair({ first, second, swarmA, swarmB });
   }
 }
 
@@ -558,21 +595,141 @@ function sleep(durationMs: number) {
   return new Promise((resolve) => setTimeout(resolve, durationMs));
 }
 
-function bindReplication(
+function wireReplicationSockets(
   first: Awaited<ReturnType<typeof openFirstSeriousCorestoreLab>>,
   second: Awaited<ReturnType<typeof openFirstSeriousCorestoreLab>>,
-  swarmA: FakeSwarmLike,
-  swarmB: FakeSwarmLike,
-  topic: Buffer,
+  swarmA: ReplicationSwarmLike,
+  swarmB: ReplicationSwarmLike,
 ) {
   swarmA.on("connection", (socket) => {
-    first.handle.session.replicate(socket);
+    first.handle.lease.store.replicate(socket);
   });
   swarmB.on("connection", (socket) => {
-    second.handle.session.replicate(socket);
+    second.handle.lease.store.replicate(socket);
   });
-  swarmA.join(topic);
-  swarmB.join(topic);
+}
+
+async function connectReplicationPeers({
+  first,
+  second,
+  swarmA,
+  swarmB,
+  topic,
+  timeoutMs,
+}: {
+  first: Awaited<ReturnType<typeof openFirstSeriousCorestoreLab>>;
+  second: Awaited<ReturnType<typeof openFirstSeriousCorestoreLab>>;
+  swarmA: ReplicationSwarmLike;
+  swarmB: ReplicationSwarmLike;
+  topic: Buffer;
+  timeoutMs: number;
+}) {
+  const doneA =
+    typeof first.handle.lease.store.findingPeers === "function"
+      ? first.handle.lease.store.findingPeers()
+      : undefined;
+  const doneB =
+    typeof second.handle.lease.store.findingPeers === "function"
+      ? second.handle.lease.store.findingPeers()
+      : undefined;
+
+  try {
+    const discoveryA = swarmA.join(topic, DEFAULT_SWARM_JOIN_OPTIONS);
+    const discoveryB = swarmB.join(topic, DEFAULT_SWARM_JOIN_OPTIONS);
+
+    await Promise.all([
+      waitForDiscoveryFlush(discoveryA, timeoutMs, "replication-discovery-a"),
+      waitForDiscoveryFlush(discoveryB, timeoutMs, "replication-discovery-b"),
+      waitForSwarmFlush(swarmA, timeoutMs, "replication-swarm-a"),
+      waitForSwarmFlush(swarmB, timeoutMs, "replication-swarm-b"),
+    ]);
+  } finally {
+    doneA?.();
+    doneB?.();
+  }
+}
+
+async function waitForDiscoveryFlush(
+  discovery: ReplicationDiscoveryLike | void,
+  timeoutMs: number,
+  label: string,
+) {
+  if (!discovery || typeof discovery.flushed !== "function") return;
+  await withTimeout(Promise.resolve(discovery.flushed()), timeoutMs, label);
+}
+
+async function waitForSwarmFlush(
+  swarm: ReplicationSwarmLike,
+  timeoutMs: number,
+  label: string,
+) {
+  await withTimeout(Promise.resolve(swarm.flush(timeoutMs)), timeoutMs, label);
+}
+
+async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, label: string): Promise<T> {
+  if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) {
+    return promise;
+  }
+
+  return await new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => {
+      reject(new Error(`timed out waiting for ${label} after ${timeoutMs}ms`));
+    }, timeoutMs);
+
+    promise.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (error) => {
+        clearTimeout(timer);
+        reject(error);
+      },
+    );
+  });
+}
+
+async function closeReplicationPair({
+  first,
+  second,
+  swarmA,
+  swarmB,
+}: {
+  first: Awaited<ReturnType<typeof openFirstSeriousCorestoreLab>> | undefined;
+  second: Awaited<ReturnType<typeof openFirstSeriousCorestoreLab>> | undefined;
+  swarmA: ReplicationSwarmLike | undefined;
+  swarmB: ReplicationSwarmLike | undefined;
+}) {
+  await closeSwarmQuietly(swarmA);
+  await closeSwarmQuietly(swarmB);
+  await closeLabQuietly(second);
+  await closeLabQuietly(first);
+}
+
+async function closeSwarmQuietly(swarm: ReplicationSwarmLike | undefined) {
+  if (!swarm) return;
+  await swarm.close().catch(() => {});
+}
+
+async function closeLabQuietly(
+  lab:
+    | Awaited<ReturnType<typeof openFirstSeriousCorestoreLab>>
+    | undefined,
+) {
+  if (!lab) return;
+  await lab.close().catch(() => {});
+}
+
+async function refreshReplicaCores(
+  lab:
+    | Awaited<ReturnType<typeof openFirstSeriousCorestoreLab>>
+    | undefined,
+) {
+  if (!lab) return;
+
+  for (const core of Object.values(lab.handle.cores)) {
+    await core.update?.({ wait: false }).catch(() => {});
+  }
 }
 
 async function openReadonlyReplica(

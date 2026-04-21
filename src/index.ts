@@ -8,4 +8,5 @@ export * from "./backends/corestore-records.js";
 export * from "./backends/corestore-first-serious-lab.js";
 export * from "./backends/corestore-follow-on-labs.js";
 export * from "./backends/corestore-replication-lab.js";
+export * from "./backends/hyperswarm.js";
 export * from "./prototypes/continuity-workstation.js";
