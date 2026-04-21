@@ -79,6 +79,31 @@ Add Hyperbee only when we need:
 
 Hyperbee should not become the primary truth substrate unless strong implementation pressure justifies it.
 
+## Current Decision After Corestore-Only Pressure
+
+After the current replay, inspectability, temporal replay, and replica reconstruction proofs, the repository still does not have concrete Hyperbee pressure.
+
+What has already been proven without Hyperbee:
+
+- known-core replay for branch, referent, artifact, context, and portal surfaces
+- compact continuity situation and transition decision reconstruction
+- time-ordered context and portal replay
+- replica-side reconstruction of compact interpretive surfaces with provenance intact
+
+What remains insufficiently pressured today:
+
+- branch id to core reference lookup across many concerns
+- referent id to anchor lookup across many concerns
+- context membership lookup at larger scale
+- named artifact discovery beyond known streams
+- concern-wide secondary indexing
+
+Current decision:
+
+- Hyperbee remains deferred
+- the repo should continue using Hypercore as the primary continuity substrate
+- Hyperbee should enter only when one of the lookup pressures above becomes concrete in labs or adjacent-repo adoption
+
 ## Doctrine Constraints
 
 The following positions remain binding while implementing:

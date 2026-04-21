@@ -7,7 +7,14 @@ import {
   FIRST_SERIOUS_CORESTORE_LAB_CONCERN,
   openFirstSeriousCorestoreLab,
 } from "./corestore-first-serious-lab.js";
-import { CorestoreReplaySummary, reconstructLocalPicture } from "./corestore-follow-on-labs.js";
+import {
+  ContinuitySituationSurface,
+  CorestoreReplaySummary,
+  InspectabilityPicture,
+  reconstructContinuitySituation,
+  reconstructInspectabilityPicture,
+  reconstructLocalPicture,
+} from "./corestore-follow-on-labs.js";
 
 export interface FakeSwarmLike {
   id: string;
@@ -36,6 +43,8 @@ export interface MultipleObserverReplicationLabReport {
   replicatedObserverBranchIds: string[];
   replicatedContinuity: StateEstimate["continuity"][];
   replicatedPayloadKinds: ExchangeArtifactPayload["payloadType"][];
+  replicaSituation: ContinuitySituationSurface;
+  replicaInspectability: InspectabilityPicture;
 }
 
 export interface IncrementalReplicationCatchupLabReport {
@@ -43,6 +52,10 @@ export interface IncrementalReplicationCatchupLabReport {
   primaryKeyHex: string;
   initialReplay: CorestoreReplaySummary;
   finalReplay: CorestoreReplaySummary;
+  initialSituation: ContinuitySituationSurface;
+  finalSituation: ContinuitySituationSurface;
+  initialInspectability: InspectabilityPicture;
+  finalInspectability: InspectabilityPicture;
 }
 
 export async function runMultipleObserverReplicationLab(
@@ -227,6 +240,8 @@ export async function runMultipleObserverReplicationLab(
     const remoteSleepCapsules = await second.readSleepCapsules();
     const remoteReferentState = await second.readReferentState();
     const remoteExchange = await second.readExchangeArtifacts();
+    const replicaSituation = await reconstructContinuitySituation(second);
+    const replicaInspectability = await reconstructInspectabilityPicture(second);
 
     return {
       namespaceParts: second.handle.namespaceParts,
@@ -240,6 +255,8 @@ export async function runMultipleObserverReplicationLab(
       ],
       replicatedContinuity: remoteReferentState.map((record) => record.continuity),
       replicatedPayloadKinds: remoteExchange.map((record) => record.payload.payloadType),
+      replicaSituation,
+      replicaInspectability,
     };
   } finally {
     await Promise.allSettled([
@@ -394,6 +411,8 @@ export async function runIncrementalReplicationCatchupLab(
     }, 4000);
 
     const initialReplay = await reconstructLocalPicture(second);
+    const initialSituation = await reconstructContinuitySituation(second);
+    const initialInspectability = await reconstructInspectabilityPicture(second);
 
     await Promise.allSettled([swarmA.close(), swarmB.close(), second.close()]);
     second = undefined;
@@ -486,12 +505,18 @@ export async function runIncrementalReplicationCatchupLab(
     }, 4000);
 
     const finalReplay = await reconstructLocalPicture(second);
+    const finalSituation = await reconstructContinuitySituation(second);
+    const finalInspectability = await reconstructInspectabilityPicture(second);
 
     return {
       namespaceParts: second.handle.namespaceParts,
       primaryKeyHex: Buffer.from(primaryKey).toString("hex"),
       initialReplay,
       finalReplay,
+      initialSituation,
+      finalSituation,
+      initialInspectability,
+      finalInspectability,
     };
   } finally {
     await Promise.allSettled([

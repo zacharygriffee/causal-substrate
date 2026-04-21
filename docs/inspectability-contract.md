@@ -24,6 +24,9 @@ The current Corestore-backed inspectability surfaces are:
 - branch replay pictures
 - referent replay pictures
 - inspectability pictures that compress branch, referent, and artifact claims into bounded explanation surfaces
+- compact continuity situation surfaces
+- compact transition decision surfaces
+- time-ordered context and portal replay with primary-context resolution over time
 
 These are reconstruction helpers, not authoritative truth engines.
 
@@ -35,6 +38,9 @@ The current implementation is already strong enough to preserve:
 - provenance on durable artifacts
 - reasoning strings on referent continuity records
 - persisted context and portal declarations as explicit inspectable artifacts
+- compact replay-backed explanation of the current continuity situation
+- compact replay-backed explanation of `stay`, `branch`, `cross-context`, and `ambiguous` transition outcomes
+- time-ordered replay of context and portal claims across wake/sleep boundaries
 - replay from known cores without Hyperbee
 - replica catch-up and later reconstruction without hidden indexing assumptions
 
@@ -42,7 +48,6 @@ The current implementation is already strong enough to preserve:
 
 The current inspectability posture is still incomplete in several ways:
 
-- branch inspectability is still stronger for happenings and sleep capsules than for later context or portal transitions over time
 - there is no dedicated explanation artifact contract beyond current replay helpers
 - there is no durable inspectability view taxonomy yet
 - artifact summaries are still helper-derived rather than standardized payload contracts

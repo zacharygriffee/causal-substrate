@@ -75,3 +75,60 @@ The repository does not treat this shape as final. The current rule is:
 - readers must reject unsupported schema versions explicitly rather than guessing
 
 This keeps current labs strict enough to trust while preserving room for `v2` once stronger pressure appears.
+
+## Durable versus derived boundary
+
+The current line is:
+
+- durable records should carry continuity-bearing observations, continuity judgments, or explicit exchange artifacts
+- durable records should carry enough ids, timestamps, and provenance to replay or explain those claims later
+- helper summaries, compact continuity situation surfaces, transition decisions, and inspectability pictures are derived unless a later exchange need proves they must become durable
+
+In practice this means:
+
+- `branch-happening`, `sleep-capsule`, and `referent-state-estimate` remain durable continuity families
+- `exchange-artifact` remains the durable shared-surface family
+- replay summaries and inspectability surfaces remain replaceable reconstructions over those records
+
+The repository should not durably store a helper view merely because it is convenient to inspect locally.
+
+## Tightening posture inside `v1`
+
+The repository is willing to tighten `v1` when the tightening only makes already-assumed invariants more explicit.
+
+Examples of acceptable tightening:
+
+- stricter cross-field checks
+- stricter payload-kind and artifact-kind alignment
+- sharper required-versus-optional field rules
+- narrower timestamp, id, or provenance requirements where the current code already assumes them
+
+Examples that should move to `v2` instead:
+
+- changing record family meaning
+- changing payload semantics
+- removing fields consumers may already rely on
+- changing whether a helper-derived surface is durable by default
+
+## Threshold for stricter encodings
+
+JSON remains acceptable for the current `v1` lab posture because:
+
+- it keeps doctrine and schema inspection simple
+- replay and replication pressure are already being exercised
+- the schema remains explicitly versioned
+
+The repository should only introduce stricter encodings once at least one of these pressures becomes concrete:
+
+- cross-language interchange needs deterministic binary encoding
+- payload size or throughput pressure makes plain JSON meaningfully wasteful
+- partial decode or schema-aware streaming validation becomes necessary
+- shared tooling across repos requires a stronger machine-checked contract than the current manual validation posture
+
+If that pressure appears, the next move should still preserve versionability:
+
+- define the semantic contract first
+- choose the encoding second
+- bump schema identity when the wire meaning changes
+
+That keeps the encoding choice from silently becoming ontology law.

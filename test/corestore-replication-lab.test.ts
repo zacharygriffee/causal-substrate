@@ -40,6 +40,15 @@ test("multiple observer replication lab syncs append-only records between two se
   assert.equal(report.replicatedObserverBranchIds.length, 2);
   assert.deepEqual(report.replicatedContinuity, ["continuing"]);
   assert.deepEqual(report.replicatedPayloadKinds, ["view"]);
+  assert.equal(report.replicaSituation.continuityState, "continuing");
+  assert.equal(report.replicaSituation.ambiguityState, "none");
+  assert.equal(report.replicaSituation.activeReferentIds.length, 1);
+  assert.equal(report.replicaInspectability.referentClaims.length, 1);
+  assert.equal(report.replicaInspectability.artifactClaims.length, 1);
+  assert.equal(
+    report.replicaInspectability.artifactClaims[0]?.provenanceSource,
+    "multiple-observer-replication-lab",
+  );
   assert.equal(activeManagedCorestoreCount(), 0);
 });
 
@@ -73,6 +82,10 @@ test("incremental replication lab catches up after replica reopen and reconstruc
   assert.deepEqual(report.initialReplay.exchangePayloadKinds, ["view"]);
   assert.equal(report.initialReplay.branchSurfaces.length, 1);
   assert.equal(report.initialReplay.referentSurfaces.length, 1);
+  assert.equal(report.initialSituation.continuityState, "continuing");
+  assert.equal(report.initialSituation.activeReferentIds.length, 1);
+  assert.equal(report.initialInspectability.referentClaims.length, 1);
+  assert.equal(report.initialInspectability.artifactClaims.length, 1);
 
   assert.equal(report.finalReplay.branchHappeningCount, 2);
   assert.equal(report.finalReplay.sleepCapsuleCount, 2);
@@ -89,6 +102,16 @@ test("incremental replication lab catches up after replica reopen and reconstruc
     report.finalReplay.artifactSurfaces.find((surface) => surface.payloadType === "receipt")
       ?.payloadSourceIds.length,
     3,
+  );
+  assert.equal(report.finalSituation.continuityState, "ambiguous");
+  assert.equal(report.finalSituation.ambiguityState, "continuity");
+  assert.equal(report.finalSituation.activeReferentIds.length, 1);
+  assert.equal(report.finalInspectability.referentClaims.length, 2);
+  assert.equal(report.finalInspectability.artifactClaims.length, 2);
+  assert.equal(
+    report.finalInspectability.artifactClaims.find((claim) => claim.payloadType === "receipt")
+      ?.provenanceSource,
+    "incremental-replication-catchup-lab",
   );
   assert.equal(activeManagedCorestoreCount(), 0);
 });

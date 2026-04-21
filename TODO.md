@@ -200,113 +200,113 @@ Done when:
 
 ### Phase 11: Compact Inspectability Surface
 
-- [ ] build one compact replay-backed continuity situation surface
-- [ ] keep it consumer-agnostic and substrate-native
-- [ ] derive it from persisted records rather than ephemeral process state
-- [ ] include the minimal bounded fields needed for inspection
-  - [ ] `primaryBranchId`
-  - [ ] `primaryContextId`
-  - [ ] `portalVisibleContextIds`
-  - [ ] `activeReferentIds`
-  - [ ] `continuityState`
-  - [ ] `ambiguityState`
-  - [ ] `reasonCodes`
-  - [ ] `evidenceSourceIds`
+- [x] build one compact replay-backed continuity situation surface
+- [x] keep it consumer-agnostic and substrate-native
+- [x] derive it from persisted records rather than ephemeral process state
+- [x] include the minimal bounded fields needed for inspection
+  - [x] `primaryBranchId`
+  - [x] `primaryContextId`
+  - [x] `portalVisibleContextIds`
+  - [x] `activeReferentIds`
+  - [x] `continuityState`
+  - [x] `ambiguityState`
+  - [x] `reasonCodes`
+  - [x] `evidenceSourceIds`
 
 Done when:
-- [ ] the surface is derivable from persisted records
-- [ ] it remains consumer-agnostic
-- [ ] it does not replace underlying history
+- [x] the surface is derivable from persisted records
+- [x] it remains consumer-agnostic
+- [x] it does not replace underlying history
 
 ### Phase 12: Transition Decision Surfaces
 
-- [ ] add a compact transition decision surface over continuity changes
-- [ ] classify transitions without importing app-specific policy
-  - [ ] `stay`
-  - [ ] `branch`
-  - [ ] `cross-context`
-  - [ ] `ambiguous`
-- [ ] emit bounded reasons and evidence ids for each decision
+- [x] add a compact transition decision surface over continuity changes
+- [x] classify transitions without importing app-specific policy
+  - [x] `stay`
+  - [x] `branch`
+  - [x] `cross-context`
+  - [x] `ambiguous`
+- [x] emit bounded reasons and evidence ids for each decision
 - [x] preserve the doctrine that bounded explanation is required but full internal heuristic exposure is not
 
 Done when:
-- [ ] a consumer can inspect why a transition was emitted
-- [ ] explanations are compact and replayable
-- [ ] no requirement exists to expose every internal heuristic
+- [x] a consumer can inspect why a transition was emitted
+- [x] explanations are compact and replayable
+- [x] no requirement exists to expose every internal heuristic
 
 ### Phase 13: Inspectability Labs
 
-- [ ] add a same-branch same-context continuation lab
-- [ ] add a new-branch opening lab
-- [ ] add a portal-visible cross-context interpretation lab
-- [ ] add an unresolved ambiguous placement lab
-- [ ] add a shared referent active-across-context-shift lab
+- [x] add a same-branch same-context continuation lab
+- [x] add a new-branch opening lab
+- [x] add a portal-visible cross-context interpretation lab
+- [x] add an unresolved ambiguous placement lab
+- [x] add a shared referent active-across-context-shift lab
 
 Done when:
-- [ ] each lab emits a compact inspectability surface
-- [ ] each lab proves the surface matches persisted history
-- [ ] tests show no hidden dependency on in-memory-only state
+- [x] each lab emits a compact inspectability surface
+- [x] each lab proves the surface matches persisted history
+- [x] tests show no hidden dependency on in-memory-only state
 
 ### Phase 14: Context / Portal Temporal Replay
 
-- [ ] strengthen replay for context transition history over time
-- [ ] strengthen replay for portal exposure history over time
-- [ ] define current primary context resolution across segment boundaries
+- [x] strengthen replay for context transition history over time
+- [x] strengthen replay for portal exposure history over time
+- [x] define current primary context resolution across segment boundaries
 - [x] preserve ambiguity without forcing multi-primary context
 
 Done when:
-- [ ] context and portal claims replay as a time-ordered story
-- [ ] current context is explainable from records alone
-- [ ] ambiguity remains first-class
+- [x] context and portal claims replay as a time-ordered story
+- [x] current context is explainable from records alone
+- [x] ambiguity remains first-class
 
 ### Phase 15: Inertia-Aware Referent Continuity
 
-- [ ] add a referent absent but plausibly continuing lab
-- [ ] add a referent absent under high volatility lab
-- [ ] add a reappearance under degraded basis lab
-- [ ] add a conflicting multi-observer persistence judgment lab
-- [ ] add a co-observed non-observer with diverging persistence judgment lab
+- [x] add a referent absent but plausibly continuing lab
+- [x] add a referent absent under high volatility lab
+- [x] add a reappearance under degraded basis lab
+- [x] add a conflicting multi-observer persistence judgment lab
+- [x] add a co-observed non-observer with diverging persistence judgment lab
 
 Done when:
-- [ ] `continuing / ambiguous / broken` is pressure-tested under multi-observer conditions
-- [ ] reasoning remains inspectable without pretending global identity is solved
+- [x] `continuing / ambiguous / broken` is pressure-tested under multi-observer conditions
+- [x] reasoning remains inspectable without pretending global identity is solved
 
 ### Phase 16: Schema Evolution Posture
 
 - [x] keep versioned schema envelopes explicit
-- [ ] tighten record encodings where that improves interoperability
-- [ ] define more sharply what belongs in durable records vs derived views
-- [ ] document the threshold for introducing stricter encodings beyond the current `v1` posture
+- [x] tighten record encodings where that improves interoperability
+- [x] define more sharply what belongs in durable records vs derived views
+- [x] document the threshold for introducing stricter encodings beyond the current `v1` posture
 
 Done when:
-- [ ] schemas are stricter where they help interoperability
+- [x] schemas are stricter where they help interoperability
 - [x] versioning remains open-ended
-- [ ] doctrine is not prematurely locked
+- [x] doctrine is not prematurely locked
 
 ### Phase 17: Multi-Observer Replication Interpretation
 
-- [ ] reproduce compact inspectability surfaces on replicated stores
-- [ ] prove a receiving observer can reconstruct branch, referent, and continuity situation surfaces
-- [ ] verify provenance survives exchange for inspectability purposes
-- [ ] note any concrete lookup pressure that suggests indexing, without introducing Hyperbee yet
+- [x] reproduce compact inspectability surfaces on replicated stores
+- [x] prove a receiving observer can reconstruct branch, referent, and continuity situation surfaces
+- [x] verify provenance survives exchange for inspectability purposes
+- [x] note any concrete lookup pressure that suggests indexing, without introducing Hyperbee yet
 
 Done when:
-- [ ] replicated stores reproduce bounded interpretation surfaces
-- [ ] provenance remains explicit
-- [ ] any Hyperbee pressure is concrete rather than speculative
+- [x] replicated stores reproduce bounded interpretation surfaces
+- [x] provenance remains explicit
+- [x] any Hyperbee pressure is concrete rather than speculative
 
 ### Phase 18: Hyperbee Decision Gate
 
-- [ ] decide on Hyperbee only after the above pressures are tested
-- [ ] evaluate branch lookup pressure
-- [ ] evaluate referent lookup pressure
-- [ ] evaluate context membership lookup pressure
-- [ ] evaluate artifact discovery pressure
-- [ ] evaluate concern indexing pressure
+- [x] decide on Hyperbee only after the above pressures are tested
+- [x] evaluate branch lookup pressure
+- [x] evaluate referent lookup pressure
+- [x] evaluate context membership lookup pressure
+- [x] evaluate artifact discovery pressure
+- [x] evaluate concern indexing pressure
 
 Done when:
-- [ ] the exact lookup pressure Hyperbee would solve is named
-- [ ] or Hyperbee is explicitly deferred again
+- [x] the exact lookup pressure Hyperbee would solve is named
+- [x] or Hyperbee is explicitly deferred again
 
 ## Rules
 

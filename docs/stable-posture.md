@@ -33,6 +33,8 @@ The current stable record posture is:
 - read-time validation is explicit
 - the current record families are strict enough to trust in labs
 - the format is still versionable and not treated as final ontology law
+- durable records stay distinct from derived inspectability surfaces
+- stricter encodings are deferred until interoperability or throughput pressure is concrete
 
 The current `v1` record families are:
 

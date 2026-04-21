@@ -2,6 +2,7 @@ import { Substrate as SubstrateKernel } from "../kernel/substrate.js";
 import { StateEstimate } from "../kernel/types.js";
 import {
   BranchHappeningRecord,
+  ExchangeArtifactRecord,
   ExchangeArtifactPayload,
   ReceiptPayload,
   ReferentStateRecord,
@@ -171,6 +172,82 @@ export interface PortalInspectabilitySurface {
   exposureRule: string;
   artifactId: string;
   transform?: string;
+}
+
+export type ContinuitySituationState = StateEstimate["continuity"] | "mixed" | "none";
+
+export type ContinuitySituationAmbiguityState =
+  | "none"
+  | "continuity"
+  | "context-placement"
+  | "mixed";
+
+export interface ContinuitySituationSurface {
+  namespaceParts: string[];
+  primaryBranchId?: string;
+  primaryContextId?: string;
+  portalVisibleContextIds: string[];
+  activeReferentIds: string[];
+  continuityState: ContinuitySituationState;
+  ambiguityState: ContinuitySituationAmbiguityState;
+  reasonCodes: string[];
+  evidenceSourceIds: string[];
+}
+
+export interface ContinuitySituationOptions {
+  asOf?: string;
+}
+
+export type TransitionDecisionKind = "stay" | "branch" | "cross-context" | "ambiguous";
+
+export interface ContinuityTransitionDecisionSurface {
+  namespaceParts: string[];
+  fromAsOf: string;
+  toAsOf: string;
+  transitionKind: TransitionDecisionKind;
+  fromSituation: ContinuitySituationSurface;
+  toSituation: ContinuitySituationSurface;
+  reasonCodes: string[];
+  evidenceSourceIds: string[];
+}
+
+export interface ContextTemporalClaim {
+  artifactId: string;
+  emittedAt: string;
+  contextId: string;
+  branchId: string;
+  label: string;
+  parentContextId?: string;
+  containmentPolicy?: string;
+}
+
+export interface PortalTemporalClaim {
+  artifactId: string;
+  emittedAt: string;
+  portalId: string;
+  branchId: string;
+  label: string;
+  sourceContextId: string;
+  targetContextId: string;
+  exposureRule: string;
+  transform?: string;
+}
+
+export interface PrimaryContextResolutionEntry {
+  asOf: string;
+  sourceEventId: string;
+  sourceEventType: "context-artifact" | "portal-artifact" | "branch-happening" | "sleep-capsule";
+  primaryContextId?: string;
+  ambiguityState: ContinuitySituationAmbiguityState;
+  reasonCodes: string[];
+  evidenceSourceIds: string[];
+}
+
+export interface ContextPortalTemporalReplay {
+  namespaceParts: string[];
+  contextTimeline: ContextTemporalClaim[];
+  portalTimeline: PortalTemporalClaim[];
+  primaryContextTimeline: PrimaryContextResolutionEntry[];
 }
 
 export interface FollowOnLabOptions {
@@ -744,6 +821,279 @@ export async function reconstructInspectabilityPicture(
   };
 }
 
+export async function reconstructContinuitySituation(
+  lab: Pick<
+    FirstSeriousCorestoreLabHandle,
+    | "handle"
+    | "readBranchHappenings"
+    | "readSleepCapsules"
+    | "readReferentState"
+    | "readExchangeArtifacts"
+  >,
+  options: ContinuitySituationOptions = {},
+): Promise<ContinuitySituationSurface> {
+  const branchHappenings = filterRecordsAsOf(
+    await lab.readBranchHappenings(),
+    options.asOf,
+  );
+  const sleepCapsules = filterRecordsAsOf(await lab.readSleepCapsules(), options.asOf);
+  const referentState = filterRecordsAsOf(await lab.readReferentState(), options.asOf);
+  const exchangeArtifacts = filterRecordsAsOf(await lab.readExchangeArtifacts(), options.asOf);
+
+  const reasonCodes: string[] = [];
+  const evidenceSourceIds: string[] = [];
+
+  const latestBranchRecord = getLatestBranchEvidence(branchHappenings, sleepCapsules);
+  const primaryBranchId = latestBranchRecord?.branchId;
+  if (latestBranchRecord) {
+    pushUnique(reasonCodes, "latest-branch-activity");
+    pushUnique(evidenceSourceIds, latestBranchRecord.recordId);
+  }
+
+  const contextArtifacts = exchangeArtifacts.filter(isContextArtifactRecord);
+  const primarySituatedContexts = contextArtifacts.filter(
+    (record) => record.payload.context.containmentPolicy === "primary-situated",
+  );
+
+  let primaryContextId: string | undefined;
+  if (primarySituatedContexts.length > 0) {
+    const latestPrimaryContext = getLatestByTimestamp(
+      primarySituatedContexts,
+      (record) => record.artifact.provenance.emittedAt,
+    );
+    primaryContextId = latestPrimaryContext?.payload.context.id;
+    if (latestPrimaryContext) {
+      pushUnique(reasonCodes, "primary-context-declared");
+      pushUnique(evidenceSourceIds, latestPrimaryContext.artifact.id);
+    }
+  } else if (contextArtifacts.length === 1) {
+    primaryContextId = contextArtifacts[0]?.payload.context.id;
+    if (contextArtifacts[0]) {
+      pushUnique(reasonCodes, "single-context-declaration");
+      pushUnique(evidenceSourceIds, contextArtifacts[0].artifact.id);
+    }
+  } else if (contextArtifacts.length > 1) {
+    pushUnique(reasonCodes, "primary-context-ambiguity");
+    for (const record of contextArtifacts) {
+      pushUnique(evidenceSourceIds, record.artifact.id);
+    }
+  }
+
+  const portalVisibleContextIds: string[] = [];
+  if (primaryContextId) {
+    const portalArtifacts = exchangeArtifacts.filter(isPortalArtifactRecord);
+    for (const record of portalArtifacts) {
+      if (record.payload.portal.targetContextId !== primaryContextId) {
+        continue;
+      }
+      pushUnique(portalVisibleContextIds, record.payload.portal.sourceContextId);
+      pushUnique(evidenceSourceIds, record.artifact.id);
+    }
+    if (portalVisibleContextIds.length > 0) {
+      pushUnique(reasonCodes, "portal-visible-contexts");
+    }
+  }
+
+  const latestReferentById = new Map<string, ReferentStateRecord>();
+  for (const record of referentState) {
+    latestReferentById.set(record.referentId, record);
+  }
+  const latestReferentClaims = [...latestReferentById.values()];
+  const activeReferentIds = latestReferentClaims
+    .filter((record) => record.continuity !== "broken")
+    .map((record) => record.referentId);
+  for (const record of latestReferentClaims) {
+    pushUnique(evidenceSourceIds, record.recordId);
+  }
+  if (latestReferentClaims.length > 0) {
+    pushUnique(reasonCodes, "latest-referent-continuity");
+  }
+  if (latestReferentClaims.some((record) => record.continuity === "broken")) {
+    pushUnique(reasonCodes, "broken-referents-excluded-from-active");
+  }
+
+  const continuityState = summarizeContinuitySituationState(
+    latestReferentClaims.map((record) => record.continuity),
+  );
+  const hasContinuityAmbiguity = latestReferentClaims.some(
+    (record) => record.continuity === "ambiguous",
+  );
+  const hasContextPlacementAmbiguity = !primaryContextId && contextArtifacts.length > 1;
+
+  if (hasContinuityAmbiguity) {
+    pushUnique(reasonCodes, "continuity-ambiguity-present");
+  }
+  const ambiguityState = summarizeContinuitySituationAmbiguity(
+    hasContinuityAmbiguity,
+    hasContextPlacementAmbiguity,
+  );
+
+  return {
+    namespaceParts: lab.handle.namespaceParts,
+    portalVisibleContextIds,
+    activeReferentIds,
+    continuityState,
+    ambiguityState,
+    reasonCodes,
+    evidenceSourceIds,
+    ...(primaryBranchId ? { primaryBranchId } : {}),
+    ...(primaryContextId ? { primaryContextId } : {}),
+  };
+}
+
+export async function reconstructTransitionDecision(
+  lab: Pick<
+    FirstSeriousCorestoreLabHandle,
+    | "handle"
+    | "readBranchHappenings"
+    | "readSleepCapsules"
+    | "readReferentState"
+    | "readExchangeArtifacts"
+  >,
+  options: {
+    fromAsOf: string;
+    toAsOf: string;
+  },
+): Promise<ContinuityTransitionDecisionSurface> {
+  const fromSituation = await reconstructContinuitySituation(lab, {
+    asOf: options.fromAsOf,
+  });
+  const toSituation = await reconstructContinuitySituation(lab, {
+    asOf: options.toAsOf,
+  });
+
+  const reasonCodes: string[] = [];
+  const evidenceSourceIds: string[] = [];
+  for (const id of fromSituation.evidenceSourceIds) {
+    pushUnique(evidenceSourceIds, id);
+  }
+  for (const id of toSituation.evidenceSourceIds) {
+    pushUnique(evidenceSourceIds, id);
+  }
+
+  let transitionKind: TransitionDecisionKind;
+  if (toSituation.ambiguityState !== "none") {
+    transitionKind = "ambiguous";
+    pushUnique(reasonCodes, "target-situation-ambiguous");
+  } else if (isPortalLinkedContextShift(fromSituation, toSituation)) {
+    transitionKind = "cross-context";
+    pushUnique(reasonCodes, "portal-linked-context-shift");
+  } else if (hasBranchShift(fromSituation, toSituation)) {
+    transitionKind = "branch";
+    pushUnique(reasonCodes, "primary-branch-shift");
+  } else if (hasContextShift(fromSituation, toSituation)) {
+    transitionKind = "ambiguous";
+    pushUnique(reasonCodes, "context-shift-without-portal-evidence");
+  } else {
+    transitionKind = "stay";
+    pushUnique(reasonCodes, "same-primary-branch-and-context");
+  }
+
+  return {
+    namespaceParts: lab.handle.namespaceParts,
+    fromAsOf: options.fromAsOf,
+    toAsOf: options.toAsOf,
+    transitionKind,
+    fromSituation,
+    toSituation,
+    reasonCodes,
+    evidenceSourceIds,
+  };
+}
+
+export async function reconstructContextPortalTemporalReplay(
+  lab: Pick<
+    FirstSeriousCorestoreLabHandle,
+    | "handle"
+    | "readBranchHappenings"
+    | "readSleepCapsules"
+    | "readReferentState"
+    | "readExchangeArtifacts"
+  >,
+): Promise<ContextPortalTemporalReplay> {
+  const branchHappenings = await lab.readBranchHappenings();
+  const sleepCapsules = await lab.readSleepCapsules();
+  const exchangeArtifacts = await lab.readExchangeArtifacts();
+
+  const contextTimeline = exchangeArtifacts
+    .filter(isContextArtifactRecord)
+    .map((record) => ({
+      artifactId: record.artifact.id,
+      emittedAt: record.recordedAt,
+      contextId: record.payload.context.id,
+      branchId: record.payload.context.branchId,
+      label: record.payload.context.label,
+      ...(record.payload.context.parentContextId
+        ? { parentContextId: record.payload.context.parentContextId }
+        : {}),
+      ...(record.payload.context.containmentPolicy
+        ? { containmentPolicy: record.payload.context.containmentPolicy }
+        : {}),
+    }));
+
+  const portalTimeline = exchangeArtifacts
+    .filter(isPortalArtifactRecord)
+    .map((record) => ({
+      artifactId: record.artifact.id,
+      emittedAt: record.recordedAt,
+      portalId: record.payload.portal.id,
+      branchId: record.payload.portal.branchId,
+      label: record.payload.portal.label,
+      sourceContextId: record.payload.portal.sourceContextId,
+      targetContextId: record.payload.portal.targetContextId,
+      exposureRule: record.payload.portal.exposureRule,
+      ...(record.payload.portal.transform
+        ? { transform: record.payload.portal.transform }
+        : {}),
+    }));
+
+  const timelineEvents = [
+    ...contextTimeline.map((claim) => ({
+      timestamp: claim.emittedAt,
+      sourceEventId: claim.artifactId,
+      sourceEventType: "context-artifact" as const,
+    })),
+    ...portalTimeline.map((claim) => ({
+      timestamp: claim.emittedAt,
+      sourceEventId: claim.artifactId,
+      sourceEventType: "portal-artifact" as const,
+    })),
+    ...branchHappenings.map((record) => ({
+      timestamp: record.recordedAt,
+      sourceEventId: record.recordId,
+      sourceEventType: "branch-happening" as const,
+    })),
+    ...sleepCapsules.map((record) => ({
+      timestamp: record.recordedAt,
+      sourceEventId: record.recordId,
+      sourceEventType: "sleep-capsule" as const,
+    })),
+  ].sort((left, right) => left.timestamp.localeCompare(right.timestamp));
+
+  const primaryContextTimeline: PrimaryContextResolutionEntry[] = [];
+  for (const event of timelineEvents) {
+    const situation = await reconstructContinuitySituation(lab, {
+      asOf: event.timestamp,
+    });
+    primaryContextTimeline.push({
+      asOf: event.timestamp,
+      sourceEventId: event.sourceEventId,
+      sourceEventType: event.sourceEventType,
+      ambiguityState: situation.ambiguityState,
+      reasonCodes: [...situation.reasonCodes],
+      evidenceSourceIds: [...situation.evidenceSourceIds],
+      ...(situation.primaryContextId ? { primaryContextId: situation.primaryContextId } : {}),
+    });
+  }
+
+  return {
+    namespaceParts: lab.handle.namespaceParts,
+    contextTimeline,
+    portalTimeline,
+    primaryContextTimeline,
+  };
+}
+
 function getOrCreateBranchSurface(
   surfaces: Map<string, ReplayBranchSurface>,
   branchId: string,
@@ -965,4 +1315,149 @@ function toPortalInspectabilitySurface(
     surface.transform = portal.transform;
   }
   return surface;
+}
+
+function getLatestBranchEvidence(
+  branchHappenings: BranchHappeningRecord[],
+  sleepCapsules: SleepCapsuleRecord[],
+):
+  | {
+      branchId: string;
+      recordId: string;
+      recordedAt: string;
+    }
+  | undefined {
+  const candidates = [
+    ...branchHappenings.map((record) => ({
+      branchId: record.branchId,
+      recordId: record.recordId,
+      recordedAt: record.recordedAt,
+    })),
+    ...sleepCapsules.map((record) => ({
+      branchId: record.branchId,
+      recordId: record.recordId,
+      recordedAt: record.recordedAt,
+    })),
+  ];
+
+  return getLatestByTimestamp(candidates, (record) => record.recordedAt);
+}
+
+function summarizeContinuitySituationState(
+  continuityHistory: StateEstimate["continuity"][],
+): ContinuitySituationState {
+  if (continuityHistory.length === 0) {
+    return "none";
+  }
+
+  const distinct = [...new Set(continuityHistory)];
+  if (distinct.length === 1) {
+    return distinct[0] ?? "none";
+  }
+
+  return "mixed";
+}
+
+function summarizeContinuitySituationAmbiguity(
+  hasContinuityAmbiguity: boolean,
+  hasContextPlacementAmbiguity: boolean,
+): ContinuitySituationAmbiguityState {
+  if (hasContinuityAmbiguity && hasContextPlacementAmbiguity) {
+    return "mixed";
+  }
+  if (hasContinuityAmbiguity) {
+    return "continuity";
+  }
+  if (hasContextPlacementAmbiguity) {
+    return "context-placement";
+  }
+  return "none";
+}
+
+function getLatestByTimestamp<T>(
+  records: T[],
+  getTimestamp: (record: T) => string,
+): T | undefined {
+  let latest: T | undefined;
+  let latestTimestamp = "";
+
+  for (const record of records) {
+    const timestamp = getTimestamp(record);
+    if (!latest || timestamp >= latestTimestamp) {
+      latest = record;
+      latestTimestamp = timestamp;
+    }
+  }
+
+  return latest;
+}
+
+function pushUnique(values: string[], value: string): void {
+  if (!values.includes(value)) {
+    values.push(value);
+  }
+}
+
+function filterRecordsAsOf<T extends { recordedAt: string }>(
+  records: T[],
+  asOf?: string,
+): T[] {
+  if (!asOf) {
+    return records;
+  }
+  return records.filter((record) => record.recordedAt <= asOf);
+}
+
+function hasBranchShift(
+  fromSituation: ContinuitySituationSurface,
+  toSituation: ContinuitySituationSurface,
+): boolean {
+  return Boolean(
+    fromSituation.primaryBranchId &&
+      toSituation.primaryBranchId &&
+      fromSituation.primaryBranchId !== toSituation.primaryBranchId,
+  );
+}
+
+function hasContextShift(
+  fromSituation: ContinuitySituationSurface,
+  toSituation: ContinuitySituationSurface,
+): boolean {
+  return Boolean(
+    fromSituation.primaryContextId &&
+      toSituation.primaryContextId &&
+      fromSituation.primaryContextId !== toSituation.primaryContextId,
+  );
+}
+
+function isPortalLinkedContextShift(
+  fromSituation: ContinuitySituationSurface,
+  toSituation: ContinuitySituationSurface,
+): boolean {
+  if (!hasContextShift(fromSituation, toSituation)) {
+    return false;
+  }
+
+  return Boolean(
+    (toSituation.primaryContextId &&
+      fromSituation.portalVisibleContextIds.includes(toSituation.primaryContextId)) ||
+      (fromSituation.primaryContextId &&
+        toSituation.portalVisibleContextIds.includes(fromSituation.primaryContextId)),
+  );
+}
+
+function isContextArtifactRecord(
+  record: ExchangeArtifactRecord,
+): record is ExchangeArtifactRecord & {
+  payload: Extract<ExchangeArtifactPayload, { payloadType: "context" }>;
+} {
+  return record.payload.payloadType === "context";
+}
+
+function isPortalArtifactRecord(
+  record: ExchangeArtifactRecord,
+): record is ExchangeArtifactRecord & {
+  payload: Extract<ExchangeArtifactPayload, { payloadType: "portal" }>;
+} {
+  return record.payload.payloadType === "portal";
 }
