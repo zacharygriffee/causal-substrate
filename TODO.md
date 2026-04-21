@@ -328,42 +328,42 @@ Done when:
 
 ### Phase 19: Discovery Projections
 
-- [ ] define the first discovery-bearing branch set
-  - [ ] context branches
-  - [ ] portal branches
-  - [ ] explicitly situated observer branches
+- [x] define the first discovery-bearing branch set
+  - [x] context branches
+  - [x] portal branches
+  - [x] explicitly situated observer branches
 - [ ] define the first bounded discovery join set
-  - [ ] primary context
-  - [ ] enclosing context chain
-  - [ ] portal-visible contexts
+  - [x] primary context
+  - [x] enclosing context chain
+  - [x] portal-visible contexts
   - [ ] declared adjacency
   - [ ] optional coarse concern overlays
-- [ ] add a `DiscoveryProjection` artifact or persisted surface shape
-- [ ] add deterministic topic derivation rules with schema versioning
-- [ ] add labs for discovery-set derivation without registry dependence
-- [ ] keep direct known-peer linkage distinct from topic-derived discovery
+- [x] add a `DiscoveryProjection` artifact or persisted surface shape
+- [x] add deterministic topic derivation rules with schema versioning
+- [x] add labs for discovery-set derivation without registry dependence
+- [x] keep direct known-peer linkage distinct from topic-derived discovery
 
 Done when:
-- [ ] discovery can be derived from branch structure as a bounded join set
-- [ ] topic derivation remains inspectable and versioned
+- [x] discovery can be derived from branch structure as a bounded join set
+- [x] topic derivation remains inspectable and versioned
 - [ ] the repo can state exactly when asserted registries are still needed
 
 ### Phase 20: Capability Surfaces
 
-- [ ] define capability-surface doctrine between rendezvous and exchange
-- [ ] add minimal type shapes for:
-  - [ ] capability surface
-  - [ ] exchange offer
-  - [ ] exchange request
-  - [ ] bounded exchange decision
-- [ ] keep capability surfaces session-scoped first rather than prematurely durable
-- [ ] add one minimal lab proving capability-limited exchange narrowing
-- [ ] decide whether first transport prototype should use raw `protomux` or `neonplex`
+- [x] define capability-surface doctrine between rendezvous and exchange
+- [x] add minimal type shapes for:
+  - [x] capability surface
+  - [x] exchange offer
+  - [x] exchange request
+  - [x] bounded exchange decision
+- [x] keep capability surfaces session-scoped first rather than prematurely durable
+- [x] add one minimal lab proving capability-limited exchange narrowing
+- [x] decide whether first transport prototype should use raw `protomux` or `neonplex`
 
 Done when:
-- [ ] the repo can describe a compact post-rendezvous negotiation layer
-- [ ] capability mismatch narrows exchange without being mistaken for continuity breakage
-- [ ] transport-specific implementation remains optional at doctrine level
+- [x] the repo can describe a compact post-rendezvous negotiation layer
+- [x] capability mismatch narrows exchange without being mistaken for continuity breakage
+- [x] transport-specific implementation remains optional at doctrine level
 
 ## Rules
 

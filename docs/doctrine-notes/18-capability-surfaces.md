@@ -100,6 +100,12 @@ They may later be carried over:
 
 But the doctrine should remain abstract enough that no single transport helper becomes part of the ontology.
 
+The current implementation lean is:
+
+- use `neonplex` for the first compact handshake proof
+- keep the capability surface itself transport-neutral
+- leave raw `protomux` or other carriers open for later adaptation where needed
+
 ## What remains open
 
 The repository does not yet claim:

@@ -20,7 +20,7 @@
     "example": "tsx examples/minimal-continuity.ts",
     "labs:validate": "tsx scripts/validate-labs.ts",
     "prototype:workstation": "tsx prototypes/continuity-workstation.ts",
-    "test": "tsx --test test/kernel.test.ts test/core-labs.test.ts test/emergence-labs.test.ts test/inertia-labs.test.ts test/next-phases.test.ts test/corestore-backend.test.ts test/corestore-first-serious-lab.test.ts test/corestore-follow-on-labs.test.ts test/corestore-replication-lab.test.ts",
+    "test": "tsx --test test/kernel.test.ts test/core-labs.test.ts test/emergence-labs.test.ts test/inertia-labs.test.ts test/next-phases.test.ts test/neonplex-handshake-lab.test.ts test/corestore-backend.test.ts test/corestore-first-serious-lab.test.ts test/corestore-follow-on-labs.test.ts test/corestore-replication-lab.test.ts",
     "test:hyperswarm": "CAUSAL_SUBSTRATE_REAL_HYPERSWARM=1 tsx --test test/corestore-hyperswarm-lab.test.ts"
   },
   "keywords": [
@@ -37,6 +37,7 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "@neonloom/plex": "^0.1.7",
     "corestore": "7.9.2",
     "hyperdht": "^6.30.0",
     "hyperswarm": "^4.17.0"
