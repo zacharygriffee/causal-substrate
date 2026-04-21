@@ -85,7 +85,7 @@ npm run test:hyperswarm
 npm run example
 ```
 
-`npm run test:hyperswarm` is an opt-in real transport lane. It uses actual `hyperswarm` and Noise streams rather than `fakeswarm`, keeps generous timeouts, and defaults to a local `hyperdht` testnet with direct-peer wiring for stable transport proof. It can still take `CAUSAL_SUBSTRATE_HYPERSWARM_BOOTSTRAP` as a comma- or space-separated bootstrap list when you want explicit DHT bootstrap hosts.
+`npm run test:hyperswarm` is an opt-in real transport lane. It uses actual `hyperswarm` and Noise streams rather than `fakeswarm`, keeps generous timeouts, and defaults to a local `hyperdht` testnet with direct-peer wiring for stable transport proof. The current proof surface includes both Corestore replication and a transport-adjacent capability handshake with bounded artifact exchange. It can still take `CAUSAL_SUBSTRATE_HYPERSWARM_BOOTSTRAP` as a comma- or space-separated bootstrap list when you want explicit DHT bootstrap hosts.
 
 ## Development posture
 

@@ -197,6 +197,7 @@ Done when:
 - [x] deeper `fakeswarm`-based swarm testing
 - [ ] transport concerns
   - [x] initial real `hyperswarm` direct-peer replication proof with liberal timeouts
+  - [x] initial real `hyperswarm` direct-peer capability handshake and bounded artifact exchange proof
   - [ ] topic-based DHT discovery proof over real `hyperswarm`
   - [ ] broader multi-peer and explicit bootstrap transport hardening
 - [x] define discovery-bearing branch doctrine

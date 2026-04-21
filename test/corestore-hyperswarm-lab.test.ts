@@ -10,6 +10,7 @@ import {
   createHyperswarmReplicationSwarm,
   type HyperswarmReplicationSwarm,
   parseHyperswarmBootstrap,
+  runHyperswarmCapabilityHandshakeLab,
   runIncrementalReplicationCatchupLab,
   runMultipleObserverReplicationLab,
 } from "../src/index.js";
@@ -79,7 +80,6 @@ function createRealHyperswarmFactory(bootstrap: string[]) {
         for (const peer of peers) {
           if (peer.publicKey.equals(swarm.publicKey)) continue;
           swarm.joinPeer(peer.publicKey);
-          peer.joinPeer(swarm.publicKey);
         }
 
         return {
@@ -107,6 +107,54 @@ function getTopicPeers(
   topics.set(key, peers);
   return peers;
 }
+
+test(
+  "capability handshake lab carries capability surfaces and a bounded view artifact over direct-peer hyperswarm",
+  {
+    skip: !SHOULD_RUN_REAL_HYPERSWARM,
+    timeout: 120_000,
+  },
+  async () => {
+    const harness = await openHyperswarmHarness();
+
+    try {
+      const report = await runHyperswarmCapabilityHandshakeLab({
+        createSwarm: createRealHyperswarmFactory(harness.bootstrap),
+        namespaceParts: ["hyperswarm-capability", randomUUID()],
+        now: () => "2026-04-21T14:00:00.000Z",
+        flushTimeoutMs: 60_000,
+      });
+
+      assert.equal(report.receiverPeerId, "observer-a-capability-surface");
+      assert.equal(report.initiatorPeerId, "observer-b-capability-surface");
+      assert.equal(report.receiverRemoteRole, "observer-witness");
+      assert.equal(report.initiatorRemoteRole, "observer-witness");
+      assert.equal(report.receiverDecision.accepted, true);
+      assert.equal(report.receiverDecision.requiresMediation, true);
+      assert.equal(
+        report.receiverDecision.reason,
+        "capability mismatch narrows exchange to mediated artifacts",
+      );
+      assert.deepEqual(report.receiverDecision.matchedArtifactKinds, ["view", "receipt"]);
+      assert.deepEqual(report.receiverDecision.matchedExchangeModes, [
+        "view-only",
+        "receipt-only",
+      ]);
+      assert.equal(report.initiatorDecision.accepted, true);
+      assert.equal(report.initiatorDecision.requiresMediation, true);
+      assert.equal(
+        report.initiatorDecision.reason,
+        "capability overlap supports bounded exchange",
+      );
+      assert.equal(report.exchangedArtifactKind, "view");
+      assert.equal(report.exchangedViewKind, "context-surface");
+      assert.match(report.exchangedArtifactId, /^artifact[_-]/);
+      assert.match(report.exchangedViewId, /^view[_-]/);
+    } finally {
+      await harness.close();
+    }
+  },
+);
 
 test(
   "multiple observer replication lab syncs append-only records between two separate Corestores via hyperswarm",
