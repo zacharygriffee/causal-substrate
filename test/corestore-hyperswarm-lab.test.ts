@@ -11,6 +11,7 @@ import {
   type HyperswarmReplicationSwarm,
   parseHyperswarmBootstrap,
   runHyperswarmCapabilityHandshakeLab,
+  runHyperswarmMultiPeerCapabilityLab,
   runIncrementalReplicationCatchupLab,
   runMultipleObserverReplicationLab,
 } from "../src/index.js";
@@ -150,6 +151,120 @@ test(
       assert.equal(report.exchangedViewKind, "context-surface");
       assert.match(report.exchangedArtifactId, /^artifact[_-]/);
       assert.match(report.exchangedViewId, /^view[_-]/);
+      assert.deepEqual(report.transportPicture.peerIds, [
+        "observer-a-capability-surface",
+        "observer-b-capability-surface",
+      ]);
+      assert.equal(report.transportPicture.traces.length, 2);
+      assert.deepEqual(
+        report.transportPicture.traces.map((trace) => ({
+          localPeerId: trace.localPeerId,
+          remotePeerId: trace.remotePeerId,
+          sentPayloadKinds: trace.sentPayloadKinds,
+          receivedPayloadKinds: trace.receivedPayloadKinds,
+        })),
+        [
+          {
+            localPeerId: "observer-a-capability-surface",
+            remotePeerId: "observer-b-capability-surface",
+            sentPayloadKinds: [],
+            receivedPayloadKinds: ["view"],
+          },
+          {
+            localPeerId: "observer-b-capability-surface",
+            remotePeerId: "observer-a-capability-surface",
+            sentPayloadKinds: ["view"],
+            receivedPayloadKinds: [],
+          },
+        ],
+      );
+    } finally {
+      await harness.close();
+    }
+  },
+);
+
+test(
+  "multi-peer capability lab keeps coarse rendezvous broad while exchange stays selective over direct-peer hyperswarm",
+  {
+    skip: !SHOULD_RUN_REAL_HYPERSWARM,
+    timeout: 180_000,
+  },
+  async () => {
+    const harness = await openHyperswarmHarness();
+
+    try {
+      const report = await runHyperswarmMultiPeerCapabilityLab({
+        createSwarm: createRealHyperswarmFactory(harness.bootstrap),
+        namespaceParts: ["hyperswarm-capability-mesh", randomUUID()],
+        now: () => "2026-04-21T15:00:00.000Z",
+        flushTimeoutMs: 60_000,
+      });
+
+      assert.deepEqual(report.peerIds, [
+        "observer-a-capability-surface",
+        "observer-b-capability-surface",
+        "relay-c-capability-surface",
+      ]);
+      assert.equal(report.degradedPeerId, "observer-a-capability-surface");
+      assert.equal(report.fullPeerId, "observer-b-capability-surface");
+      assert.equal(report.relayPeerId, "relay-c-capability-surface");
+
+      assert.equal(report.degradedFromFullDecision.accepted, true);
+      assert.equal(report.degradedFromFullDecision.requiresMediation, true);
+      assert.equal(
+        report.degradedFromFullDecision.reason,
+        "capability mismatch narrows exchange to mediated artifacts",
+      );
+      assert.deepEqual(report.degradedFromFullDecision.matchedArtifactKinds, [
+        "view",
+        "receipt",
+      ]);
+
+      assert.equal(report.degradedFromRelayDecision.accepted, true);
+      assert.equal(report.degradedFromRelayDecision.requiresMediation, true);
+      assert.equal(
+        report.degradedFromRelayDecision.reason,
+        "capability mismatch narrows exchange to mediated artifacts",
+      );
+      assert.deepEqual(report.degradedFromRelayDecision.matchedArtifactKinds, ["receipt"]);
+      assert.deepEqual(report.degradedFromRelayDecision.matchedExchangeModes, ["receipt-only"]);
+
+      assert.equal(report.fullFromRelayDecision.accepted, true);
+      assert.equal(report.fullFromRelayDecision.requiresMediation, true);
+      assert.equal(
+        report.fullFromRelayDecision.reason,
+        "capability overlap supports bounded exchange",
+      );
+      assert.deepEqual(report.fullFromRelayDecision.matchedArtifactKinds, ["receipt"]);
+      assert.deepEqual(report.fullFromRelayDecision.matchedExchangeModes, ["receipt-only"]);
+
+      assert.deepEqual(report.receivedArtifactKinds, ["view", "receipt"]);
+      assert.deepEqual(report.receivedPayloadKinds, ["view", "receipt"]);
+      assert.deepEqual(report.transportPicture.peerIds, [
+        "observer-a-capability-surface",
+        "observer-b-capability-surface",
+        "relay-c-capability-surface",
+      ]);
+      assert.equal(report.transportPicture.traces.length, 5);
+      assert.deepEqual(
+        report.transportPicture.traces
+          .filter((trace) => trace.localPeerId === "observer-a-capability-surface")
+          .map((trace) => ({
+            remotePeerId: trace.remotePeerId,
+            receivedPayloadKinds: trace.receivedPayloadKinds,
+          })),
+        [
+          {
+            remotePeerId: "observer-b-capability-surface",
+            receivedPayloadKinds: ["view"],
+          },
+          {
+            remotePeerId: "relay-c-capability-surface",
+            receivedPayloadKinds: ["receipt"],
+          },
+        ],
+      );
     } finally {
       await harness.close();
     }
