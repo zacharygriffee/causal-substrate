@@ -199,6 +199,7 @@ Done when:
   - [x] initial real `hyperswarm` direct-peer replication proof with liberal timeouts
   - [ ] topic-based DHT discovery proof over real `hyperswarm`
   - [ ] broader multi-peer and explicit bootstrap transport hardening
+- [x] define discovery-bearing branch doctrine
 - [ ] Autobase or higher-order shared surfaces
 - [x] define peer / observer / operator boundary doctrine
 - [x] define preservation versus branch promotion doctrine
@@ -325,6 +326,28 @@ Done when:
 - [x] the exact lookup pressure Hyperbee would solve is named
 - [x] or Hyperbee is explicitly deferred again
 
+### Phase 19: Discovery Projections
+
+- [ ] define the first discovery-bearing branch set
+  - [ ] context branches
+  - [ ] portal branches
+  - [ ] explicitly situated observer branches
+- [ ] define the first bounded discovery join set
+  - [ ] primary context
+  - [ ] enclosing context chain
+  - [ ] portal-visible contexts
+  - [ ] declared adjacency
+  - [ ] optional coarse concern overlays
+- [ ] add a `DiscoveryProjection` artifact or persisted surface shape
+- [ ] add deterministic topic derivation rules with schema versioning
+- [ ] add labs for discovery-set derivation without registry dependence
+- [ ] keep direct known-peer linkage distinct from topic-derived discovery
+
+Done when:
+- [ ] discovery can be derived from branch structure as a bounded join set
+- [ ] topic derivation remains inspectable and versioned
+- [ ] the repo can state exactly when asserted registries are still needed
+
 ## Rules
 
 - never reopen the same Corestore root independently in-process
@@ -334,4 +357,5 @@ Done when:
 - make shared artifacts explicit
 - keep views derived and replaceable
 - do not let indexing layers replace continuity-bearing Hypercores as the primary substrate
+- do not let discovery topics substitute for branch continuity
 - do not require multi-writer support in short-term implementation work

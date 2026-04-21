@@ -22,7 +22,8 @@ Order:
 14. [Inspectability Boundary](./14-inspectability-boundary.md)
 15. [Peer, Observer, Operator Boundary](./15-peer-observer-operator-boundary.md)
 16. [Preservation Versus Branch Promotion](./16-preservation-vs-branch-promotion.md)
+17. [Discovery-Bearing Branches](./17-discovery-bearing-branches.md)
 
 Practical rule:
 
-The first five notes establish the minimum doctrine needed to begin designing local labs. The remaining five tighten interpretation, projection, and exchange boundaries.
+The first five notes establish the minimum doctrine needed to begin designing local labs. The later notes tighten interpretation, projection, exchange, transport, and discovery boundaries.

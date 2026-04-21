@@ -220,6 +220,26 @@ Not every threshold-bearing process should become a branch.
 
 Branch promotion should remain deliberate and comparatively sparse.
 
+### Discovery-bearing branches
+
+The repository should derive discovery from situated structure before it falls back to registries or asserted indexing surfaces.
+
+The current doctrinal line is:
+
+- continuity-bearing branches remain primary
+- some branches are discovery-bearing because their structure determines where discovery should happen
+- discovery topics are derived projections over those branches
+- topic membership is not truth, identity, equivalence, or compatibility
+
+The current discovery lean is:
+
+- derive a bounded join set rather than a single universal topic
+- prioritize primary context, enclosing context, portal-visible context, and declared adjacency
+- use coarse concern overlays only when structural discovery is insufficient
+- allow direct known-peer linkage as a transport concern when discovery is already resolved
+
+This keeps discovery local-first, inspectable, and doctrine-aligned without making a volatile registry the default substrate posture.
+
 ### Inspectability and opacity
 
 The repository should not require full introspection of every inner heuristic process.

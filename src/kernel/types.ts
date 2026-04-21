@@ -47,6 +47,21 @@ export type ArtifactKind =
 export type ComparabilityLevel = "none" | "partial" | "strong";
 export type CompatibilityLevel = "unknown" | "compatible" | "incompatible" | "unresolved";
 export type ConvergenceLevel = "not-forced" | "clustered" | "divergent" | "unresolved";
+export type DiscoveryTopicKind =
+  | "context-self"
+  | "context-parent"
+  | "context-portal"
+  | "context-adjacent"
+  | "concern-coarse"
+  | "peer-direct";
+
+export type DiscoveryScopeKind =
+  | "context"
+  | "portal"
+  | "observer"
+  | "referent"
+  | "concern"
+  | "peer";
 
 export interface BasisDescriptor {
   id: EntityId;
@@ -208,6 +223,21 @@ export interface ArtifactEnvelope {
   payloadIds: EntityId[];
   locality: Locality;
   provenance: Provenance;
+  metadata?: Record<string, unknown>;
+}
+
+export interface DiscoveryProjection {
+  id: EntityId;
+  topicKind: DiscoveryTopicKind;
+  scopeKind: DiscoveryScopeKind;
+  sourceBranchId: EntityId;
+  scopeAnchorId: EntityId;
+  topicKey: string;
+  basisId?: EntityId;
+  contextId?: EntityId;
+  concern?: string;
+  quantization?: string;
+  sourceIds: EntityId[];
   metadata?: Record<string, unknown>;
 }
 
