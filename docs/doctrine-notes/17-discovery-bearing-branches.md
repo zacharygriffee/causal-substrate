@@ -91,6 +91,7 @@ It should be derived from:
 
 - a projection version
 - a topic kind
+- an optional `discoverySalt` or equivalent partitioning modifier
 - a basis-relative scope
 - a discovery-bearing anchor
 - optional quantized positioning or concern overlays
@@ -103,6 +104,26 @@ But it should not be treated as:
 - proof of co-reference
 
 Topics carry discovery posture, not ontology authority.
+
+## Partitioning posture
+
+The repository may use an optional `discoverySalt` to partition otherwise similar discovery projections across unrelated domains, areas, or deployments.
+
+The current line is:
+
+- the salt modifies discovery derivation only
+- the salt is optional in shape
+- the effective salt should still be deterministic at derivation time
+- if no salt is provided, a stable default is acceptable
+
+This means:
+
+- the salt is not branch identity
+- the salt is not referent identity
+- the salt is not an emergence seed
+- the salt is not authority
+
+It is a partitioning modifier for rendezvous derivation only.
 
 ## Direct peer posture
 

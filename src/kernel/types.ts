@@ -260,12 +260,19 @@ export interface DiscoveryProjection {
   sourceBranchId: EntityId;
   scopeAnchorId: EntityId;
   topicKey: string;
+  discoverySalt?: string;
   basisId?: EntityId;
   contextId?: EntityId;
   concern?: string;
   quantization?: string;
   sourceIds: EntityId[];
   metadata?: Record<string, unknown>;
+}
+
+export interface DiscoveryJoinSet {
+  primaryTopicKey: string;
+  topicKeys: string[];
+  projections: DiscoveryProjection[];
 }
 
 export interface CapabilitySurface {

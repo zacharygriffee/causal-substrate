@@ -2,6 +2,7 @@ export * from "./kernel/types.js";
 export * from "./kernel/substrate.js";
 export * from "./kernel/continuity-pressure.js";
 export * from "./kernel/capability-surface.js";
+export * from "./kernel/discovery-projection.js";
 export * from "./backends/filesystem.js";
 export * from "./backends/corestore.js";
 export * from "./backends/corestore-layout.js";

@@ -1,7 +1,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { negotiateCapabilityExchange, Substrate } from "../src/index.js";
+import {
+  computeDiscoveryJoinSet,
+  negotiateCapabilityExchange,
+  Substrate,
+} from "../src/index.js";
 
 function createSubstrate() {
   let tick = 0;
@@ -864,4 +868,191 @@ test("lab-11: capability mismatch can narrow exchange to a mediated view without
   assert.deepEqual(decision.matchedArtifactKinds, ["view", "receipt"]);
   assert.deepEqual(decision.matchedExchangeModes, ["view-only", "receipt-only"]);
   assert.match(decision.reason, /mediated artifacts/);
+});
+
+test("lab-12: discovery join set derives from primary context plus portal-visible context without requiring a registry", () => {
+  const substrate = createSubstrate();
+  const basis = substrate.createBasis({
+    label: "discovery-basis",
+    dimensions: ["position", "containment", "visibility"],
+  });
+  const buildingBranch = substrate.createBranch({
+    role: "context",
+    label: "building-branch",
+    basisId: basis.id,
+  });
+  const building = substrate.createContext({
+    label: "building",
+    branchId: buildingBranch.id,
+  });
+  const roomBranch = substrate.createBranch({
+    role: "context",
+    label: "room-branch",
+    basisId: basis.id,
+  });
+  const room = substrate.createContext({
+    label: "room",
+    branchId: roomBranch.id,
+    parentContextId: building.id,
+  });
+  const hallwayBranch = substrate.createBranch({
+    role: "context",
+    label: "hallway-branch",
+    basisId: basis.id,
+  });
+  const hallway = substrate.createContext({
+    label: "hallway",
+    branchId: hallwayBranch.id,
+    parentContextId: building.id,
+  });
+  const portalBranch = substrate.createBranch({
+    role: "portal",
+    label: "doorway-branch",
+    basisId: basis.id,
+    contextId: room.id,
+  });
+  const portal = substrate.createPortal({
+    label: "doorway",
+    branchId: portalBranch.id,
+    sourceContextId: hallway.id,
+    targetContextId: room.id,
+    exposureRule: "motion silhouettes only",
+  });
+  const observer = substrate.createObserver({
+    label: "observer-a",
+    basisId: basis.id,
+  });
+  const observerBranch = substrate.createBranch({
+    role: "observer",
+    label: "observer-branch",
+    basisId: basis.id,
+    observerId: observer.id,
+    contextId: room.id,
+  });
+
+  const joinSet = computeDiscoveryJoinSet({
+    observerBranch,
+    contexts: substrate.state.contexts,
+    portals: substrate.state.portals,
+  });
+
+  assert.equal(joinSet.projections.length, 3);
+  assert.equal(joinSet.projections[0]?.topicKind, "context-self");
+  assert.equal(joinSet.projections[1]?.topicKind, "context-parent");
+  assert.equal(joinSet.projections[2]?.topicKind, "context-portal");
+  assert.deepEqual(joinSet.projections[2]?.sourceIds, [
+    observerBranch.id,
+    hallway.id,
+    portal.id,
+  ]);
+  assert.equal(new Set(joinSet.topicKeys).size, joinSet.topicKeys.length);
+  assert.equal(joinSet.primaryTopicKey, joinSet.projections[0]?.topicKey);
+});
+
+test("lab-13: coarse rendezvous can stay broad while capability filtering keeps exchange selective", () => {
+  const sharedTopic = "coarse-room-topic";
+
+  const peerAJoinSet = {
+    topicKeys: [sharedTopic],
+  };
+  const peerBJoinSet = {
+    topicKeys: [sharedTopic],
+  };
+
+  const decision = negotiateCapabilityExchange(
+    {
+      id: "peer-a-capability",
+      peerRole: "observer-witness",
+      basisId: "basis-rb",
+      sourceBranchId: "branch-peer-a",
+      primaryContextId: "room-a",
+      visibleContextIds: [],
+      supportedDimensions: ["red", "blue", "position"],
+      missingDimensions: ["green"],
+      offer: {
+        artifactKinds: ["receipt"],
+        exchangeModes: ["receipt-only"],
+        branchRoles: ["observer"],
+      },
+      request: {
+        artifactKinds: ["view", "receipt"],
+        preferredExchangeModes: ["view-only", "receipt-only"],
+        branchRoles: ["observer"],
+      },
+    },
+    {
+      id: "peer-b-capability",
+      peerRole: "observer-witness",
+      basisId: "basis-rgb",
+      sourceBranchId: "branch-peer-b",
+      primaryContextId: "room-a",
+      visibleContextIds: [],
+      supportedDimensions: ["red", "green", "blue", "position"],
+      offer: {
+        artifactKinds: ["view", "receipt"],
+        exchangeModes: ["raw-witness", "view-only", "receipt-only"],
+        branchRoles: ["observer"],
+      },
+    },
+  );
+
+  assert.deepEqual(peerAJoinSet.topicKeys, peerBJoinSet.topicKeys);
+  assert.equal(decision.accepted, true);
+  assert.equal(decision.requiresMediation, true);
+  assert.deepEqual(decision.matchedArtifactKinds, ["view", "receipt"]);
+  assert.deepEqual(decision.matchedExchangeModes, ["view-only", "receipt-only"]);
+  assert.match(decision.reason, /mediated artifacts/);
+});
+
+test("lab-14: discovery salt partitions otherwise similar discovery structures without changing continuity semantics", () => {
+  const substrate = createSubstrate();
+  const basis = substrate.createBasis({
+    label: "salted-discovery-basis",
+    dimensions: ["position", "containment"],
+  });
+  const roomBranch = substrate.createBranch({
+    role: "context",
+    label: "room-branch",
+    basisId: basis.id,
+  });
+  const room = substrate.createContext({
+    label: "room",
+    branchId: roomBranch.id,
+  });
+  const observer = substrate.createObserver({
+    label: "observer-a",
+    basisId: basis.id,
+  });
+  const observerBranch = substrate.createBranch({
+    role: "observer",
+    label: "observer-branch",
+    basisId: basis.id,
+    observerId: observer.id,
+    contextId: room.id,
+  });
+
+  const defaultJoinSet = computeDiscoveryJoinSet({
+    observerBranch,
+    contexts: substrate.state.contexts,
+    portals: substrate.state.portals,
+  });
+  const areaAJoinSet = computeDiscoveryJoinSet({
+    observerBranch,
+    contexts: substrate.state.contexts,
+    portals: substrate.state.portals,
+    discoverySalt: "area-a",
+  });
+  const areaBJoinSet = computeDiscoveryJoinSet({
+    observerBranch,
+    contexts: substrate.state.contexts,
+    portals: substrate.state.portals,
+    discoverySalt: "area-b",
+  });
+
+  assert.equal(defaultJoinSet.projections[0]?.discoverySalt, "default");
+  assert.equal(areaAJoinSet.projections[0]?.discoverySalt, "area-a");
+  assert.equal(areaBJoinSet.projections[0]?.discoverySalt, "area-b");
+  assert.notEqual(defaultJoinSet.primaryTopicKey, areaAJoinSet.primaryTopicKey);
+  assert.notEqual(areaAJoinSet.primaryTopicKey, areaBJoinSet.primaryTopicKey);
+  assert.equal(observerBranch.contextId, room.id);
 });
