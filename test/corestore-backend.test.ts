@@ -113,3 +113,29 @@ test("corestore backend can reopen cleanly after close without residual lock iss
 
   assert.equal(activeManagedCorestoreCount(), 0);
 });
+
+test("corestore backend rejects reopening the same storage path with incompatible root options", async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), "causal-substrate-corestore-"));
+  const concern = "incompatible-root-options";
+
+  const opened = await openConcernCores({
+    storageDir: directory,
+    concern,
+  });
+
+  try {
+    await assert.rejects(
+      openConcernCores({
+        storageDir: directory,
+        concern,
+        rootOptions: {
+          primaryKey: Buffer.alloc(32, 7),
+          unsafe: true,
+        },
+      }),
+      /already open with different root options/,
+    );
+  } finally {
+    await opened.close();
+  }
+});

@@ -76,3 +76,44 @@ export type FirstSeriousCorestoreRecord =
   | SleepCapsuleRecord
   | ReferentStateRecord
   | ExchangeArtifactRecord;
+
+export function assertBranchHappeningRecord(record: unknown): BranchHappeningRecord {
+  return assertRecordType(record, "branch-happening") as BranchHappeningRecord;
+}
+
+export function assertSleepCapsuleRecord(record: unknown): SleepCapsuleRecord {
+  return assertRecordType(record, "sleep-capsule") as SleepCapsuleRecord;
+}
+
+export function assertReferentStateRecord(record: unknown): ReferentStateRecord {
+  return assertRecordType(record, "referent-state-estimate") as ReferentStateRecord;
+}
+
+export function assertExchangeArtifactRecord(record: unknown): ExchangeArtifactRecord {
+  return assertRecordType(record, "exchange-artifact") as ExchangeArtifactRecord;
+}
+
+function assertRecordType(
+  record: unknown,
+  expectedType: FirstSeriousCorestoreRecord["recordType"],
+): FirstSeriousCorestoreRecord {
+  if (!record || typeof record !== "object") {
+    throw new Error(`invalid corestore record: expected object for ${expectedType}`);
+  }
+
+  const candidate = record as Partial<FirstSeriousCorestoreRecord>;
+  if (candidate.schema !== CORESTORE_RECORD_SCHEMA) {
+    throw new Error(`invalid corestore record schema for ${expectedType}`);
+  }
+  if (candidate.schemaVersion !== 1) {
+    throw new Error(`invalid corestore record schema version for ${expectedType}`);
+  }
+  if (candidate.recordType !== expectedType) {
+    throw new Error(`invalid corestore record type: expected ${expectedType}`);
+  }
+  if (typeof candidate.recordId !== "string" || typeof candidate.recordedAt !== "string") {
+    throw new Error(`invalid corestore record envelope for ${expectedType}`);
+  }
+
+  return candidate as FirstSeriousCorestoreRecord;
+}

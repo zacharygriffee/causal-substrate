@@ -11,12 +11,17 @@ import {
 } from "../kernel/types.js";
 import { Substrate as SubstrateKernel } from "../kernel/substrate.js";
 import {
+  CorestoreRootOptions,
   appendConcernRecord,
   OpenConcernHandle,
   openConcernCores,
   readConcernRecords,
 } from "./corestore.js";
 import {
+  assertBranchHappeningRecord,
+  assertExchangeArtifactRecord,
+  assertReferentStateRecord,
+  assertSleepCapsuleRecord,
   BranchHappeningRecord,
   CORESTORE_RECORD_SCHEMA,
   ExchangeArtifactRecord,
@@ -31,6 +36,7 @@ export const FIRST_SERIOUS_CORESTORE_LAB_CONCERN = "first-serious-causal-lab";
 export interface OpenFirstSeriousCorestoreLabOptions {
   storageDir: string;
   namespaceParts?: string[] | undefined;
+  rootOptions?: CorestoreRootOptions | undefined;
 }
 
 export interface FirstSeriousCorestoreLabHandle {
@@ -113,6 +119,7 @@ export async function openFirstSeriousCorestoreLab(
     storageDir: options.storageDir,
     concern: FIRST_SERIOUS_CORESTORE_LAB_CONCERN,
     namespaceParts: options.namespaceParts,
+    rootOptions: options.rootOptions,
   });
 
   return {
@@ -221,13 +228,13 @@ export async function openFirstSeriousCorestoreLab(
         },
       }),
     readBranchHappenings: async () =>
-      readConcernRecords(handle, "branch-happenings") as Promise<BranchHappeningRecord[]>,
+      (await readConcernRecords(handle, "branch-happenings")).map(assertBranchHappeningRecord),
     readSleepCapsules: async () =>
-      readConcernRecords(handle, "segments") as Promise<SleepCapsuleRecord[]>,
+      (await readConcernRecords(handle, "segments")).map(assertSleepCapsuleRecord),
     readReferentState: async () =>
-      readConcernRecords(handle, "referent-state") as Promise<ReferentStateRecord[]>,
+      (await readConcernRecords(handle, "referent-state")).map(assertReferentStateRecord),
     readExchangeArtifacts: async () =>
-      readConcernRecords(handle, "exchange-artifacts") as Promise<ExchangeArtifactRecord[]>,
+      (await readConcernRecords(handle, "exchange-artifacts")).map(assertExchangeArtifactRecord),
   };
 }
 

@@ -58,34 +58,34 @@
 
 ### Next
 
-- [ ] consolidate the Corestore-only path
-  - [ ] keep serious substrate work on Corestore/Hypercore only
-  - [ ] avoid Hyperbee unless concrete lookup or registry pressure appears
-  - [ ] treat known-core access and stream replay as the default posture
+- [x] consolidate the Corestore-only path
+  - [x] keep serious substrate work on Corestore/Hypercore only
+  - [x] avoid Hyperbee unless concrete lookup or registry pressure appears
+  - [x] treat known-core access and stream replay as the default posture
 - [ ] harden the Corestore record model
-  - [ ] stabilize branch happening records
-  - [ ] stabilize sleep capsule records
-  - [ ] stabilize referent state estimate records
-  - [ ] stabilize exchange artifact records
+  - [x] stabilize branch happening records
+  - [x] stabilize sleep capsule records
+  - [x] stabilize referent state estimate records
+  - [x] stabilize exchange artifact records
   - [ ] decide whether JSON remains sufficient or stricter schema validation is needed
-- [ ] implement a multi-segment continuity lab on Hypercores
-  - [ ] append multiple wake/sleep cycles for one observer branch
-  - [ ] prove carried nuclei across several sealed segments
-  - [ ] verify continuation history remains readable without an index layer
-- [ ] implement a referent tracking lab on Hypercores
-  - [ ] append successive referent state estimates over time
-  - [ ] represent `continuing`, `ambiguous`, and `broken` as stream history
-  - [ ] prove absence and contradiction pressure can be read from append-only records
-- [ ] implement an exchange artifact lab on Hypercores
-  - [ ] emit views as explicit exchange records
-  - [ ] emit bindings as explicit exchange records
-  - [ ] emit lineage claims as explicit exchange records
-  - [ ] emit receipts as explicit exchange records
-  - [ ] prove exchange surfaces remain derived and replaceable
-- [ ] implement a cross-core reconstruction pass
-  - [ ] reconstruct a local picture by reading the four working cores together
-  - [ ] measure where known-core replay stays tractable
-  - [ ] note any lookup pain precisely instead of assuming an index is needed
+- [x] implement a multi-segment continuity lab on Hypercores
+  - [x] append multiple wake/sleep cycles for one observer branch
+  - [x] prove carried nuclei across several sealed segments
+  - [x] verify continuation history remains readable without an index layer
+- [x] implement a referent tracking lab on Hypercores
+  - [x] append successive referent state estimates over time
+  - [x] represent `continuing`, `ambiguous`, and `broken` as stream history
+  - [x] prove absence and contradiction pressure can be read from append-only records
+- [x] implement an exchange artifact lab on Hypercores
+  - [x] emit views as explicit exchange records
+  - [x] emit bindings as explicit exchange records
+  - [x] emit lineage claims as explicit exchange records
+  - [x] emit receipts as explicit exchange records
+  - [x] prove exchange surfaces remain derived and replaceable
+- [x] implement a cross-core reconstruction pass
+  - [x] reconstruct a local picture by reading the four working cores together
+  - [x] measure where known-core replay stays tractable
+  - [x] note any lookup pain precisely instead of assuming an index is needed
 - [ ] formalize artifact envelopes for Corestore-backed emission
 
 ### Later
@@ -97,6 +97,8 @@
   - [ ] named artifact lookup
   - [ ] concern indexing
 - [ ] replication labs
+  - [x] prove two-Corestore replication over Hypercore using `fakeswarm`
+  - [ ] extend replication beyond the current single-writer proof
 - [ ] NoiseSecretStream majority experiments
 - [ ] fakeswarm-based swarm testing
 - [ ] transport concerns

@@ -11,6 +11,13 @@ interface ManagedRootEntry {
   refs: number;
   store: CorestoreInstance;
   storageDir: string;
+  rootOptionsKey: string;
+}
+
+export interface CorestoreRootOptions {
+  primaryKey?: Buffer | undefined;
+  unsafe?: boolean | undefined;
+  writable?: boolean | undefined;
 }
 
 export interface ManagedCorestoreLease {
@@ -24,6 +31,7 @@ export interface OpenConcernOptions {
   concern: string;
   namespaceParts?: string[] | undefined;
   layout?: PlannedCoreLayout[] | undefined;
+  rootOptions?: CorestoreRootOptions | undefined;
 }
 
 export interface OpenConcernHandle {
@@ -76,7 +84,7 @@ export async function acquireManagedCorestore(storageDir: string): Promise<Manag
 export async function openConcernCores(
   options: OpenConcernOptions,
 ): Promise<OpenConcernHandle> {
-  const lease = await acquireManagedCorestore(options.storageDir);
+  const lease = await acquireManagedCorestoreWithOptions(options.storageDir, options.rootOptions);
   const namespaceParts = buildDeterministicNamespace(
     options.concern,
     options.namespaceParts ?? [],
@@ -146,8 +154,42 @@ export async function readConcernRecords(
 }
 
 async function getOrOpenRoot(storageDir: string) {
+  return getOrOpenRootWithOptions(storageDir, undefined);
+}
+
+async function acquireManagedCorestoreWithOptions(
+  storageDir: string,
+  rootOptions: CorestoreRootOptions | undefined,
+): Promise<ManagedCorestoreLease> {
+  const resolved = path.resolve(storageDir);
+  const root = await getOrOpenRootWithOptions(resolved, rootOptions);
+  root.refs += 1;
+
+  let closed = false;
+
+  return {
+    storageDir: resolved,
+    store: root.store,
+    close: async () => {
+      if (closed) return;
+      closed = true;
+      await releaseManagedCorestore(resolved);
+    },
+  };
+}
+
+async function getOrOpenRootWithOptions(
+  storageDir: string,
+  rootOptions: CorestoreRootOptions | undefined,
+) {
   const existing = roots.get(storageDir);
   if (existing) {
+    const requestedKey = serializeRootOptions(rootOptions);
+    if (existing.rootOptionsKey !== requestedKey) {
+      throw new Error(
+        `corestore at ${storageDir} is already open with different root options`,
+      );
+    }
     return existing;
   }
 
@@ -156,7 +198,7 @@ async function getOrOpenRoot(storageDir: string) {
     return opening;
   }
 
-  const promise = openRoot(storageDir);
+  const promise = openRoot(storageDir, rootOptions);
   openings.set(storageDir, promise);
 
   try {
@@ -168,14 +210,18 @@ async function getOrOpenRoot(storageDir: string) {
   }
 }
 
-async function openRoot(storageDir: string): Promise<ManagedRootEntry> {
-  const store = new Corestore(storageDir);
+async function openRoot(
+  storageDir: string,
+  rootOptions: CorestoreRootOptions | undefined,
+): Promise<ManagedRootEntry> {
+  const store = new Corestore(storageDir, rootOptions);
   await store.ready();
 
   return {
     refs: 0,
     store,
     storageDir,
+    rootOptionsKey: serializeRootOptions(rootOptions),
   };
 }
 
@@ -203,4 +249,16 @@ async function safeCloseSession(session: CorestoreInstance) {
   } catch {
     // Closing is best-effort here; the root lease will still be released.
   }
+}
+
+function serializeRootOptions(rootOptions: CorestoreRootOptions | undefined) {
+  if (!rootOptions) return "default";
+
+  return JSON.stringify({
+    primaryKeyHex: rootOptions.primaryKey
+      ? Buffer.from(rootOptions.primaryKey).toString("hex")
+      : null,
+    unsafe: rootOptions.unsafe ?? false,
+    writable: rootOptions.writable ?? true,
+  });
 }
