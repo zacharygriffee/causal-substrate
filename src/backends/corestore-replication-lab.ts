@@ -634,12 +634,10 @@ async function connectReplicationPeers({
       : undefined;
 
   try {
-    const discoveryA = swarmA.join(topic, DEFAULT_SWARM_JOIN_OPTIONS);
-    const discoveryB = swarmB.join(topic, DEFAULT_SWARM_JOIN_OPTIONS);
+    swarmA.join(topic, DEFAULT_SWARM_JOIN_OPTIONS);
+    swarmB.join(topic, DEFAULT_SWARM_JOIN_OPTIONS);
 
     await Promise.all([
-      waitForDiscoveryFlush(discoveryA, timeoutMs, "replication-discovery-a"),
-      waitForDiscoveryFlush(discoveryB, timeoutMs, "replication-discovery-b"),
       waitForSwarmFlush(swarmA, timeoutMs, "replication-swarm-a"),
       waitForSwarmFlush(swarmB, timeoutMs, "replication-swarm-b"),
     ]);
@@ -647,15 +645,6 @@ async function connectReplicationPeers({
     doneA?.();
     doneB?.();
   }
-}
-
-async function waitForDiscoveryFlush(
-  discovery: ReplicationDiscoveryLike | void,
-  timeoutMs: number,
-  label: string,
-) {
-  if (!discovery || typeof discovery.flushed !== "function") return;
-  await withTimeout(Promise.resolve(discovery.flushed()), timeoutMs, label);
 }
 
 async function waitForSwarmFlush(

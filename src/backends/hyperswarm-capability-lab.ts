@@ -186,18 +186,16 @@ export async function runHyperswarmCapabilityHandshakeLab(
     });
 
     const topic = createCapabilityTopic(options.namespaceParts ?? []);
-    const degradedDiscovery = swarmA.join(topic, {
+    swarmA.join(topic, {
       client: true,
       server: true,
     });
-    const fullDiscovery = swarmB.join(topic, {
+    swarmB.join(topic, {
       client: true,
       server: true,
     });
 
     await Promise.all([
-      degradedDiscovery?.flushed?.(),
-      fullDiscovery?.flushed?.(),
       swarmA.flush(timeoutMs),
       swarmB.flush(timeoutMs),
     ]);
@@ -452,23 +450,20 @@ export async function runHyperswarmMultiPeerCapabilityLab(
     });
 
     const topic = createCapabilityTopic([...(options.namespaceParts ?? []), "mesh"]);
-    const degradedDiscovery = degradedSwarm.join(topic, {
+    degradedSwarm.join(topic, {
       client: true,
       server: true,
     });
-    const fullDiscovery = fullSwarm.join(topic, {
+    fullSwarm.join(topic, {
       client: true,
       server: true,
     });
-    const relayDiscovery = relaySwarm.join(topic, {
+    relaySwarm.join(topic, {
       client: true,
       server: true,
     });
 
     await Promise.all([
-      degradedDiscovery?.flushed?.(),
-      fullDiscovery?.flushed?.(),
-      relayDiscovery?.flushed?.(),
       degradedSwarm.flush(timeoutMs),
       fullSwarm.flush(timeoutMs),
       relaySwarm.flush(timeoutMs),
