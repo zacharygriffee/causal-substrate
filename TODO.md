@@ -195,6 +195,16 @@ Done when:
 - [x] deeper `fakeswarm`-based swarm testing
 - [ ] transport concerns
 - [ ] Autobase or higher-order shared surfaces
+- [x] add an explicit branch capability evolution lab
+  - [x] model basis degradation or gain within one continuing branch
+  - [x] prove continuity can survive capability change without forced fork
+  - [x] prove downstream referent judgments can weaken under revised basis
+  - [x] identify where capability change becomes lineage pressure instead
+- [x] add an explicit persisted branch birth / fork lab
+  - [x] prove a successor branch can inherit prior history up to a fork point
+  - [x] prove divergence after fork without collapsing shared ancestry
+  - [x] prove carry-forward nucleus or inherited package at branch birth
+  - [x] distinguish fork, birth from prepared continuity, and sibling emergence where useful
 
 ## Next Phases
 

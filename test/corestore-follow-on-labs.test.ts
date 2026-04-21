@@ -511,6 +511,132 @@ test("persisted context and portal declarations are replayable and inspectable w
   }
 });
 
+test("persisted branch fork carries inherited nucleus forward while preserving divergence after birth", async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), "causal-substrate-follow-on-"));
+  const lab = await openFirstSeriousCorestoreLab({
+    storageDir: directory,
+    namespaceParts: ["persisted-branch-fork"],
+  });
+  const substrate = new Substrate({
+    now: () => "2026-04-20T00:00:00.000Z",
+  });
+
+  try {
+    const basis = substrate.createBasis({
+      label: "fork-basis",
+      dimensions: ["shape", "continuity", "position"],
+    });
+    const sourceBranch = substrate.createBranch({
+      role: "referent",
+      label: "source-referent-branch",
+      basisId: basis.id,
+    });
+    const sourceSegment = substrate.openSegment({
+      branchId: sourceBranch.id,
+      inheritedNucleusIds: [],
+      summary: "source branch pre-fork wake",
+    });
+    const sourceHappening = substrate.createHappening({
+      branchId: sourceBranch.id,
+      segmentId: sourceSegment.id,
+      label: "source continuity before fork",
+      triggerIds: [],
+      salience: 0.79,
+    });
+    await lab.appendBranchHappening({
+      branchId: sourceBranch.id,
+      segmentId: sourceSegment.id,
+      happening: sourceHappening,
+    });
+
+    const sourceCarry = substrate.sealSegment(sourceSegment.id, {
+      anchor: "source-fork-anchor",
+    });
+    const sealedSourceSegment = substrate.state.segments.get(sourceCarry.segmentId);
+    assert.ok(sealedSourceSegment);
+    await lab.appendSleepCapsule({
+      branchId: sourceBranch.id,
+      segment: sealedSourceSegment,
+      nucleus: sourceCarry.nucleus,
+    });
+
+    const fork = substrate.forkBranch({
+      sourceBranchId: sourceBranch.id,
+      label: "forked-successor-branch",
+      relation: "split",
+      lineageEvidence: "successor branch emerges from preserved source continuity",
+    });
+    const childSegment = substrate.openSegment({
+      branchId: fork.branch.id,
+      inheritedNucleusIds: [sourceCarry.nucleus.id],
+      summary: "forked successor wake",
+    });
+    const childHappening = substrate.createHappening({
+      branchId: fork.branch.id,
+      segmentId: childSegment.id,
+      label: "successor continuity after fork",
+      triggerIds: [],
+      salience: 0.83,
+    });
+    await lab.appendBranchHappening({
+      branchId: fork.branch.id,
+      segmentId: childSegment.id,
+      happening: childHappening,
+    });
+
+    const childCarry = substrate.sealSegment(childSegment.id, {
+      anchor: "child-fork-anchor",
+    });
+    const sealedChildSegment = substrate.state.segments.get(childCarry.segmentId);
+    assert.ok(sealedChildSegment);
+    await lab.appendSleepCapsule({
+      branchId: fork.branch.id,
+      segment: sealedChildSegment,
+      nucleus: childCarry.nucleus,
+    });
+
+    const lineageArtifact = substrate.createArtifactEnvelope({
+      kind: "lineage-claim",
+      label: "fork-lineage-artifact",
+      sourceIds: [sourceBranch.id, fork.branch.id],
+      payloadIds: [fork.lineage.id],
+      provenance: {
+        basisId: basis.id,
+        source: "persisted-branch-fork-test",
+      },
+    });
+    await lab.appendLineageClaimArtifact({
+      artifact: lineageArtifact,
+      lineage: fork.lineage,
+    });
+
+    const replay = await reconstructLocalPicture(lab);
+    const sourcePicture = await reconstructBranchPicture(lab, sourceBranch.id);
+    const childPicture = await reconstructBranchPicture(lab, fork.branch.id);
+    const inspectability = await reconstructInspectabilityPicture(lab);
+
+    assert.equal(fork.lineage.relation, "split");
+    assert.deepEqual(fork.branch.parentBranchIds, [sourceBranch.id]);
+    assert.equal(replay.branchSurfaces.length, 2);
+    assert.deepEqual(
+      replay.branchSurfaces.map((surface) => surface.branchId).sort(),
+      [fork.branch.id, sourceBranch.id].sort(),
+    );
+    assert.deepEqual(sourcePicture.happenings.map((record) => record.recordId), [sourceHappening.id]);
+    assert.deepEqual(childPicture.happenings.map((record) => record.recordId), [childHappening.id]);
+    assert.deepEqual(childPicture.sleepCapsules[0]?.segment.inheritedNucleusIds, [sourceCarry.nucleus.id]);
+    assert.equal(childPicture.sleepCapsules[0]?.nucleus.anchor, "child-fork-anchor");
+    assert.equal(
+      replay.artifactSurfaces.find((surface) => surface.payloadType === "lineage-claim")?.summary,
+      `lineage split from ${sourceBranch.id} to ${fork.branch.id}`,
+    );
+    assert.equal(inspectability.artifactClaims.length, 1);
+    assert.equal(inspectability.artifactClaims[0]?.provenanceSource, "persisted-branch-fork-test");
+  } finally {
+    await lab.close();
+  }
+});
+
 test("compact continuity situation reconstructs primary branch, primary context, portal visibility, and active referents from persisted records", async () => {
   const directory = await mkdtemp(path.join(tmpdir(), "causal-substrate-follow-on-"));
   const lab = await openFirstSeriousCorestoreLab({

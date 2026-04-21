@@ -52,6 +52,85 @@ test("phase-6: helper APIs support explicit split pressure and multi-nucleus mer
   assert.deepEqual(merge.segment.inheritedNucleusIds, [carry.nucleus.id]);
 });
 
+test("branch capability evolution can revise basis without forcing a branch fork", () => {
+  const substrate = createSubstrate();
+  const fullBasis = substrate.createBasis({
+    label: "rgb-camera-basis",
+    dimensions: ["red", "green", "blue", "position"],
+  });
+  const degradedBasis = substrate.createBasis({
+    label: "rb-camera-basis",
+    dimensions: ["red", "blue", "position"],
+    partial: true,
+    degradedFrom: [fullBasis.id],
+    revisedFrom: [fullBasis.id],
+  });
+  const observer = substrate.createObserver({
+    label: "camera",
+    basisId: fullBasis.id,
+  });
+  const observerBranch = substrate.createBranch({
+    role: "observer",
+    label: "camera-branch",
+    basisId: fullBasis.id,
+    observerId: observer.id,
+  });
+  const referentBranch = substrate.createBranch({
+    role: "referent",
+    label: "colored-cube-branch",
+    basisId: fullBasis.id,
+  });
+  const referent = substrate.createReferent({
+    label: "colored-cube",
+    anchor: "cube-anchor",
+    branchId: referentBranch.id,
+  });
+  const binding = substrate.createBinding({
+    kind: "tracking",
+    observerBranchId: observerBranch.id,
+    referentBranchId: referentBranch.id,
+    referentId: referent.id,
+    strength: 0.91,
+  });
+
+  const initialEstimate = substrate.createStateEstimate({
+    referentId: referent.id,
+    branchId: referentBranch.id,
+    continuity: "continuing",
+    reasoning: "full color basis preserves enough distinction for continuing judgment",
+    basedOnBindingIds: [binding.id],
+    metadata: { effectiveBasisId: fullBasis.id },
+  });
+
+  const revisedBranch = substrate.reviseBranchBasis({
+    branchId: observerBranch.id,
+    basisId: degradedBasis.id,
+    reason: "camera lost the ability to preserve green distinctions",
+  });
+
+  const degradedEstimate = substrate.createStateEstimate({
+    referentId: referent.id,
+    branchId: referentBranch.id,
+    continuity: "ambiguous",
+    reasoning: "green loss weakens re-identification enough to keep continuity unresolved",
+    basedOnBindingIds: [binding.id],
+    metadata: { effectiveBasisId: degradedBasis.id },
+  });
+
+  assert.equal(revisedBranch.id, observerBranch.id);
+  assert.equal(revisedBranch.basisId, degradedBasis.id);
+  assert.deepEqual(degradedBasis.degradedFrom, [fullBasis.id]);
+  assert.deepEqual(revisedBranch.parentBranchIds, []);
+  assert.equal(initialEstimate.continuity, "continuing");
+  assert.equal(degradedEstimate.continuity, "ambiguous");
+  assert.deepEqual(revisedBranch.metadata?.basisRevision, {
+    fromBasisId: fullBasis.id,
+    toBasisId: degradedBasis.id,
+    revisedAt: "2026-04-22T00:00:01Z",
+    reason: "camera lost the ability to preserve green distinctions",
+  });
+});
+
 test("phase-6 and phase-8: artifact envelopes and comparison surfaces carry typed provenance", () => {
   const substrate = createSubstrate();
   const basis = substrate.createBasis({

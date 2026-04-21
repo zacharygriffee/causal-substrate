@@ -52,6 +52,13 @@ export interface OpenSegmentInput {
   metadata?: Record<string, unknown>;
 }
 
+export interface ReviseBranchBasisInput {
+  branchId: string;
+  basisId: string;
+  reason?: string;
+  metadata?: Record<string, unknown>;
+}
+
 export interface CreateTriggerInput {
   label: string;
   threshold: string;
@@ -281,6 +288,28 @@ export class Substrate {
     });
     this.state.branches.set(branch.id, branch);
     return branch;
+  }
+
+  reviseBranchBasis(input: ReviseBranchBasisInput): Branch {
+    const branch = this.requireEntity(this.state.branches, input.branchId, "branch");
+    this.requireBasis(input.basisId);
+
+    const revisedBranch = compact<Branch>({
+      ...branch,
+      basisId: input.basisId,
+      metadata: compact({
+        ...(branch.metadata ?? {}),
+        ...(input.metadata ?? {}),
+        basisRevision: {
+          fromBasisId: branch.basisId,
+          toBasisId: input.basisId,
+          revisedAt: this.now(),
+          reason: input.reason,
+        },
+      }),
+    });
+    this.state.branches.set(branch.id, revisedBranch);
+    return revisedBranch;
   }
 
   openSegment(input: OpenSegmentInput): Segment {
