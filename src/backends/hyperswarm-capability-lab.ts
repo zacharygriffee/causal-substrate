@@ -85,6 +85,7 @@ export async function runHyperswarmCapabilityHandshakeLab(
   const swarmA = await options.createSwarm(Buffer.alloc(32, 21), topics);
   const swarmB = await options.createSwarm(Buffer.alloc(32, 22), topics);
   const channels: Array<{ destroy?: () => void }> = [];
+  const timeoutMs = options.flushTimeoutMs ?? DEFAULT_SWARM_FLUSH_TIMEOUT_MS;
 
   const degradedSurface: CapabilitySurface = {
     id: "observer-a-capability-surface",
@@ -175,11 +176,13 @@ export async function runHyperswarmCapabilityHandshakeLab(
       swarm: swarmA,
       localSurface: degradedSurface,
       channels,
+      timeoutMs,
     });
     const fullReady = openCapabilityChannel({
       swarm: swarmB,
       localSurface: fullSurface,
       channels,
+      timeoutMs,
     });
 
     const topic = createCapabilityTopic(options.namespaceParts ?? []);
@@ -195,8 +198,8 @@ export async function runHyperswarmCapabilityHandshakeLab(
     await Promise.all([
       degradedDiscovery?.flushed?.(),
       fullDiscovery?.flushed?.(),
-      swarmA.flush(options.flushTimeoutMs ?? DEFAULT_SWARM_FLUSH_TIMEOUT_MS),
-      swarmB.flush(options.flushTimeoutMs ?? DEFAULT_SWARM_FLUSH_TIMEOUT_MS),
+      swarmA.flush(timeoutMs),
+      swarmB.flush(timeoutMs),
     ]);
 
     const [degradedPeer, fullPeer] = await Promise.all([degradedReady, fullReady]);
@@ -283,6 +286,7 @@ export async function runHyperswarmMultiPeerCapabilityLab(
   const fullSwarm = await options.createSwarm(Buffer.alloc(32, 32), topics);
   const relaySwarm = await options.createSwarm(Buffer.alloc(32, 33), topics);
   const channels: Array<{ destroy?: () => void }> = [];
+  const timeoutMs = options.flushTimeoutMs ?? DEFAULT_SWARM_FLUSH_TIMEOUT_MS;
 
   const degradedSurface: CapabilitySurface = {
     id: "observer-a-capability-surface",
@@ -430,18 +434,21 @@ export async function runHyperswarmMultiPeerCapabilityLab(
       localSurface: degradedSurface,
       expectedConnections: 2,
       channels,
+      timeoutMs,
     });
     const fullReady = openCapabilityMeshPeer({
       swarm: fullSwarm,
       localSurface: fullSurface,
       expectedConnections: 2,
       channels,
+      timeoutMs,
     });
     const relayReady = openCapabilityMeshPeer({
       swarm: relaySwarm,
       localSurface: relaySurface,
       expectedConnections: 2,
       channels,
+      timeoutMs,
     });
 
     const topic = createCapabilityTopic([...(options.namespaceParts ?? []), "mesh"]);
@@ -462,9 +469,9 @@ export async function runHyperswarmMultiPeerCapabilityLab(
       degradedDiscovery?.flushed?.(),
       fullDiscovery?.flushed?.(),
       relayDiscovery?.flushed?.(),
-      degradedSwarm.flush(options.flushTimeoutMs ?? DEFAULT_SWARM_FLUSH_TIMEOUT_MS),
-      fullSwarm.flush(options.flushTimeoutMs ?? DEFAULT_SWARM_FLUSH_TIMEOUT_MS),
-      relaySwarm.flush(options.flushTimeoutMs ?? DEFAULT_SWARM_FLUSH_TIMEOUT_MS),
+      degradedSwarm.flush(timeoutMs),
+      fullSwarm.flush(timeoutMs),
+      relaySwarm.flush(timeoutMs),
     ]);
 
     const [degradedPeer, fullPeer, relayPeer] = await Promise.all([
@@ -599,6 +606,7 @@ async function openCapabilityChannel(input: {
   swarm: ReplicationSwarmLike;
   localSurface: CapabilitySurface;
   channels: Array<{ destroy?: () => void }>;
+  timeoutMs?: number;
 }) {
   return new Promise<{
     channel: CapabilityChannelHandle;
@@ -607,7 +615,7 @@ async function openCapabilityChannel(input: {
   }>((resolve, reject) => {
     const timeout = setTimeout(() => {
       reject(new Error(`timed out waiting for swarm connection for ${input.localSurface.id}`));
-    }, DEFAULT_SWARM_FLUSH_TIMEOUT_MS);
+    }, input.timeoutMs ?? DEFAULT_SWARM_FLUSH_TIMEOUT_MS);
 
     input.swarm.on("connection", (socket, peerInfo) => {
       const channel = openPlexCapabilityChannel(socket, peerInfo, input.localSurface);
@@ -638,6 +646,7 @@ async function openCapabilityMeshPeer(input: {
   localSurface: CapabilitySurface;
   expectedConnections: number;
   channels: Array<{ destroy?: () => void }>;
+  timeoutMs?: number;
 }) {
   return new Promise<{
     localSurface: CapabilitySurface;
@@ -653,7 +662,7 @@ async function openCapabilityMeshPeer(input: {
       reject(
         new Error(`timed out waiting for capability mesh for ${input.localSurface.id}`),
       );
-    }, DEFAULT_SWARM_FLUSH_TIMEOUT_MS);
+    }, input.timeoutMs ?? DEFAULT_SWARM_FLUSH_TIMEOUT_MS);
 
     const connections = new Map<
       string,
