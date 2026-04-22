@@ -96,6 +96,73 @@ test("closeHyperswarmReplicationSwarm does not double-destroy the owned DHT when
   assert.equal(transportState.closeReport?.completed, true);
 });
 
+test("closeHyperswarmReplicationSwarm drains owned discovery sessions before destroying swarm", async () => {
+  const calls: string[] = [];
+  const transportState = createTransportState();
+
+  await closeHyperswarmReplicationSwarm(
+    {
+      async destroy() {
+        calls.push("swarm-destroy");
+      },
+    },
+    undefined,
+    {
+      discoverySessions: [
+        {
+          async destroy() {
+            calls.push("discovery-a");
+          },
+        },
+        {
+          async destroy() {
+            calls.push("discovery-b");
+          },
+        },
+      ],
+      gracefulCloseTimeoutMs: 50,
+      transportState,
+    },
+  );
+
+  assert.deepEqual(calls, ["discovery-a", "discovery-b", "swarm-destroy"]);
+  assert.equal(transportState.closeReport?.strategy, "graceful");
+  assert.equal(transportState.closeReport?.completed, true);
+});
+
+test("closeHyperswarmReplicationSwarm still forces termination if discovery drain hangs", async () => {
+  const calls: boolean[] = [];
+  const transportState = createTransportState();
+  let discoveryDestroyCount = 0;
+
+  await closeHyperswarmReplicationSwarm(
+    {
+      destroy(options) {
+        calls.push(Boolean(options?.force));
+        return Promise.resolve();
+      },
+    },
+    undefined,
+    {
+      discoverySessions: [
+        {
+          destroy() {
+            discoveryDestroyCount += 1;
+            return new Promise<void>(() => {});
+          },
+        },
+      ],
+      gracefulCloseTimeoutMs: 20,
+      transportState,
+    },
+  );
+
+  assert.equal(discoveryDestroyCount, 1);
+  assert.deepEqual(calls, [true]);
+  assert.equal(transportState.closeReport?.strategy, "forced-after-timeout");
+  assert.equal(transportState.closeReport?.completed, true);
+});
+
 test(
   "createHyperswarmReplicationSwarm records joined-topic discovery state",
   { timeout: 60_000 },

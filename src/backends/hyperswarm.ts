@@ -71,6 +71,7 @@ export interface HyperswarmTransportState {
 
 type InternalHyperswarmTransportState = HyperswarmTransportState & {
   discoveryStateMap: Map<string, HyperswarmDiscoveryState>;
+  ownedDiscoverySessions: Set<DiscoverySessionLike>;
 };
 
 type DiscoverySessionLike = {
@@ -177,7 +178,7 @@ export async function createHyperswarmReplicationSwarm(
         server: truthyJoinOption(joinOptions?.server, true),
       });
 
-      return instrumentDiscoverySession(session, discoveryState);
+      return instrumentDiscoverySession(session, discoveryState, transportState);
     },
     async listen() {
       await swarm.listen();
@@ -195,6 +196,7 @@ export async function createHyperswarmReplicationSwarm(
     },
     async close() {
       await closeHyperswarmReplicationSwarm(swarm, ownedDht, {
+        discoverySessions: transportState.ownedDiscoverySessions,
         gracefulCloseTimeoutMs: options.gracefulCloseTimeoutMs,
         transportState,
       });
@@ -209,6 +211,7 @@ export async function closeHyperswarmReplicationSwarm(
   } | undefined,
   dht: ManagedDht | undefined,
   options: {
+    discoverySessions?: Iterable<DiscoverySessionLike> | undefined;
     gracefulCloseTimeoutMs?: number | undefined;
     transportState?: HyperswarmTransportState | undefined;
   } = {},
@@ -226,6 +229,7 @@ export async function closeHyperswarmReplicationSwarm(
     closeReport.strategy = "graceful";
 
     try {
+      await destroyDiscoverySessions(options.discoverySessions, gracefulTimeoutMs);
       await withTimeout(Promise.resolve(swarm.destroy({ force: false })), gracefulTimeoutMs);
       closeReport.completed = true;
       if (options.transportState) {
@@ -254,6 +258,7 @@ export async function closeHyperswarmReplicationSwarm(
   if (swarm?.close) {
     closeReport.strategy = "graceful";
     try {
+      await destroyDiscoverySessions(options.discoverySessions, gracefulTimeoutMs);
       await withTimeout(Promise.resolve(swarm.close()), gracefulTimeoutMs);
       closeReport.completed = true;
     } catch (error) {
@@ -271,6 +276,7 @@ export async function closeHyperswarmReplicationSwarm(
   } else if (dht?.destroy) {
     closeReport.strategy = "graceful";
     try {
+      await destroyDiscoverySessions(options.discoverySessions, gracefulTimeoutMs);
       await withTimeout(Promise.resolve(dht.destroy({ force: false })), gracefulTimeoutMs);
       closeReport.completed = true;
     } catch (error) {
@@ -307,6 +313,7 @@ function createTransportState(): InternalHyperswarmTransportState {
     connectionEvents: [],
     connectionOpens: 0,
     discoveryStateMap: new Map<string, HyperswarmDiscoveryState>(),
+    ownedDiscoverySessions: new Set<DiscoverySessionLike>(),
     discoveryStates: [],
     errorCount: 0,
     errorSamples: [],
@@ -392,16 +399,18 @@ function recordConnectionEvent(input: {
 function instrumentDiscoverySession(
   session: DiscoverySessionLike | void,
   state: HyperswarmDiscoveryState,
+  transportState: InternalHyperswarmTransportState,
 ): DiscoverySessionLike | void {
   if (!session) return session;
 
-  return {
+  const instrumented = {
     ...session,
     async destroy() {
       try {
         const result = await session.destroy?.();
         state.destroyCount += 1;
         state.lastDestroyAtMs = Date.now();
+        transportState.ownedDiscoverySessions.delete(instrumented);
         return result;
       } catch (error) {
         state.lastErrorMessage = formatErrorMessage(error);
@@ -436,6 +445,9 @@ function instrumentDiscoverySession(
       }
     },
   };
+
+  transportState.ownedDiscoverySessions.add(instrumented);
+  return instrumented;
 }
 
 function touchDiscoveryState(
@@ -517,6 +529,29 @@ function formatErrorMessage(error: unknown): string {
     return error.message;
   }
   return String(error);
+}
+
+async function destroyDiscoverySessions(
+  sessions: Iterable<DiscoverySessionLike> | undefined,
+  timeoutMs: number,
+) {
+  if (!sessions) {
+    return;
+  }
+
+  const pending = Array.from(sessions);
+  if (pending.length === 0) {
+    return;
+  }
+
+  await withTimeout(
+    Promise.allSettled(
+      pending.map(async (session) => {
+        await session.destroy?.();
+      }),
+    ).then(() => undefined),
+    timeoutMs,
+  );
 }
 
 async function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
