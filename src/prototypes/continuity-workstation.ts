@@ -163,9 +163,13 @@ export function buildContinuityWorkstationReport() {
     label: "workstation-comparison-surface",
     sourceIds: [continuationEstimate.id, ambiguityEstimate.id, binding.id, degradedBinding.id],
     basisId: basis.id,
+    projection: "shared continuity workstation comparison surface",
     comparability: "partial",
     compatibility: "unresolved",
+    equivalence: "unresolved",
     convergence: "not-forced",
+    reasonCodes: ["shared-projection-partial", "basis-degradation-present"],
+    evidenceSourceIds: [continuationEstimate.id, ambiguityEstimate.id, binding.id, degradedBinding.id],
     summary: "two observers maintain different judgments over one tracked continuity",
   });
   const artifact = substrate.createArtifactEnvelope({

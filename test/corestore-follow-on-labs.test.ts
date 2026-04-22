@@ -6,6 +6,7 @@ import test from "node:test";
 
 import {
   activeManagedCorestoreCount,
+  buildGenericConsumerComparisonPicture,
   buildGenericConsumerContinuityPicture,
   openFirstSeriousCorestoreLab,
   reconstructBranchPicture,
@@ -15,6 +16,9 @@ import {
   reconstructLocalPicture,
   reconstructReferentPicture,
   reconstructTransitionDecision,
+  runComparisonPressureLab,
+  runConvergencePressureLab,
+  runEquivalencePressureLab,
   Substrate,
   runContinuityEvolutionForkLab,
   runExchangeArtifactLab,
@@ -370,6 +374,226 @@ test("generic consumer continuity picture answers what is active, what changed, 
   } finally {
     await lab.close();
   }
+});
+
+test("comparison pressure lab records bounded comparability and compatibility outcomes as replayable artifacts", async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), "causal-substrate-follow-on-"));
+  const report = await runComparisonPressureLab({
+    storageDir: directory,
+    namespaceParts: ["comparison-pressure"],
+    now: () => "2026-04-22T03:00:00.000Z",
+  });
+
+  assert.equal(report.replay.comparisonSurfaces.length, 3);
+  assert.deepEqual(
+    report.observedComparisons.map((entry) => ({
+      label: entry.label,
+      comparability: entry.comparability,
+      compatibility: entry.compatibility,
+      reasonCodes: entry.reasonCodes,
+    })),
+    [
+      {
+        label: "shared-basis-compatible-comparison",
+        comparability: "strong",
+        compatibility: "compatible",
+        reasonCodes: ["shared-basis-available", "no-contradiction-under-projection"],
+      },
+      {
+        label: "shared-basis-incompatible-comparison",
+        comparability: "strong",
+        compatibility: "incompatible",
+        reasonCodes: ["shared-basis-available", "contradictory-continuity-claim"],
+      },
+      {
+        label: "foreign-basis-incomparable-comparison",
+        comparability: "none",
+        compatibility: "unknown",
+        reasonCodes: ["no-shared-projection"],
+      },
+    ],
+  );
+  assert.equal(report.inspectability.comparisonClaims.length, 3);
+  assert.ok(
+    report.inspectability.comparisonClaims.some(
+      (claim) =>
+        claim.label === "shared-basis-compatible-comparison" &&
+        claim.projection === "shared shape-position projection",
+    ),
+  );
+  assert.ok(
+    report.replay.artifactSurfaces.some(
+      (surface) =>
+        surface.payloadType === "comparison" &&
+        surface.summary === "comparison strong/compatible",
+    ),
+  );
+});
+
+test("generic consumer comparison picture exposes bounded comparison claims without raw internals", async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), "causal-substrate-follow-on-"));
+  const lab = await openFirstSeriousCorestoreLab({
+    storageDir: directory,
+    namespaceParts: ["generic-consumer-comparison-picture"],
+  });
+  const substrate = new Substrate({
+    now: () => "2026-04-22T03:10:00.000Z",
+  });
+
+  try {
+    const basis = substrate.createBasis({
+      label: "consumer-comparison-basis",
+      dimensions: ["shape", "position"],
+    });
+    const observer = substrate.createObserver({
+      label: "consumer-comparison-observer",
+      basisId: basis.id,
+    });
+    const branch = substrate.createBranch({
+      role: "observer",
+      label: "consumer-comparison-branch",
+      basisId: basis.id,
+      observerId: observer.id,
+    });
+    const referentBranch = substrate.createBranch({
+      role: "referent",
+      label: "consumer-comparison-referent-branch",
+      basisId: basis.id,
+    });
+    const referent = substrate.createReferent({
+      label: "consumer-comparison-ball",
+      anchor: "consumer-comparison-ball-anchor",
+      branchId: referentBranch.id,
+    });
+    const binding = substrate.createBinding({
+      kind: "tracking",
+      observerBranchId: branch.id,
+      referentBranchId: referentBranch.id,
+      referentId: referent.id,
+    });
+    const firstEstimate = substrate.createStateEstimate({
+      referentId: referent.id,
+      branchId: referentBranch.id,
+      continuity: "continuing",
+      reasoning: "first estimate remains stable",
+      basedOnBindingIds: [binding.id],
+    });
+    const secondEstimate = substrate.createStateEstimate({
+      referentId: referent.id,
+      branchId: referentBranch.id,
+      continuity: "continuing",
+      reasoning: "second estimate remains comparable under the same basis",
+      basedOnBindingIds: [binding.id],
+    });
+    const comparison = substrate.createComparisonSurface({
+      label: "consumer-comparison-surface",
+      sourceIds: [firstEstimate.id, secondEstimate.id],
+      basisId: basis.id,
+      projection: "shape-position projection",
+      comparability: "strong",
+      compatibility: "compatible",
+      equivalence: "unresolved",
+      convergence: "not-forced",
+      reasonCodes: ["shared-basis-available", "no-contradiction-under-projection"],
+      evidenceSourceIds: [binding.id, firstEstimate.id, secondEstimate.id],
+      summary: "comparison remains bounded and explicit",
+    });
+    await lab.appendComparisonArtifact({
+      artifact: substrate.createArtifactEnvelope({
+        kind: "comparability-surface",
+        label: "consumer-comparison-artifact",
+        sourceIds: [comparison.id, firstEstimate.id, secondEstimate.id],
+        payloadIds: [comparison.id],
+        provenance: {
+          basisId: basis.id,
+          emitterId: observer.id,
+          source: "generic-consumer-comparison-test",
+        },
+      }),
+      comparison,
+    });
+
+    const picture = await buildGenericConsumerComparisonPicture(lab);
+    assert.equal(picture.version, "v1");
+    assert.deepEqual(picture.comparisons, [
+      {
+        comparisonId: comparison.id,
+        label: "consumer-comparison-surface",
+        sourceIds: [firstEstimate.id, secondEstimate.id],
+        basisId: basis.id,
+        projection: "shape-position projection",
+        comparability: "strong",
+        compatibility: "compatible",
+        equivalence: "unresolved",
+        convergence: "not-forced",
+        reasonCodes: ["shared-basis-available", "no-contradiction-under-projection"],
+        evidenceSourceIds: [binding.id, firstEstimate.id, secondEstimate.id],
+        summary: "comparison remains bounded and explicit",
+      },
+    ]);
+  } finally {
+    await lab.close();
+  }
+});
+
+test("equivalence pressure lab keeps equivalence basis-relative and provisional", async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), "causal-substrate-follow-on-"));
+  const report = await runEquivalencePressureLab({
+    storageDir: directory,
+    namespaceParts: ["equivalence-pressure"],
+    now: () => "2026-04-22T03:20:00.000Z",
+  });
+
+  assert.equal(report.replay.comparisonSurfaces.length, 2);
+  assert.deepEqual(
+    report.observedComparisons.map((entry) => ({
+      label: entry.label,
+      equivalence: entry.equivalence,
+      reasonCodes: entry.reasonCodes,
+    })),
+    [
+      {
+        label: "coarse-equivalence-comparison",
+        equivalence: "strong",
+        reasonCodes: ["coarse-projection-preserves-distinctions", "same-enough-under-projection"],
+      },
+      {
+        label: "rich-equivalence-comparison",
+        equivalence: "unresolved",
+        reasonCodes: ["rich-projection-available", "color-distinction-underdetermined"],
+      },
+    ],
+  );
+});
+
+test("convergence pressure lab keeps convergence as evidence pressure rather than authority", async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), "causal-substrate-follow-on-"));
+  const report = await runConvergencePressureLab({
+    storageDir: directory,
+    namespaceParts: ["convergence-pressure"],
+    now: () => "2026-04-22T03:30:00.000Z",
+  });
+
+  assert.equal(report.replay.comparisonSurfaces.length, 2);
+  assert.deepEqual(
+    report.observedComparisons.map((entry) => ({
+      label: entry.label,
+      convergence: entry.convergence,
+      reasonCodes: entry.reasonCodes,
+    })),
+    [
+      {
+        label: "clustered-convergence-comparison",
+        convergence: "clustered",
+        reasonCodes: ["shared-projection-available", "set-level-clustering-observed"],
+      },
+      {
+        label: "divergent-convergence-comparison",
+        convergence: "divergent",
+        reasonCodes: ["shared-projection-available", "set-level-clustering-broken"],
+      },
+    ],
+  );
 });
 
 test("cross-core reconstruction can summarize known-core replay without Hyperbee", async () => {

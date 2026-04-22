@@ -23,6 +23,14 @@ State estimates remain durable continuity-bearing records in the current Coresto
 
 Comparison surfaces remain representable in the kernel, but they are not yet part of the first-finished-version exchange artifact set either.
 
+Comparison surfaces are now part of the repository's explicit post-finish comparison pressure layer:
+
+- they are replayable
+- they are inspectable
+- they carry basis/projection references, reason codes, and evidence ids
+
+They should still be treated as provisional comparison artifacts rather than as truth-bearing authority surfaces.
+
 ## First Finished Version Artifact Set
 
 For the first finished version, the stable teachable exchange-facing artifact set is:
@@ -40,6 +48,7 @@ The practical split is:
 
 - branch happenings, sleep capsules, and referent-state estimates preserve source continuity
 - exchange artifacts project bounded surfaces derived from that continuity
+- comparison artifacts project bounded comparison pressure derived from continuity evidence
 
 This keeps local continuity and exchange-facing surfaces separate.
 
@@ -95,6 +104,7 @@ Adjacent consumers should rely on:
 
 - explicit exchange artifacts for anything boundary-crossing
 - continuity situation, transition, and inspectability surfaces for bounded explanation
+- comparison artifacts and generic comparison pictures when explicit comparison pressure is needed
 - replay-backed continuity records for deeper inspection when needed
 
 Adjacent consumers should not assume:
@@ -109,5 +119,5 @@ The current formalization does not yet settle:
 
 - final receipt structure
 - cryptographic or signature requirements
-- later exchange forms for state estimates or comparison surfaces
+- later exchange forms for state estimates
 - whether every artifact kind needs its own dedicated wrapper

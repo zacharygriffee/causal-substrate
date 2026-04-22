@@ -1,6 +1,7 @@
 import {
   ArtifactEnvelope,
   Binding,
+  ComparisonSurface,
   Context,
   Happening,
   LineageEdge,
@@ -64,6 +65,7 @@ export interface ReceiptPayload {
 export type ExchangeArtifactPayload =
   | { payloadType: "view"; view: View }
   | { payloadType: "binding"; binding: Binding }
+  | { payloadType: "comparison"; comparison: ComparisonSurface }
   | { payloadType: "context"; context: Context }
   | { payloadType: "portal"; portal: Portal }
   | { payloadType: "lineage-claim"; lineage: LineageEdge }
@@ -390,6 +392,64 @@ function assertBinding(value: unknown, label: string) {
   return candidate as Binding;
 }
 
+function assertComparability(value: unknown, label: string) {
+  if (value !== "none" && value !== "partial" && value !== "strong") {
+    throw new Error(`invalid ${label}: unknown comparability level`);
+  }
+}
+
+function assertCompatibility(value: unknown, label: string) {
+  if (
+    value !== "unknown" &&
+    value !== "compatible" &&
+    value !== "incompatible" &&
+    value !== "unresolved"
+  ) {
+    throw new Error(`invalid ${label}: unknown compatibility level`);
+  }
+}
+
+function assertEquivalence(value: unknown, label: string) {
+  if (
+    value !== undefined &&
+    value !== "none" &&
+    value !== "partial" &&
+    value !== "strong" &&
+    value !== "unresolved"
+  ) {
+    throw new Error(`invalid ${label}: unknown equivalence level`);
+  }
+}
+
+function assertConvergence(value: unknown, label: string) {
+  if (
+    value !== "not-forced" &&
+    value !== "clustered" &&
+    value !== "divergent" &&
+    value !== "unresolved"
+  ) {
+    throw new Error(`invalid ${label}: unknown convergence level`);
+  }
+}
+
+function assertComparisonSurface(value: unknown, label: string) {
+  const candidate = assertObject(value, label) as Partial<ComparisonSurface>;
+  assertString(candidate.id, `${label}.id`);
+  assertString(candidate.label, `${label}.label`);
+  assertStringArray(candidate.sourceIds, `${label}.sourceIds`);
+  assertOptionalString(candidate.basisId, `${label}.basisId`);
+  assertOptionalString(candidate.projection, `${label}.projection`);
+  assertComparability(candidate.comparability, `${label}.comparability`);
+  assertCompatibility(candidate.compatibility, `${label}.compatibility`);
+  assertEquivalence(candidate.equivalence, `${label}.equivalence`);
+  assertConvergence(candidate.convergence, `${label}.convergence`);
+  assertStringArray(candidate.reasonCodes, `${label}.reasonCodes`);
+  assertStringArray(candidate.evidenceSourceIds, `${label}.evidenceSourceIds`);
+  assertOptionalString(candidate.summary, `${label}.summary`);
+  assertRecordMetadata(candidate.metadata, `${label}.metadata`);
+  return candidate as ComparisonSurface;
+}
+
 function assertContext(value: unknown, label: string) {
   const candidate = assertObject(value, label) as Partial<Context>;
   assertString(candidate.id, `${label}.id`);
@@ -498,6 +558,19 @@ function assertExchangePayload(value: unknown, artifact: ArtifactEnvelope) {
     case "binding": {
       const binding = assertBinding(candidate.binding, "exchange-artifact.payload.binding");
       assertArtifactPayloadLink(artifact, binding.id, "binding", "binding");
+      return;
+    }
+    case "comparison": {
+      const comparison = assertComparisonSurface(
+        candidate.comparison,
+        "exchange-artifact.payload.comparison",
+      );
+      assertArtifactPayloadLink(
+        artifact,
+        comparison.id,
+        "comparability-surface",
+        "comparison",
+      );
       return;
     }
     case "context": {

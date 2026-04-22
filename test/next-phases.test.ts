@@ -174,9 +174,13 @@ test("phase-6 and phase-8: artifact envelopes and comparison surfaces carry type
     label: "artifact-comparison",
     sourceIds: [binding.id, estimate.id],
     basisId: basis.id,
+    projection: "shared comparison over binding and estimate evidence",
     comparability: "partial",
     compatibility: "unresolved",
+    equivalence: "unresolved",
     convergence: "not-forced",
+    reasonCodes: ["shared-projection-partial", "compatibility-underdetermined"],
+    evidenceSourceIds: [binding.id, estimate.id],
     summary: "partial comparability without convergence",
   });
   const artifact = substrate.createArtifactEnvelope({

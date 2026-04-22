@@ -652,9 +652,13 @@ export async function runHyperswarmOrthogonalBallTransportLab(
     const comparison = substrate.createComparisonSurface({
       label: "orthogonal-ball-comparison",
       sourceIds: [sideBinding.id, topBinding.id, ball.id],
+      projection: "shared ball projection through orthogonal observer bases",
       comparability: "partial",
       compatibility: "unresolved",
+      equivalence: "unresolved",
       convergence: "not-forced",
+      reasonCodes: ["shared-ball-projection-partial", "observer-bases-diverge"],
+      evidenceSourceIds: [sideBinding.id, topBinding.id, ball.id],
       summary: "Both cameras may be tracking the same ball, but basis mismatch prevents forced agreement.",
     });
     const sideArtifact = substrate.createArtifactEnvelope({

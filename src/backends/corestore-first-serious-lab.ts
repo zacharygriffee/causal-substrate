@@ -1,6 +1,7 @@
 import {
   ArtifactEnvelope,
   Binding,
+  ComparisonSurface,
   Context,
   Happening,
   LineageEdge,
@@ -81,6 +82,12 @@ export interface FirstSeriousCorestoreLabHandle {
     recordedAt?: string | undefined;
     artifact: ArtifactEnvelope;
     binding: Binding;
+  }) => Promise<ExchangeArtifactRecord>;
+  appendComparisonArtifact: (input: {
+    recordId?: string | undefined;
+    recordedAt?: string | undefined;
+    artifact: ArtifactEnvelope;
+    comparison: ComparisonSurface;
   }) => Promise<ExchangeArtifactRecord>;
   appendContextArtifact: (input: {
     recordId?: string | undefined;
@@ -219,6 +226,16 @@ export async function openFirstSeriousCorestoreLab(
         payload: {
           payloadType: "binding",
           binding: input.binding,
+        },
+      }),
+    appendComparisonArtifact: async (input) =>
+      appendExchangeArtifact(handle, {
+        recordId: input.recordId,
+        recordedAt: input.recordedAt,
+        artifact: input.artifact,
+        payload: {
+          payloadType: "comparison",
+          comparison: input.comparison,
         },
       }),
     appendContextArtifact: async (input) =>

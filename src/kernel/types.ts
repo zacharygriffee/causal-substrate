@@ -46,6 +46,7 @@ export type ArtifactKind =
 
 export type ComparabilityLevel = "none" | "partial" | "strong";
 export type CompatibilityLevel = "unknown" | "compatible" | "incompatible" | "unresolved";
+export type EquivalenceLevel = "none" | "partial" | "strong" | "unresolved";
 export type ConvergenceLevel = "not-forced" | "clustered" | "divergent" | "unresolved";
 export type DiscoveryTopicKind =
   | "context-self"
@@ -302,10 +303,14 @@ export interface ComparisonSurface {
   label: string;
   sourceIds: EntityId[];
   basisId?: EntityId;
+  projection?: string;
   comparability: ComparabilityLevel;
   compatibility: CompatibilityLevel;
+  equivalence?: EquivalenceLevel;
   convergence: ConvergenceLevel;
-  summary: string;
+  reasonCodes: string[];
+  evidenceSourceIds: EntityId[];
+  summary?: string;
   metadata?: Record<string, unknown>;
 }
 

@@ -25,6 +25,7 @@ Order:
 17. [Discovery-Bearing Branches](./17-discovery-bearing-branches.md)
 18. [Capability Surfaces](./18-capability-surfaces.md)
 19. [Pulsed Rendezvous](./19-pulsed-rendezvous.md)
+20. [Comparison Surfaces](./20-comparison-surfaces.md)
 
 Practical rule:
 

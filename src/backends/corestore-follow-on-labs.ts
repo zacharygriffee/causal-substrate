@@ -29,6 +29,7 @@ export interface CorestoreReplaySummary {
   artifactSurfaces: ReplayArtifactSurface[];
   contextSurfaces: ReplayContextSurface[];
   portalSurfaces: ReplayPortalSurface[];
+  comparisonSurfaces: ReplayComparisonSurface[];
 }
 
 export interface ReplayBranchSurface {
@@ -93,6 +94,22 @@ export interface ReplayPortalSurface {
   artifactId: string;
 }
 
+export interface ReplayComparisonSurface {
+  comparisonId: string;
+  artifactId: string;
+  label: string;
+  sourceIds: string[];
+  basisId?: string;
+  projection?: string;
+  comparability: string;
+  compatibility: string;
+  equivalence?: string;
+  convergence: string;
+  reasonCodes: string[];
+  evidenceSourceIds: string[];
+  summary?: string;
+}
+
 export interface BranchReplayPicture {
   branchId: string;
   happenings: BranchHappeningRecord[];
@@ -151,6 +168,7 @@ export interface InspectabilityPicture {
   referentClaims: ReferentInspectabilitySurface[];
   contextClaims: ContextInspectabilitySurface[];
   portalClaims: PortalInspectabilitySurface[];
+  comparisonClaims: ComparisonInspectabilitySurface[];
   artifactClaims: ArtifactInspectabilitySurface[];
 }
 
@@ -172,6 +190,22 @@ export interface PortalInspectabilitySurface {
   exposureRule: string;
   artifactId: string;
   transform?: string;
+}
+
+export interface ComparisonInspectabilitySurface {
+  comparisonId: string;
+  artifactId: string;
+  label: string;
+  sourceIds: string[];
+  basisId?: string;
+  projection?: string;
+  comparability: string;
+  compatibility: string;
+  equivalence?: string;
+  convergence: string;
+  reasonCodes: string[];
+  evidenceSourceIds: string[];
+  summary?: string;
 }
 
 export type ContinuitySituationState = StateEstimate["continuity"] | "mixed" | "none";
@@ -298,6 +332,44 @@ export interface ContinuityEvolutionForkLabReport {
     transitionKind: TransitionDecisionKind;
     lineageRelation: string;
   };
+}
+
+export interface ComparisonPressureLabReport {
+  replay: CorestoreReplaySummary;
+  inspectability: InspectabilityPicture;
+  observedComparisons: Array<{
+    comparisonId: string;
+    label: string;
+    comparability: string;
+    compatibility: string;
+    reasonCodes: string[];
+    evidenceSourceIds: string[];
+  }>;
+}
+
+export interface EquivalencePressureLabReport {
+  replay: CorestoreReplaySummary;
+  inspectability: InspectabilityPicture;
+  observedComparisons: Array<{
+    comparisonId: string;
+    label: string;
+    basisId?: string;
+    projection?: string;
+    equivalence?: string;
+    reasonCodes: string[];
+  }>;
+}
+
+export interface ConvergencePressureLabReport {
+  replay: CorestoreReplaySummary;
+  inspectability: InspectabilityPicture;
+  observedComparisons: Array<{
+    comparisonId: string;
+    label: string;
+    convergence: string;
+    reasonCodes: string[];
+    evidenceSourceIds: string[];
+  }>;
 }
 
 export async function runMultiSegmentContinuityLab(
@@ -871,6 +943,491 @@ export async function runContinuityEvolutionForkLab(
   }
 }
 
+export async function runComparisonPressureLab(
+  options: FollowOnLabOptions,
+): Promise<ComparisonPressureLabReport> {
+  const lab = await openFirstSeriousCorestoreLab({
+    storageDir: options.storageDir,
+    namespaceParts: options.namespaceParts,
+  });
+  const substrate = new SubstrateKernel(options.now ? { now: options.now } : {});
+
+  try {
+    const sharedBasis = substrate.createBasis({
+      label: "comparison-shared-basis",
+      dimensions: ["shape", "position"],
+    });
+    const foreignBasis = substrate.createBasis({
+      label: "comparison-foreign-basis",
+      dimensions: ["temperature", "chemical-signature"],
+      partial: true,
+    });
+    const observerA = substrate.createObserver({
+      label: "comparison-observer-a",
+      basisId: sharedBasis.id,
+    });
+    const observerB = substrate.createObserver({
+      label: "comparison-observer-b",
+      basisId: sharedBasis.id,
+    });
+    const observerC = substrate.createObserver({
+      label: "comparison-observer-c",
+      basisId: foreignBasis.id,
+    });
+    const branchA = substrate.createBranch({
+      role: "observer",
+      label: "comparison-branch-a",
+      basisId: sharedBasis.id,
+      observerId: observerA.id,
+    });
+    const branchB = substrate.createBranch({
+      role: "observer",
+      label: "comparison-branch-b",
+      basisId: sharedBasis.id,
+      observerId: observerB.id,
+    });
+    const branchC = substrate.createBranch({
+      role: "observer",
+      label: "comparison-branch-c",
+      basisId: foreignBasis.id,
+      observerId: observerC.id,
+    });
+    const referentBranch = substrate.createBranch({
+      role: "referent",
+      label: "comparison-ball-branch",
+      basisId: sharedBasis.id,
+    });
+    const ball = substrate.createReferent({
+      label: "comparison-ball",
+      anchor: "comparison-ball-anchor",
+      branchId: referentBranch.id,
+    });
+
+    const bindingA = substrate.createBinding({
+      kind: "tracking",
+      observerBranchId: branchA.id,
+      referentBranchId: referentBranch.id,
+      referentId: ball.id,
+    });
+    const bindingB = substrate.createBinding({
+      kind: "tracking",
+      observerBranchId: branchB.id,
+      referentBranchId: referentBranch.id,
+      referentId: ball.id,
+    });
+    const bindingC = substrate.createBinding({
+      kind: "tracking",
+      observerBranchId: branchC.id,
+      referentBranchId: referentBranch.id,
+      referentId: ball.id,
+    });
+
+    const estimateA = substrate.createStateEstimate({
+      referentId: ball.id,
+      branchId: referentBranch.id,
+      continuity: "continuing",
+      reasoning: "observer A keeps a stable shared-basis judgment",
+      basedOnBindingIds: [bindingA.id],
+    });
+    const estimateB = substrate.createStateEstimate({
+      referentId: ball.id,
+      branchId: referentBranch.id,
+      continuity: "continuing",
+      reasoning: "observer B agrees under the same shared basis",
+      basedOnBindingIds: [bindingB.id],
+    });
+    const estimateConflict = substrate.createStateEstimate({
+      referentId: ball.id,
+      branchId: referentBranch.id,
+      continuity: "broken",
+      reasoning: "observer B now carries a contradictory shared-basis claim",
+      basedOnBindingIds: [bindingB.id],
+    });
+    const estimateForeign = substrate.createStateEstimate({
+      referentId: ball.id,
+      branchId: referentBranch.id,
+      continuity: "ambiguous",
+      reasoning: "observer C tracks with foreign basis dimensions only",
+      basedOnBindingIds: [bindingC.id],
+    });
+
+    const compatibleComparison = substrate.createComparisonSurface({
+      label: "shared-basis-compatible-comparison",
+      sourceIds: [estimateA.id, estimateB.id],
+      basisId: sharedBasis.id,
+      projection: "shared shape-position projection",
+      comparability: "strong",
+      compatibility: "compatible",
+      equivalence: "unresolved",
+      convergence: "not-forced",
+      reasonCodes: ["shared-basis-available", "no-contradiction-under-projection"],
+      evidenceSourceIds: [bindingA.id, bindingB.id, estimateA.id, estimateB.id],
+      summary: "two shared-basis estimates remain comparable and compatible",
+    });
+    await lab.appendComparisonArtifact({
+      artifact: substrate.createArtifactEnvelope({
+        kind: "comparability-surface",
+        label: "shared-basis-compatible-artifact",
+        sourceIds: [compatibleComparison.id, estimateA.id, estimateB.id],
+        payloadIds: [compatibleComparison.id],
+        provenance: {
+          basisId: sharedBasis.id,
+          emitterId: observerA.id,
+          source: "comparison-pressure-lab",
+        },
+      }),
+      comparison: compatibleComparison,
+    });
+
+    const incompatibleComparison = substrate.createComparisonSurface({
+      label: "shared-basis-incompatible-comparison",
+      sourceIds: [estimateA.id, estimateConflict.id],
+      basisId: sharedBasis.id,
+      projection: "shared shape-position projection",
+      comparability: "strong",
+      compatibility: "incompatible",
+      equivalence: "none",
+      convergence: "divergent",
+      reasonCodes: ["shared-basis-available", "contradictory-continuity-claim"],
+      evidenceSourceIds: [bindingA.id, bindingB.id, estimateA.id, estimateConflict.id],
+      summary: "shared-basis comparison reveals contradiction rather than coexistence",
+    });
+    await lab.appendComparisonArtifact({
+      artifact: substrate.createArtifactEnvelope({
+        kind: "comparability-surface",
+        label: "shared-basis-incompatible-artifact",
+        sourceIds: [incompatibleComparison.id, estimateA.id, estimateConflict.id],
+        payloadIds: [incompatibleComparison.id],
+        provenance: {
+          basisId: sharedBasis.id,
+          emitterId: observerB.id,
+          source: "comparison-pressure-lab",
+        },
+      }),
+      comparison: incompatibleComparison,
+    });
+
+    const incomparableComparison = substrate.createComparisonSurface({
+      label: "foreign-basis-incomparable-comparison",
+      sourceIds: [estimateA.id, estimateForeign.id],
+      basisId: foreignBasis.id,
+      comparability: "none",
+      compatibility: "unknown",
+      equivalence: "unresolved",
+      convergence: "not-forced",
+      reasonCodes: ["no-shared-projection"],
+      evidenceSourceIds: [bindingA.id, bindingC.id, estimateA.id, estimateForeign.id],
+      summary: "comparison is not claimed because no useful shared projection is available",
+    });
+    await lab.appendComparisonArtifact({
+      artifact: substrate.createArtifactEnvelope({
+        kind: "comparability-surface",
+        label: "foreign-basis-incomparable-artifact",
+        sourceIds: [incomparableComparison.id, estimateA.id, estimateForeign.id],
+        payloadIds: [incomparableComparison.id],
+        provenance: {
+          basisId: foreignBasis.id,
+          emitterId: observerC.id,
+          source: "comparison-pressure-lab",
+        },
+      }),
+      comparison: incomparableComparison,
+    });
+
+    const replay = await reconstructLocalPicture(lab);
+    const inspectability = await reconstructInspectabilityPicture(lab);
+
+    return {
+      replay,
+      inspectability,
+      observedComparisons: replay.comparisonSurfaces.map((surface) => ({
+        comparisonId: surface.comparisonId,
+        label: surface.label,
+        comparability: surface.comparability,
+        compatibility: surface.compatibility,
+        reasonCodes: [...surface.reasonCodes],
+        evidenceSourceIds: [...surface.evidenceSourceIds],
+      })),
+    };
+  } finally {
+    await lab.close();
+  }
+}
+
+export async function runEquivalencePressureLab(
+  options: FollowOnLabOptions,
+): Promise<EquivalencePressureLabReport> {
+  const lab = await openFirstSeriousCorestoreLab({
+    storageDir: options.storageDir,
+    namespaceParts: options.namespaceParts,
+  });
+  const substrate = new SubstrateKernel(options.now ? { now: options.now } : {});
+
+  try {
+    const richBasis = substrate.createBasis({
+      label: "equivalence-rich-basis",
+      dimensions: ["shape", "color", "position"],
+    });
+    const coarseBasis = substrate.createBasis({
+      label: "equivalence-coarse-basis",
+      dimensions: ["shape", "position"],
+      partial: true,
+      projectedFrom: [richBasis.id],
+    });
+    const observer = substrate.createObserver({
+      label: "equivalence-observer",
+      basisId: richBasis.id,
+    });
+    const branch = substrate.createBranch({
+      role: "observer",
+      label: "equivalence-observer-branch",
+      basisId: richBasis.id,
+      observerId: observer.id,
+    });
+    const referentBranch = substrate.createBranch({
+      role: "referent",
+      label: "equivalence-referent-branch",
+      basisId: richBasis.id,
+    });
+    const referent = substrate.createReferent({
+      label: "equivalence-cube",
+      anchor: "equivalence-cube-anchor",
+      branchId: referentBranch.id,
+    });
+    const binding = substrate.createBinding({
+      kind: "tracking",
+      observerBranchId: branch.id,
+      referentBranchId: referentBranch.id,
+      referentId: referent.id,
+    });
+    const firstEstimate = substrate.createStateEstimate({
+      referentId: referent.id,
+      branchId: referentBranch.id,
+      continuity: "continuing",
+      reasoning: "first observation preserves coarse and rich distinctions",
+      basedOnBindingIds: [binding.id],
+    });
+    const secondEstimate = substrate.createStateEstimate({
+      referentId: referent.id,
+      branchId: referentBranch.id,
+      continuity: "continuing",
+      reasoning: "second observation preserves shape and position but color remains uncertain",
+      basedOnBindingIds: [binding.id],
+    });
+
+    const coarseComparison = substrate.createComparisonSurface({
+      label: "coarse-equivalence-comparison",
+      sourceIds: [firstEstimate.id, secondEstimate.id],
+      basisId: coarseBasis.id,
+      projection: "shape-position coarse projection",
+      comparability: "strong",
+      compatibility: "compatible",
+      equivalence: "strong",
+      convergence: "not-forced",
+      reasonCodes: ["coarse-projection-preserves-distinctions", "same-enough-under-projection"],
+      evidenceSourceIds: [binding.id, firstEstimate.id, secondEstimate.id],
+      summary: "coarse projection supports same-enough judgment without settling identity globally",
+    });
+    await lab.appendComparisonArtifact({
+      artifact: substrate.createArtifactEnvelope({
+        kind: "comparability-surface",
+        label: "coarse-equivalence-artifact",
+        sourceIds: [coarseComparison.id, firstEstimate.id, secondEstimate.id],
+        payloadIds: [coarseComparison.id],
+        provenance: {
+          basisId: coarseBasis.id,
+          emitterId: observer.id,
+          source: "equivalence-pressure-lab",
+        },
+      }),
+      comparison: coarseComparison,
+    });
+
+    const richComparison = substrate.createComparisonSurface({
+      label: "rich-equivalence-comparison",
+      sourceIds: [firstEstimate.id, secondEstimate.id],
+      basisId: richBasis.id,
+      projection: "shape-color-position rich projection",
+      comparability: "strong",
+      compatibility: "compatible",
+      equivalence: "unresolved",
+      convergence: "not-forced",
+      reasonCodes: ["rich-projection-available", "color-distinction-underdetermined"],
+      evidenceSourceIds: [binding.id, firstEstimate.id, secondEstimate.id],
+      summary: "richer basis keeps equivalence provisional instead of collapsing to identity",
+    });
+    await lab.appendComparisonArtifact({
+      artifact: substrate.createArtifactEnvelope({
+        kind: "comparability-surface",
+        label: "rich-equivalence-artifact",
+        sourceIds: [richComparison.id, firstEstimate.id, secondEstimate.id],
+        payloadIds: [richComparison.id],
+        provenance: {
+          basisId: richBasis.id,
+          emitterId: observer.id,
+          source: "equivalence-pressure-lab",
+        },
+      }),
+      comparison: richComparison,
+    });
+
+    const replay = await reconstructLocalPicture(lab);
+    const inspectability = await reconstructInspectabilityPicture(lab);
+
+    return {
+      replay,
+      inspectability,
+      observedComparisons: replay.comparisonSurfaces.map((surface) => ({
+        comparisonId: surface.comparisonId,
+        label: surface.label,
+        reasonCodes: [...surface.reasonCodes],
+        ...(surface.basisId ? { basisId: surface.basisId } : {}),
+        ...(surface.projection ? { projection: surface.projection } : {}),
+        ...(surface.equivalence ? { equivalence: surface.equivalence } : {}),
+      })),
+    };
+  } finally {
+    await lab.close();
+  }
+}
+
+export async function runConvergencePressureLab(
+  options: FollowOnLabOptions,
+): Promise<ConvergencePressureLabReport> {
+  const lab = await openFirstSeriousCorestoreLab({
+    storageDir: options.storageDir,
+    namespaceParts: options.namespaceParts,
+  });
+  const substrate = new SubstrateKernel(options.now ? { now: options.now } : {});
+
+  try {
+    const basis = substrate.createBasis({
+      label: "convergence-basis",
+      dimensions: ["shape", "position", "motion"],
+    });
+    const observer = substrate.createObserver({
+      label: "convergence-observer",
+      basisId: basis.id,
+    });
+    const branch = substrate.createBranch({
+      role: "observer",
+      label: "convergence-observer-branch",
+      basisId: basis.id,
+      observerId: observer.id,
+    });
+    const referentBranch = substrate.createBranch({
+      role: "referent",
+      label: "convergence-referent-branch",
+      basisId: basis.id,
+    });
+    const referent = substrate.createReferent({
+      label: "convergence-ball",
+      anchor: "convergence-ball-anchor",
+      branchId: referentBranch.id,
+    });
+    const binding = substrate.createBinding({
+      kind: "tracking",
+      observerBranchId: branch.id,
+      referentBranchId: referentBranch.id,
+      referentId: referent.id,
+    });
+    const estimateA = substrate.createStateEstimate({
+      referentId: referent.id,
+      branchId: referentBranch.id,
+      continuity: "continuing",
+      reasoning: "first witness stays aligned with the tracked ball",
+      basedOnBindingIds: [binding.id],
+    });
+    const estimateB = substrate.createStateEstimate({
+      referentId: referent.id,
+      branchId: referentBranch.id,
+      continuity: "continuing",
+      reasoning: "second witness still clusters around the same candidate ball",
+      basedOnBindingIds: [binding.id],
+    });
+    const estimateC = substrate.createStateEstimate({
+      referentId: referent.id,
+      branchId: referentBranch.id,
+      continuity: "broken",
+      reasoning: "third witness diverges sharply from the clustered reading",
+      basedOnBindingIds: [binding.id],
+    });
+
+    const clusteredComparison = substrate.createComparisonSurface({
+      label: "clustered-convergence-comparison",
+      sourceIds: [estimateA.id, estimateB.id],
+      basisId: basis.id,
+      projection: "shared motion-shape projection",
+      comparability: "strong",
+      compatibility: "compatible",
+      equivalence: "unresolved",
+      convergence: "clustered",
+      reasonCodes: ["shared-projection-available", "set-level-clustering-observed"],
+      evidenceSourceIds: [binding.id, estimateA.id, estimateB.id],
+      summary: "several claims cluster, but the cluster remains evidence rather than authority",
+    });
+    await lab.appendComparisonArtifact({
+      artifact: substrate.createArtifactEnvelope({
+        kind: "comparability-surface",
+        label: "clustered-convergence-artifact",
+        sourceIds: [clusteredComparison.id, estimateA.id, estimateB.id],
+        payloadIds: [clusteredComparison.id],
+        provenance: {
+          basisId: basis.id,
+          emitterId: observer.id,
+          source: "convergence-pressure-lab",
+        },
+      }),
+      comparison: clusteredComparison,
+    });
+
+    const divergentComparison = substrate.createComparisonSurface({
+      label: "divergent-convergence-comparison",
+      sourceIds: [estimateA.id, estimateC.id],
+      basisId: basis.id,
+      projection: "shared motion-shape projection",
+      comparability: "strong",
+      compatibility: "incompatible",
+      equivalence: "none",
+      convergence: "divergent",
+      reasonCodes: ["shared-projection-available", "set-level-clustering-broken"],
+      evidenceSourceIds: [binding.id, estimateA.id, estimateC.id],
+      summary: "divergence is recorded as pressure, not as a truth verdict",
+    });
+    await lab.appendComparisonArtifact({
+      artifact: substrate.createArtifactEnvelope({
+        kind: "comparability-surface",
+        label: "divergent-convergence-artifact",
+        sourceIds: [divergentComparison.id, estimateA.id, estimateC.id],
+        payloadIds: [divergentComparison.id],
+        provenance: {
+          basisId: basis.id,
+          emitterId: observer.id,
+          source: "convergence-pressure-lab",
+        },
+      }),
+      comparison: divergentComparison,
+    });
+
+    const replay = await reconstructLocalPicture(lab);
+    const inspectability = await reconstructInspectabilityPicture(lab);
+
+    return {
+      replay,
+      inspectability,
+      observedComparisons: replay.comparisonSurfaces.map((surface) => ({
+        comparisonId: surface.comparisonId,
+        label: surface.label,
+        convergence: surface.convergence,
+        reasonCodes: [...surface.reasonCodes],
+        evidenceSourceIds: [...surface.evidenceSourceIds],
+      })),
+    };
+  } finally {
+    await lab.close();
+  }
+}
+
 export async function reconstructLocalPicture(
   lab: Pick<
     FirstSeriousCorestoreLabHandle,
@@ -968,6 +1525,11 @@ export async function reconstructLocalPicture(
       ? [toReplayPortalSurface(record.artifact.id, record.payload.portal)]
       : [],
   );
+  const comparisonSurfaces = exchangeArtifacts.flatMap((record) =>
+    record.payload.payloadType === "comparison"
+      ? [toReplayComparisonSurface(record.artifact.id, record.payload.comparison)]
+      : [],
+  );
 
   return {
     namespaceParts: lab.handle.namespaceParts,
@@ -985,6 +1547,7 @@ export async function reconstructLocalPicture(
     artifactSurfaces,
     contextSurfaces,
     portalSurfaces,
+    comparisonSurfaces,
   };
 }
 
@@ -1117,6 +1680,11 @@ export async function reconstructInspectabilityPicture(
       ? [toPortalInspectabilitySurface(record.artifact.id, record.payload.portal)]
       : [],
   );
+  const comparisonClaims = exchangeArtifacts.flatMap((record) =>
+    record.payload.payloadType === "comparison"
+      ? [toComparisonInspectabilitySurface(record.artifact.id, record.payload.comparison)]
+      : [],
+  );
 
   return {
     namespaceParts: lab.handle.namespaceParts,
@@ -1124,6 +1692,7 @@ export async function reconstructInspectabilityPicture(
     referentClaims,
     contextClaims,
     portalClaims,
+    comparisonClaims,
     artifactClaims,
   };
 }
@@ -1464,6 +2033,8 @@ function getPayloadId(payload: ExchangeArtifactPayload): string {
       return payload.view.id;
     case "binding":
       return payload.binding.id;
+    case "comparison":
+      return payload.comparison.id;
     case "context":
       return payload.context.id;
     case "portal":
@@ -1485,6 +2056,8 @@ function getPayloadSourceIds(payload: ExchangeArtifactPayload): string[] {
         payload.binding.referentBranchId,
         payload.binding.referentId,
       ];
+    case "comparison":
+      return [...payload.comparison.sourceIds];
     case "context":
       return [
         payload.context.branchId,
@@ -1509,6 +2082,8 @@ function describeArtifactPayload(payload: ExchangeArtifactPayload): string {
       return `derived view: ${payload.view.label}`;
     case "binding":
       return `binding from ${payload.binding.observerBranchId} to ${payload.binding.referentId}`;
+    case "comparison":
+      return `comparison ${payload.comparison.comparability}/${payload.comparison.compatibility}`;
     case "context":
       return `context declaration: ${payload.context.label}`;
     case "portal":
@@ -1518,6 +2093,80 @@ function describeArtifactPayload(payload: ExchangeArtifactPayload): string {
     case "receipt":
       return payload.receipt.summary;
   }
+}
+
+function toReplayComparisonSurface(
+  artifactId: string,
+  comparison: {
+    id: string;
+    label: string;
+    sourceIds: string[];
+    basisId?: string;
+    projection?: string;
+    comparability: string;
+    compatibility: string;
+    equivalence?: string;
+    convergence: string;
+    reasonCodes: string[];
+    evidenceSourceIds: string[];
+    summary?: string;
+  },
+): ReplayComparisonSurface {
+  return compact<ReplayComparisonSurface>({
+    comparisonId: comparison.id,
+    artifactId,
+    label: comparison.label,
+    sourceIds: [...comparison.sourceIds],
+    basisId: comparison.basisId,
+    projection: comparison.projection,
+    comparability: comparison.comparability,
+    compatibility: comparison.compatibility,
+    equivalence: comparison.equivalence,
+    convergence: comparison.convergence,
+    reasonCodes: [...comparison.reasonCodes],
+    evidenceSourceIds: [...comparison.evidenceSourceIds],
+    summary: comparison.summary,
+  });
+}
+
+function toComparisonInspectabilitySurface(
+  artifactId: string,
+  comparison: {
+    id: string;
+    label: string;
+    sourceIds: string[];
+    basisId?: string;
+    projection?: string;
+    comparability: string;
+    compatibility: string;
+    equivalence?: string;
+    convergence: string;
+    reasonCodes: string[];
+    evidenceSourceIds: string[];
+    summary?: string;
+  },
+): ComparisonInspectabilitySurface {
+  return compact<ComparisonInspectabilitySurface>({
+    comparisonId: comparison.id,
+    artifactId,
+    label: comparison.label,
+    sourceIds: [...comparison.sourceIds],
+    basisId: comparison.basisId,
+    projection: comparison.projection,
+    comparability: comparison.comparability,
+    compatibility: comparison.compatibility,
+    equivalence: comparison.equivalence,
+    convergence: comparison.convergence,
+    reasonCodes: [...comparison.reasonCodes],
+    evidenceSourceIds: [...comparison.evidenceSourceIds],
+    summary: comparison.summary,
+  });
+}
+
+function compact<T extends object>(value: Record<string, unknown>): T {
+  return Object.fromEntries(
+    Object.entries(value).filter(([, entry]) => entry !== undefined),
+  ) as T;
 }
 
 function toReplayContextSurface(

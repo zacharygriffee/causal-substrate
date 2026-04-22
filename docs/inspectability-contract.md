@@ -27,6 +27,7 @@ The current Corestore-backed inspectability surfaces are:
 - compact continuity situation surfaces
 - compact transition decision surfaces
 - generic consumer continuity pictures built from persisted continuity, referent, and transition records
+- replay-backed comparison claims and generic consumer comparison pictures
 - time-ordered context and portal replay with primary-context resolution over time
 
 These are reconstruction helpers, not authoritative truth engines.
@@ -42,6 +43,7 @@ The current implementation is already strong enough to preserve:
 - compact replay-backed explanation of the current continuity situation
 - compact replay-backed explanation of `stay`, `branch`, `cross-context`, and `ambiguous` transition outcomes
 - compact consumer-facing answers to what is active, what changed, and why
+- bounded explanation of comparison pressure through basis/projection references, reason codes, and evidence ids
 - time-ordered replay of context and portal claims across wake/sleep boundaries
 - replay from known cores without Hyperbee
 - replica catch-up and later reconstruction without hidden indexing assumptions
@@ -53,7 +55,7 @@ The current inspectability posture is still incomplete in several ways:
 - there is no dedicated explanation artifact contract beyond current replay helpers
 - there is no durable inspectability view taxonomy yet
 - artifact summaries are still helper-derived rather than standardized payload contracts
-- no inspectability surface yet explains comparison surfaces, compatibility, or convergence evidence
+- comparison strategy itself remains outside the substrate even though comparison claims are now inspectable
 
 ## Current rule for future work
 

@@ -137,10 +137,14 @@ export interface CreateComparisonSurfaceInput {
   label: string;
   sourceIds: string[];
   basisId?: string;
+  projection?: string;
   comparability: ComparisonSurface["comparability"];
   compatibility: ComparisonSurface["compatibility"];
+  equivalence?: ComparisonSurface["equivalence"];
   convergence: ComparisonSurface["convergence"];
-  summary: string;
+  reasonCodes: string[];
+  evidenceSourceIds: string[];
+  summary?: string;
   metadata?: Record<string, unknown>;
 }
 
@@ -604,8 +608,12 @@ export class Substrate {
 
   createComparisonSurface(input: CreateComparisonSurfaceInput): ComparisonSurface {
     this.requireKnownIds(input.sourceIds, "comparison surface source");
+    this.requireKnownIds(input.evidenceSourceIds, "comparison surface evidence");
     if (input.basisId) {
       this.requireBasis(input.basisId);
+    }
+    if (input.reasonCodes.length === 0) {
+      throw new Error("comparison surface reasonCodes must not be empty");
     }
 
     const surface = compact<ComparisonSurface>({
@@ -613,9 +621,13 @@ export class Substrate {
       label: input.label,
       sourceIds: [...input.sourceIds],
       basisId: input.basisId,
+      projection: input.projection,
       comparability: input.comparability,
       compatibility: input.compatibility,
+      equivalence: input.equivalence,
       convergence: input.convergence,
+      reasonCodes: [...input.reasonCodes],
+      evidenceSourceIds: [...input.evidenceSourceIds],
       summary: input.summary,
       metadata: input.metadata,
     });

@@ -120,6 +120,7 @@ It should expose:
 - current continuity situation
 - current active referents with bounded reasoning
 - optional recent transition summary
+- optional bounded comparison picture when explicit comparison pressure matters
 
 It may include:
 
@@ -132,6 +133,7 @@ It should not include:
 - operator policy
 - transport ownership
 - app-specific vocabulary from Edge, Virtualia, or any other adjacent repo
+- consumer-specific comparison scoring policy
 
 ## Anti-patterns
 
