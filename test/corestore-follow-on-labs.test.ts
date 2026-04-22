@@ -6,6 +6,7 @@ import test from "node:test";
 
 import {
   activeManagedCorestoreCount,
+  buildGenericConsumerContinuityPicture,
   openFirstSeriousCorestoreLab,
   reconstructBranchPicture,
   reconstructContinuitySituation,
@@ -15,6 +16,7 @@ import {
   reconstructReferentPicture,
   reconstructTransitionDecision,
   Substrate,
+  runContinuityEvolutionForkLab,
   runExchangeArtifactLab,
   runMultiSegmentContinuityLab,
   runReferentTrackingLab,
@@ -95,6 +97,279 @@ test("exchange artifact lab emits explicit view, binding, lineage claim, and rec
   );
   assert.deepEqual(report.replay.contextSurfaces, []);
   assert.deepEqual(report.replay.portalSurfaces, []);
+});
+
+test("continuity evolution and fork lab produces a replay-backed observable narrative for basis revision and successor birth", async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), "causal-substrate-follow-on-"));
+  const report = await runContinuityEvolutionForkLab({
+    storageDir: directory,
+    namespaceParts: ["continuity-evolution-fork"],
+    now: () => "2026-04-22T01:00:00.000Z",
+  });
+
+  assert.equal(report.summary.continuityShift.from, "continuing");
+  assert.equal(report.summary.continuityShift.to, "ambiguous");
+  assert.equal(report.summary.transitionKind, "ambiguous");
+  assert.equal(report.summary.lineageRelation, "split");
+  assert.equal(report.replay.branchSurfaces.length, 2);
+  assert.equal(report.replay.branchHappeningCount, 3);
+  assert.equal(report.replay.sleepCapsuleCount, 2);
+  assert.deepEqual(
+    report.observedNarrative.map((entry) => entry.step),
+    ["basis-revision", "fork"],
+  );
+  assert.match(
+    report.observedNarrative[0]?.explanation ?? "",
+    /same observer branch remained active/i,
+  );
+  assert.match(
+    report.observedNarrative[1]?.explanation ?? "",
+    /successor branch carries the source nucleus forward/i,
+  );
+  assert.deepEqual(
+    report.evolvingBranchPicture.happenings.map((record) => record.recordId),
+    ["finish-line-evolution-happening-1", "finish-line-evolution-happening-2"],
+  );
+  assert.deepEqual(
+    report.forkedBranchPicture.happenings.map((record) => record.recordId),
+    ["finish-line-evolution-happening-3"],
+  );
+  assert.deepEqual(
+    report.forkedBranchPicture.sleepCapsules[0]?.segment.inheritedNucleusIds,
+    [report.summary.sourceNucleusId],
+  );
+  assert.equal(
+    report.forkedBranchPicture.sleepCapsules[0]?.nucleus.id,
+    report.summary.inheritedNucleusId,
+  );
+  assert.deepEqual(report.transition.reasonCodes, ["target-situation-ambiguous"]);
+  assert.ok(
+    report.inspectability.artifactClaims.some(
+      (claim) =>
+        claim.payloadType === "view" &&
+        claim.summary === "derived view: basis-revision-surface",
+    ),
+  );
+  assert.ok(
+    report.replay.artifactSurfaces.some(
+      (surface) =>
+        surface.payloadType === "lineage-claim" &&
+        surface.summary ===
+          `lineage split from ${report.summary.evolvingBranchId} to ${report.summary.forkedBranchId}`,
+    ),
+  );
+});
+
+test("generic consumer continuity picture answers what is active, what changed, and why without app-specific vocabulary", async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), "causal-substrate-follow-on-"));
+  const lab = await openFirstSeriousCorestoreLab({
+    storageDir: directory,
+    namespaceParts: ["generic-consumer-continuity-picture"],
+  });
+  const substrate = new Substrate({
+    now: () => "2026-04-22T02:00:00.000Z",
+  });
+
+  try {
+    const basis = substrate.createBasis({
+      label: "generic-consumer-basis",
+      dimensions: ["shape", "position", "containment"],
+    });
+    const observer = substrate.createObserver({
+      label: "generic-consumer-observer",
+      basisId: basis.id,
+    });
+    const roomBranch = substrate.createBranch({
+      role: "context",
+      label: "generic-room-branch",
+      basisId: basis.id,
+    });
+    const room = substrate.createContext({
+      branchId: roomBranch.id,
+      label: "room",
+      containmentPolicy: "primary-situated",
+    });
+    const hallwayBranch = substrate.createBranch({
+      role: "context",
+      label: "generic-hallway-branch",
+      basisId: basis.id,
+    });
+    const hallway = substrate.createContext({
+      branchId: hallwayBranch.id,
+      label: "hallway",
+      containmentPolicy: "candidate",
+    });
+    const observerBranch = substrate.createBranch({
+      role: "observer",
+      label: "generic-consumer-observer-branch",
+      basisId: basis.id,
+      observerId: observer.id,
+      contextId: room.id,
+    });
+    const portalBranch = substrate.createBranch({
+      role: "portal",
+      label: "generic-doorway-branch",
+      basisId: basis.id,
+      contextId: room.id,
+    });
+    const portal = substrate.createPortal({
+      branchId: portalBranch.id,
+      label: "generic-doorway",
+      sourceContextId: hallway.id,
+      targetContextId: room.id,
+      exposureRule: "motion only",
+    });
+    const referentBranch = substrate.createBranch({
+      role: "referent",
+      label: "generic-ball-branch",
+      basisId: basis.id,
+      contextId: room.id,
+    });
+    const referent = substrate.createReferent({
+      label: "generic-ball",
+      anchor: "generic-ball-anchor",
+      branchId: referentBranch.id,
+    });
+    const binding = substrate.createBinding({
+      kind: "tracking",
+      observerBranchId: observerBranch.id,
+      referentBranchId: referentBranch.id,
+      referentId: referent.id,
+    });
+    const inertia = substrate.createInertiaModel({
+      label: "consumer-persistent-object",
+      strategy: "absence alone should not immediately break continuity",
+    });
+    const volatility = substrate.createVolatilityModel({
+      label: "consumer-busy-room",
+      expectedRate: "medium",
+    });
+
+    const segment = substrate.openSegment({
+      branchId: observerBranch.id,
+      inheritedNucleusIds: [],
+      summary: "generic consumer continuity wake",
+    });
+    await lab.appendBranchHappening({
+      branchId: observerBranch.id,
+      segmentId: segment.id,
+      happening: {
+        id: "generic-consumer-happening-1",
+        branchId: observerBranch.id,
+        segmentId: segment.id,
+        label: "ball observed in room",
+        triggerIds: [],
+        observedAt: "2026-04-22T02:00:00.000Z",
+      },
+    });
+    const roomArtifact = substrate.createArtifactEnvelope({
+      kind: "context-surface",
+      label: "generic-room-artifact",
+      sourceIds: [roomBranch.id],
+      payloadIds: [room.id],
+      provenance: {
+        emittedAt: "2026-04-22T02:00:00.000Z",
+        basisId: basis.id,
+        emitterId: observer.id,
+        source: "generic-consumer-continuity-test",
+      },
+    });
+    await lab.appendContextArtifact({
+      artifact: roomArtifact,
+      context: room,
+    });
+    const doorwayArtifact = substrate.createArtifactEnvelope({
+      kind: "portal-surface",
+      label: "generic-doorway-artifact",
+      sourceIds: [portalBranch.id, hallway.id, room.id],
+      payloadIds: [portal.id],
+      provenance: {
+        emittedAt: "2026-04-22T02:00:05.000Z",
+        basisId: basis.id,
+        emitterId: observer.id,
+        source: "generic-consumer-continuity-test",
+      },
+    });
+    await lab.appendPortalArtifact({
+      artifact: doorwayArtifact,
+      portal,
+    });
+    await lab.appendReferentState({
+      referent,
+      estimate: {
+        id: "generic-consumer-estimate-1",
+        referentId: referent.id,
+        branchId: referentBranch.id,
+        estimatedAt: "2026-04-22T02:00:10.000Z",
+        continuity: "continuing",
+        reasoning: "ball remains plausibly present under moderate absence pressure",
+        basedOnBindingIds: [binding.id],
+        inertiaModelId: inertia.id,
+        volatilityModelId: volatility.id,
+      },
+    });
+    await lab.appendReferentState({
+      referent,
+      estimate: {
+        id: "generic-consumer-estimate-2",
+        referentId: referent.id,
+        branchId: referentBranch.id,
+        estimatedAt: "2026-04-22T02:00:20.000Z",
+        continuity: "ambiguous",
+        reasoning: "continued absence under moderate volatility leaves continuity unresolved",
+        basedOnBindingIds: [binding.id],
+        inertiaModelId: inertia.id,
+        volatilityModelId: volatility.id,
+      },
+    });
+
+    const picture = await buildGenericConsumerContinuityPicture({
+      lab,
+      asOf: "2026-04-22T02:00:20.000Z",
+      transitionWindow: {
+        fromAsOf: "2026-04-22T02:00:10.000Z",
+        toAsOf: "2026-04-22T02:00:20.000Z",
+      },
+    });
+
+    assert.equal(picture.version, "v1");
+    assert.equal(picture.situation.primaryBranchId, observerBranch.id);
+    assert.equal(picture.situation.primaryContextId, room.id);
+    assert.deepEqual(picture.situation.portalVisibleContextIds, [hallway.id]);
+    assert.deepEqual(picture.situation.activeReferentIds, [referent.id]);
+    assert.equal(picture.situation.continuityState, "ambiguous");
+    assert.equal(picture.situation.ambiguityState, "continuity");
+    assert.ok(
+      picture.situation.reasonCodes.includes("continuity-ambiguity-present"),
+    );
+    assert.deepEqual(picture.referents, [
+      {
+        referentId: referent.id,
+        branchId: referentBranch.id,
+        continuity: "ambiguous",
+        reasoning: "continued absence under moderate volatility leaves continuity unresolved",
+        estimatedAt: "2026-04-22T02:00:20.000Z",
+        basedOnBindingIds: [binding.id],
+        inertiaModelId: inertia.id,
+        volatilityModelId: volatility.id,
+      },
+    ]);
+    assert.deepEqual(picture.transition, {
+      fromAsOf: "2026-04-22T02:00:10.000Z",
+      toAsOf: "2026-04-22T02:00:20.000Z",
+      transitionKind: "ambiguous",
+      reasonCodes: ["target-situation-ambiguous"],
+      evidenceSourceIds: [
+        "generic-consumer-happening-1",
+        roomArtifact.id,
+        doorwayArtifact.id,
+        "generic-consumer-estimate-1",
+        "generic-consumer-estimate-2",
+      ],
+    });
+  } finally {
+    await lab.close();
+  }
 });
 
 test("cross-core reconstruction can summarize known-core replay without Hyperbee", async () => {

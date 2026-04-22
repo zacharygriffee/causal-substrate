@@ -30,6 +30,8 @@ The current repository posture is intentionally conservative. The kernel encodes
 - [`docs/doctrine-notes/`](./docs/doctrine-notes/README.md): ordered focused doctrine notes that tighten each hole enough for lab and implementation work
 - [`docs/stable-posture.md`](./docs/stable-posture.md): current settled, open, and deferred posture in one teachable entrypoint
 - [`docs/inspectability-contract.md`](./docs/inspectability-contract.md): current bounded explanation contract and the remaining inspectability gaps
+- [`docs/first-finished-version.md`](./docs/first-finished-version.md): what the first finished version establishes, what it leaves open, and what is deferred
+- [`docs/transport-finish-line.md`](./docs/transport-finish-line.md): what transport proves for the first finished version and what remains supplementary
 - [`docs/doctrine-notes/15-peer-observer-operator-boundary.md`](./docs/doctrine-notes/15-peer-observer-operator-boundary.md): transport/runtime versus continuity versus coordination boundary
 - [`docs/doctrine-notes/16-preservation-vs-branch-promotion.md`](./docs/doctrine-notes/16-preservation-vs-branch-promotion.md): preserve broadly, branch narrowly
 - [`docs/doctrine-notes/17-discovery-bearing-branches.md`](./docs/doctrine-notes/17-discovery-bearing-branches.md): derive bounded discovery join sets from branch structure before registries

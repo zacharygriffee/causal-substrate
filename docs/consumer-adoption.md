@@ -32,6 +32,14 @@ The default integration seam is:
 3. produce explicit artifacts only when something should cross a boundary
 4. let another layer handle transport, publication, rendering, or operator policy
 
+For the first finished version, the generic bounded consumer surface should be small and explicit. A consumer should be able to ask:
+
+- what is active
+- what changed
+- why
+
+without needing raw branch replay as its default interface.
+
 ## Adoption pattern: universe or geometry consumer
 
 This is the `Virtualia`-like pattern.
@@ -102,6 +110,28 @@ Practical rule:
 
 - continuity artifacts may ride the mesh
 - mesh rules should not redefine continuity doctrine
+
+## Current generic consumer picture
+
+The current generic consumer-facing continuity picture is intentionally narrower than the full ontology.
+
+It should expose:
+
+- current continuity situation
+- current active referents with bounded reasoning
+- optional recent transition summary
+
+It may include:
+
+- inertia and volatility identifiers when they materially inform continuity interpretation
+- replay-backed evidence identifiers for later inspection
+
+It should not include:
+
+- raw append logs as the default consumer API
+- operator policy
+- transport ownership
+- app-specific vocabulary from Edge, Virtualia, or any other adjacent repo
 
 ## Anti-patterns
 

@@ -271,6 +271,35 @@ export interface ExchangeArtifactLabReport {
   payloadKinds: ExchangeArtifactPayload["payloadType"][];
 }
 
+export interface ObservedContinuityNarrativeEntry {
+  step: "basis-revision" | "fork";
+  claim: string;
+  explanation: string;
+  evidenceSourceIds: string[];
+}
+
+export interface ContinuityEvolutionForkLabReport {
+  replay: CorestoreReplaySummary;
+  inspectability: InspectabilityPicture;
+  evolvingBranchPicture: BranchReplayPicture;
+  forkedBranchPicture: BranchReplayPicture;
+  transition: ContinuityTransitionDecisionSurface;
+  observedNarrative: ObservedContinuityNarrativeEntry[];
+  summary: {
+    evolvingBranchId: string;
+    forkedBranchId: string;
+    trackedReferentId: string;
+    sourceNucleusId: string;
+    inheritedNucleusId: string;
+    continuityShift: {
+      from: StateEstimate["continuity"];
+      to: StateEstimate["continuity"];
+    };
+    transitionKind: TransitionDecisionKind;
+    lineageRelation: string;
+  };
+}
+
 export async function runMultiSegmentContinuityLab(
   options: FollowOnLabOptions,
 ): Promise<MultiSegmentContinuityLabReport> {
@@ -558,6 +587,284 @@ export async function runExchangeArtifactLab(
     return {
       replay: await reconstructLocalPicture(lab),
       payloadKinds,
+    };
+  } finally {
+    await lab.close();
+  }
+}
+
+export async function runContinuityEvolutionForkLab(
+  options: FollowOnLabOptions,
+): Promise<ContinuityEvolutionForkLabReport> {
+  const lab = await openFirstSeriousCorestoreLab({
+    storageDir: options.storageDir,
+    namespaceParts: options.namespaceParts,
+  });
+  const substrate = new SubstrateKernel(options.now ? { now: options.now } : {});
+
+  try {
+    const fullBasis = substrate.createBasis({
+      label: "finish-line-rgb-basis",
+      dimensions: ["red", "green", "blue", "position"],
+    });
+    const degradedBasis = substrate.createBasis({
+      label: "finish-line-rb-basis",
+      dimensions: ["red", "blue", "position"],
+      partial: true,
+      degradedFrom: [fullBasis.id],
+      revisedFrom: [fullBasis.id],
+    });
+    const observer = substrate.createObserver({
+      label: "finish-line-camera",
+      basisId: fullBasis.id,
+    });
+    const observerBranch = substrate.createBranch({
+      role: "observer",
+      label: "finish-line-camera-branch",
+      basisId: fullBasis.id,
+      observerId: observer.id,
+    });
+    const referentBranch = substrate.createBranch({
+      role: "referent",
+      label: "finish-line-cube-branch",
+      basisId: fullBasis.id,
+    });
+    const referent = substrate.createReferent({
+      label: "finish-line-cube",
+      anchor: "finish-line-cube-anchor",
+      branchId: referentBranch.id,
+    });
+    const binding = substrate.createBinding({
+      kind: "tracking",
+      observerBranchId: observerBranch.id,
+      referentBranchId: referentBranch.id,
+      referentId: referent.id,
+      strength: 0.91,
+    });
+
+    const sourceSegment = substrate.openSegment({
+      branchId: observerBranch.id,
+      inheritedNucleusIds: [],
+      summary: "full-basis continuity before revision",
+    });
+    const initialHappening = {
+      id: "finish-line-evolution-happening-1",
+      branchId: observerBranch.id,
+      segmentId: sourceSegment.id,
+      label: "full-color observation before capability loss",
+      triggerIds: [],
+      observedAt: "2026-04-22T01:00:00.000Z",
+    };
+    await lab.appendBranchHappening({
+      branchId: observerBranch.id,
+      segmentId: sourceSegment.id,
+      happening: initialHappening,
+    });
+    await lab.appendReferentState({
+      referent,
+      estimate: {
+        id: "finish-line-evolution-estimate-1",
+        referentId: referent.id,
+        branchId: referentBranch.id,
+        estimatedAt: "2026-04-22T01:00:10.000Z",
+        continuity: "continuing",
+        reasoning: "full color basis preserves enough distinction for a continuing judgment",
+        basedOnBindingIds: [binding.id],
+        metadata: {
+          effectiveBasisId: fullBasis.id,
+        },
+      },
+    });
+
+    const revisedBranch = substrate.reviseBranchBasis({
+      branchId: observerBranch.id,
+      basisId: degradedBasis.id,
+      reason: "camera lost the ability to preserve green distinctions",
+    });
+    const revisionView = substrate.createView({
+      kind: "segment-summary",
+      label: "basis-revision-surface",
+      sourceIds: [observerBranch.id, fullBasis.id, degradedBasis.id],
+      projection:
+        "observer branch revised basis from rgb to rb without forcing a branch split",
+      metadata: {
+        basisRevision: {
+          fromBasisId: fullBasis.id,
+          toBasisId: degradedBasis.id,
+        },
+      },
+    });
+    const revisionArtifact = substrate.createArtifactEnvelope({
+      kind: "view",
+      label: "basis-revision-artifact",
+      sourceIds: [observerBranch.id, fullBasis.id, degradedBasis.id],
+      payloadIds: [revisionView.id],
+      locality: "shared-candidate",
+      provenance: {
+        basisId: degradedBasis.id,
+        emitterId: observer.id,
+        emittedAt: "2026-04-22T01:00:20.000Z",
+        source: "continuity-evolution-fork-lab",
+      },
+    });
+    await lab.appendViewArtifact({
+      artifact: revisionArtifact,
+      view: revisionView,
+    });
+
+    const revisedHappening = {
+      id: "finish-line-evolution-happening-2",
+      branchId: revisedBranch.id,
+      segmentId: sourceSegment.id,
+      label: "degraded-basis observation after capability loss",
+      triggerIds: [],
+      observedAt: "2026-04-22T01:00:30.000Z",
+    };
+    await lab.appendBranchHappening({
+      branchId: revisedBranch.id,
+      segmentId: sourceSegment.id,
+      happening: revisedHappening,
+    });
+    await lab.appendReferentState({
+      referent,
+      estimate: {
+        id: "finish-line-evolution-estimate-2",
+        referentId: referent.id,
+        branchId: referentBranch.id,
+        estimatedAt: "2026-04-22T01:00:40.000Z",
+        continuity: "ambiguous",
+        reasoning:
+          "green loss weakens re-identification enough to keep continuity unresolved",
+        basedOnBindingIds: [binding.id],
+        metadata: {
+          effectiveBasisId: degradedBasis.id,
+        },
+      },
+    });
+
+    const sourceCarry = substrate.sealSegment(sourceSegment.id, {
+      anchor: "finish-line-source-anchor",
+    });
+    const sealedSourceSegment = substrate.state.segments.get(sourceCarry.segmentId);
+    if (!sealedSourceSegment) {
+      throw new Error(`missing sealed source segment ${sourceCarry.segmentId}`);
+    }
+    await lab.appendSleepCapsule({
+      branchId: observerBranch.id,
+      segment: {
+        ...sealedSourceSegment,
+        closedAt: "2026-04-22T01:01:00.000Z",
+      },
+      nucleus: sourceCarry.nucleus,
+    });
+
+    const fork = substrate.forkBranch({
+      sourceBranchId: observerBranch.id,
+      label: "finish-line-camera-branch-fork",
+      relation: "split",
+      lineageEvidence: "fork pressure exceeded simple basis revision and produced a successor branch",
+    });
+    const childSegment = substrate.openSegment({
+      branchId: fork.branch.id,
+      inheritedNucleusIds: [sourceCarry.nucleus.id],
+      summary: "forked continuity after pressure exceeded revision-only posture",
+    });
+    const childHappening = {
+      id: "finish-line-evolution-happening-3",
+      branchId: fork.branch.id,
+      segmentId: childSegment.id,
+      label: "forked successor observation after split pressure",
+      triggerIds: [],
+      observedAt: "2026-04-22T01:01:10.000Z",
+    };
+    await lab.appendBranchHappening({
+      branchId: fork.branch.id,
+      segmentId: childSegment.id,
+      happening: childHappening,
+    });
+
+    const childCarry = substrate.sealSegment(childSegment.id, {
+      anchor: "finish-line-child-anchor",
+    });
+    const sealedChildSegment = substrate.state.segments.get(childCarry.segmentId);
+    if (!sealedChildSegment) {
+      throw new Error(`missing sealed child segment ${childCarry.segmentId}`);
+    }
+    await lab.appendSleepCapsule({
+      branchId: fork.branch.id,
+      segment: {
+        ...sealedChildSegment,
+        closedAt: "2026-04-22T01:01:20.000Z",
+      },
+      nucleus: childCarry.nucleus,
+    });
+
+    const lineageArtifact = substrate.createArtifactEnvelope({
+      kind: "lineage-claim",
+      label: "finish-line-fork-lineage-artifact",
+      sourceIds: [observerBranch.id, fork.branch.id],
+      payloadIds: [fork.lineage.id],
+      locality: "shared-candidate",
+      provenance: {
+        basisId: degradedBasis.id,
+        emitterId: observer.id,
+        emittedAt: "2026-04-22T01:01:15.000Z",
+        source: "continuity-evolution-fork-lab",
+      },
+    });
+    await lab.appendLineageClaimArtifact({
+      artifact: lineageArtifact,
+      lineage: fork.lineage,
+    });
+
+    const replay = await reconstructLocalPicture(lab);
+    const inspectability = await reconstructInspectabilityPicture(lab);
+    const evolvingBranchPicture = await reconstructBranchPicture(lab, observerBranch.id);
+    const forkedBranchPicture = await reconstructBranchPicture(lab, fork.branch.id);
+    const transition = await reconstructTransitionDecision(lab, {
+      fromAsOf: "2026-04-22T01:00:10.000Z",
+      toAsOf: "2026-04-22T01:00:40.000Z",
+    });
+
+    return {
+      replay,
+      inspectability,
+      evolvingBranchPicture,
+      forkedBranchPicture,
+      transition,
+      observedNarrative: [
+        {
+          step: "basis-revision",
+          claim: "one branch can survive capability revision without forcing a fork",
+          explanation:
+            "The same observer branch remained active while a basis-revision artifact was emitted and the tracked referent judgment weakened from continuing to ambiguous.",
+          evidenceSourceIds: [
+            revisionArtifact.id,
+            "finish-line-evolution-estimate-1",
+            "finish-line-evolution-estimate-2",
+          ],
+        },
+        {
+          step: "fork",
+          claim: "fork pressure creates a successor branch with inherited continuity rather than erasing ancestry",
+          explanation:
+            "The successor branch carries the source nucleus forward, records its own wake, and publishes an explicit split lineage claim instead of pretending the fork replaced prior history.",
+          evidenceSourceIds: [sourceCarry.nucleus.id, childCarry.nucleus.id, lineageArtifact.id],
+        },
+      ],
+      summary: {
+        evolvingBranchId: observerBranch.id,
+        forkedBranchId: fork.branch.id,
+        trackedReferentId: referent.id,
+        sourceNucleusId: sourceCarry.nucleus.id,
+        inheritedNucleusId: childCarry.nucleus.id,
+        continuityShift: {
+          from: "continuing",
+          to: "ambiguous",
+        },
+        transitionKind: transition.transitionKind,
+        lineageRelation: fork.lineage.relation,
+      },
     };
   } finally {
     await lab.close();

@@ -13,11 +13,35 @@ Artifacts are explicit emitted surfaces derived from local continuity. They do n
 The current repository supports explicit artifact envelopes over:
 
 - bindings
+- context surfaces
+- portal surfaces
 - lineage claims
 - views
-- state estimates
-- comparison surfaces
 - receipts
+
+State estimates remain durable continuity-bearing records in the current Corestore posture, but they are not yet part of the first-finished-version exchange artifact set.
+
+Comparison surfaces remain representable in the kernel, but they are not yet part of the first-finished-version exchange artifact set either.
+
+## First Finished Version Artifact Set
+
+For the first finished version, the stable teachable exchange-facing artifact set is:
+
+- `binding`
+- `context-surface`
+- `portal-surface`
+- `lineage-claim`
+- `view`
+- `receipt`
+
+This is the set adjacent consumers should expect to see emitted explicitly when something is intended to cross a local/shared boundary.
+
+The practical split is:
+
+- branch happenings, sleep capsules, and referent-state estimates preserve source continuity
+- exchange artifacts project bounded surfaces derived from that continuity
+
+This keeps local continuity and exchange-facing surfaces separate.
 
 ## Required Artifact Structure
 
@@ -42,6 +66,14 @@ Current provenance fields:
 
 This is sufficient for local and prototype-stage work. It is not yet the final exchange schema.
 
+For the first finished version, the rule is:
+
+- every emitted exchange artifact should carry `emittedAt`
+- `basisId` should be present when basis materially affects interpretation
+- `emitterId` should be present when custody or authorship matters
+- `source` should identify the emitting lab, adapter, or boundary
+- `note` remains optional explanatory context
+
 ## Locality
 
 Artifacts currently distinguish:
@@ -51,16 +83,25 @@ Artifacts currently distinguish:
 
 This makes explicit whether an emitted surface is purely local or intended as a candidate for later exchange work.
 
-## Comparison Surfaces
+For the first finished version, the teachable locality rule is:
 
-The current repository also supports comparison surfaces with:
+- source continuity remains local by default
+- emitted exchange artifacts are `shared-candidate` only when they are meant to cross a boundary
+- nothing becomes shared merely because it was observed or persisted locally
 
-- comparability
-- compatibility
-- convergence
-- summary
+## What This Means For Consumers
 
-This keeps comparability representable without forcing it into agreement or convergence logic.
+Adjacent consumers should rely on:
+
+- explicit exchange artifacts for anything boundary-crossing
+- continuity situation, transition, and inspectability surfaces for bounded explanation
+- replay-backed continuity records for deeper inspection when needed
+
+Adjacent consumers should not assume:
+
+- raw local continuity is available for exchange by default
+- emitted artifacts settle global truth
+- every kernel entity type already has a stable exchange artifact form
 
 ## What Remains Open
 
@@ -68,5 +109,5 @@ The current formalization does not yet settle:
 
 - final receipt structure
 - cryptographic or signature requirements
-- final artifact taxonomy for decentralized exchange
+- later exchange forms for state estimates or comparison surfaces
 - whether every artifact kind needs its own dedicated wrapper

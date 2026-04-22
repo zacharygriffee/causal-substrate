@@ -394,50 +394,50 @@ The first finished version should be demonstrable with:
 - [x] add an explicit branch capability evolution lab
 - [x] add an explicit persisted branch birth / fork lab
 - [x] represent split, merge, continuation, and inheritance pressure lineage-first
-- [ ] tighten replay and inspectability proof for continuity evolution and fork pressure as one coherent finish-line package
+- [x] tighten replay and inspectability proof for continuity evolution and fork pressure as one coherent finish-line package
 
 Done when:
-- [ ] the repo can demonstrate continuity evolution without hand-waving
-- [ ] the repo can demonstrate branch birth/fork as first-class continuity behavior
-- [ ] replay and inspectability surfaces can explain those changes from durable records
+- [x] the repo can demonstrate continuity evolution without hand-waving
+- [x] the repo can demonstrate branch birth/fork as first-class continuity behavior
+- [x] replay and inspectability surfaces can explain those changes from durable records
 
 ### Finish Phase 2: Inertia / Volatility Operationalization
 
 - [x] define stronger doctrine for continuity under absence
 - [x] pressure `continuing / ambiguous / broken` under multi-observer conditions
 - [x] add referent continuity labs for absence, reappearance, and conflicting judgment
-- [ ] make inertia/volatility reasoning more explicit in finish-line bounded consumer surfaces where needed
+- [x] make inertia/volatility reasoning more explicit in finish-line bounded consumer surfaces where needed
 
 Done when:
-- [ ] referent persistence under absence is demonstrable, not just named
-- [ ] ambiguity under absence is principled rather than ad hoc
-- [ ] continuity judgments can cite inertia/volatility reasoning explicitly enough for consumers
+- [x] referent persistence under absence is demonstrable, not just named
+- [x] ambiguity under absence is principled rather than ad hoc
+- [x] continuity judgments can cite inertia/volatility reasoning explicitly enough for consumers
 
 ### Finish Phase 3: Generic Consumer Surface
 
 - [x] build a compact continuity situation surface
 - [x] build a compact transition decision surface
 - [x] build a mesh-agnostic adapter snapshot over persisted records
-- [ ] add one neutral consumer-facing lab that consumes the bounded continuity picture without app-specific vocabulary
-- [ ] decide the minimal stable generic consumer surface for first finished version
+- [x] add one neutral consumer-facing lab that consumes the bounded continuity picture without app-specific vocabulary
+- [x] decide the minimal stable generic consumer surface for first finished version
 
 Done when:
-- [ ] a generic consumer can ask what is active, what changed, and why
-- [ ] the answer comes from compact explicit surfaces rather than raw substrate internals
-- [ ] no Edge-specific, Virtualia-specific, or mesh-runtime vocabulary is required
+- [x] a generic consumer can ask what is active, what changed, and why
+- [x] the answer comes from compact explicit surfaces rather than raw substrate internals
+- [x] no Edge-specific, Virtualia-specific, or mesh-runtime vocabulary is required
 
 ### Finish Phase 4: Artifact Boundary Stabilization
 
 - [x] keep source continuity local by default
 - [x] make shared artifacts explicit by default
 - [x] formalize artifact envelopes for Corestore-backed emission
-- [ ] define the first-finished-version artifact set clearly enough to teach and consume
-- [ ] verify provenance, basis, and locality posture are consistent across the v1 artifact set
+- [x] define the first-finished-version artifact set clearly enough to teach and consume
+- [x] verify provenance, basis, and locality posture are consistent across the v1 artifact set
 
 Done when:
-- [ ] the v1 artifact set is clearly named
-- [ ] local/shared boundaries are explicit and teachable
-- [ ] adjacent consumers can rely on explicit artifacts rather than hidden continuity state
+- [x] the v1 artifact set is clearly named
+- [x] local/shared boundaries are explicit and teachable
+- [x] adjacent consumers can rely on explicit artifacts rather than hidden continuity state
 
 ### Finish Phase 5: Transport Consolidation
 
@@ -446,25 +446,25 @@ Done when:
 - [x] prove capability-limited exchange after rendezvous
 - [x] prove discovery-derived multi-topic rendezvous without registry dependence by default
 - [x] keep Hyperbee deferred unless concrete indexing pressure appears
-- [ ] write one finish-line transport note stating exactly what transport proves, what it does not prove, and why Hyperbee remains supplementary
-- [ ] decide whether one additional public-network hardening pass is needed before calling the first version finished
+- [x] write one finish-line transport note stating exactly what transport proves, what it does not prove, and why Hyperbee remains supplementary
+- [x] decide whether one additional public-network hardening pass is needed before calling the first version finished
 
 Done when:
-- [ ] the repo has a credible decentralized story for the first finished version
-- [ ] transport remains clearly subordinate to continuity and explicit artifacts
-- [ ] Hyperbee and multiwriter are clearly future-capable but not required for the first finished version
+- [x] the repo has a credible decentralized story for the first finished version
+- [x] transport remains clearly subordinate to continuity and explicit artifacts
+- [x] Hyperbee and multiwriter are clearly future-capable but not required for the first finished version
 
 ### Finish Phase 6: Finish-Line Consolidation
 
-- [ ] write a finish-line consolidation doc for the first finished version
-- [ ] update README/TODO to separate finished, open, and deferred posture cleanly
-- [ ] map core finish-line claims to the labs and proofs that establish them
-- [ ] make the first finished version straightforward to teach and demonstrate end-to-end
+- [x] write a finish-line consolidation doc for the first finished version
+- [x] update README/TODO to separate finished, open, and deferred posture cleanly
+- [x] map core finish-line claims to the labs and proofs that establish them
+- [x] make the first finished version straightforward to teach and demonstrate end-to-end
 
 Done when:
-- [ ] a new reader can see what is finished and what is still intentionally open
-- [ ] the first finished version can be demonstrated end-to-end without appealing to future concepts
-- [ ] adjacent repos can consume the repo through stable generic surfaces rather than by reading doctrine only
+- [x] a new reader can see what is finished and what is still intentionally open
+- [x] the first finished version can be demonstrated end-to-end without appealing to future concepts
+- [x] adjacent repos can consume the repo through stable generic surfaces rather than by reading doctrine only
 
 ## Rules
 
