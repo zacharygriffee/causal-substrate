@@ -10,6 +10,8 @@ import {
   runHyperswarmBranchCapabilityEvolutionTransportLab,
   runHyperswarmBranchForkTransportLab,
   createHyperswarmReplicationSwarm,
+  runHyperswarmDiscoveryCapabilityMeshLab,
+  runHyperswarmDiscoveryJoinSetLab,
   type HyperswarmReplicationSwarm,
   parseHyperswarmBootstrap,
   runHyperswarmCapabilityHandshakeLab,
@@ -391,6 +393,113 @@ test(
         const transport = swarm.getTransportState();
         assert.equal(transport.connectionOpens >= 1, true);
         assert.equal((transport.discoveryStates[0]?.refreshCount ?? 0) >= 2, true);
+        assert.equal(transport.closeReport?.completed, true);
+      }
+    } finally {
+      await harness.close();
+    }
+  },
+);
+
+test(
+  "actual hyperswarm derived discovery join sets rendezvous through bounded structural topics",
+  {
+    skip: !SHOULD_RUN_REAL_HYPERSWARM,
+    timeout: 180_000,
+  },
+  async () => {
+    const harness = await openHyperswarmHarness();
+    const factoryHarness = openActualTopicHyperswarmFactoryHarness(harness.bootstrap);
+
+    try {
+      const report = await runHyperswarmDiscoveryJoinSetLab({
+        createSwarm: factoryHarness.createSwarm,
+        namespaceParts: ["hyperswarm-discovery-join-set", randomUUID()],
+        now: () => "2026-04-22T03:00:00.000Z",
+        flushTimeoutMs: 60_000,
+      });
+
+      assert.deepEqual(report.peerIds, ["room-discovery-peer", "courtyard-discovery-peer"]);
+      assert.deepEqual(report.joinSetSizes, [4, 4]);
+      assert.deepEqual(report.sharedTopicKinds, ["concern-coarse"]);
+      assert.equal(report.transportPicture.pulseCount >= 1, true);
+      assert.deepEqual(report.transportPicture.sharedTopicKinds, ["context-parent", "concern-coarse"]);
+      assert.deepEqual(
+        report.transportPicture.traces.map((trace) => ({
+          peerId: trace.peerId,
+          joinedTopicKinds: trace.joinedTopicKinds,
+        })),
+        [
+          {
+            peerId: "room-discovery-peer",
+            joinedTopicKinds: [
+              "context-self",
+              "context-parent",
+              "context-adjacent",
+              "concern-coarse",
+            ],
+          },
+          {
+            peerId: "courtyard-discovery-peer",
+            joinedTopicKinds: [
+              "context-self",
+              "context-parent",
+              "context-adjacent",
+              "concern-coarse",
+            ],
+          },
+        ],
+      );
+      for (const swarm of factoryHarness.swarms) {
+        const transport = swarm.getTransportState();
+        assert.equal(transport.connectionOpens >= 1, true);
+        assert.equal(transport.closeReport?.completed, true);
+      }
+    } finally {
+      await harness.close();
+    }
+  },
+);
+
+test(
+  "actual hyperswarm derived discovery join sets can rendezvous broadly while capability exchange stays selective",
+  {
+    skip: !SHOULD_RUN_REAL_HYPERSWARM,
+    timeout: 240_000,
+  },
+  async () => {
+    const harness = await openHyperswarmHarness();
+    const factoryHarness = openActualTopicHyperswarmFactoryHarness(harness.bootstrap);
+
+    try {
+      const report = await runHyperswarmDiscoveryCapabilityMeshLab({
+        createSwarm: factoryHarness.createSwarm,
+        namespaceParts: ["hyperswarm-discovery-capability-mesh", randomUUID()],
+        now: () => "2026-04-22T03:05:00.000Z",
+        flushTimeoutMs: 60_000,
+      });
+
+      assert.deepEqual(report.peerIds, [
+        "observer-a-capability-surface",
+        "observer-b-capability-surface",
+        "relay-c-capability-surface",
+      ]);
+      assert.deepEqual(report.joinSetSizes, [4, 4, 2]);
+      assert.deepEqual(report.sharedTopicKinds, ["concern-coarse"]);
+      assert.equal(report.degradedFromFullDecision.accepted, true);
+      assert.equal(report.degradedFromFullDecision.requiresMediation, true);
+      assert.equal(report.degradedFromRelayDecision.accepted, true);
+      assert.equal(report.degradedFromRelayDecision.requiresMediation, true);
+      assert.equal(report.fullFromRelayDecision.accepted, true);
+      assert.equal(report.fullFromRelayDecision.requiresMediation, true);
+      assert.deepEqual(report.receivedArtifactKinds, ["view", "receipt"]);
+      assert.deepEqual(report.receivedPayloadKinds, ["view", "receipt"]);
+      assert.equal(report.transportPicture.pulseCount >= 1, true);
+      assert.deepEqual(report.transportPicture.sharedTopicKinds, ["concern-coarse"]);
+      assert.equal(report.transportPicture.traces.length, 5);
+      for (const swarm of factoryHarness.swarms) {
+        const transport = swarm.getTransportState();
+        assert.equal(transport.connectionOpens >= 1, true);
         assert.equal(transport.closeReport?.completed, true);
       }
     } finally {

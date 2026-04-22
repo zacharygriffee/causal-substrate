@@ -149,6 +149,38 @@ The current line is:
 
 This reduces dependency on volatile discovery registries while preserving an explicit fallback for cases where structure is too weak, too private, too unstable, or too cross-cutting.
 
+## When asserted registries are justified
+
+The repository should treat asserted registries as a last-resort discovery aid, not as a default discovery substrate.
+
+An asserted registry is justified only when all of the following are true:
+
+- the relevant peers or artifacts cannot be reached reliably from the derived join set alone
+- the missing reachability matters for the concrete concern, not just for theoretical completeness
+- the missing reachability cannot be repaired by adding a bounded structural projection such as adjacency, portal exposure, or a coarse concern overlay
+- the registry remains inspectable as an explicit artifact or index surface rather than becoming hidden authority
+
+This means a registry is appropriate for cases like:
+
+- rendezvous across structurally unrelated but intentionally shared concern groups
+- bootstrap or handoff for peers that are known to matter but are not structurally nearby
+- bounded directory surfaces for explicitly published artifacts
+
+It is not appropriate merely because:
+
+- a single topic feels simpler
+- someone wants a universal similarity key
+- the implementation has not yet modeled adjacency or concern overlays
+- a consumer prefers hidden convenience over inspectable structure
+
+The current working rule is:
+
+- derive from situated structure first
+- extend with bounded overlays second
+- assert registries only when reachability remains insufficient after those steps
+
+That keeps registries as explicit coordination aids rather than silent ontology substitutes.
+
 ## What remains open
 
 The repository does not yet claim:

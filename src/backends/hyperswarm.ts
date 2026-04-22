@@ -428,7 +428,7 @@ function instrumentDiscoverySession(
         throw error;
       }
     },
-    async refresh(opts) {
+    async refresh(opts?: Record<string, unknown>) {
       try {
         const result = await session.refresh?.(opts);
         state.refreshCount += 1;

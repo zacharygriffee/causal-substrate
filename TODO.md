@@ -209,6 +209,8 @@ Done when:
   - [x] actual-topic transport proof for same-branch capability evolution without forced fork
   - [x] actual-topic transport proof for split lineage with carry-forward nucleus inheritance
   - [x] actual-topic receiver reconstruction of inspectability and transition decision surfaces after catchup
+  - [x] actual-topic proof that derived multi-topic discovery join sets can rendezvous without a registry
+  - [x] actual-topic proof that discovery-derived rendezvous can still narrow exchange through capability surfaces
 - [x] define discovery-bearing branch doctrine
 - [ ] Autobase or higher-order shared surfaces
 - [x] define peer / observer / operator boundary doctrine
@@ -352,11 +354,12 @@ Done when:
 - [x] add deterministic topic derivation rules with schema versioning
 - [x] add labs for discovery-set derivation without registry dependence
 - [x] keep direct known-peer linkage distinct from topic-derived discovery
+- [x] state exactly when asserted registries are still needed
 
 Done when:
 - [x] discovery can be derived from branch structure as a bounded join set
 - [x] topic derivation remains inspectable and versioned
-- [ ] the repo can state exactly when asserted registries are still needed
+- [x] the repo can state exactly when asserted registries are still needed
 
 ### Phase 20: Capability Surfaces
 
