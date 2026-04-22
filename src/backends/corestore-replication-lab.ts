@@ -15,22 +15,15 @@ import {
   reconstructInspectabilityPicture,
   reconstructLocalPicture,
 } from "./corestore-follow-on-labs.js";
+import {
+  type ReplicationDiscoveryLike,
+  type ReplicationSwarmLike,
+  waitForDiscoveryRendezvous,
+} from "./hyperswarm-rendezvous.js";
 
 export interface FakeSwarmLike {
   id: string;
   join: (topic: Buffer, opts?: Record<string, unknown>) => unknown;
-  flush: (timeoutMs?: number) => Promise<void>;
-  close: () => Promise<void>;
-  on: (event: "connection", listener: (socket: unknown, peerInfo: unknown) => void) => void;
-}
-
-export interface ReplicationDiscoveryLike {
-  flushed?: () => Promise<void>;
-}
-
-export interface ReplicationSwarmLike {
-  id?: string;
-  join: (topic: Buffer, opts?: Record<string, unknown>) => ReplicationDiscoveryLike | void;
   flush: (timeoutMs?: number) => Promise<void>;
   close: () => Promise<void>;
   on: (event: "connection", listener: (socket: unknown, peerInfo: unknown) => void) => void;
@@ -634,13 +627,21 @@ async function connectReplicationPeers({
       : undefined;
 
   try {
-    swarmA.join(topic, DEFAULT_SWARM_JOIN_OPTIONS);
-    swarmB.join(topic, DEFAULT_SWARM_JOIN_OPTIONS);
+    const discoveryA = swarmA.join(topic, DEFAULT_SWARM_JOIN_OPTIONS);
+    const discoveryB = swarmB.join(topic, DEFAULT_SWARM_JOIN_OPTIONS);
 
     await Promise.all([
       waitForSwarmFlush(swarmA, timeoutMs, "replication-swarm-a"),
       waitForSwarmFlush(swarmB, timeoutMs, "replication-swarm-b"),
     ]);
+
+    await waitForDiscoveryRendezvous({
+      discoveryA,
+      discoveryB,
+      swarmA,
+      swarmB,
+      timeoutMs,
+    });
   } finally {
     doneA?.();
     doneB?.();

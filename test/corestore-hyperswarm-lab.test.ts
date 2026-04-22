@@ -17,19 +17,32 @@ import {
 } from "../src/index.js";
 
 const SHOULD_RUN_REAL_HYPERSWARM = process.env.CAUSAL_SUBSTRATE_REAL_HYPERSWARM === "1";
+const SHOULD_RUN_TOPIC_DEBUG = process.env.CAUSAL_SUBSTRATE_HYPERSWARM_TOPIC_DEBUG === "1";
+const SHOULD_USE_PUBLIC_HYPERSWARM = process.env.CAUSAL_SUBSTRATE_HYPERSWARM_PUBLIC === "1";
 const CONFIGURED_HYPERSWARM_BOOTSTRAP = parseHyperswarmBootstrap(
   process.env.CAUSAL_SUBSTRATE_HYPERSWARM_BOOTSTRAP,
 );
 
 interface HyperswarmHarness {
-  bootstrap: string[];
+  bootstrap?: string[];
   close: () => Promise<void>;
+}
+
+interface RealHyperswarmFactoryHarness {
+  createSwarm: ReturnType<typeof createRealHyperswarmFactory>;
+  swarms: HyperswarmReplicationSwarm[];
 }
 
 async function openHyperswarmHarness(): Promise<HyperswarmHarness> {
   if (CONFIGURED_HYPERSWARM_BOOTSTRAP.length > 0) {
     return {
       bootstrap: CONFIGURED_HYPERSWARM_BOOTSTRAP,
+      close: async () => {},
+    };
+  }
+
+  if (SHOULD_USE_PUBLIC_HYPERSWARM) {
+    return {
       close: async () => {},
     };
   }
@@ -47,12 +60,15 @@ async function openHyperswarmHarness(): Promise<HyperswarmHarness> {
   };
 }
 
-function createRealHyperswarmFactory(bootstrap: string[]) {
+function createRealHyperswarmFactory(bootstrap?: string[]) {
+  const swarms: HyperswarmReplicationSwarm[] = [];
+
   return async (seed?: Buffer, topics?: Map<string, unknown>) => {
     const swarm = await createHyperswarmReplicationSwarm({
       seed,
       bootstrap,
     });
+    swarms.push(swarm);
     await swarm.listen();
 
     return {
@@ -91,6 +107,38 @@ function createRealHyperswarmFactory(bootstrap: string[]) {
   };
 }
 
+function openRealHyperswarmFactoryHarness(bootstrap?: string[]): RealHyperswarmFactoryHarness {
+  const swarms: HyperswarmReplicationSwarm[] = [];
+  const createSwarm = async (seed?: Buffer, topics?: Map<string, unknown>) => {
+    const factory = createRealHyperswarmFactory(bootstrap);
+    const swarm = await factory(seed, topics);
+    swarms.push(swarm as HyperswarmReplicationSwarm);
+    return swarm;
+  };
+
+  return {
+    createSwarm,
+    swarms,
+  };
+}
+
+function openActualTopicHyperswarmFactoryHarness(bootstrap?: string[]) {
+  const swarms: HyperswarmReplicationSwarm[] = [];
+
+  return {
+    createSwarm: async (seed?: Buffer) => {
+      const swarm = await createHyperswarmReplicationSwarm({
+        bootstrap,
+        seed,
+      });
+      swarms.push(swarm);
+      await swarm.listen();
+      return swarm;
+    },
+    swarms,
+  };
+}
+
 function getTopicPeers(
   topics: Map<string, unknown> | undefined,
   key: string,
@@ -117,10 +165,11 @@ test(
   },
   async () => {
     const harness = await openHyperswarmHarness();
+    const factoryHarness = openRealHyperswarmFactoryHarness(harness.bootstrap);
 
     try {
       const report = await runHyperswarmCapabilityHandshakeLab({
-        createSwarm: createRealHyperswarmFactory(harness.bootstrap),
+        createSwarm: factoryHarness.createSwarm,
         namespaceParts: ["hyperswarm-capability", randomUUID()],
         now: () => "2026-04-21T14:00:00.000Z",
         flushTimeoutMs: 60_000,
@@ -178,6 +227,10 @@ test(
           },
         ],
       );
+      assert.ok(factoryHarness.swarms.length >= 2);
+      for (const swarm of factoryHarness.swarms) {
+        assert.equal(swarm.getTransportState().closeReport?.completed, true);
+      }
     } finally {
       await harness.close();
     }
@@ -281,12 +334,13 @@ test(
     const firstDirectory = await mkdtemp(path.join(tmpdir(), "causal-substrate-hs-a-"));
     const secondDirectory = await mkdtemp(path.join(tmpdir(), "causal-substrate-hs-b-"));
     const harness = await openHyperswarmHarness();
+    const factoryHarness = openRealHyperswarmFactoryHarness(harness.bootstrap);
 
     try {
       const report = await runMultipleObserverReplicationLab({
         storageDirA: firstDirectory,
         storageDirB: secondDirectory,
-        createSwarm: createRealHyperswarmFactory(harness.bootstrap),
+        createSwarm: factoryHarness.createSwarm,
         namespaceParts: ["hyperswarm-proof", randomUUID()],
         now: () => "2026-04-21T12:00:00.000Z",
         flushTimeoutMs: 60_000,
@@ -311,6 +365,10 @@ test(
         "multiple-observer-replication-lab",
       );
       assert.equal(activeManagedCorestoreCount(), 0);
+      assert.ok(factoryHarness.swarms.length >= 2);
+      for (const swarm of factoryHarness.swarms) {
+        assert.equal(swarm.getTransportState().closeReport?.completed, true);
+      }
     } finally {
       await harness.close();
     }
@@ -371,6 +429,47 @@ test(
         "incremental-replication-catchup-lab",
       );
       assert.equal(activeManagedCorestoreCount(), 0);
+    } finally {
+      await harness.close();
+    }
+  },
+);
+
+test(
+  "debug: actual hyperswarm topic rendezvous exposes transport state when replication stalls",
+  {
+    skip: !SHOULD_RUN_REAL_HYPERSWARM || !SHOULD_RUN_TOPIC_DEBUG,
+    timeout: 240_000,
+  },
+  async () => {
+    const firstDirectory = await mkdtemp(path.join(tmpdir(), "causal-substrate-hs-topic-debug-a-"));
+    const secondDirectory = await mkdtemp(path.join(tmpdir(), "causal-substrate-hs-topic-debug-b-"));
+    const harness = await openHyperswarmHarness();
+    const factoryHarness = openActualTopicHyperswarmFactoryHarness(harness.bootstrap);
+
+    try {
+      await runMultipleObserverReplicationLab({
+        storageDirA: firstDirectory,
+        storageDirB: secondDirectory,
+        createSwarm: factoryHarness.createSwarm,
+        namespaceParts: ["hyperswarm-topic-debug", randomUUID()],
+        now: () => "2026-04-21T18:30:00.000Z",
+        flushTimeoutMs: 60_000,
+        replicationTimeoutMs: 120_000,
+      });
+    } catch (error) {
+      const transportStates = factoryHarness.swarms.map((swarm) => ({
+        connections: swarm.connectionCount(),
+        id: swarm.id,
+        transport: swarm.getTransportState(),
+      }));
+
+      throw new Error(
+        [
+          error instanceof Error ? error.message : String(error),
+          JSON.stringify(transportStates, null, 2),
+        ].join("\n\n"),
+      );
     } finally {
       await harness.close();
     }

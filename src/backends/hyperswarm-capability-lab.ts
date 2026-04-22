@@ -11,7 +11,7 @@ import {
   View,
 } from "../kernel/types.js";
 import { negotiateCapabilityExchange } from "../kernel/capability-surface.js";
-import { ReplicationSwarmLike } from "./corestore-replication-lab.js";
+import type { ReplicationSwarmLike } from "./hyperswarm-rendezvous.js";
 
 const DEFAULT_SWARM_FLUSH_TIMEOUT_MS = 30_000;
 const jsonCodec = makeCodec("json");
@@ -612,7 +612,7 @@ async function openCapabilityChannel(input: {
       reject(new Error(`timed out waiting for swarm connection for ${input.localSurface.id}`));
     }, input.timeoutMs ?? DEFAULT_SWARM_FLUSH_TIMEOUT_MS);
 
-    input.swarm.on("connection", (socket, peerInfo) => {
+    input.swarm.on("connection", (socket: unknown, peerInfo: unknown) => {
       const channel = openPlexCapabilityChannel(socket, peerInfo, input.localSurface);
 
       input.channels.push(channel);
@@ -679,7 +679,7 @@ async function openCapabilityMeshPeer(input: {
       });
     };
 
-    input.swarm.on("connection", (socket, peerInfo) => {
+    input.swarm.on("connection", (socket: unknown, peerInfo: unknown) => {
       const channel = openPlexCapabilityChannel(socket, peerInfo, input.localSurface);
       input.channels.push(channel);
 
