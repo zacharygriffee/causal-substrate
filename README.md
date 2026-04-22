@@ -21,8 +21,11 @@ It is meant to model how causality becomes realized, tracked, persisted, inherit
 
 The current repository posture is intentionally conservative. The kernel encodes the minimum structural primitives and invariants needed to represent continuity without prematurely fixing the semantics of identity, convergence, compatibility, equivalence, or agreement.
 
+If you are approaching the repo as a human trying to place it in the ecosystem, start with [`docs/human-getting-started.md`](./docs/human-getting-started.md) before diving into the doctrine stack.
+
 ## Repository shape
 
+- [`docs/human-getting-started.md`](./docs/human-getting-started.md): the shortest human walkthrough for what this repo is for, what it owns, and how an adjacent repo should begin consuming it
 - [`docs/ontology.md`](./docs/ontology.md): conceptual posture, non-goals, and load-bearing distinctions
 - [`docs/doctrine.md`](./docs/doctrine.md): doctrinal commitments and repository rules
 - [`docs/doctrine-consolidation.md`](./docs/doctrine-consolidation.md): tightened doctrine after completing the initial lab program
