@@ -21,7 +21,7 @@
     "labs:validate": "tsx scripts/validate-labs.ts",
     "prototype:workstation": "tsx prototypes/continuity-workstation.ts",
     "smoke:hyperswarm-discovery": "tsx scripts/hyperswarm-discovery-smoke.ts",
-    "test": "tsx --test test/kernel.test.ts test/core-labs.test.ts test/emergence-labs.test.ts test/inertia-labs.test.ts test/next-phases.test.ts test/neonplex-handshake-lab.test.ts test/corestore-backend.test.ts test/corestore-first-serious-lab.test.ts test/corestore-follow-on-labs.test.ts test/corestore-replication-lab.test.ts test/hyperswarm-wrapper.test.ts",
+    "test": "tsx --test test/kernel.test.ts test/core-labs.test.ts test/emergence-labs.test.ts test/inertia-labs.test.ts test/next-phases.test.ts test/neonplex-handshake-lab.test.ts test/corestore-backend.test.ts test/corestore-first-serious-lab.test.ts test/corestore-follow-on-labs.test.ts test/corestore-replication-lab.test.ts test/mesh-agnostic-adapter.test.ts test/hyperswarm-wrapper.test.ts",
     "test:hyperswarm": "CAUSAL_SUBSTRATE_REAL_HYPERSWARM=1 tsx --test test/corestore-hyperswarm-lab.test.ts"
   },
   "keywords": [

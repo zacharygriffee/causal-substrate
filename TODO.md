@@ -42,6 +42,7 @@
 - [x] implement multi-segment continuity, referent history, exchange artifact, and reconstruction labs
 - [x] prove two-Corestore replication over Hypercore using `fakeswarm`
 - [x] add an opt-in real `hyperswarm` direct-peer replication lane
+- [x] prove a mesh-agnostic adapter snapshot over persisted continuity, inspectability, transition, and discovery surfaces
 
 ## Finish-Line Phases
 

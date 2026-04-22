@@ -15,4 +15,5 @@ export * from "./backends/hyperswarm-rendezvous.js";
 export * from "./backends/hyperswarm-capability-lab.js";
 export * from "./backends/hyperswarm-emergence-lab.js";
 export * from "./backends/hyperswarm-discovery-lab.js";
+export * from "./adapters/mesh-agnostic-adapter.js";
 export * from "./prototypes/continuity-workstation.js";

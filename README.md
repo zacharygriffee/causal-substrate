@@ -77,6 +77,8 @@ Current implementation bias:
 - the first serious substrate labs should bias toward Corestore and Hypercore
 - Hyperbee should remain secondary unless indexing needs force it
 
+The current consumer posture also includes a mesh-agnostic adapter seam: persisted continuity records can be reconstructed into explicit continuity, inspectability, transition, and derived discovery surfaces without importing swarm, peer, or authority ownership into the core substrate.
+
 ## Quick start
 
 ```bash

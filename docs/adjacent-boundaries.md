@@ -92,6 +92,12 @@ This repository should remain mesh-agnostic at the core.
 
 If it becomes mesh-facing, the preferred posture is an adapter or integration repo rather than making mesh ownership a core responsibility here.
 
+Current proof posture:
+
+- the repo can reconstruct a mesh-agnostic adapter snapshot from persisted continuity records
+- that snapshot may carry continuity, inspectability, transition, and derived discovery surfaces
+- the snapshot does not need to import peer identity, swarm ownership, or transport authority into the core model
+
 ### `(adjacent mesh-v0-2)`
 
 `(adjacent mesh-v0-2)` owns:
