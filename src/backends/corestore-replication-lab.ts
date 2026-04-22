@@ -9,11 +9,13 @@ import {
 } from "./corestore-first-serious-lab.js";
 import {
   ContinuitySituationSurface,
+  ContinuityTransitionDecisionSurface,
   CorestoreReplaySummary,
   InspectabilityPicture,
   reconstructContinuitySituation,
   reconstructInspectabilityPicture,
   reconstructLocalPicture,
+  reconstructTransitionDecision,
 } from "./corestore-follow-on-labs.js";
 import {
   type ReplicationDiscoveryLike,
@@ -64,6 +66,7 @@ export interface IncrementalReplicationCatchupLabReport {
   finalReplay: CorestoreReplaySummary;
   initialSituation: ContinuitySituationSurface;
   finalSituation: ContinuitySituationSurface;
+  transitionDecision: ContinuityTransitionDecisionSurface;
   initialInspectability: InspectabilityPicture;
   finalInspectability: InspectabilityPicture;
 }
@@ -541,6 +544,10 @@ export async function runIncrementalReplicationCatchupLab(
 
     const finalReplay = await reconstructLocalPicture(second);
     const finalSituation = await reconstructContinuitySituation(second);
+    const transitionDecision = await reconstructTransitionDecision(second, {
+      fromAsOf: firstEstimate.estimatedAt,
+      toAsOf: secondEstimate.estimatedAt,
+    });
     const finalInspectability = await reconstructInspectabilityPicture(second);
 
     return {
@@ -550,6 +557,7 @@ export async function runIncrementalReplicationCatchupLab(
       finalReplay,
       initialSituation,
       finalSituation,
+      transitionDecision,
       initialInspectability,
       finalInspectability,
     };

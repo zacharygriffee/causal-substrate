@@ -13,6 +13,14 @@ export interface ComputeDiscoveryJoinSetInput {
   observerBranch: Branch;
   contexts: Map<string, Context>;
   portals: Map<string, Portal>;
+  adjacentContextIds?: string[];
+  concernOverlays?: Array<{
+    concern: string;
+    scopeAnchorId?: string;
+    quantization?: string;
+    sourceIds?: string[];
+    metadata?: Record<string, unknown>;
+  }>;
   discoverySalt?: string;
   topicVersion?: string;
 }
@@ -39,6 +47,7 @@ export function computeDiscoveryJoinSet(input: ComputeDiscoveryJoinSetInput): Di
   const primaryContext = requireContext(input.contexts, input.observerBranch.contextId);
   const parentContexts = collectParentContexts(primaryContext, input.contexts);
   const portalVisibleContexts = collectPortalVisibleContexts(primaryContext.id, input.portals, input.contexts);
+  const adjacentContexts = collectAdjacentContexts(input.adjacentContextIds ?? [], input.contexts);
 
   pushProjection({
     projections,
@@ -48,6 +57,7 @@ export function computeDiscoveryJoinSet(input: ComputeDiscoveryJoinSetInput): Di
       discoverySalt,
       topicVersion,
       topicKind: "context-self",
+      scopeKind: "context",
       sourceBranchId: input.observerBranch.id,
       scopeAnchorId: primaryContext.id,
       contextId: primaryContext.id,
@@ -64,6 +74,7 @@ export function computeDiscoveryJoinSet(input: ComputeDiscoveryJoinSetInput): Di
         discoverySalt,
         topicVersion,
         topicKind: "context-parent",
+        scopeKind: "context",
         sourceBranchId: input.observerBranch.id,
         scopeAnchorId: context.id,
         contextId: context.id,
@@ -81,6 +92,7 @@ export function computeDiscoveryJoinSet(input: ComputeDiscoveryJoinSetInput): Di
         discoverySalt,
         topicVersion,
         topicKind: "context-portal",
+        scopeKind: "portal",
         sourceBranchId: input.observerBranch.id,
         scopeAnchorId: visible.context.id,
         contextId: visible.context.id,
@@ -88,6 +100,46 @@ export function computeDiscoveryJoinSet(input: ComputeDiscoveryJoinSetInput): Di
         metadata: {
           viaPortalId: visible.portal.id,
         },
+      }),
+    });
+  }
+
+  for (const adjacent of adjacentContexts) {
+    pushProjection({
+      projections,
+      seenTopicKeys,
+      projection: buildProjection({
+        id: `${input.observerBranch.id}:context-adjacent:${adjacent.id}`,
+        discoverySalt,
+        topicVersion,
+        topicKind: "context-adjacent",
+        scopeKind: "context",
+        sourceBranchId: input.observerBranch.id,
+        scopeAnchorId: adjacent.id,
+        contextId: adjacent.id,
+        sourceIds: [input.observerBranch.id, adjacent.id],
+      }),
+    });
+  }
+
+  for (const overlay of input.concernOverlays ?? []) {
+    const scopeAnchorId = overlay.scopeAnchorId ?? primaryContext.id;
+    pushProjection({
+      projections,
+      seenTopicKeys,
+      projection: buildProjection({
+        id: `${input.observerBranch.id}:concern-coarse:${overlay.concern}:${scopeAnchorId}`,
+        discoverySalt,
+        topicVersion,
+        topicKind: "concern-coarse",
+        scopeKind: "concern",
+        sourceBranchId: input.observerBranch.id,
+        scopeAnchorId,
+        contextId: primaryContext.id,
+        concern: overlay.concern,
+        sourceIds: overlay.sourceIds ?? [input.observerBranch.id, primaryContext.id],
+        ...(overlay.quantization ? { quantization: overlay.quantization } : {}),
+        ...(overlay.metadata ? { metadata: overlay.metadata } : {}),
       }),
     });
   }
@@ -125,21 +177,42 @@ function collectPortalVisibleContexts(
     }));
 }
 
+function collectAdjacentContexts(
+  adjacentContextIds: string[],
+  contexts: Map<string, Context>,
+) {
+  const seen = new Set<string>();
+  const adjacent: Context[] = [];
+
+  for (const contextId of adjacentContextIds) {
+    if (seen.has(contextId)) {
+      continue;
+    }
+    seen.add(contextId);
+    adjacent.push(requireContext(contexts, contextId));
+  }
+
+  return adjacent;
+}
+
 function buildProjection(input: {
   id: string;
   discoverySalt: string;
   topicVersion: string;
   topicKind: DiscoveryTopicKind;
+  scopeKind: DiscoveryProjection["scopeKind"];
   sourceBranchId: string;
   scopeAnchorId: string;
   contextId?: string;
+  concern?: string;
+  quantization?: string;
   sourceIds: string[];
   metadata?: Record<string, unknown>;
 }): DiscoveryProjection {
   return compact<DiscoveryProjection>({
     id: input.id,
     topicKind: input.topicKind,
-    scopeKind: "context",
+    scopeKind: input.scopeKind,
     sourceBranchId: input.sourceBranchId,
     scopeAnchorId: input.scopeAnchorId,
     topicKey: deriveTopicKey({
@@ -147,11 +220,15 @@ function buildProjection(input: {
       topicVersion: input.topicVersion,
       topicKind: input.topicKind,
       anchor: input.scopeAnchorId,
+      ...(input.concern ? { concern: input.concern } : {}),
+      ...(input.quantization ? { quantization: input.quantization } : {}),
     }),
     discoverySalt: input.discoverySalt,
     contextId: input.contextId,
     sourceIds: input.sourceIds,
     metadata: input.metadata,
+    ...(input.concern ? { concern: input.concern } : {}),
+    ...(input.quantization ? { quantization: input.quantization } : {}),
   });
 }
 
@@ -160,6 +237,8 @@ function deriveTopicKey(input: {
   topicVersion: string;
   topicKind: DiscoveryTopicKind;
   anchor: string;
+  concern?: string;
+  quantization?: string;
 }) {
   return createHash("sha256")
     .update(
@@ -170,6 +249,8 @@ function deriveTopicKey(input: {
         input.discoverySalt,
         input.topicKind,
         input.anchor,
+        input.concern ?? "",
+        input.quantization ?? "",
       ].join(":"),
     )
     .digest("hex");

@@ -7,6 +7,8 @@ import test from "node:test";
 
 import {
   activeManagedCorestoreCount,
+  runHyperswarmBranchCapabilityEvolutionTransportLab,
+  runHyperswarmBranchForkTransportLab,
   createHyperswarmReplicationSwarm,
   type HyperswarmReplicationSwarm,
   parseHyperswarmBootstrap,
@@ -398,6 +400,106 @@ test(
 );
 
 test(
+  "actual hyperswarm topic branch capability evolution revises basis without forcing a fork",
+  {
+    skip: !SHOULD_RUN_REAL_HYPERSWARM,
+    timeout: 180_000,
+  },
+  async () => {
+    const harness = await openHyperswarmHarness();
+    const factoryHarness = openActualTopicHyperswarmFactoryHarness(harness.bootstrap);
+    let tick = 0;
+
+    try {
+      const report = await runHyperswarmBranchCapabilityEvolutionTransportLab({
+        createSwarm: factoryHarness.createSwarm,
+        namespaceParts: ["hyperswarm-topic-branch-capability-evolution", randomUUID()],
+        now: () => `2026-04-22T02:20:${String(tick++).padStart(2, "0")}.000Z`,
+        flushTimeoutMs: 60_000,
+      });
+
+      assert.equal(report.branchId.startsWith("branch_"), true);
+      assert.deepEqual(report.parentBranchIds, []);
+      assert.equal(report.initialContinuity, "continuing");
+      assert.equal(report.degradedContinuity, "ambiguous");
+      assert.equal(report.revisedFromBasisIds.length, 1);
+      assert.equal(report.degradationSourceIds.length, 1);
+      assert.deepEqual(report.exchangedArtifactKinds, ["state-estimate", "state-estimate", "view"]);
+      assert.equal(report.exchangedViewKind, "branch-timeline");
+      assert.deepEqual(report.transportPicture.peerIds, [
+        "capability-evolution-peer",
+        "capability-custodian-peer",
+      ]);
+      assert.equal(
+        (report.basisRevision?.basisRevision as { fromBasisId?: string } | undefined)?.fromBasisId,
+        report.degradationSourceIds[0],
+      );
+      assert.equal(
+        (report.basisRevision?.basisRevision as { toBasisId?: string } | undefined)?.toBasisId,
+        report.revisedBasisId,
+      );
+      assert.equal(
+        (report.basisRevision?.basisRevision as { revisedAt?: string } | undefined)?.revisedAt,
+        "2026-04-22T02:20:01.000Z",
+      );
+      assert.equal(
+        (report.basisRevision?.basisRevision as { reason?: string } | undefined)?.reason,
+        "camera lost the ability to preserve green distinctions",
+      );
+      for (const swarm of factoryHarness.swarms) {
+        const transport = swarm.getTransportState();
+        assert.equal(transport.connectionOpens >= 1, true);
+        assert.equal((transport.discoveryStates[0]?.refreshCount ?? 0) >= 2, true);
+        assert.equal(transport.closeReport?.completed, true);
+      }
+    } finally {
+      await harness.close();
+    }
+  },
+);
+
+test(
+  "actual hyperswarm topic branch fork carries inherited nucleus forward while preserving split lineage",
+  {
+    skip: !SHOULD_RUN_REAL_HYPERSWARM,
+    timeout: 180_000,
+  },
+  async () => {
+    const harness = await openHyperswarmHarness();
+    const factoryHarness = openActualTopicHyperswarmFactoryHarness(harness.bootstrap);
+
+    try {
+      const report = await runHyperswarmBranchForkTransportLab({
+        createSwarm: factoryHarness.createSwarm,
+        namespaceParts: ["hyperswarm-topic-branch-fork", randomUUID()],
+        now: () => "2026-04-22T02:25:00.000Z",
+        flushTimeoutMs: 60_000,
+      });
+
+      assert.equal(report.sourceBranchId.startsWith("branch_"), true);
+      assert.equal(report.childBranchId.startsWith("branch_"), true);
+      assert.equal(report.lineageRelation, "split");
+      assert.deepEqual(report.childParentBranchIds, [report.sourceBranchId]);
+      assert.equal(report.inheritedNucleusIds.length, 1);
+      assert.equal(report.childNucleusAnchor, "child-fork-anchor");
+      assert.deepEqual(report.exchangedArtifactKinds, ["lineage-claim", "view"]);
+      assert.deepEqual(report.transportPicture.peerIds, [
+        "branch-fork-peer",
+        "lineage-custodian-peer",
+      ]);
+      for (const swarm of factoryHarness.swarms) {
+        const transport = swarm.getTransportState();
+        assert.equal(transport.connectionOpens >= 1, true);
+        assert.equal((transport.discoveryStates[0]?.refreshCount ?? 0) >= 2, true);
+        assert.equal(transport.closeReport?.completed, true);
+      }
+    } finally {
+      await harness.close();
+    }
+  },
+);
+
+test(
   "actual hyperswarm topic mutual observers exchange mediated self-access artifacts without overwriting source continuity",
   {
     skip: !SHOULD_RUN_REAL_HYPERSWARM,
@@ -637,6 +739,7 @@ test(
     const firstDirectory = await mkdtemp(path.join(tmpdir(), "causal-substrate-hs-a-"));
     const secondDirectory = await mkdtemp(path.join(tmpdir(), "causal-substrate-hs-b-"));
     const harness = await openHyperswarmHarness();
+    let tick = 0;
 
     try {
       const report = await runIncrementalReplicationCatchupLab({
@@ -644,7 +747,7 @@ test(
         storageDirB: secondDirectory,
         createSwarm: createRealHyperswarmFactory(harness.bootstrap),
         namespaceParts: ["hyperswarm-catchup", randomUUID()],
-        now: () => "2026-04-21T13:00:00.000Z",
+        now: () => `2026-04-21T13:00:${String(tick++).padStart(2, "0")}.000Z`,
         flushTimeoutMs: 60_000,
         replicationTimeoutMs: 120_000,
       });
@@ -672,6 +775,10 @@ test(
       ]);
       assert.equal(report.finalSituation.continuityState, "ambiguous");
       assert.equal(report.finalSituation.ambiguityState, "continuity");
+      assert.equal(report.transitionDecision.transitionKind, "ambiguous");
+      assert.deepEqual(report.transitionDecision.reasonCodes, ["target-situation-ambiguous"]);
+      assert.equal(report.transitionDecision.fromSituation.continuityState, "continuing");
+      assert.equal(report.transitionDecision.toSituation.continuityState, "ambiguous");
       assert.equal(report.finalSituation.activeReferentIds.length, 1);
       assert.equal(report.finalInspectability.referentClaims.length, 2);
       assert.equal(report.finalInspectability.artifactClaims.length, 2);
@@ -681,6 +788,49 @@ test(
         "incremental-replication-catchup-lab",
       );
       assert.equal(activeManagedCorestoreCount(), 0);
+    } finally {
+      await harness.close();
+    }
+  },
+);
+
+test(
+  "actual hyperswarm topic incremental replication catchup reconstructs inspectability and transition decision surfaces",
+  {
+    skip: !SHOULD_RUN_REAL_HYPERSWARM,
+    timeout: 300_000,
+  },
+  async () => {
+    const firstDirectory = await mkdtemp(path.join(tmpdir(), "causal-substrate-hs-topic-catchup-a-"));
+    const secondDirectory = await mkdtemp(path.join(tmpdir(), "causal-substrate-hs-topic-catchup-b-"));
+    const harness = await openHyperswarmHarness();
+    const factoryHarness = openActualTopicHyperswarmFactoryHarness(harness.bootstrap);
+    let tick = 0;
+
+    try {
+      const report = await runIncrementalReplicationCatchupLab({
+        storageDirA: firstDirectory,
+        storageDirB: secondDirectory,
+        createSwarm: factoryHarness.createSwarm,
+        namespaceParts: ["hyperswarm-topic-catchup", randomUUID()],
+        now: () => `2026-04-22T02:30:${String(tick++).padStart(2, "0")}.000Z`,
+        flushTimeoutMs: 60_000,
+        replicationTimeoutMs: 120_000,
+      });
+
+      assert.equal(report.initialSituation.continuityState, "continuing");
+      assert.equal(report.finalSituation.continuityState, "ambiguous");
+      assert.equal(report.transitionDecision.transitionKind, "ambiguous");
+      assert.deepEqual(report.transitionDecision.reasonCodes, ["target-situation-ambiguous"]);
+      assert.equal(report.finalInspectability.referentClaims.length, 2);
+      assert.equal(report.finalInspectability.artifactClaims.length, 2);
+      assert.ok(factoryHarness.swarms.length >= 4);
+      for (const swarm of factoryHarness.swarms) {
+        const transport = swarm.getTransportState();
+        assert.equal(transport.connectionOpens >= 1, true);
+        assert.equal((transport.discoveryStates[0]?.refreshCount ?? 0) >= 2, true);
+        assert.equal(transport.closeReport?.completed, true);
+      }
     } finally {
       await harness.close();
     }
@@ -717,6 +867,12 @@ test(
       assert.deepEqual(report.replicatedPayloadKinds, ["view"]);
       assert.equal(report.replicaSituation.continuityState, "continuing");
       assert.equal(report.replicaSituation.ambiguityState, "none");
+      assert.equal(report.replicaInspectability.referentClaims.length, 1);
+      assert.equal(report.replicaInspectability.artifactClaims.length, 1);
+      assert.equal(
+        report.replicaInspectability.artifactClaims[0]?.provenanceSource,
+        "multiple-observer-replication-lab",
+      );
       assert.equal(activeManagedCorestoreCount(), 0);
       assert.ok(factoryHarness.swarms.length >= 2);
       for (const swarm of factoryHarness.swarms) {

@@ -949,6 +949,79 @@ test("lab-12: discovery join set derives from primary context plus portal-visibl
   assert.equal(joinSet.primaryTopicKey, joinSet.projections[0]?.topicKey);
 });
 
+test("lab-12b: discovery join set can extend with declared adjacency and coarse concern overlays", () => {
+  const substrate = createSubstrate();
+  const basis = substrate.createBasis({
+    label: "discovery-overlay-basis",
+    dimensions: ["position", "containment", "concern"],
+  });
+  const campusBranch = substrate.createBranch({
+    role: "context",
+    label: "campus-branch",
+    basisId: basis.id,
+  });
+  const campus = substrate.createContext({
+    label: "campus",
+    branchId: campusBranch.id,
+  });
+  const roomBranch = substrate.createBranch({
+    role: "context",
+    label: "room-branch",
+    basisId: basis.id,
+  });
+  const room = substrate.createContext({
+    label: "room",
+    branchId: roomBranch.id,
+    parentContextId: campus.id,
+  });
+  const courtyardBranch = substrate.createBranch({
+    role: "context",
+    label: "courtyard-branch",
+    basisId: basis.id,
+  });
+  const courtyard = substrate.createContext({
+    label: "courtyard",
+    branchId: courtyardBranch.id,
+    parentContextId: campus.id,
+  });
+  const observer = substrate.createObserver({
+    label: "observer-b",
+    basisId: basis.id,
+  });
+  const observerBranch = substrate.createBranch({
+    role: "observer",
+    label: "observer-b-branch",
+    basisId: basis.id,
+    observerId: observer.id,
+    contextId: room.id,
+  });
+
+  const joinSet = computeDiscoveryJoinSet({
+    observerBranch,
+    contexts: substrate.state.contexts,
+    portals: substrate.state.portals,
+    adjacentContextIds: [courtyard.id, courtyard.id],
+    concernOverlays: [
+      {
+        concern: "camera",
+        quantization: "coarse-v1",
+      },
+    ],
+  });
+
+  assert.equal(joinSet.projections.length, 4);
+  assert.deepEqual(
+    joinSet.projections.map((projection) => projection.topicKind),
+    ["context-self", "context-parent", "context-adjacent", "concern-coarse"],
+  );
+  assert.equal(joinSet.projections[2]?.scopeAnchorId, courtyard.id);
+  assert.equal(joinSet.projections[2]?.scopeKind, "context");
+  assert.equal(joinSet.projections[3]?.scopeKind, "concern");
+  assert.equal(joinSet.projections[3]?.concern, "camera");
+  assert.equal(joinSet.projections[3]?.quantization, "coarse-v1");
+  assert.equal(new Set(joinSet.topicKeys).size, joinSet.topicKeys.length);
+});
+
 test("lab-13: coarse rendezvous can stay broad while capability filtering keeps exchange selective", () => {
   const sharedTopic = "coarse-room-topic";
 

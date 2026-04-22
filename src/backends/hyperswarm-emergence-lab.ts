@@ -7,8 +7,11 @@ import { Substrate } from "../kernel/substrate.js";
 import type {
   ArtifactEnvelope,
   Binding,
+  Branch,
   ComparisonSurface,
   LineageEdge,
+  Nucleus,
+  Segment,
   StateEstimate,
   View,
 } from "../kernel/types.js";
@@ -88,6 +91,35 @@ export interface HyperswarmOrthogonalBallTransportLabReport {
   comparisonComparability: ComparisonSurface["comparability"];
   comparisonCompatibility: ComparisonSurface["compatibility"];
   comparisonConvergence: ComparisonSurface["convergence"];
+  exchangedArtifactKinds: ArtifactEnvelope["kind"][];
+  transportPicture: EmergenceTransportPicture;
+}
+
+export interface HyperswarmBranchCapabilityEvolutionTransportLabReport {
+  namespaceParts: string[];
+  observerPeerIds: string[];
+  branchId: string;
+  parentBranchIds: string[];
+  revisedBasisId: string;
+  initialContinuity: StateEstimate["continuity"];
+  degradedContinuity: StateEstimate["continuity"];
+  revisedFromBasisIds: string[];
+  degradationSourceIds: string[];
+  basisRevision: Branch["metadata"];
+  exchangedArtifactKinds: ArtifactEnvelope["kind"][];
+  exchangedViewKind: View["kind"];
+  transportPicture: EmergenceTransportPicture;
+}
+
+export interface HyperswarmBranchForkTransportLabReport {
+  namespaceParts: string[];
+  observerPeerIds: string[];
+  sourceBranchId: string;
+  childBranchId: string;
+  lineageRelation: LineageEdge["relation"];
+  childParentBranchIds: string[];
+  inheritedNucleusIds: string[];
+  childNucleusAnchor: string;
   exchangedArtifactKinds: ArtifactEnvelope["kind"][];
   transportPicture: EmergenceTransportPicture;
 }
@@ -754,6 +786,434 @@ export async function runHyperswarmOrthogonalBallTransportLab(
             remotePeerId: sideSurface.id,
             sentMessageKinds: ["top-estimate-with-comparison"],
             receivedMessageKinds: [receivedByTop.messageKind],
+          }),
+        ],
+      },
+    };
+  } finally {
+    await cleanupChannelsAndSwarms(channels, [swarmA, swarmB]);
+  }
+}
+
+export async function runHyperswarmBranchCapabilityEvolutionTransportLab(
+  options: HyperswarmEmergenceTransportLabOptions,
+): Promise<HyperswarmBranchCapabilityEvolutionTransportLabReport> {
+  const topics = options.topics ?? new Map<string, unknown>();
+  const swarmA = await options.createSwarm(Buffer.alloc(32, 71), topics);
+  const swarmB = await options.createSwarm(Buffer.alloc(32, 72), topics);
+  const channels: Array<{ destroy?: () => void }> = [];
+  const timeoutMs = options.flushTimeoutMs ?? DEFAULT_SWARM_FLUSH_TIMEOUT_MS;
+  const substrate = new Substrate(options.now ? { now: options.now } : {});
+
+  try {
+    const fullBasis = substrate.createBasis({
+      label: "rgb-camera-basis",
+      dimensions: ["red", "green", "blue", "position"],
+    });
+    const degradedBasis = substrate.createBasis({
+      label: "rb-camera-basis",
+      dimensions: ["red", "blue", "position"],
+      partial: true,
+      degradedFrom: [fullBasis.id],
+      revisedFrom: [fullBasis.id],
+    });
+    const observer = substrate.createObserver({
+      label: "camera",
+      basisId: fullBasis.id,
+    });
+    const receiver = substrate.createObserver({
+      label: "continuity-custodian",
+      basisId: fullBasis.id,
+    });
+    const observerBranch = substrate.createBranch({
+      role: "observer",
+      label: "camera-branch",
+      basisId: fullBasis.id,
+      observerId: observer.id,
+    });
+    const receiverBranch = substrate.createBranch({
+      role: "observer",
+      label: "continuity-custodian-branch",
+      basisId: fullBasis.id,
+      observerId: receiver.id,
+    });
+    const referentBranch = substrate.createBranch({
+      role: "referent",
+      label: "colored-cube-branch",
+      basisId: fullBasis.id,
+    });
+    const referent = substrate.createReferent({
+      label: "colored-cube",
+      anchor: "cube-anchor",
+      branchId: referentBranch.id,
+    });
+    const binding = substrate.createBinding({
+      kind: "tracking",
+      observerBranchId: observerBranch.id,
+      referentBranchId: referentBranch.id,
+      referentId: referent.id,
+      strength: 0.91,
+    });
+    const initialEstimate = substrate.createStateEstimate({
+      referentId: referent.id,
+      branchId: referentBranch.id,
+      continuity: "continuing",
+      reasoning: "full color basis preserves enough distinction for continuing judgment",
+      basedOnBindingIds: [binding.id],
+      metadata: { effectiveBasisId: fullBasis.id },
+    });
+    const revisedBranch = substrate.reviseBranchBasis({
+      branchId: observerBranch.id,
+      basisId: degradedBasis.id,
+      reason: "camera lost the ability to preserve green distinctions",
+    });
+    const degradedEstimate = substrate.createStateEstimate({
+      referentId: referent.id,
+      branchId: referentBranch.id,
+      continuity: "ambiguous",
+      reasoning: "green loss weakens re-identification enough to keep continuity unresolved",
+      basedOnBindingIds: [binding.id],
+      metadata: { effectiveBasisId: degradedBasis.id },
+    });
+    const revisionView = substrate.createView({
+      kind: "branch-timeline",
+      label: "camera-basis-revision-view",
+      sourceIds: [observerBranch.id, binding.id, initialEstimate.id, degradedEstimate.id],
+      projection: "same branch continues while effective basis degrades and downstream judgment weakens",
+    });
+    const initialArtifact = substrate.createArtifactEnvelope({
+      kind: "state-estimate",
+      label: "camera-initial-estimate-artifact",
+      sourceIds: [observerBranch.id, referentBranch.id],
+      payloadIds: [initialEstimate.id],
+      locality: "shared-candidate",
+      provenance: {
+        emitterId: observer.id,
+        basisId: fullBasis.id,
+        source: "hyperswarm-branch-capability-evolution-transport-lab",
+      },
+    });
+    const degradedArtifact = substrate.createArtifactEnvelope({
+      kind: "state-estimate",
+      label: "camera-degraded-estimate-artifact",
+      sourceIds: [observerBranch.id, referentBranch.id],
+      payloadIds: [degradedEstimate.id],
+      locality: "shared-candidate",
+      provenance: {
+        emitterId: observer.id,
+        basisId: degradedBasis.id,
+        source: "hyperswarm-branch-capability-evolution-transport-lab",
+      },
+    });
+    const revisionArtifact = substrate.createArtifactEnvelope({
+      kind: "view",
+      label: "camera-basis-revision-artifact",
+      sourceIds: [observerBranch.id, referentBranch.id],
+      payloadIds: [revisionView.id],
+      locality: "shared-candidate",
+      provenance: {
+        emitterId: observer.id,
+        basisId: degradedBasis.id,
+        source: "hyperswarm-branch-capability-evolution-transport-lab",
+      },
+    });
+
+    const senderSurface: EmergencePeerSurface = {
+      id: "capability-evolution-peer",
+      role: "observer",
+      branchId: observerBranch.id,
+      observerId: observer.id,
+      basisId: degradedBasis.id,
+      referentIds: [referent.id],
+    };
+    const receiverSurface: EmergencePeerSurface = {
+      id: "capability-custodian-peer",
+      role: "observer",
+      branchId: receiverBranch.id,
+      observerId: receiver.id,
+      basisId: fullBasis.id,
+      referentIds: [referent.id],
+    };
+
+    const senderReady = openEmergencePeer({
+      swarm: swarmA,
+      localSurface: senderSurface,
+      channels,
+      timeoutMs,
+    });
+    const receiverReady = openEmergencePeer({
+      swarm: swarmB,
+      localSurface: receiverSurface,
+      channels,
+      timeoutMs,
+    });
+
+    await connectPair({
+      swarmA,
+      swarmB,
+      namespaceParts: [...(options.namespaceParts ?? []), "branch-capability-evolution"],
+      timeoutMs,
+    });
+
+    const [senderPeer, receiverPeer] = await Promise.all([senderReady, receiverReady]);
+    const received = waitForEvent<{
+      initialArtifact: ArtifactEnvelope;
+      initialEstimate: StateEstimate;
+      degradedArtifact: ArtifactEnvelope;
+      degradedEstimate: StateEstimate;
+      revisionArtifact: ArtifactEnvelope;
+      revisionView: View;
+      revisedBranch: Branch;
+      messageKind: "branch-capability-evolution";
+    }>(receiverPeer.channel, "data", timeoutMs);
+
+    senderPeer.channel.write({
+      initialArtifact,
+      initialEstimate,
+      degradedArtifact,
+      degradedEstimate,
+      revisionArtifact,
+      revisionView,
+      revisedBranch,
+      messageKind: "branch-capability-evolution",
+    });
+
+    const receivedBundle = await received;
+
+    return {
+      namespaceParts: options.namespaceParts ?? [],
+      observerPeerIds: [senderSurface.id, receiverSurface.id],
+      branchId: receivedBundle.revisedBranch.id,
+      parentBranchIds: receivedBundle.revisedBranch.parentBranchIds,
+      revisedBasisId: receivedBundle.revisedBranch.basisId,
+      initialContinuity: receivedBundle.initialEstimate.continuity,
+      degradedContinuity: receivedBundle.degradedEstimate.continuity,
+      revisedFromBasisIds: [...(degradedBasis.revisedFrom ?? [])],
+      degradationSourceIds: [...(degradedBasis.degradedFrom ?? [])],
+      basisRevision: receivedBundle.revisedBranch.metadata,
+      exchangedArtifactKinds: [
+        receivedBundle.initialArtifact.kind,
+        receivedBundle.degradedArtifact.kind,
+        receivedBundle.revisionArtifact.kind,
+      ],
+      exchangedViewKind: receivedBundle.revisionView.kind,
+      transportPicture: {
+        peerIds: [senderSurface.id, receiverSurface.id],
+        traces: [
+          createEmergenceTrace({
+            localPeerId: senderSurface.id,
+            remotePeerId: receiverSurface.id,
+            sentMessageKinds: ["branch-capability-evolution"],
+            receivedMessageKinds: [],
+          }),
+          createEmergenceTrace({
+            localPeerId: receiverSurface.id,
+            remotePeerId: senderSurface.id,
+            sentMessageKinds: [],
+            receivedMessageKinds: [receivedBundle.messageKind],
+          }),
+        ],
+      },
+    };
+  } finally {
+    await cleanupChannelsAndSwarms(channels, [swarmA, swarmB]);
+  }
+}
+
+export async function runHyperswarmBranchForkTransportLab(
+  options: HyperswarmEmergenceTransportLabOptions,
+): Promise<HyperswarmBranchForkTransportLabReport> {
+  const topics = options.topics ?? new Map<string, unknown>();
+  const swarmA = await options.createSwarm(Buffer.alloc(32, 81), topics);
+  const swarmB = await options.createSwarm(Buffer.alloc(32, 82), topics);
+  const channels: Array<{ destroy?: () => void }> = [];
+  const timeoutMs = options.flushTimeoutMs ?? DEFAULT_SWARM_FLUSH_TIMEOUT_MS;
+  const substrate = new Substrate(options.now ? { now: options.now } : {});
+
+  try {
+    const basis = substrate.createBasis({
+      label: "fork-basis",
+      dimensions: ["shape", "continuity", "position"],
+    });
+    const observer = substrate.createObserver({
+      label: "fork-observer",
+      basisId: basis.id,
+    });
+    const receiver = substrate.createObserver({
+      label: "lineage-custodian",
+      basisId: basis.id,
+    });
+    const sourceBranch = substrate.createBranch({
+      role: "referent",
+      label: "source-referent-branch",
+      basisId: basis.id,
+      observerId: observer.id,
+    });
+    const receiverBranch = substrate.createBranch({
+      role: "observer",
+      label: "lineage-custodian-branch",
+      basisId: basis.id,
+      observerId: receiver.id,
+    });
+    const sourceSegment = substrate.openSegment({
+      branchId: sourceBranch.id,
+      inheritedNucleusIds: [],
+      summary: "source branch pre-fork wake",
+    });
+    const sourceHappening = substrate.createHappening({
+      branchId: sourceBranch.id,
+      segmentId: sourceSegment.id,
+      label: "source continuity before fork",
+      triggerIds: [],
+      salience: 0.79,
+    });
+    const sourceCarry = substrate.sealSegment(sourceSegment.id, {
+      anchor: "source-fork-anchor",
+    });
+    const fork = substrate.forkBranch({
+      sourceBranchId: sourceBranch.id,
+      label: "forked-successor-branch",
+      relation: "split",
+      lineageEvidence: "successor branch emerges from preserved source continuity",
+    });
+    const childSegment = substrate.openSegment({
+      branchId: fork.branch.id,
+      inheritedNucleusIds: [sourceCarry.nucleus.id],
+      summary: "forked successor wake",
+    });
+    const childHappening = substrate.createHappening({
+      branchId: fork.branch.id,
+      segmentId: childSegment.id,
+      label: "successor continuity after fork",
+      triggerIds: [],
+      salience: 0.83,
+    });
+    const childCarry = substrate.sealSegment(childSegment.id, {
+      anchor: "child-fork-anchor",
+    });
+    const lineageArtifact = substrate.createArtifactEnvelope({
+      kind: "lineage-claim",
+      label: "fork-lineage-artifact",
+      sourceIds: [sourceBranch.id, fork.branch.id],
+      payloadIds: [fork.lineage.id],
+      locality: "shared-candidate",
+      provenance: {
+        basisId: basis.id,
+        emitterId: observer.id,
+        source: "hyperswarm-branch-fork-transport-lab",
+      },
+    });
+    const forkView = substrate.createView({
+      kind: "segment-summary",
+      label: "fork-carry-forward-view",
+      sourceIds: [sourceBranch.id, fork.branch.id, sourceCarry.nucleus.id, childCarry.nucleus.id],
+      projection: "successor branch inherits source nucleus package while diverging after split",
+    });
+    const forkViewArtifact = substrate.createArtifactEnvelope({
+      kind: "view",
+      label: "fork-carry-forward-artifact",
+      sourceIds: [sourceBranch.id, fork.branch.id],
+      payloadIds: [forkView.id],
+      locality: "shared-candidate",
+      provenance: {
+        basisId: basis.id,
+        emitterId: observer.id,
+        source: "hyperswarm-branch-fork-transport-lab",
+      },
+    });
+
+    const senderSurface: EmergencePeerSurface = {
+      id: "branch-fork-peer",
+      role: "observer",
+      branchId: sourceBranch.id,
+      observerId: observer.id,
+      basisId: basis.id,
+    };
+    const receiverSurface: EmergencePeerSurface = {
+      id: "lineage-custodian-peer",
+      role: "observer",
+      branchId: receiverBranch.id,
+      observerId: receiver.id,
+      basisId: basis.id,
+    };
+
+    const senderReady = openEmergencePeer({
+      swarm: swarmA,
+      localSurface: senderSurface,
+      channels,
+      timeoutMs,
+    });
+    const receiverReady = openEmergencePeer({
+      swarm: swarmB,
+      localSurface: receiverSurface,
+      channels,
+      timeoutMs,
+    });
+
+    await connectPair({
+      swarmA,
+      swarmB,
+      namespaceParts: [...(options.namespaceParts ?? []), "branch-fork"],
+      timeoutMs,
+    });
+
+    const [senderPeer, receiverPeer] = await Promise.all([senderReady, receiverReady]);
+    const received = waitForEvent<{
+      lineageArtifact: ArtifactEnvelope;
+      lineage: LineageEdge;
+      forkViewArtifact: ArtifactEnvelope;
+      forkView: View;
+      childBranch: Branch;
+      childSegment: Segment;
+      childNucleus: Nucleus;
+      sourceHappeningId: string;
+      childHappeningId: string;
+      messageKind: "branch-fork";
+    }>(receiverPeer.channel, "data", timeoutMs);
+
+    senderPeer.channel.write({
+      lineageArtifact,
+      lineage: fork.lineage,
+      forkViewArtifact,
+      forkView,
+      childBranch: fork.branch,
+      childSegment: substrate.state.segments.get(childCarry.segmentId),
+      childNucleus: childCarry.nucleus,
+      sourceHappeningId: sourceHappening.id,
+      childHappeningId: childHappening.id,
+      messageKind: "branch-fork",
+    });
+
+    const receivedBundle = await received;
+
+    if (!receivedBundle.childSegment) {
+      throw new Error("fork transport bundle missing child segment");
+    }
+
+    return {
+      namespaceParts: options.namespaceParts ?? [],
+      observerPeerIds: [senderSurface.id, receiverSurface.id],
+      sourceBranchId: sourceBranch.id,
+      childBranchId: receivedBundle.childBranch.id,
+      lineageRelation: receivedBundle.lineage.relation,
+      childParentBranchIds: receivedBundle.childBranch.parentBranchIds,
+      inheritedNucleusIds: receivedBundle.childSegment.inheritedNucleusIds,
+      childNucleusAnchor: receivedBundle.childNucleus.anchor,
+      exchangedArtifactKinds: [receivedBundle.lineageArtifact.kind, receivedBundle.forkViewArtifact.kind],
+      transportPicture: {
+        peerIds: [senderSurface.id, receiverSurface.id],
+        traces: [
+          createEmergenceTrace({
+            localPeerId: senderSurface.id,
+            remotePeerId: receiverSurface.id,
+            sentMessageKinds: ["branch-fork"],
+            receivedMessageKinds: [],
+          }),
+          createEmergenceTrace({
+            localPeerId: receiverSurface.id,
+            remotePeerId: senderSurface.id,
+            sentMessageKinds: [],
+            receivedMessageKinds: [receivedBundle.messageKind],
           }),
         ],
       },

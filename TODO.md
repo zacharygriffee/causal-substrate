@@ -206,6 +206,9 @@ Done when:
   - [x] actual-topic transport proof for mutual observer mediated self-access
   - [x] actual-topic transport proof for co-observed non-observer materialization from seed pressure
   - [x] actual-topic transport proof for orthogonal divergent persistence judgments without forced consensus
+  - [x] actual-topic transport proof for same-branch capability evolution without forced fork
+  - [x] actual-topic transport proof for split lineage with carry-forward nucleus inheritance
+  - [x] actual-topic receiver reconstruction of inspectability and transition decision surfaces after catchup
 - [x] define discovery-bearing branch doctrine
 - [ ] Autobase or higher-order shared surfaces
 - [x] define peer / observer / operator boundary doctrine
@@ -343,8 +346,8 @@ Done when:
   - [x] primary context
   - [x] enclosing context chain
   - [x] portal-visible contexts
-  - [ ] declared adjacency
-  - [ ] optional coarse concern overlays
+  - [x] declared adjacency
+  - [x] optional coarse concern overlays
 - [x] add a `DiscoveryProjection` artifact or persisted surface shape
 - [x] add deterministic topic derivation rules with schema versioning
 - [x] add labs for discovery-set derivation without registry dependence
