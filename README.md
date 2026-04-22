@@ -34,6 +34,7 @@ The current repository posture is intentionally conservative. The kernel encodes
 - [`docs/doctrine-notes/16-preservation-vs-branch-promotion.md`](./docs/doctrine-notes/16-preservation-vs-branch-promotion.md): preserve broadly, branch narrowly
 - [`docs/doctrine-notes/17-discovery-bearing-branches.md`](./docs/doctrine-notes/17-discovery-bearing-branches.md): derive bounded discovery join sets from branch structure before registries
 - [`docs/doctrine-notes/18-capability-surfaces.md`](./docs/doctrine-notes/18-capability-surfaces.md): compact negotiation between rendezvous and continuity exchange
+- [`docs/doctrine-notes/19-pulsed-rendezvous.md`](./docs/doctrine-notes/19-pulsed-rendezvous.md): topic join is admission, while rendezvous completion requires pulsed discovery and connection evidence
 - [`docs/working-defaults.md`](./docs/working-defaults.md): current lab defaults to use unless an experiment explicitly models an exception
 - [`docs/post-lab-synthesis.md`](./docs/post-lab-synthesis.md): what the completed lab program established and what it still leaves open
 - [`docs/corestore-hypercore-plan.md`](./docs/corestore-hypercore-plan.md): current implementation posture for serious substrate labs
@@ -82,10 +83,13 @@ Current implementation bias:
 npm install
 npm test
 npm run test:hyperswarm
+npm run smoke:hyperswarm-discovery
 npm run example
 ```
 
-`npm run test:hyperswarm` is an opt-in real transport lane. It uses actual `hyperswarm` and Noise streams rather than `fakeswarm`, keeps generous timeouts, and defaults to a local `hyperdht` testnet. The current proof surface includes direct-peer transport, Corestore replication, and transport-adjacent capability negotiation with bounded artifact exchange. It can still take `CAUSAL_SUBSTRATE_HYPERSWARM_BOOTSTRAP` as a comma- or space-separated bootstrap list when you want explicit DHT bootstrap hosts.
+`npm run test:hyperswarm` is an opt-in real transport lane. It uses actual `hyperswarm` and Noise streams rather than `fakeswarm`, keeps generous timeouts, and defaults to a local `hyperdht` testnet. The current proof surface includes direct-peer transport, pulsed topic rendezvous, Corestore replication, transport-adjacent capability negotiation with bounded artifact exchange, and actual-topic transport proofs for the phase-2 emergence cases: mediated self-access, co-observed non-observer materialization, and divergent persistence without forced consensus. It can still take `CAUSAL_SUBSTRATE_HYPERSWARM_BOOTSTRAP` as a comma- or space-separated bootstrap list when you want explicit DHT bootstrap hosts.
+
+`npm run smoke:hyperswarm-discovery` is an independent discovery-only smoke. It exercises topic rendezvous without Corestore replication, pulses `discovery.refresh()` explicitly, and prints per-swarm transport state. Set `CAUSAL_SUBSTRATE_HYPERSWARM_PUBLIC=1` to run it against the public network, and `CAUSAL_SUBSTRATE_DISCOVERY_PEERS=3` or higher to practice a small discovery mesh instead of a pair.
 
 ## Development posture
 
@@ -96,3 +100,9 @@ Prefer additions that:
 - treat convergence/agreement as optional higher-order behavior
 - avoid forcing global identity or truth
 - leave decentralized persistence as a backend concern rather than a core primitive
+
+Transport note:
+
+- topic join alone is not treated as sufficient rendezvous proof
+- actual rendezvous is an active pulsed phase over discovery sessions
+- the working posture is `join -> refresh/flushed/flush pulses -> connection evidence`

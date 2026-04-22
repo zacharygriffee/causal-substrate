@@ -7,6 +7,7 @@ import {
 } from "../src/index.js";
 import {
   type ReplicationDiscoveryLike,
+  waitForDiscoveryMeshRendezvous,
   waitForDiscoveryRendezvous,
 } from "../src/backends/hyperswarm-rendezvous.js";
 
@@ -40,6 +41,7 @@ const PULSE_INTERVAL_MS = parsePositiveInt(
   5_000,
 );
 const MAX_PULSES = parsePositiveInt(process.env.CAUSAL_SUBSTRATE_DISCOVERY_PULSES, 6);
+const PEER_COUNT = parsePositiveInt(process.env.CAUSAL_SUBSTRATE_DISCOVERY_PEERS, 2);
 const USE_RANDOM_TOPIC = process.env.CAUSAL_SUBSTRATE_DISCOVERY_RANDOM_TOPIC !== "0";
 const TOPIC_LABEL =
   process.env.CAUSAL_SUBSTRATE_DISCOVERY_TOPIC ?? "causal-substrate/hyperswarm-discovery-smoke";
@@ -51,44 +53,51 @@ void main().catch((error) => {
 
 async function main() {
   const harness = await openSmokeHarness();
-  const swarmA = await createHyperswarmReplicationSwarm({
-    bootstrap: harness.bootstrap,
-    gracefulCloseTimeoutMs: 5_000,
-    seed: Buffer.alloc(32, 0x11),
-  });
-  const swarmB = await createHyperswarmReplicationSwarm({
-    bootstrap: harness.bootstrap,
-    gracefulCloseTimeoutMs: 5_000,
-    seed: Buffer.alloc(32, 0x22),
-  });
+  const swarms = await Promise.all(
+    Array.from({ length: PEER_COUNT }, (_, index) =>
+      createHyperswarmReplicationSwarm({
+        bootstrap: harness.bootstrap,
+        gracefulCloseTimeoutMs: 5_000,
+        seed: Buffer.alloc(32, 0x11 + index),
+      }),
+    ),
+  );
   const topic = createTopic();
   const startedAt = Date.now();
 
-  await Promise.all([swarmA.listen(), swarmB.listen()]);
+  await Promise.all(swarms.map((swarm) => swarm.listen()));
 
-  const discoveryA = swarmA.join(topic, {
-    client: true,
-    server: true,
-  }) as ReplicationDiscoveryLike;
-  const discoveryB = swarmB.join(topic, {
-    client: true,
-    server: true,
-  }) as ReplicationDiscoveryLike;
+  const discoveries = swarms.map(
+    (swarm) =>
+      swarm.join(topic, {
+        client: true,
+        server: true,
+      }) as ReplicationDiscoveryLike,
+  );
 
   let success = false;
   let pulseCount = 0;
 
   try {
-    await Promise.allSettled([swarmA.flush(), swarmB.flush()]);
-    const rendezvous = await waitForDiscoveryRendezvous({
-      discoveryA,
-      discoveryB,
-      maxPulses: MAX_PULSES,
-      pulseIntervalMs: PULSE_INTERVAL_MS,
-      swarmA,
-      swarmB,
-      timeoutMs: WAIT_MS,
-    });
+    await Promise.allSettled(swarms.map((swarm) => swarm.flush()));
+    const rendezvous =
+      swarms.length === 2
+        ? await waitForDiscoveryRendezvous({
+            discoveryA: discoveries[0],
+            discoveryB: discoveries[1],
+            maxPulses: MAX_PULSES,
+            pulseIntervalMs: PULSE_INTERVAL_MS,
+            swarmA: swarms[0]!,
+            swarmB: swarms[1]!,
+            timeoutMs: WAIT_MS,
+          })
+        : await waitForDiscoveryMeshRendezvous({
+            discoveries,
+            maxPulses: MAX_PULSES,
+            pulseIntervalMs: PULSE_INTERVAL_MS,
+            swarms,
+            timeoutMs: WAIT_MS,
+          });
     success = rendezvous.connected;
     pulseCount = rendezvous.pulseCount;
   } finally {
@@ -98,7 +107,7 @@ async function main() {
       pulseCount,
       success,
       topicHex: topic.toString("hex"),
-      swarms: [swarmA, swarmB].map((swarm) => ({
+      swarms: swarms.map((swarm) => ({
         connections: swarm.connectionCount(),
         id: swarm.id,
         publicKeyHex: swarm.publicKey.toString("hex"),
@@ -109,10 +118,8 @@ async function main() {
     console.log(JSON.stringify(summary, null, 2));
 
     await Promise.allSettled([
-      discoveryA.destroy?.(),
-      discoveryB.destroy?.(),
-      swarmA.close(),
-      swarmB.close(),
+      ...discoveries.map((discovery) => discovery.destroy?.()),
+      ...swarms.map((swarm) => swarm.close()),
       harness.close(),
     ]);
 

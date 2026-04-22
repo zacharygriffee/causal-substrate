@@ -7,6 +7,7 @@ import {
   closeHyperswarmReplicationSwarm,
   type HyperswarmTransportState,
 } from "../src/backends/hyperswarm.js";
+import { waitForDiscoveryRendezvous } from "../src/backends/hyperswarm-rendezvous.js";
 
 function createTransportState(): HyperswarmTransportState {
   return {
@@ -159,6 +160,59 @@ test(
     } finally {
       await swarm.close();
       await testnet.destroy();
+    }
+  },
+);
+
+test(
+  "createHyperswarmReplicationSwarm rendezvous works with explicit bootstrap hosts",
+  { timeout: 60_000 },
+  async () => {
+    const { default: createTestnet } = await import("hyperdht/testnet.js");
+    const testnet = await createTestnet(3, { host: "127.0.0.1" });
+    const bootstrap = testnet.bootstrap.map((node: { host: string; port: number }) => {
+      return `${node.host}:${node.port}`;
+    });
+    const swarmA = await createHyperswarmReplicationSwarm({
+      bootstrap,
+      gracefulCloseTimeoutMs: 1_000,
+      seed: Buffer.alloc(32, 0x61),
+    });
+    const swarmB = await createHyperswarmReplicationSwarm({
+      bootstrap,
+      gracefulCloseTimeoutMs: 1_000,
+      seed: Buffer.alloc(32, 0x62),
+    });
+    const topic = randomBytes(32);
+
+    try {
+      await Promise.all([swarmA.listen(), swarmB.listen()]);
+
+      const discoveryA = swarmA.join(topic, {
+        client: true,
+        server: true,
+      });
+      const discoveryB = swarmB.join(topic, {
+        client: true,
+        server: true,
+      });
+
+      await Promise.allSettled([swarmA.flush(), swarmB.flush()]);
+
+      const rendezvous = await waitForDiscoveryRendezvous({
+        discoveryA,
+        discoveryB,
+        swarmA,
+        swarmB,
+        timeoutMs: 30_000,
+      });
+
+      assert.equal(rendezvous.connected, true);
+      assert.equal(rendezvous.pulseCount >= 1, true);
+      assert.equal(swarmA.getTransportState().connectionOpens >= 1, true);
+      assert.equal(swarmB.getTransportState().connectionOpens >= 1, true);
+    } finally {
+      await Promise.allSettled([swarmA.close(), swarmB.close(), testnet.destroy()]);
     }
   },
 );

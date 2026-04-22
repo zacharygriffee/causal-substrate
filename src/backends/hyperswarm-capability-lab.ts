@@ -12,6 +12,10 @@ import {
 } from "../kernel/types.js";
 import { negotiateCapabilityExchange } from "../kernel/capability-surface.js";
 import type { ReplicationSwarmLike } from "./hyperswarm-rendezvous.js";
+import {
+  waitForDiscoveryMeshRendezvous,
+  waitForDiscoveryRendezvous,
+} from "./hyperswarm-rendezvous.js";
 
 const DEFAULT_SWARM_FLUSH_TIMEOUT_MS = 30_000;
 const jsonCodec = makeCodec("json");
@@ -186,11 +190,11 @@ export async function runHyperswarmCapabilityHandshakeLab(
     });
 
     const topic = createCapabilityTopic(options.namespaceParts ?? []);
-    swarmA.join(topic, {
+    const discoveryA = swarmA.join(topic, {
       client: true,
       server: true,
     });
-    swarmB.join(topic, {
+    const discoveryB = swarmB.join(topic, {
       client: true,
       server: true,
     });
@@ -199,6 +203,13 @@ export async function runHyperswarmCapabilityHandshakeLab(
       swarmA.flush(timeoutMs),
       swarmB.flush(timeoutMs),
     ]);
+    await waitForDiscoveryRendezvous({
+      discoveryA,
+      discoveryB,
+      swarmA,
+      swarmB,
+      timeoutMs,
+    });
 
     const [degradedPeer, fullPeer] = await Promise.all([degradedReady, fullReady]);
 
@@ -450,15 +461,15 @@ export async function runHyperswarmMultiPeerCapabilityLab(
     });
 
     const topic = createCapabilityTopic([...(options.namespaceParts ?? []), "mesh"]);
-    degradedSwarm.join(topic, {
+    const degradedDiscovery = degradedSwarm.join(topic, {
       client: true,
       server: true,
     });
-    fullSwarm.join(topic, {
+    const fullDiscovery = fullSwarm.join(topic, {
       client: true,
       server: true,
     });
-    relaySwarm.join(topic, {
+    const relayDiscovery = relaySwarm.join(topic, {
       client: true,
       server: true,
     });
@@ -468,6 +479,12 @@ export async function runHyperswarmMultiPeerCapabilityLab(
       fullSwarm.flush(timeoutMs),
       relaySwarm.flush(timeoutMs),
     ]);
+    await waitForDiscoveryMeshRendezvous({
+      discoveries: [degradedDiscovery, fullDiscovery, relayDiscovery],
+      swarms: [degradedSwarm, fullSwarm, relaySwarm],
+      timeoutMs,
+      minConnectionsPerSwarm: 2,
+    });
 
     const [degradedPeer, fullPeer, relayPeer] = await Promise.all([
       degradedReady,

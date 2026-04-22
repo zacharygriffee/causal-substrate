@@ -23,6 +23,15 @@ export interface DiscoveryRendezvousOptions {
   maxPulses?: number | undefined;
 }
 
+export interface DiscoveryMeshRendezvousOptions {
+  discoveries: Array<ReplicationDiscoveryLike | void>;
+  pulseIntervalMs?: number | undefined;
+  swarms: ReplicationSwarmLike[];
+  timeoutMs: number;
+  maxPulses?: number | undefined;
+  minConnectionsPerSwarm?: number | undefined;
+}
+
 const DEFAULT_DISCOVERY_PULSE_INTERVAL_MS = 5_000;
 const DEFAULT_DISCOVERY_PULSE_LIMIT = 6;
 
@@ -87,6 +96,65 @@ export async function waitForDiscoveryRendezvous(
   };
 }
 
+export async function waitForDiscoveryMeshRendezvous(
+  options: DiscoveryMeshRendezvousOptions,
+): Promise<{
+  connected: boolean;
+  pulseCount: number;
+}> {
+  if (
+    options.discoveries.some((discovery) => typeof discovery?.refresh !== "function") ||
+    options.swarms.some((swarm) => typeof swarm.connectionCount !== "function")
+  ) {
+    return {
+      connected: false,
+      pulseCount: 0,
+    };
+  }
+
+  const startedAt = Date.now();
+  const maxPulses = options.maxPulses ?? DEFAULT_DISCOVERY_PULSE_LIMIT;
+  const pulseIntervalMs = options.pulseIntervalMs ?? DEFAULT_DISCOVERY_PULSE_INTERVAL_MS;
+  const minConnectionsPerSwarm = options.minConnectionsPerSwarm ?? 1;
+  let pulseCount = 0;
+
+  while (Date.now() - startedAt < options.timeoutMs) {
+    if (hasMeshConnections(options.swarms, minConnectionsPerSwarm)) {
+      return {
+        connected: true,
+        pulseCount,
+      };
+    }
+
+    if (pulseCount >= maxPulses) {
+      return {
+        connected: hasMeshConnections(options.swarms, minConnectionsPerSwarm),
+        pulseCount,
+      };
+    }
+
+    pulseCount += 1;
+
+    await Promise.allSettled(
+      options.discoveries.map((discovery, index) => pulseDiscovery(discovery, options.swarms[index]!)),
+    );
+
+    if (hasMeshConnections(options.swarms, minConnectionsPerSwarm)) {
+      return {
+        connected: true,
+        pulseCount,
+      };
+    }
+
+    await sleep(pulseIntervalMs);
+  }
+
+  return {
+    connected: hasMeshConnections(options.swarms, minConnectionsPerSwarm),
+    pulseCount,
+  };
+}
+
 export async function pulseDiscovery(
   discovery: ReplicationDiscoveryLike | void,
   swarm: ReplicationSwarmLike,
@@ -106,6 +174,13 @@ function hasMutualConnections(
   swarmB: ReplicationSwarmLike,
 ): boolean {
   return (swarmA.connectionCount?.() ?? 0) > 0 && (swarmB.connectionCount?.() ?? 0) > 0;
+}
+
+function hasMeshConnections(
+  swarms: ReplicationSwarmLike[],
+  minConnectionsPerSwarm: number,
+): boolean {
+  return swarms.every((swarm) => (swarm.connectionCount?.() ?? 0) >= minConnectionsPerSwarm);
 }
 
 function sleep(durationMs: number) {

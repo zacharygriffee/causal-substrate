@@ -199,8 +199,13 @@ Done when:
   - [x] initial real `hyperswarm` direct-peer replication proof with liberal timeouts
   - [x] initial real `hyperswarm` direct-peer capability handshake and bounded artifact exchange proof
   - [x] initial real `hyperswarm` mixed-capability multi-peer proof over a coarse rendezvous topic
-  - [ ] topic-based DHT discovery proof over real `hyperswarm`
-  - [ ] broader multi-peer and explicit bootstrap transport hardening
+  - [x] topic-based DHT discovery proof over real `hyperswarm`
+  - [x] independent discovery-only smoke over local testnet and public network
+  - [x] pulsed rendezvous helper for topic join, refresh, flush, and connection evidence
+  - [x] broader multi-peer and explicit bootstrap transport hardening
+  - [x] actual-topic transport proof for mutual observer mediated self-access
+  - [x] actual-topic transport proof for co-observed non-observer materialization from seed pressure
+  - [x] actual-topic transport proof for orthogonal divergent persistence judgments without forced consensus
 - [x] define discovery-bearing branch doctrine
 - [ ] Autobase or higher-order shared surfaces
 - [x] define peer / observer / operator boundary doctrine
