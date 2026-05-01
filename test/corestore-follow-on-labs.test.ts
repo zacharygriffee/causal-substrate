@@ -849,6 +849,7 @@ test("cross-core reconstruction can summarize known-core replay without Hyperbee
       ],
       contextClaims: [],
       portalClaims: [],
+      comparisonClaims: [],
       artifactClaims: [
         {
           artifactId: "artifact-room-1",

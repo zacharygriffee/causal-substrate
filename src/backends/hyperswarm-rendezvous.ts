@@ -1,5 +1,5 @@
 export interface ReplicationDiscoveryLike {
-  destroy?: () => Promise<void>;
+  destroy?: () => Promise<void> | void;
   flushed?: () => Promise<void>;
   refresh?: (opts?: Record<string, unknown>) => Promise<void>;
 }

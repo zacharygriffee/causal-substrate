@@ -3,7 +3,7 @@ import { mkdtemp } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
-import { pathToFileURL } from "node:url";
+import { createFakeSwarm } from "fakeswarm";
 
 import {
   activeManagedCorestoreCount,
@@ -14,9 +14,6 @@ import {
 test("multiple observer replication lab syncs append-only records between two separate Corestores via fakeswarm", async () => {
   const firstDirectory = await mkdtemp(path.join(tmpdir(), "causal-substrate-repl-a-"));
   const secondDirectory = await mkdtemp(path.join(tmpdir(), "causal-substrate-repl-b-"));
-  const { createFakeSwarm } = await import(
-    pathToFileURL("/home/zevilz/WebstormProjects/fakeswarm/src/index.js").href
-  );
 
   const report = await runMultipleObserverReplicationLab({
     storageDirA: firstDirectory,
@@ -55,9 +52,6 @@ test("multiple observer replication lab syncs append-only records between two se
 test("incremental replication lab catches up after replica reopen and reconstructs replay without Hyperbee", async () => {
   const firstDirectory = await mkdtemp(path.join(tmpdir(), "causal-substrate-repl-a-"));
   const secondDirectory = await mkdtemp(path.join(tmpdir(), "causal-substrate-repl-b-"));
-  const { createFakeSwarm } = await import(
-    pathToFileURL("/home/zevilz/WebstormProjects/fakeswarm/src/index.js").href
-  );
 
   const report = await runIncrementalReplicationCatchupLab({
     storageDirA: firstDirectory,
