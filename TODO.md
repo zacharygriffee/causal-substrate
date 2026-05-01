@@ -1,5 +1,45 @@
 # TODO
 
+## Adjacent Tool Interop Alignment
+
+- [ ] Define the causal-substrate-owned profile of the shared descriptor/request/receipt seam for Edge and other consumers.
+  - Treat "local layer" as operator-facing explicit artifact interop: Edge may observe, inspect, prepare, or request bounded continuity pictures without becoming substrate or owning graph truth.
+  - Start with bounded snapshot/export descriptors for:
+    - branch references
+    - referent references
+    - context references
+    - portal/export pictures
+    - comparison/ambiguity evidence
+    - reason/evidence ids
+  - Consider other causal-substrate local-layer surfacable capabilities:
+    - continuity situation/status summaries
+    - bounded inspectability views
+    - portal/exposure descriptors
+    - referent persistence estimates
+    - comparison pressure receipts
+  - Keep causal-substrate responsible for continuity, branch mechanics, referent persistence, context containment, portals, comparison surfaces, and inspectability boundaries.
+  - Keep consumers responsible for operator flow, display, local policy, and orchestration across tools.
+  - Do not expose raw graph traversal as the default Edge interface, and do not let consumers infer topology, merge/fork branches, create hidden continuity, or treat snapshots as global truth.
+  - Accept when: Edge can consume bounded continuity pictures without owning substrate mechanics or requiring hidden context carry-over.
+
+- [x] Define a dedicated explanation artifact contract for Edge Phase 90 continuity explanation import.
+  - Motivation: Edge Phase 90 is blocked until causal-substrate owns an explicit explanation payload instead of Edge inventing one from replay helpers.
+  - Start from the current inspectability contract and generic consumer continuity picture, but promote only the stable, substrate-owned shape.
+  - The contract should expose bounded fields such as:
+    - explanation artifact kind and schema version
+    - source continuity refs
+    - active or recently changed branch refs
+    - relevant segment or sleep boundary refs
+    - referent continuity state and bounded reasoning
+    - context and portal refs when they affect the explanation
+    - transition summary when applicable
+    - evidence ids, source ids, and provenance
+    - warnings for ambiguity, partial basis, or derived-view-only posture
+  - It must preserve that source continuity stays local or custody-bound by default.
+  - It must not expose raw append logs as the default consumer API.
+  - It must not imply global truth, agreement, merge/fork authority, hidden graph traversal, writer admission, mesh participation, or Edge/operator policy.
+  - Accept when: Edge can import a supplied causal-substrate explanation artifact as evidence-only orchestration context without owning continuity doctrine or substrate internals.
+
 ## Current Posture
 
 - preserve ontology and working defaults first

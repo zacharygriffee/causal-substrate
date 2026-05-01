@@ -29,8 +29,36 @@ The current Corestore-backed inspectability surfaces are:
 - generic consumer continuity pictures built from persisted continuity, referent, and transition records
 - replay-backed comparison claims and generic consumer comparison pictures
 - time-ordered context and portal replay with primary-context resolution over time
+- `causal-substrate/continuity-explanation/v1` artifacts for consumers that need a portable evidence-only explanation import
 
 These are reconstruction helpers, not authoritative truth engines.
+
+## Continuity explanation artifact v1
+
+The `causal-substrate/continuity-explanation/v1` artifact is the first dedicated explanation contract for adjacent tools such as Edge.
+
+It is derived from the generic consumer continuity picture plus the bounded inspectability picture. It carries:
+
+- schema and version
+- an explanation artifact id and emitted time
+- source continuity custody posture
+- active or recently changed branch refs
+- relevant segment and sleep-boundary refs
+- referent continuity states with bounded reasoning
+- context and portal refs when they affect the explanation
+- optional transition summary
+- evidence ids and supporting artifact refs with provenance
+- warnings for ambiguity, derived-view-only posture, source-continuity non-transfer, and partial basis when applicable
+
+It explicitly carries a consumer boundary:
+
+- evidence-only
+- no raw append logs
+- no writer admission
+- no mesh participation grant
+- no global truth assertion
+
+This lets Edge import the artifact as orchestration context without owning continuity doctrine, hidden graph traversal, branch mechanics, or substrate internals.
 
 ## Current strengths
 
@@ -43,6 +71,7 @@ The current implementation is already strong enough to preserve:
 - compact replay-backed explanation of the current continuity situation
 - compact replay-backed explanation of `stay`, `branch`, `cross-context`, and `ambiguous` transition outcomes
 - compact consumer-facing answers to what is active, what changed, and why
+- portable evidence-only explanation artifacts for adjacent import
 - bounded explanation of comparison pressure through basis/projection references, reason codes, and evidence ids
 - time-ordered replay of context and portal claims across wake/sleep boundaries
 - replay from known cores without Hyperbee
@@ -52,7 +81,6 @@ The current implementation is already strong enough to preserve:
 
 The current inspectability posture is still incomplete in several ways:
 
-- there is no dedicated explanation artifact contract beyond current replay helpers
 - there is no durable inspectability view taxonomy yet
 - artifact summaries are still helper-derived rather than standardized payload contracts
 - comparison strategy itself remains outside the substrate even though comparison claims are now inspectable

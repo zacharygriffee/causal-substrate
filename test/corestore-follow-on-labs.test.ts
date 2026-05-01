@@ -6,6 +6,8 @@ import test from "node:test";
 
 import {
   activeManagedCorestoreCount,
+  assertContinuityExplanationArtifact,
+  buildContinuityExplanationArtifact,
   buildGenericConsumerComparisonPicture,
   buildGenericConsumerContinuityPicture,
   openFirstSeriousCorestoreLab,
@@ -371,6 +373,256 @@ test("generic consumer continuity picture answers what is active, what changed, 
         "generic-consumer-estimate-2",
       ],
     });
+  } finally {
+    await lab.close();
+  }
+});
+
+test("continuity explanation artifact gives Edge bounded evidence-only import context", async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), "causal-substrate-follow-on-"));
+  const lab = await openFirstSeriousCorestoreLab({
+    storageDir: directory,
+    namespaceParts: ["edge-phase-90-explanation"],
+  });
+  const substrate = new Substrate({
+    now: () => "2026-04-23T09:00:00.000Z",
+  });
+
+  try {
+    const basis = substrate.createBasis({
+      label: "edge-explanation-basis",
+      dimensions: ["continuity", "context", "absence"],
+    });
+    const observer = substrate.createObserver({
+      label: "edge-explanation-observer",
+      basisId: basis.id,
+    });
+    const roomBranch = substrate.createBranch({
+      role: "context",
+      label: "edge-room-branch",
+      basisId: basis.id,
+    });
+    const room = substrate.createContext({
+      branchId: roomBranch.id,
+      label: "room",
+      containmentPolicy: "primary-situated",
+    });
+    const hallwayBranch = substrate.createBranch({
+      role: "context",
+      label: "edge-hallway-branch",
+      basisId: basis.id,
+    });
+    const hallway = substrate.createContext({
+      branchId: hallwayBranch.id,
+      label: "hallway",
+      containmentPolicy: "candidate",
+    });
+    const observerBranch = substrate.createBranch({
+      role: "observer",
+      label: "edge-observer-branch",
+      basisId: basis.id,
+      observerId: observer.id,
+      contextId: room.id,
+    });
+    const portalBranch = substrate.createBranch({
+      role: "portal",
+      label: "edge-doorway-branch",
+      basisId: basis.id,
+      contextId: room.id,
+    });
+    const portal = substrate.createPortal({
+      branchId: portalBranch.id,
+      label: "edge-doorway",
+      sourceContextId: hallway.id,
+      targetContextId: room.id,
+      exposureRule: "bounded visibility",
+    });
+    const referentBranch = substrate.createBranch({
+      role: "referent",
+      label: "edge-referent-branch",
+      basisId: basis.id,
+      contextId: room.id,
+    });
+    const referent = substrate.createReferent({
+      label: "edge-referent",
+      anchor: "edge-referent-anchor",
+      branchId: referentBranch.id,
+    });
+    const binding = substrate.createBinding({
+      kind: "tracking",
+      observerBranchId: observerBranch.id,
+      referentBranchId: referentBranch.id,
+      referentId: referent.id,
+      contextId: room.id,
+    });
+
+    const segment = substrate.openSegment({
+      branchId: observerBranch.id,
+      summary: "edge explanation wake",
+    });
+    await lab.appendBranchHappening({
+      branchId: observerBranch.id,
+      segmentId: segment.id,
+      happening: {
+        id: "edge-happening-1",
+        branchId: observerBranch.id,
+        segmentId: segment.id,
+        label: "referent observed before absence",
+        triggerIds: [],
+        observedAt: "2026-04-23T09:00:00.000Z",
+      },
+    });
+    const carry = substrate.sealSegment(segment.id, {
+      anchor: "edge-sleep-anchor-1",
+    });
+    const sealedSegment = substrate.state.segments.get(carry.segmentId);
+    assert.ok(sealedSegment);
+    await lab.appendSleepCapsule({
+      branchId: observerBranch.id,
+      segment: sealedSegment,
+      nucleus: carry.nucleus,
+    });
+
+    const roomArtifact = substrate.createArtifactEnvelope({
+      kind: "context-surface",
+      label: "edge-room-context",
+      sourceIds: [roomBranch.id],
+      payloadIds: [room.id],
+      provenance: {
+        emittedAt: "2026-04-23T09:00:02.000Z",
+        basisId: basis.id,
+        emitterId: observer.id,
+        source: "edge-phase-90-test",
+      },
+    });
+    await lab.appendContextArtifact({
+      artifact: roomArtifact,
+      context: room,
+    });
+    const portalArtifact = substrate.createArtifactEnvelope({
+      kind: "portal-surface",
+      label: "edge-doorway-portal",
+      sourceIds: [portalBranch.id, hallway.id, room.id],
+      payloadIds: [portal.id],
+      provenance: {
+        emittedAt: "2026-04-23T09:00:03.000Z",
+        basisId: basis.id,
+        emitterId: observer.id,
+        source: "edge-phase-90-test",
+      },
+    });
+    await lab.appendPortalArtifact({
+      artifact: portalArtifact,
+      portal,
+    });
+    await lab.appendReferentState({
+      referent,
+      estimate: {
+        id: "edge-estimate-1",
+        referentId: referent.id,
+        branchId: referentBranch.id,
+        estimatedAt: "2026-04-23T09:00:10.000Z",
+        continuity: "continuing",
+        reasoning: "referent remains plausible before absence pressure increases",
+        basedOnBindingIds: [binding.id],
+      },
+    });
+    await lab.appendReferentState({
+      referent,
+      estimate: {
+        id: "edge-estimate-2",
+        referentId: referent.id,
+        branchId: referentBranch.id,
+        estimatedAt: "2026-04-23T09:00:20.000Z",
+        continuity: "ambiguous",
+        reasoning: "absence pressure leaves continuity unresolved",
+        basedOnBindingIds: [binding.id],
+      },
+    });
+
+    const artifact = await buildContinuityExplanationArtifact({
+      lab,
+      emittedAt: "2026-04-23T09:00:30.000Z",
+      asOf: "2026-04-23T09:00:20.000Z",
+      transitionWindow: {
+        fromAsOf: "2026-04-23T09:00:10.000Z",
+        toAsOf: "2026-04-23T09:00:20.000Z",
+      },
+      provenanceSource: "edge-phase-90-test",
+    });
+
+    assertContinuityExplanationArtifact(artifact);
+    assert.equal(artifact.schema, "causal-substrate/continuity-explanation/v1");
+    assert.equal(artifact.artifactKind, "continuity-explanation");
+    assert.equal(artifact.boundary.evidenceOnly, true);
+    assert.equal(artifact.boundary.rawAppendLogsIncluded, false);
+    assert.equal(artifact.boundary.grantsWriterAdmission, false);
+    assert.equal(artifact.boundary.grantsMeshParticipation, false);
+    assert.equal(artifact.boundary.assertsGlobalTruth, false);
+    assert.equal(artifact.sourceContinuity.custody, "local-or-custody-bound");
+    assert.deepEqual(artifact.sourceContinuity.namespaceParts, [
+      "causal-substrate",
+      "v1",
+      "first-serious-causal-lab",
+      "edge-phase-90-explanation",
+    ]);
+    assert.equal(artifact.situation.primaryBranchId, observerBranch.id);
+    assert.equal(artifact.situation.primaryContextId, room.id);
+    assert.deepEqual(artifact.situation.portalVisibleContextIds, [hallway.id]);
+    assert.equal(artifact.transition?.transitionKind, "ambiguous");
+    assert.deepEqual(artifact.transition?.reasonCodes, ["target-situation-ambiguous"]);
+    assert.deepEqual(artifact.referentContinuity, [
+      {
+        referentId: referent.id,
+        branchId: referentBranch.id,
+        continuity: "ambiguous",
+        reasoning: "absence pressure leaves continuity unresolved",
+        estimatedAt: "2026-04-23T09:00:20.000Z",
+        basedOnBindingIds: [binding.id],
+      },
+    ]);
+    assert.ok(
+      artifact.branchRefs.some(
+        (branch) =>
+          branch.branchId === observerBranch.id &&
+          branch.role === "primary" &&
+          branch.latestSegmentId === segment.id,
+      ),
+    );
+    assert.deepEqual(artifact.sleepBoundaryRefs, [
+      {
+        branchId: observerBranch.id,
+        segmentId: segment.id,
+        nucleusId: carry.nucleus.id,
+        anchor: "edge-sleep-anchor-1",
+      },
+    ]);
+    assert.ok(
+      artifact.contextRefs.some(
+        (context) => context.contextId === room.id && context.role === "primary",
+      ),
+    );
+    assert.ok(
+      artifact.contextRefs.some(
+        (context) =>
+          context.contextId === hallway.id && context.role === "portal-visible",
+      ),
+    );
+    assert.deepEqual(artifact.portalRefs.map((ref) => ref.portalId), [portal.id]);
+    assert.ok(artifact.evidenceSourceIds.includes("edge-estimate-2"));
+    assert.ok(artifact.evidenceSourceIds.includes(binding.id));
+    assert.deepEqual(
+      artifact.supportingArtifacts.map((ref) => ref.artifactId),
+      [roomArtifact.id, portalArtifact.id],
+    );
+    assert.deepEqual(artifact.provenance.basisIds, [basis.id]);
+    assert.deepEqual(artifact.warnings, [
+      "derived-view-only",
+      "source-continuity-not-transferred",
+      "ambiguity-present",
+    ]);
+    assert.equal(Object.hasOwn(artifact, "branchHappenings"), false);
+    assert.equal(Object.hasOwn(artifact, "appendLogs"), false);
   } finally {
     await lab.close();
   }
