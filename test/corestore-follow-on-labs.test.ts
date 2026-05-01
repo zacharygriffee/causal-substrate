@@ -7,9 +7,11 @@ import test from "node:test";
 import {
   activeManagedCorestoreCount,
   assertContinuityExplanationArtifact,
+  buildAdjacentToolInteropResponse,
   buildContinuityExplanationArtifact,
   buildGenericConsumerComparisonPicture,
   buildGenericConsumerContinuityPicture,
+  createAdjacentToolInteropRequest,
   openFirstSeriousCorestoreLab,
   reconstructBranchPicture,
   reconstructContinuitySituation,
@@ -623,6 +625,237 @@ test("continuity explanation artifact gives Edge bounded evidence-only import co
     ]);
     assert.equal(Object.hasOwn(artifact, "branchHappenings"), false);
     assert.equal(Object.hasOwn(artifact, "appendLogs"), false);
+  } finally {
+    await lab.close();
+  }
+});
+
+test("adjacent tool interop request returns bounded descriptors, surfaces, and receipt without graph authority", async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), "causal-substrate-follow-on-"));
+  const lab = await openFirstSeriousCorestoreLab({
+    storageDir: directory,
+    namespaceParts: ["adjacent-tool-interop"],
+  });
+  const substrate = new Substrate({
+    now: () => "2026-04-24T11:00:00.000Z",
+  });
+
+  try {
+    const basis = substrate.createBasis({
+      label: "adjacent-tool-basis",
+      dimensions: ["continuity", "context", "comparison"],
+    });
+    const observer = substrate.createObserver({
+      label: "adjacent-tool-observer",
+      basisId: basis.id,
+    });
+    const roomBranch = substrate.createBranch({
+      role: "context",
+      label: "interop-room-branch",
+      basisId: basis.id,
+    });
+    const room = substrate.createContext({
+      branchId: roomBranch.id,
+      label: "room",
+      containmentPolicy: "primary-situated",
+    });
+    const hallwayBranch = substrate.createBranch({
+      role: "context",
+      label: "interop-hallway-branch",
+      basisId: basis.id,
+    });
+    const hallway = substrate.createContext({
+      branchId: hallwayBranch.id,
+      label: "hallway",
+      containmentPolicy: "candidate",
+    });
+    const observerBranch = substrate.createBranch({
+      role: "observer",
+      label: "interop-observer-branch",
+      basisId: basis.id,
+      observerId: observer.id,
+      contextId: room.id,
+    });
+    const portalBranch = substrate.createBranch({
+      role: "portal",
+      label: "interop-portal-branch",
+      basisId: basis.id,
+      contextId: room.id,
+    });
+    const portal = substrate.createPortal({
+      branchId: portalBranch.id,
+      label: "interop-doorway",
+      sourceContextId: hallway.id,
+      targetContextId: room.id,
+      exposureRule: "bounded operator view",
+    });
+    const referentBranch = substrate.createBranch({
+      role: "referent",
+      label: "interop-referent-branch",
+      basisId: basis.id,
+      contextId: room.id,
+    });
+    const referent = substrate.createReferent({
+      label: "interop-referent",
+      anchor: "interop-anchor",
+      branchId: referentBranch.id,
+    });
+    const binding = substrate.createBinding({
+      kind: "tracking",
+      observerBranchId: observerBranch.id,
+      referentBranchId: referentBranch.id,
+      referentId: referent.id,
+      contextId: room.id,
+    });
+
+    const segment = substrate.openSegment({
+      branchId: observerBranch.id,
+      summary: "adjacent interop wake",
+    });
+    await lab.appendBranchHappening({
+      branchId: observerBranch.id,
+      segmentId: segment.id,
+      happening: {
+        id: "interop-happening-1",
+        branchId: observerBranch.id,
+        segmentId: segment.id,
+        label: "referent observed for interop",
+        triggerIds: [],
+        observedAt: "2026-04-24T11:00:00.000Z",
+      },
+    });
+    const roomArtifact = substrate.createArtifactEnvelope({
+      kind: "context-surface",
+      label: "interop-room-context",
+      sourceIds: [roomBranch.id],
+      payloadIds: [room.id],
+      provenance: {
+        emittedAt: "2026-04-24T11:00:01.000Z",
+        basisId: basis.id,
+        emitterId: observer.id,
+        source: "adjacent-tool-interop-test",
+      },
+    });
+    await lab.appendContextArtifact({
+      artifact: roomArtifact,
+      context: room,
+    });
+    const portalArtifact = substrate.createArtifactEnvelope({
+      kind: "portal-surface",
+      label: "interop-doorway-portal",
+      sourceIds: [portalBranch.id, hallway.id, room.id],
+      payloadIds: [portal.id],
+      provenance: {
+        emittedAt: "2026-04-24T11:00:02.000Z",
+        basisId: basis.id,
+        emitterId: observer.id,
+        source: "adjacent-tool-interop-test",
+      },
+    });
+    await lab.appendPortalArtifact({
+      artifact: portalArtifact,
+      portal,
+    });
+    await lab.appendReferentState({
+      referent,
+      estimate: {
+        id: "interop-estimate-1",
+        referentId: referent.id,
+        branchId: referentBranch.id,
+        estimatedAt: "2026-04-24T11:00:05.000Z",
+        continuity: "continuing",
+        reasoning: "referent remains available as bounded evidence",
+        basedOnBindingIds: [binding.id],
+      },
+    });
+    const comparison = substrate.createComparisonSurface({
+      label: "interop-comparison",
+      sourceIds: [referent.id, room.id],
+      basisId: basis.id,
+      comparability: "partial",
+      compatibility: "unresolved",
+      convergence: "not-forced",
+      reasonCodes: ["consumer-needs-bounded-comparison"],
+      evidenceSourceIds: [referent.id, roomArtifact.id],
+      summary: "comparison is evidence pressure only",
+    });
+    const comparisonArtifact = substrate.createArtifactEnvelope({
+      kind: "comparability-surface",
+      label: "interop-comparison-artifact",
+      sourceIds: [...comparison.sourceIds],
+      payloadIds: [comparison.id],
+      provenance: {
+        emittedAt: "2026-04-24T11:00:07.000Z",
+        basisId: basis.id,
+        emitterId: observer.id,
+        source: "adjacent-tool-interop-test",
+      },
+    });
+    await lab.appendComparisonArtifact({
+      artifact: comparisonArtifact,
+      comparison,
+    });
+
+    const request = createAdjacentToolInteropRequest({
+      requestId: "edge-interop-request-1",
+      consumerId: "mesh-ecology-edge",
+      requestedSurfaces: [
+        "continuity-situation",
+        "continuity-explanation",
+        "inspectability-picture",
+        "comparison-picture",
+      ],
+      asOf: "2026-04-24T11:00:07.000Z",
+      reason: "operator-facing bounded continuity import",
+    });
+    const response = await buildAdjacentToolInteropResponse({
+      lab,
+      request,
+      emittedAt: "2026-04-24T11:00:10.000Z",
+      source: "adjacent-tool-interop-test",
+    });
+
+    assert.equal(response.schema, "causal-substrate/adjacent-tool-interop/v1");
+    assert.deepEqual(response.receipt.suppliedSurfaceKinds, [
+      "continuity-situation",
+      "continuity-explanation",
+      "inspectability-picture",
+      "comparison-picture",
+    ]);
+    assert.equal(response.boundary.operatorFacing, true);
+    assert.equal(response.boundary.evidenceOnly, true);
+    assert.equal(response.boundary.sourceContinuityLocal, true);
+    assert.equal(response.boundary.rawAppendLogsIncluded, false);
+    assert.equal(response.boundary.rawGraphTraversalIncluded, false);
+    assert.equal(response.boundary.hiddenContextCarryoverIncluded, false);
+    assert.equal(response.boundary.grantsWriterAdmission, false);
+    assert.equal(response.boundary.grantsMergeOrForkAuthority, false);
+    assert.equal(response.boundary.grantsMeshParticipation, false);
+    assert.equal(response.boundary.assertsGlobalTruth, false);
+    assert.equal(response.boundary.importsConsumerPolicy, false);
+    assert.deepEqual(response.descriptors.branchRefs, [observerBranch.id]);
+    assert.deepEqual(response.descriptors.referentRefs, [referent.id]);
+    assert.deepEqual(response.descriptors.contextRefs.sort(), [hallway.id, room.id].sort());
+    assert.deepEqual(response.descriptors.portalRefs, [portal.id]);
+    assert.deepEqual(
+      response.descriptors.artifactRefs.sort(),
+      [roomArtifact.id, portalArtifact.id, comparisonArtifact.id].sort(),
+    );
+    assert.deepEqual(response.descriptors.comparisonRefs, [comparison.id]);
+    assert.ok(response.descriptors.reasonCodes.includes("latest-branch-activity"));
+    assert.ok(response.descriptors.evidenceIds.includes("interop-estimate-1"));
+    assert.ok(response.descriptors.evidenceIds.includes(roomArtifact.id));
+    assert.equal(
+      response.surfaces.continuityExplanation?.boundary.rawAppendLogsIncluded,
+      false,
+    );
+    assert.equal(response.surfaces.continuitySituation?.primaryContextId, room.id);
+    assert.equal(response.surfaces.comparisonPicture?.comparisons[0]?.comparisonId, comparison.id);
+    assert.deepEqual(response.receipt.boundary, response.boundary);
+    assert.ok(response.receipt.warnings.includes("bounded-surface-only"));
+    assert.ok(response.receipt.warnings.includes("raw-graph-unavailable"));
+    assert.equal(Object.hasOwn(response.surfaces, "branchHappenings"), false);
+    assert.equal(Object.hasOwn(response.surfaces, "graphTraversal"), false);
   } finally {
     await lab.close();
   }

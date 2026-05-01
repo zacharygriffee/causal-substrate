@@ -86,6 +86,14 @@ The clean seam is:
 - `causal-substrate` produces local continuity and explicit shareable artifacts
 - `mesh-ecology-edge` decides what publication or boundary action, if any, should happen next
 
+Current interop posture:
+
+- adjacent tools may submit a bounded descriptor/request/receipt request through `causal-substrate/adjacent-tool-interop/v1`
+- requests may ask for continuity situation, generic continuity picture, continuity explanation, inspectability picture, or comparison picture surfaces
+- responses include descriptor refs for branches, referents, contexts, portals, artifacts, comparisons, reason codes, and evidence ids
+- receipts carry explicit non-authority flags: no raw append logs, no raw graph traversal, no hidden context carry-over, no writer admission, no merge/fork authority, no mesh participation, and no global truth assertion
+- Edge may use the response as operator-facing orchestration context, but it does not become substrate and does not own continuity doctrine
+
 ## Boundary with mesh integration generally
 
 This repository should remain mesh-agnostic at the core.

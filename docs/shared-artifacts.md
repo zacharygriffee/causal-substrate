@@ -105,6 +105,7 @@ Adjacent consumers should rely on:
 - explicit exchange artifacts for anything boundary-crossing
 - continuity situation, transition, and inspectability surfaces for bounded explanation
 - `causal-substrate/continuity-explanation/v1` artifacts when a portable evidence-only explanation import is needed
+- `causal-substrate/adjacent-tool-interop/v1` responses when a consumer needs a descriptor/request/receipt boundary around bounded surfaces
 - comparison artifacts and generic comparison pictures when explicit comparison pressure is needed
 - replay-backed continuity records for deeper inspection when needed
 

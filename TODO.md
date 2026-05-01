@@ -2,7 +2,7 @@
 
 ## Adjacent Tool Interop Alignment
 
-- [ ] Define the causal-substrate-owned profile of the shared descriptor/request/receipt seam for Edge and other consumers.
+- [x] Define the causal-substrate-owned profile of the shared descriptor/request/receipt seam for Edge and other consumers.
   - Treat "local layer" as operator-facing explicit artifact interop: Edge may observe, inspect, prepare, or request bounded continuity pictures without becoming substrate or owning graph truth.
   - Start with bounded snapshot/export descriptors for:
     - branch references

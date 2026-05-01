@@ -135,6 +135,30 @@ It should not include:
 - app-specific vocabulary from Edge, Virtualia, or any other adjacent repo
 - consumer-specific comparison scoring policy
 
+## Adjacent tool interop
+
+Adjacent tools that need a formal request/response boundary should use the `causal-substrate/adjacent-tool-interop/v1` seam.
+
+The request declares:
+
+- the consumer id
+- requested bounded surfaces
+- optional `asOf` time
+- optional transition window
+- optional reason for the request
+
+The response may supply:
+
+- continuity situation
+- generic continuity picture
+- continuity explanation artifact
+- inspectability picture
+- comparison picture
+
+The response also supplies descriptor refs and a receipt. The receipt is intentionally part of the contract because it states what was supplied and what was not granted.
+
+Consumers must treat this response as evidence-only. It does not include raw graph traversal, hidden topology, source append logs, writer admission, merge/fork authority, mesh participation, global truth, or consumer policy.
+
 ## Anti-patterns
 
 Avoid these integration mistakes:

@@ -19,4 +19,5 @@ export * from "./adapters/mesh-agnostic-adapter.js";
 export * from "./adapters/generic-consumer-continuity.js";
 export * from "./adapters/generic-consumer-comparison.js";
 export * from "./adapters/continuity-explanation-artifact.js";
+export * from "./adapters/adjacent-tool-interop.js";
 export * from "./prototypes/continuity-workstation.js";
