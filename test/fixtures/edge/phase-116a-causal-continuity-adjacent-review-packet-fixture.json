@@ -1,0 +1,841 @@
+{
+  "artifactKind": "edge_ecosystem_causal_continuity_packet_fixture_review",
+  "schemaVersion": "edge_ecosystem_causal_continuity_packet_fixture_review.v1",
+  "fixtureId": "edge-ecosystem-causal-continuity-packet-fixture-review:2026-05-02T10:00:00.000Z",
+  "createdAt": "2026-05-02T10:00:00.000Z",
+  "fixtureScope": "edge_side_causal_continuity_packet_review_only",
+  "targetRepo": "causal-substrate",
+  "targetSurface": "causal_continuity",
+  "seamId": "causal_substrate",
+  "ecosystemSeamId": "causal_substrate",
+  "packetSetRef": "edge-ecosystem-adjacent-packets:2026-05-02T10:00:00.000Z",
+  "packetRef": "edge-ecosystem-adjacent-packet:001:causal_substrate:2026-05-02T10:00:00.000Z",
+  "packetSet": {
+    "artifactKind": "edge_ecosystem_adjacent_implementation_packet_set",
+    "schemaVersion": "edge_ecosystem_adjacent_implementation_packet_set.v1",
+    "packetSetId": "edge-ecosystem-adjacent-packets:2026-05-02T10:00:00.000Z",
+    "createdAt": "2026-05-02T10:00:00.000Z",
+    "sourceContractSetRef": "edge-ecosystem-handoff-contracts:2026-05-02T10:00:00.000Z",
+    "sourceLedgerRef": "edge-ecosystem-state-ledger:2026-05-02T10:00:00.000Z",
+    "sourceReadinessRollupRef": "edge-ecosystem-readiness:2026-05-02T10:00:00.000Z",
+    "packetRefs": [
+      "edge-ecosystem-adjacent-packet:001:causal_substrate:2026-05-02T10:00:00.000Z"
+    ],
+    "packets": [
+      {
+        "artifactKind": "edge_ecosystem_adjacent_implementation_packet",
+        "schemaVersion": "edge_ecosystem_adjacent_implementation_packet.v1",
+        "packetId": "edge-ecosystem-adjacent-packet:001:causal_substrate:2026-05-02T10:00:00.000Z",
+        "createdAt": "2026-05-02T10:00:00.000Z",
+        "seamId": "causal_substrate",
+        "ecosystemSeamId": "causal_substrate",
+        "targetRepo": "causal-substrate",
+        "targetSurface": "causal_continuity",
+        "packetStatus": "ready_for_handoff_review",
+        "packetCompleteness": "contract_backed",
+        "sourceContractRef": "edge-ecosystem-handoff-contract:001:causal_substrate:2026-05-02T10:00:00.000Z",
+        "sourceContractSetRef": "edge-ecosystem-handoff-contracts:2026-05-02T10:00:00.000Z",
+        "sourceLedgerRef": "edge-ecosystem-state-ledger:2026-05-02T10:00:00.000Z",
+        "sourceReadinessRollupRef": "edge-ecosystem-readiness:2026-05-02T10:00:00.000Z",
+        "sourceWorkPacketRefs": [
+          "edge-ecosystem-work-packet:edge-ecosystem-next-action:001:review_ready_seam:causal_substrate:2026-05-02T10:00:00.000Z"
+        ],
+        "sourceNextActionRefs": [
+          "edge-ecosystem-next-action:001:review_ready_seam:causal_substrate:2026-05-02T10:00:00.000Z"
+        ],
+        "sourceEvidenceRefs": [
+          "edge-causal-continuity-review:phase-116-ready"
+        ],
+        "sourceLedgerEventRefs": [
+          "edge-ecosystem-ledger-event:001:readiness_state_observed:causal_substrate:2026-05-02T10:00:00.000Z",
+          "edge-ecosystem-ledger-event:002:readiness_state_changed:causal_substrate:2026-05-02T10:00:00.000Z",
+          "edge-ecosystem-ledger-event:003:next_action_selected:causal_substrate:2026-05-02T10:00:00.000Z",
+          "edge-ecosystem-ledger-event:004:work_packet_recorded:causal_substrate:2026-05-02T10:00:00.000Z",
+          "edge-ecosystem-ledger-event:005:handoff_contract_drafted:causal_substrate:2026-05-02T10:00:00.000Z"
+        ],
+        "sourceLedgerDeltaRefs": [
+          "edge-ecosystem-ledger-delta:001:readiness_state_changed:causal_substrate:2026-05-02T10:00:00.000Z"
+        ],
+        "contractSnapshot": {
+          "contractId": "edge-ecosystem-handoff-contract:001:causal_substrate:2026-05-02T10:00:00.000Z",
+          "schemaVersion": "edge_ecosystem_handoff_contract.v1",
+          "seamId": "causal_substrate",
+          "ecosystemSeamId": "causal_substrate",
+          "targetRepo": "causal-substrate",
+          "targetSurface": "causal_continuity",
+          "contractStatus": "ready_for_handoff_review",
+          "readinessState": "ready_for_operator_review",
+          "expectedRequestArtifactKind": "edge_causal_continuity_request",
+          "expectedRequestRequiredFields": [
+            "requestId",
+            "expectedPrimaryBranchRef",
+            "expectedNamespaceParts"
+          ],
+          "expectedReceiptArtifactKind": "continuity-explanation",
+          "expectedReceiptRequiredFields": [
+            "schema",
+            "schemaVersion",
+            "primaryBranchRef",
+            "namespaceParts"
+          ],
+          "allowedReceiptStatuses": [
+            "imported",
+            "mismatch",
+            "malformed",
+            "unsupported",
+            "causal_explanation_ready",
+            "causal_explanation_blocked"
+          ],
+          "correlationFields": [
+            "requestId",
+            "expectedPrimaryBranchRef",
+            "primaryBranchRef",
+            "expectedNamespaceParts",
+            "namespaceParts"
+          ],
+          "edgeAuthorityBoundary": "Edge may ask continuity questions and compare explicit explanation evidence for operator review.",
+          "adjacentAuthorityBoundary": "Causal substrate owns continuity explanation schemas, branch semantics, and causal truth.",
+          "acceptanceSemantics": {
+            "edgeDraftOnly": true,
+            "adjacentAccepted": false,
+            "acceptanceRequiresAdjacentEvidence": true,
+            "readinessEffect": "operator_guidance_only",
+            "truthEffect": "none"
+          },
+          "handoffContractIsReviewOnly": true,
+          "adjacentRepoOwnsAuthority": true,
+          "doesNotSatisfyAdjacentAcceptance": true
+        },
+        "readinessSnapshot": {
+          "seamId": "causal_substrate",
+          "ecosystemSeamId": "causal_substrate",
+          "readinessState": "ready_for_operator_review",
+          "blockerReasons": [],
+          "readySignals": [
+            "byte_interop_receipt_imported",
+            "causal_explanation_evidence_available",
+            "causal_explanation_ready_for_orchestration",
+            "platform_lifecycle_receipt_imported"
+          ],
+          "sourceArtifactRefs": [
+            "edge-causal-continuity-review:phase-116-ready"
+          ],
+          "readinessIsOperatorGuidanceOnly": true,
+          "adjacentTruthClaimed": false,
+          "infersAdjacentTruth": false
+        },
+        "historySummary": {
+          "schemaVersion": "edge_ecosystem_ledger_history_view.v1",
+          "ledgerRef": "edge-ecosystem-state-ledger:2026-05-02T10:00:00.000Z",
+          "eventCount": 5,
+          "deltaCount": 1,
+          "filteredEventCount": 5,
+          "filteredDeltaCount": 1,
+          "latestEventRef": "edge-ecosystem-ledger-event:005:handoff_contract_drafted:causal_substrate:2026-05-02T10:00:00.000Z",
+          "latestDeltaRef": "edge-ecosystem-ledger-delta:001:readiness_state_changed:causal_substrate:2026-05-02T10:00:00.000Z",
+          "historyIsReviewOnly": true,
+          "replaySupported": false,
+          "adjacentTruthClaimed": false
+        },
+        "expectedRequestArtifactKind": "edge_causal_continuity_request",
+        "expectedRequestRequiredFields": [
+          "requestId",
+          "expectedPrimaryBranchRef",
+          "expectedNamespaceParts"
+        ],
+        "expectedReceiptArtifactKind": "continuity-explanation",
+        "expectedReceiptRequiredFields": [
+          "schema",
+          "schemaVersion",
+          "primaryBranchRef",
+          "namespaceParts"
+        ],
+        "allowedReceiptStatuses": [
+          "imported",
+          "mismatch",
+          "malformed",
+          "unsupported",
+          "causal_explanation_ready",
+          "causal_explanation_blocked"
+        ],
+        "correlationFields": [
+          "requestId",
+          "expectedPrimaryBranchRef",
+          "primaryBranchRef",
+          "expectedNamespaceParts",
+          "namespaceParts"
+        ],
+        "edgeAuthorityBoundary": "Edge may ask continuity questions and compare explicit explanation evidence for operator review.",
+        "adjacentAuthorityBoundary": "Causal substrate owns continuity explanation schemas, branch semantics, and causal truth.",
+        "acceptanceSemantics": {
+          "edgeDraftOnly": true,
+          "adjacentAccepted": false,
+          "acceptanceRequiresAdjacentEvidence": true,
+          "readinessEffect": "operator_guidance_only",
+          "truthEffect": "none"
+        },
+        "packetIsEdgeDraftOnly": true,
+        "packetIsReviewOnly": true,
+        "adjacentAccepted": false,
+        "adjacentAcceptanceClaimed": false,
+        "adjacentRepoOwnsAuthority": true,
+        "evidenceRefsAreEvidenceOnly": true,
+        "ledgerHistoryRefsAreReviewOnly": true,
+        "workPacketRefsAreEdgeLocalContextOnly": true,
+        "nextActionRefsAreExplanatoryOnly": true,
+        "unsupportedActions": [
+          "discover_repos",
+          "discover_tools",
+          "discover_evidence",
+          "call_adjacent_repo",
+          "call_tool",
+          "execute",
+          "schedule_work",
+          "activate_platform",
+          "publish_to_mesh",
+          "admit_writer",
+          "grant_authority",
+          "infer_reachability",
+          "infer_mesh_participation",
+          "infer_adjacent_truth"
+        ],
+        "localOnly": true,
+        "explicitArtifactOnly": true,
+        "derivedOnly": true,
+        "discoversRepos": false,
+        "discoversTools": false,
+        "discoversEvidence": false,
+        "callsAdjacentRepo": false,
+        "callsTool": false,
+        "executesAction": false,
+        "schedulesWork": false,
+        "activatesPlatform": false,
+        "publishesToMesh": false,
+        "admitsWriter": false,
+        "grantsAuthority": false,
+        "infersReachability": false,
+        "infersMeshParticipation": false,
+        "infersAdjacentTruth": false,
+        "adjacentRepoAuthority": false,
+        "hiddenStateMutation": false
+      }
+    ],
+    "seamIds": [
+      "causal_substrate"
+    ],
+    "targetRepos": [
+      "causal-substrate"
+    ],
+    "packetCount": 1,
+    "draftOnly": true,
+    "reviewOnly": true,
+    "packetSetIsEdgeDraftOnly": true,
+    "adjacentAccepted": false,
+    "adjacentAcceptanceClaimed": false,
+    "adjacentReposOwnAuthority": true,
+    "storesHiddenState": false,
+    "writesToDisk": false,
+    "unsupportedActions": [
+      "discover_repos",
+      "discover_tools",
+      "discover_evidence",
+      "call_adjacent_repo",
+      "call_tool",
+      "execute",
+      "schedule_work",
+      "activate_platform",
+      "publish_to_mesh",
+      "admit_writer",
+      "grant_authority",
+      "infer_reachability",
+      "infer_mesh_participation",
+      "infer_adjacent_truth"
+    ],
+    "localOnly": true,
+    "explicitArtifactOnly": true,
+    "derivedOnly": true,
+    "discoversRepos": false,
+    "discoversTools": false,
+    "discoversEvidence": false,
+    "callsAdjacentRepo": false,
+    "callsTool": false,
+    "executesAction": false,
+    "schedulesWork": false,
+    "activatesPlatform": false,
+    "publishesToMesh": false,
+    "admitsWriter": false,
+    "grantsAuthority": false,
+    "infersReachability": false,
+    "infersMeshParticipation": false,
+    "infersAdjacentTruth": false,
+    "adjacentRepoAuthority": false,
+    "hiddenStateMutation": false
+  },
+  "packet": {
+    "artifactKind": "edge_ecosystem_adjacent_implementation_packet",
+    "schemaVersion": "edge_ecosystem_adjacent_implementation_packet.v1",
+    "packetId": "edge-ecosystem-adjacent-packet:001:causal_substrate:2026-05-02T10:00:00.000Z",
+    "createdAt": "2026-05-02T10:00:00.000Z",
+    "seamId": "causal_substrate",
+    "ecosystemSeamId": "causal_substrate",
+    "targetRepo": "causal-substrate",
+    "targetSurface": "causal_continuity",
+    "packetStatus": "ready_for_handoff_review",
+    "packetCompleteness": "contract_backed",
+    "sourceContractRef": "edge-ecosystem-handoff-contract:001:causal_substrate:2026-05-02T10:00:00.000Z",
+    "sourceContractSetRef": "edge-ecosystem-handoff-contracts:2026-05-02T10:00:00.000Z",
+    "sourceLedgerRef": "edge-ecosystem-state-ledger:2026-05-02T10:00:00.000Z",
+    "sourceReadinessRollupRef": "edge-ecosystem-readiness:2026-05-02T10:00:00.000Z",
+    "sourceWorkPacketRefs": [
+      "edge-ecosystem-work-packet:edge-ecosystem-next-action:001:review_ready_seam:causal_substrate:2026-05-02T10:00:00.000Z"
+    ],
+    "sourceNextActionRefs": [
+      "edge-ecosystem-next-action:001:review_ready_seam:causal_substrate:2026-05-02T10:00:00.000Z"
+    ],
+    "sourceEvidenceRefs": [
+      "edge-causal-continuity-review:phase-116-ready"
+    ],
+    "sourceLedgerEventRefs": [
+      "edge-ecosystem-ledger-event:001:readiness_state_observed:causal_substrate:2026-05-02T10:00:00.000Z",
+      "edge-ecosystem-ledger-event:002:readiness_state_changed:causal_substrate:2026-05-02T10:00:00.000Z",
+      "edge-ecosystem-ledger-event:003:next_action_selected:causal_substrate:2026-05-02T10:00:00.000Z",
+      "edge-ecosystem-ledger-event:004:work_packet_recorded:causal_substrate:2026-05-02T10:00:00.000Z",
+      "edge-ecosystem-ledger-event:005:handoff_contract_drafted:causal_substrate:2026-05-02T10:00:00.000Z"
+    ],
+    "sourceLedgerDeltaRefs": [
+      "edge-ecosystem-ledger-delta:001:readiness_state_changed:causal_substrate:2026-05-02T10:00:00.000Z"
+    ],
+    "contractSnapshot": {
+      "contractId": "edge-ecosystem-handoff-contract:001:causal_substrate:2026-05-02T10:00:00.000Z",
+      "schemaVersion": "edge_ecosystem_handoff_contract.v1",
+      "seamId": "causal_substrate",
+      "ecosystemSeamId": "causal_substrate",
+      "targetRepo": "causal-substrate",
+      "targetSurface": "causal_continuity",
+      "contractStatus": "ready_for_handoff_review",
+      "readinessState": "ready_for_operator_review",
+      "expectedRequestArtifactKind": "edge_causal_continuity_request",
+      "expectedRequestRequiredFields": [
+        "requestId",
+        "expectedPrimaryBranchRef",
+        "expectedNamespaceParts"
+      ],
+      "expectedReceiptArtifactKind": "continuity-explanation",
+      "expectedReceiptRequiredFields": [
+        "schema",
+        "schemaVersion",
+        "primaryBranchRef",
+        "namespaceParts"
+      ],
+      "allowedReceiptStatuses": [
+        "imported",
+        "mismatch",
+        "malformed",
+        "unsupported",
+        "causal_explanation_ready",
+        "causal_explanation_blocked"
+      ],
+      "correlationFields": [
+        "requestId",
+        "expectedPrimaryBranchRef",
+        "primaryBranchRef",
+        "expectedNamespaceParts",
+        "namespaceParts"
+      ],
+      "edgeAuthorityBoundary": "Edge may ask continuity questions and compare explicit explanation evidence for operator review.",
+      "adjacentAuthorityBoundary": "Causal substrate owns continuity explanation schemas, branch semantics, and causal truth.",
+      "acceptanceSemantics": {
+        "edgeDraftOnly": true,
+        "adjacentAccepted": false,
+        "acceptanceRequiresAdjacentEvidence": true,
+        "readinessEffect": "operator_guidance_only",
+        "truthEffect": "none"
+      },
+      "handoffContractIsReviewOnly": true,
+      "adjacentRepoOwnsAuthority": true,
+      "doesNotSatisfyAdjacentAcceptance": true
+    },
+    "readinessSnapshot": {
+      "seamId": "causal_substrate",
+      "ecosystemSeamId": "causal_substrate",
+      "readinessState": "ready_for_operator_review",
+      "blockerReasons": [],
+      "readySignals": [
+        "byte_interop_receipt_imported",
+        "causal_explanation_evidence_available",
+        "causal_explanation_ready_for_orchestration",
+        "platform_lifecycle_receipt_imported"
+      ],
+      "sourceArtifactRefs": [
+        "edge-causal-continuity-review:phase-116-ready"
+      ],
+      "readinessIsOperatorGuidanceOnly": true,
+      "adjacentTruthClaimed": false,
+      "infersAdjacentTruth": false
+    },
+    "historySummary": {
+      "schemaVersion": "edge_ecosystem_ledger_history_view.v1",
+      "ledgerRef": "edge-ecosystem-state-ledger:2026-05-02T10:00:00.000Z",
+      "eventCount": 5,
+      "deltaCount": 1,
+      "filteredEventCount": 5,
+      "filteredDeltaCount": 1,
+      "latestEventRef": "edge-ecosystem-ledger-event:005:handoff_contract_drafted:causal_substrate:2026-05-02T10:00:00.000Z",
+      "latestDeltaRef": "edge-ecosystem-ledger-delta:001:readiness_state_changed:causal_substrate:2026-05-02T10:00:00.000Z",
+      "historyIsReviewOnly": true,
+      "replaySupported": false,
+      "adjacentTruthClaimed": false
+    },
+    "expectedRequestArtifactKind": "edge_causal_continuity_request",
+    "expectedRequestRequiredFields": [
+      "requestId",
+      "expectedPrimaryBranchRef",
+      "expectedNamespaceParts"
+    ],
+    "expectedReceiptArtifactKind": "continuity-explanation",
+    "expectedReceiptRequiredFields": [
+      "schema",
+      "schemaVersion",
+      "primaryBranchRef",
+      "namespaceParts"
+    ],
+    "allowedReceiptStatuses": [
+      "imported",
+      "mismatch",
+      "malformed",
+      "unsupported",
+      "causal_explanation_ready",
+      "causal_explanation_blocked"
+    ],
+    "correlationFields": [
+      "requestId",
+      "expectedPrimaryBranchRef",
+      "primaryBranchRef",
+      "expectedNamespaceParts",
+      "namespaceParts"
+    ],
+    "edgeAuthorityBoundary": "Edge may ask continuity questions and compare explicit explanation evidence for operator review.",
+    "adjacentAuthorityBoundary": "Causal substrate owns continuity explanation schemas, branch semantics, and causal truth.",
+    "acceptanceSemantics": {
+      "edgeDraftOnly": true,
+      "adjacentAccepted": false,
+      "acceptanceRequiresAdjacentEvidence": true,
+      "readinessEffect": "operator_guidance_only",
+      "truthEffect": "none"
+    },
+    "packetIsEdgeDraftOnly": true,
+    "packetIsReviewOnly": true,
+    "adjacentAccepted": false,
+    "adjacentAcceptanceClaimed": false,
+    "adjacentRepoOwnsAuthority": true,
+    "evidenceRefsAreEvidenceOnly": true,
+    "ledgerHistoryRefsAreReviewOnly": true,
+    "workPacketRefsAreEdgeLocalContextOnly": true,
+    "nextActionRefsAreExplanatoryOnly": true,
+    "unsupportedActions": [
+      "discover_repos",
+      "discover_tools",
+      "discover_evidence",
+      "call_adjacent_repo",
+      "call_tool",
+      "execute",
+      "schedule_work",
+      "activate_platform",
+      "publish_to_mesh",
+      "admit_writer",
+      "grant_authority",
+      "infer_reachability",
+      "infer_mesh_participation",
+      "infer_adjacent_truth"
+    ],
+    "localOnly": true,
+    "explicitArtifactOnly": true,
+    "derivedOnly": true,
+    "discoversRepos": false,
+    "discoversTools": false,
+    "discoversEvidence": false,
+    "callsAdjacentRepo": false,
+    "callsTool": false,
+    "executesAction": false,
+    "schedulesWork": false,
+    "activatesPlatform": false,
+    "publishesToMesh": false,
+    "admitsWriter": false,
+    "grantsAuthority": false,
+    "infersReachability": false,
+    "infersMeshParticipation": false,
+    "infersAdjacentTruth": false,
+    "adjacentRepoAuthority": false,
+    "hiddenStateMutation": false
+  },
+  "reviewChecklist": [
+    {
+      "checklistId": "target_repo_is_causal_substrate",
+      "label": "Target repo is causal-substrate.",
+      "required": true
+    },
+    {
+      "checklistId": "seam_is_causal_substrate",
+      "label": "Seam is causal_substrate.",
+      "required": true
+    },
+    {
+      "checklistId": "target_surface_is_causal_continuity",
+      "label": "Target surface is causal continuity review.",
+      "required": true
+    },
+    {
+      "checklistId": "packet_is_edge_draft_only",
+      "label": "Packet is Edge-draft only.",
+      "required": true
+    },
+    {
+      "checklistId": "packet_is_review_only",
+      "label": "Packet is review-only.",
+      "required": true
+    },
+    {
+      "checklistId": "packet_is_adjacent_unaccepted",
+      "label": "Packet is adjacent-unaccepted.",
+      "required": true
+    },
+    {
+      "checklistId": "required_packet_fields_present",
+      "label": "Required packet fields are present.",
+      "required": true
+    },
+    {
+      "checklistId": "contract_metadata_complete",
+      "label": "Contract metadata is complete and mirrors Edge-draft causal continuity expectations.",
+      "required": true
+    },
+    {
+      "checklistId": "request_and_receipt_fields_preserved",
+      "label": "Request and receipt required fields are preserved.",
+      "required": true
+    },
+    {
+      "checklistId": "correlation_refs_sufficient",
+      "label": "Correlation refs include request, branch, and namespace review refs.",
+      "required": true
+    },
+    {
+      "checklistId": "source_refs_available",
+      "label": "Source refs are present for contract, contract set, ledger, readiness, evidence, work packet, next action, ledger events, and ledger deltas where available.",
+      "required": true
+    },
+    {
+      "checklistId": "wording_does_not_imply_causal_truth",
+      "label": "Wording does not imply causal truth.",
+      "required": true
+    },
+    {
+      "checklistId": "wording_does_not_imply_canonical_branch_acceptance",
+      "label": "Wording does not imply canonical branch acceptance.",
+      "required": true
+    },
+    {
+      "checklistId": "wording_does_not_imply_reality_settlement",
+      "label": "Wording does not imply reality settlement.",
+      "required": true
+    },
+    {
+      "checklistId": "wording_does_not_imply_lineage_settlement",
+      "label": "Wording does not imply lineage settlement.",
+      "required": true
+    },
+    {
+      "checklistId": "wording_does_not_imply_replay_event_sourcing_or_conflict_resolution",
+      "label": "Wording does not imply event replay, event sourcing, conflict resolution, or causal-substrate authority.",
+      "required": true
+    },
+    {
+      "checklistId": "malformed_packets_remain_review_only",
+      "label": "Malformed or incomplete packets should be rejected or marked review-only by causal-substrate.",
+      "required": true
+    },
+    {
+      "checklistId": "no_edge_mutation_callback_live_fetch_runner_scheduler_replay_or_mesh_publish",
+      "label": "No Edge mutation, callback, live fetch, runner, scheduler, replay, or mesh publish is required.",
+      "required": true
+    }
+  ],
+  "causalWordingGuardrails": {
+    "guardrailSetId": "causal_continuity_fixture_review_wording_guardrails",
+    "useWording": [
+      "draft adjacent review packet",
+      "static fixture",
+      "causal continuity review evidence",
+      "continuity explanation review",
+      "expected causal-owned response",
+      "branch correlation ref",
+      "namespace correlation ref",
+      "ready for operator review",
+      "evidence-only continuity context"
+    ],
+    "avoidWording": [
+      "causal truth",
+      "canonical branch accepted",
+      "branch is canonical",
+      "settle lineage",
+      "settle reality",
+      "replay events",
+      "replay ledger",
+      "event sourcing authority",
+      "resolve causal conflict",
+      "repair history",
+      "authoritative continuity",
+      "production proof",
+      "mesh proof"
+    ],
+    "readinessMeansOperatorReviewOnly": true,
+    "packetPresenceDoesNotAcceptCanonicalBranch": true,
+    "packetPresenceDoesNotSettleLineage": true,
+    "packetPresenceDoesNotSettleReality": true,
+    "packetPresenceDoesNotAuthorizeReplay": true,
+    "reviewOnly": true,
+    "callsAdjacentRepo": false,
+    "executesAction": false,
+    "schedulesWork": false,
+    "publishesToMesh": false
+  },
+  "expectedCausalEvidenceResponseShape": {
+    "artifactKind": "causal_continuity_edge_packet_review_evidence",
+    "schemaVersion": "causal_continuity_edge_packet_review_evidence.v1",
+    "expectationIsEdgeSideOnly": true,
+    "notAcceptedAdjacentSchema": true,
+    "causalSubstrateOwnsArtifactKind": true,
+    "causalSubstrateOwnsSchemaVersion": true,
+    "evidenceId": "causal-continuity-review-evidence:phase-116",
+    "createdAt": "2026-05-02T10:00:00.000Z",
+    "packetRef": "edge-ecosystem-adjacent-packet:001:causal_substrate:2026-05-02T10:00:00.000Z",
+    "sourceContractRef": "edge-ecosystem-handoff-contract:001:causal_substrate:2026-05-02T10:00:00.000Z",
+    "sourceContractSetRef": "edge-ecosystem-handoff-contracts:2026-05-02T10:00:00.000Z",
+    "sourceLedgerRef": "edge-ecosystem-state-ledger:2026-05-02T10:00:00.000Z",
+    "sourceReadinessRollupRef": "edge-ecosystem-readiness:2026-05-02T10:00:00.000Z",
+    "sourceEvidenceRefs": [
+      "edge-causal-continuity-review:phase-116-ready"
+    ],
+    "sourceWorkPacketRefs": [
+      "edge-ecosystem-work-packet:edge-ecosystem-next-action:001:review_ready_seam:causal_substrate:2026-05-02T10:00:00.000Z"
+    ],
+    "sourceNextActionRefs": [
+      "edge-ecosystem-next-action:001:review_ready_seam:causal_substrate:2026-05-02T10:00:00.000Z"
+    ],
+    "sourceLedgerEventRefs": [
+      "edge-ecosystem-ledger-event:001:readiness_state_observed:causal_substrate:2026-05-02T10:00:00.000Z",
+      "edge-ecosystem-ledger-event:002:readiness_state_changed:causal_substrate:2026-05-02T10:00:00.000Z",
+      "edge-ecosystem-ledger-event:003:next_action_selected:causal_substrate:2026-05-02T10:00:00.000Z",
+      "edge-ecosystem-ledger-event:004:work_packet_recorded:causal_substrate:2026-05-02T10:00:00.000Z",
+      "edge-ecosystem-ledger-event:005:handoff_contract_drafted:causal_substrate:2026-05-02T10:00:00.000Z"
+    ],
+    "sourceLedgerDeltaRefs": [
+      "edge-ecosystem-ledger-delta:001:readiness_state_changed:causal_substrate:2026-05-02T10:00:00.000Z"
+    ],
+    "reviewStatus": "review_ready",
+    "allowedReviewStatuses": [
+      "review_ready",
+      "review_blocked",
+      "packet_malformed",
+      "packet_incomplete",
+      "unsupported_target",
+      "contract_metadata_incomplete",
+      "continuity_explanation_missing",
+      "canonical_branch_claim_implied",
+      "causal_truth_claim_implied",
+      "lineage_settlement_implied",
+      "replay_authority_implied"
+    ],
+    "evidenceLabel": {
+      "evidenceKind": "causal_continuity_fixture_review",
+      "outcome": "review_ready",
+      "scenarioId": "phase-116-causal-continuity-adjacent-packet"
+    },
+    "reasonCodes": [
+      "causal_continuity_packet_fixture_review_ready",
+      "continuity_explanation_review_only",
+      "no_canonical_branch_acceptance"
+    ],
+    "requestArtifactKindReviewed": "edge_causal_continuity_request",
+    "receiptArtifactKindReviewed": "continuity-explanation",
+    "expectedPrimaryBranchRef": "branch:phase-116-expected-primary",
+    "primaryBranchRef": null,
+    "expectedNamespaceParts": [
+      "causal-substrate",
+      "edge",
+      "phase-116"
+    ],
+    "namespaceParts": [],
+    "continuityExplanationRef": null,
+    "correlationRefs": {
+      "packetRef": "edge-ecosystem-adjacent-packet:001:causal_substrate:2026-05-02T10:00:00.000Z",
+      "sourceContractRef": "edge-ecosystem-handoff-contract:001:causal_substrate:2026-05-02T10:00:00.000Z",
+      "sourceContractSetRef": "edge-ecosystem-handoff-contracts:2026-05-02T10:00:00.000Z",
+      "sourceLedgerRef": "edge-ecosystem-state-ledger:2026-05-02T10:00:00.000Z",
+      "sourceReadinessRollupRef": "edge-ecosystem-readiness:2026-05-02T10:00:00.000Z",
+      "sourceEvidenceRefs": [
+        "edge-causal-continuity-review:phase-116-ready"
+      ],
+      "sourceWorkPacketRefs": [
+        "edge-ecosystem-work-packet:edge-ecosystem-next-action:001:review_ready_seam:causal_substrate:2026-05-02T10:00:00.000Z"
+      ],
+      "sourceNextActionRefs": [
+        "edge-ecosystem-next-action:001:review_ready_seam:causal_substrate:2026-05-02T10:00:00.000Z"
+      ],
+      "sourceLedgerEventRefs": [
+        "edge-ecosystem-ledger-event:001:readiness_state_observed:causal_substrate:2026-05-02T10:00:00.000Z",
+        "edge-ecosystem-ledger-event:002:readiness_state_changed:causal_substrate:2026-05-02T10:00:00.000Z",
+        "edge-ecosystem-ledger-event:003:next_action_selected:causal_substrate:2026-05-02T10:00:00.000Z",
+        "edge-ecosystem-ledger-event:004:work_packet_recorded:causal_substrate:2026-05-02T10:00:00.000Z",
+        "edge-ecosystem-ledger-event:005:handoff_contract_drafted:causal_substrate:2026-05-02T10:00:00.000Z"
+      ],
+      "sourceLedgerDeltaRefs": [
+        "edge-ecosystem-ledger-delta:001:readiness_state_changed:causal_substrate:2026-05-02T10:00:00.000Z"
+      ],
+      "requestId": "causal-continuity-request:phase-116-review",
+      "expectedPrimaryBranchRef": "branch:phase-116-expected-primary",
+      "primaryBranchRef": null,
+      "expectedNamespaceParts": [
+        "causal-substrate",
+        "edge",
+        "phase-116"
+      ],
+      "namespaceParts": [],
+      "continuityExplanationRef": null
+    },
+    "requiredFields": [
+      "artifactKind",
+      "schemaVersion",
+      "evidenceId",
+      "createdAt",
+      "packetRef",
+      "sourceContractRef",
+      "sourceContractSetRef",
+      "sourceLedgerRef",
+      "sourceReadinessRollupRef",
+      "sourceEvidenceRefs",
+      "sourceWorkPacketRefs",
+      "sourceNextActionRefs",
+      "sourceLedgerEventRefs",
+      "sourceLedgerDeltaRefs",
+      "reviewStatus",
+      "evidenceLabel",
+      "correlationRefs",
+      "reasonCodes",
+      "requestArtifactKindReviewed",
+      "receiptArtifactKindReviewed",
+      "expectedPrimaryBranchRef",
+      "primaryBranchRef",
+      "expectedNamespaceParts",
+      "namespaceParts",
+      "continuityExplanationRef"
+    ],
+    "edgePacketAcceptedAsSchema": false,
+    "edgePacketAcceptedAsCommand": false,
+    "canonicalBranchAccepted": false,
+    "causalTruthClaimed": false,
+    "lineageSettled": false,
+    "realitySettled": false,
+    "replayAuthorized": false,
+    "eventSourcingAuthorityClaimed": false,
+    "productionProofClaimed": false,
+    "meshTruthClaimed": false,
+    "edgeAuthorityGranted": false,
+    "reviewOnly": true,
+    "evidenceOnly": true
+  },
+  "stopGoDecision": {
+    "artifactKind": "edge_ecosystem_causal_continuity_packet_stop_go_decision",
+    "decision": "go_for_causal_substrate_repo_review",
+    "readyToHandToCausalSubstrate": true,
+    "blockers": [],
+    "acceptanceCriteria": [
+      "Causal-substrate reads the packet as a static fixture only.",
+      "Causal-substrate validates packetRef, sourceContractRef, branch refs, namespace refs, and correlation refs.",
+      "Causal-substrate owns any response artifact kind, schemaVersion, statuses, continuity explanation refs, and branch semantics.",
+      "Causal-substrate response claims no causal truth, canonical branch acceptance, lineage settlement, reality settlement, replay authority, production proof, mesh truth, or Edge authority.",
+      "Causal-substrate response does not accept the Edge packet as a command or schema.",
+      "Edge can later plan evidence-only import of the response without calling causal-substrate."
+    ],
+    "reviewOnly": true,
+    "fixtureOnly": true,
+    "edgeDraftOnly": true,
+    "causalSubstrateAccepted": false,
+    "adjacentAccepted": false,
+    "adjacentAcceptanceClaimed": false,
+    "canonicalBranchAccepted": false,
+    "causalTruthClaimed": false,
+    "lineageSettled": false,
+    "realitySettled": false,
+    "replayAuthorized": false,
+    "eventSourcingAuthorityClaimed": false,
+    "productionProofClaimed": false,
+    "meshTruthClaimed": false,
+    "callsAdjacentRepo": false,
+    "executesAction": false,
+    "schedulesWork": false,
+    "publishesToMesh": false,
+    "infersAdjacentTruth": false,
+    "infersMeshParticipation": false
+  },
+  "packetIsEdgeDraftOnly": true,
+  "packetIsReviewOnly": true,
+  "fixtureOnly": true,
+  "edgeLocalOnly": true,
+  "adjacentAccepted": false,
+  "adjacentAcceptanceClaimed": false,
+  "adjacentRepoOwnsAuthority": true,
+  "causalSubstrateAccepted": false,
+  "canonicalBranchAccepted": false,
+  "causalTruthClaimed": false,
+  "lineageSettled": false,
+  "realitySettled": false,
+  "replayAuthorized": false,
+  "eventSourcingAuthorityClaimed": false,
+  "noExecutionAuthorized": true,
+  "executionImplied": false,
+  "noSchedulerRunnerLiveDiscoveryOrMeshPublication": true,
+  "noProductionProofClaimed": true,
+  "productionProofClaimed": false,
+  "meshTruthClaimed": false,
+  "fixtureIsNotAdjacentTodo": true,
+  "fixtureIsNotAcceptedSchema": true,
+  "fixtureIsNotExecutionInstruction": true,
+  "fixtureIsNotReplayInstruction": true,
+  "readinessMeansOperatorReviewOnly": true,
+  "unsupportedActions": [
+    "discover_repos",
+    "discover_tools",
+    "discover_evidence",
+    "call_adjacent_repo",
+    "call_tool",
+    "execute",
+    "schedule_work",
+    "activate_platform",
+    "publish_to_mesh",
+    "admit_writer",
+    "grant_authority",
+    "infer_reachability",
+    "infer_mesh_participation",
+    "infer_adjacent_truth"
+  ],
+  "localOnly": true,
+  "explicitArtifactOnly": true,
+  "derivedOnly": true,
+  "discoversRepos": false,
+  "discoversTools": false,
+  "discoversEvidence": false,
+  "callsAdjacentRepo": false,
+  "callsTool": false,
+  "executesAction": false,
+  "schedulesWork": false,
+  "activatesPlatform": false,
+  "publishesToMesh": false,
+  "admitsWriter": false,
+  "grantsAuthority": false,
+  "infersReachability": false,
+  "infersMeshParticipation": false,
+  "infersAdjacentTruth": false,
+  "adjacentRepoAuthority": false,
+  "hiddenStateMutation": false
+}

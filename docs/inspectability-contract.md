@@ -30,6 +30,7 @@ The current Corestore-backed inspectability surfaces are:
 - replay-backed comparison claims and generic consumer comparison pictures
 - time-ordered context and portal replay with primary-context resolution over time
 - `causal-substrate/continuity-explanation/v1` artifacts for consumers that need a portable evidence-only explanation import
+- `causal-substrate/adjacent-review-evidence/v1` artifacts for static adjacent review packet evidence
 
 These are reconstruction helpers, not authoritative truth engines.
 
@@ -59,6 +60,27 @@ It explicitly carries a consumer boundary:
 - no global truth assertion
 
 This lets Edge import the artifact as orchestration context without owning continuity doctrine, hidden graph traversal, branch mechanics, or substrate internals.
+
+## Adjacent review evidence artifact v1
+
+The `causal-substrate/adjacent-review-evidence/v1` artifact is a review-only evidence surface for static adjacent packet fixtures.
+
+Phase 117 uses it for the checked-in Edge Phase 116A causal continuity review fixture at `test/fixtures/edge/phase-116a-causal-continuity-adjacent-review-packet-fixture.json`.
+
+The artifact validates the static review envelope and preserves correlation refs, but it does not accept the Edge packet as a causal schema. Edge compatibility metadata on the artifact is classification-only for later Edge import.
+
+It explicitly carries a non-authority boundary:
+
+- no Edge runtime fetch, call, or mutation
+- no causal truth claim
+- no canonical branch acceptance
+- no lineage or reality settlement
+- no replay or event-sourcing authority
+- no causal conflict resolution
+- no production proof
+- no mesh truth
+- no mesh publication
+- no adjacent acceptance from packet presence
 
 ## Current strengths
 
