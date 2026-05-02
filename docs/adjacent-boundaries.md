@@ -94,6 +94,15 @@ Current interop posture:
 - receipts carry explicit non-authority flags: no raw append logs, no raw graph traversal, no hidden context carry-over, no writer admission, no merge/fork authority, no mesh participation, and no global truth assertion
 - Edge may use the response as operator-facing orchestration context, but it does not become substrate and does not own continuity doctrine
 
+Phase 117 static review posture:
+
+- `causal-substrate` may consume the Edge Phase 116A causal continuity adjacent review packet fixture only from its checked-in static copy at `test/fixtures/edge/phase-116a-causal-continuity-adjacent-review-packet-fixture.json`
+- the emitted review evidence uses the causal-owned `causal-substrate/adjacent-review-evidence/v1` schema and `causal-adjacent-review-evidence` artifact kind
+- Edge compatibility metadata on that artifact is classification-only for later Edge import and does not make Edge the schema owner
+- fixture presence does not imply adjacent acceptance, causal truth, canonical branch acceptance, lineage settlement, reality settlement, production proof, or mesh truth
+- the fixture is not a command, TODO list, replay instruction, event-sourcing authority, or conflict-resolution input
+- Phase 117 performs no Edge runtime fetch, Edge call, Edge mutation, runner, scheduler, live discovery, mesh publication, replay engine, canonical branch selection, lineage settlement, or reality settlement
+
 ## Boundary with mesh integration generally
 
 This repository should remain mesh-agnostic at the core.
