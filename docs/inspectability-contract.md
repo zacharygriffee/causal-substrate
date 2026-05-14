@@ -32,6 +32,7 @@ The current Corestore-backed inspectability surfaces are:
 - `causal-substrate/continuity-explanation/v1` artifacts for consumers that need a portable evidence-only explanation import
 - `causal-substrate/adjacent-review-evidence/v1` artifacts for static adjacent review packet evidence
 - `causal-substrate/edge-contact-evidence/v1` artifacts for Edge contact/transport evidence import
+- `causal-substrate/mesh-contact-proof-evidence/v1` artifacts for mesh-v0-2 direct contact proof evidence import
 
 These are reconstruction helpers, not authoritative truth engines.
 
@@ -107,6 +108,32 @@ It blocks:
 - Edge authority claims
 
 The artifact lets Edge later attach contact attempts and transport selection to causal review without making causal-substrate perform contact, replay Edge events, own transport runtime, or treat local readiness as decentralized readiness.
+
+## Mesh contact proof evidence artifact v1
+
+The `causal-substrate/mesh-contact-proof-evidence/v1` artifact is an evidence-only surface for `mesh-v0-2` direct contact proof evidence.
+
+It preserves:
+
+- proof kind and participant refs
+- operation, request, response, and host public-key refs
+- selected transport kind
+- selected contact seam
+- transport role and scope
+- whether the source proof says contact was attempted or succeeded
+- readiness scope
+- failure class/message when the source proof reports failed contact
+
+It blocks:
+
+- causal truth claims
+- canonical branch acceptance
+- continuity record writes
+- distributed-readiness claims
+- mesh completion claims
+- mesh truth or publication claims
+
+The artifact lets direct Protomux RPC over HyperDHT contact evidence become inspectable without making causal-substrate perform contact, own mesh runtime, accept a canonical branch, or treat local direct-peer success as distributed readiness.
 
 ## Current strengths
 
