@@ -23,6 +23,15 @@ The current repository posture is intentionally conservative. The kernel encodes
 
 If you are approaching the repo as a human trying to place it in the ecosystem, start with [`docs/human-getting-started.md`](./docs/human-getting-started.md) before diving into the doctrine stack.
 
+## System spine
+
+For repo-family composition, layer boundaries, and proof standards, use
+[`mesh-ecology-spine`](https://github.com/zacharygriffee/mesh-ecology-spine)
+as the system-level reference. This repo owns causal continuity and history;
+the spine explains how that continuity composes with Edge, Platform,
+`mesh-v0-2`, and Packs without making local files, HTTP, or request logs the
+substrate model.
+
 ## Repository shape
 
 - [`docs/human-getting-started.md`](./docs/human-getting-started.md): the shortest human walkthrough for what this repo is for, what it owns, and how an adjacent repo should begin consuming it
