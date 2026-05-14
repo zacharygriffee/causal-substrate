@@ -53,6 +53,7 @@ export interface EdgeOperationHistoryEventRef {
   parentEventRefs: string[];
   receiptRefs: string[];
   evidenceRefs: string[];
+  contactProofRefs: string[];
 }
 
 export interface EdgeOperationHistoryCheck {
@@ -382,6 +383,7 @@ function collectEventRefs(trail: JsonRecord | undefined): EdgeOperationHistoryEv
       parentEventRefs: stringArray(event.parentEventRefs),
       receiptRefs: stringArray(event.receiptRefs),
       evidenceRefs: collectEvidenceRefs(event),
+      contactProofRefs: collectContactProofRefs(event),
     };
   });
 }
@@ -394,11 +396,23 @@ function collectEvidenceRefs(event: JsonRecord): string[] {
     }
   }
   const payload = isRecord(event.payload) ? event.payload : undefined;
-  for (const key of ["evidenceRef", "attachmentRef", "sourceRef", "hash", "path", "artifactPath"]) {
+  for (const key of ["evidenceRef", "attachmentRef", "sourceRef", "hash", "path", "artifactPath", "evidenceSha256", "evidencePath"]) {
     const value = stringValue(payload?.[key]);
     if (value) {
       refs.add(value);
     }
+  }
+  return [...refs];
+}
+
+function collectContactProofRefs(event: JsonRecord): string[] {
+  const payload = isRecord(event.payload) ? event.payload : undefined;
+  const posture = isRecord(payload?.contactProofPosture) ? payload.contactProofPosture : undefined;
+  if (!posture) return [];
+  const refs = new Set<string>();
+  for (const key of ["sourceRepo", "sourceSchema", "proofKind", "requestId", "responseId", "hostPublicKey", "transportKind", "contactSeam", "readinessScope"]) {
+    const value = stringValue(posture[key]);
+    if (value) refs.add(`${key}:${value}`);
   }
   return [...refs];
 }

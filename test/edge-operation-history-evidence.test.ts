@@ -116,6 +116,51 @@ test("JSON input preserves the same operation refs as parsed input", () => {
   assert.deepEqual(fromJson.eventRefs, parsed.eventRefs);
 });
 
+test("Edge operation history preserves attached mesh contact proof links", () => {
+  const trail = clone(validTrail());
+  trail.events[1].payload = {
+    evidencePath: "artifacts/contact-proof.json",
+    evidenceSha256: "sha256:contact-proof",
+    evidenceKind: "mesh_contact_proof",
+    localClassification: "mesh_contact_proof_observed",
+    contactProofPosture: {
+      sourceRepo: "mesh-v0-2",
+      sourceSchema: "mesh-v0-2/contact-proof/direct-peer/v1",
+      proofKind: "mesh_contact_direct_peer_lab",
+      requestId: "mesh-contact-request:a",
+      responseId: "mesh-contact-response:a",
+      hostPublicKey: "a".repeat(64),
+      transportKind: "protomux-rpc",
+      contactSeam: "hyperdht_direct_peer",
+      readinessScope: "direct_peer_contact",
+      distributedReadinessClaimed: false,
+    },
+  };
+
+  const artifact = buildEdgeOperationHistoryEvidenceArtifact({
+    trail,
+    emittedAt: "2026-05-14T12:00:00.000Z",
+  });
+  const evidenceEvent = artifact.eventRefs[1];
+
+  assert.equal(artifact.reviewStatus, "operation-history-evidence-emitted");
+  assert.ok(evidenceEvent?.evidenceRefs.includes("artifacts/contact-proof.json"));
+  assert.ok(evidenceEvent?.evidenceRefs.includes("sha256:contact-proof"));
+  assert.deepEqual(evidenceEvent?.contactProofRefs, [
+    "sourceRepo:mesh-v0-2",
+    "sourceSchema:mesh-v0-2/contact-proof/direct-peer/v1",
+    "proofKind:mesh_contact_direct_peer_lab",
+    "requestId:mesh-contact-request:a",
+    "responseId:mesh-contact-response:a",
+    `hostPublicKey:${"a".repeat(64)}`,
+    "transportKind:protomux-rpc",
+    "contactSeam:hyperdht_direct_peer",
+    "readinessScope:direct_peer_contact",
+  ]);
+  assert.equal(artifact.boundary.replaysEvents, false);
+  assert.equal(artifact.boundary.writesContinuityRecords, false);
+});
+
 test("malformed JSON yields malformed evidence without throwing", () => {
   const artifact = buildEdgeOperationHistoryEvidenceArtifactFromJson({
     trailJson: "{not-json",
