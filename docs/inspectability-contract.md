@@ -31,6 +31,7 @@ The current Corestore-backed inspectability surfaces are:
 - time-ordered context and portal replay with primary-context resolution over time
 - `causal-substrate/continuity-explanation/v1` artifacts for consumers that need a portable evidence-only explanation import
 - `causal-substrate/adjacent-review-evidence/v1` artifacts for static adjacent review packet evidence
+- `causal-substrate/edge-contact-evidence/v1` artifacts for Edge contact/transport evidence import
 
 These are reconstruction helpers, not authoritative truth engines.
 
@@ -81,6 +82,31 @@ It explicitly carries a non-authority boundary:
 - no mesh truth
 - no mesh publication
 - no adjacent acceptance from packet presence
+
+## Edge contact evidence artifact v1
+
+The `causal-substrate/edge-contact-evidence/v1` artifact is an evidence-only surface for Edge contact and transport posture.
+
+It preserves:
+
+- operation, target, and participant refs
+- selected transport kind
+- selected contact seam
+- transport role and scaffold posture
+- fallback transport kinds
+- whether Edge's source evidence says contact was attempted or succeeded
+- readiness scope
+
+It blocks:
+
+- causal truth claims
+- canonical branch acceptance
+- continuity record writes
+- distributed-readiness claims
+- mesh truth or publication claims
+- Edge authority claims
+
+The artifact lets Edge later attach contact attempts and transport selection to causal review without making causal-substrate perform contact, replay Edge events, own transport runtime, or treat local readiness as decentralized readiness.
 
 ## Current strengths
 
