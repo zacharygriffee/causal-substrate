@@ -75,6 +75,7 @@ export interface MeshContactProofProtocolEvidence {
 }
 
 export interface MeshContactProofCapabilityEvidence {
+  descriptorSource?: "inline_descriptor" | "capability_advertisement";
   capability?: string;
   methodName?: string;
   ownerRepo?: string;
@@ -85,6 +86,15 @@ export interface MeshContactProofCapabilityEvidence {
   meshLayerDefault: boolean;
   discoveryRequired: boolean;
   participantContact: boolean;
+}
+
+export interface MeshContactProofCapabilityAdvertisementEvidence {
+  present: boolean;
+  participant?: string;
+  protocolFamily?: string;
+  protocolSchema?: string;
+  capabilityCount: number;
+  capabilities: MeshContactProofCapabilityEvidence[];
 }
 
 export interface MeshContactProofContinuityEvidence {
@@ -142,6 +152,7 @@ export interface MeshContactProofEvidenceArtifact {
   contactRefs: MeshContactProofRefs;
   protocolEvidence: MeshContactProofProtocolEvidence;
   capabilityEvidence: MeshContactProofCapabilityEvidence;
+  capabilityAdvertisementEvidence: MeshContactProofCapabilityAdvertisementEvidence;
   continuityEvidence: MeshContactProofContinuityEvidence;
   transportEvidence: MeshContactProofTransportEvidence;
   boundary: MeshContactProofEvidenceBoundary;
@@ -256,6 +267,7 @@ function buildArtifactFromParsedEvidence(input: {
   const contactRefs = collectContactRefs(evidence, input.sourcePath);
   const protocolEvidence = collectProtocolEvidence(evidence);
   const capabilityEvidence = collectCapabilityEvidence(evidence);
+  const capabilityAdvertisementEvidence = collectCapabilityAdvertisementEvidence(evidence);
   const transportEvidence = collectTransportEvidence(evidence);
   const continuityEvidence = buildContinuityEvidence(protocolEvidence, capabilityEvidence, transportEvidence);
   const reviewStatus = status === "mesh-contact-proof-valid-evidence"
@@ -289,6 +301,7 @@ function buildArtifactFromParsedEvidence(input: {
     contactRefs,
     protocolEvidence,
     capabilityEvidence,
+    capabilityAdvertisementEvidence,
     continuityEvidence,
     transportEvidence,
     boundary: buildBoundary(),
@@ -343,8 +356,23 @@ function buildContinuityEvidence(
 }
 
 function collectCapabilityEvidence(evidence: JsonRecord | undefined): MeshContactProofCapabilityEvidence {
-  const descriptor = isRecord(evidence?.capabilityDescriptor) ? evidence.capabilityDescriptor : undefined;
+  const advertised = advertisedCapabilities(evidence);
+  const descriptor = advertised.find((capability) =>
+    capability.capability === "contact-proof" &&
+    capability.proofScope === "bounded_direct_participant_contact"
+  ) ?? advertised[0] ?? (isRecord(evidence?.capabilityDescriptor) ? evidence.capabilityDescriptor : undefined);
+  return capabilityEvidenceFromDescriptor(
+    descriptor,
+    descriptor && advertised.includes(descriptor) ? "capability_advertisement" : "inline_descriptor",
+  );
+}
+
+function capabilityEvidenceFromDescriptor(
+  descriptor: JsonRecord | undefined,
+  descriptorSource: "inline_descriptor" | "capability_advertisement",
+): MeshContactProofCapabilityEvidence {
   const result: MeshContactProofCapabilityEvidence = {
+    ...(descriptor ? { descriptorSource } : {}),
     localLayerDefault: descriptor?.localLayerDefault === true,
     meshLayerDefault: descriptor?.meshLayerDefault === true,
     discoveryRequired: descriptor?.discoveryRequired === true,
@@ -362,6 +390,26 @@ function collectCapabilityEvidence(evidence: JsonRecord | undefined): MeshContac
   if (proofScope) result.proofScope = proofScope;
   if (transportKind) result.transportKind = transportKind;
   if (contactSeam) result.contactSeam = contactSeam;
+  return result;
+}
+
+function collectCapabilityAdvertisementEvidence(
+  evidence: JsonRecord | undefined,
+): MeshContactProofCapabilityAdvertisementEvidence {
+  const advertisement = isRecord(evidence?.capabilityAdvertisement) ? evidence.capabilityAdvertisement : undefined;
+  const capabilities = advertisedCapabilities(evidence)
+    .map((capability) => capabilityEvidenceFromDescriptor(capability, "capability_advertisement"));
+  const result: MeshContactProofCapabilityAdvertisementEvidence = {
+    present: advertisement !== undefined,
+    capabilityCount: capabilities.length,
+    capabilities,
+  };
+  const participant = stringValue(advertisement?.participant);
+  const protocolFamily = stringValue(advertisement?.protocolFamily);
+  const protocolSchema = stringValue(advertisement?.protocolSchema);
+  if (participant) result.participant = participant;
+  if (protocolFamily) result.protocolFamily = protocolFamily;
+  if (protocolSchema) result.protocolSchema = protocolSchema;
   return result;
 }
 
@@ -460,8 +508,29 @@ function validateEvidence(evidence: JsonRecord | undefined, parseableJsonObject:
     checks.push("distributed-readiness-claim:blocked");
   }
   const capabilityDescriptor = isRecord(evidence.capabilityDescriptor) ? evidence.capabilityDescriptor : undefined;
-  if (capabilityDescriptor) {
-    const capabilityEvidence = collectCapabilityEvidence(evidence);
+  const capabilityAdvertisement = isRecord(evidence.capabilityAdvertisement) ? evidence.capabilityAdvertisement : undefined;
+  const capabilityEvidence = collectCapabilityEvidence(evidence);
+  if (capabilityAdvertisement) {
+    if (evidence.capabilitiesRequestEncoding !== "@mesh-contact/participant-capabilities-request") {
+      checks.push("capability-advertisement:request-encoding-mismatch");
+    }
+    if (evidence.capabilitiesResponseEncoding !== "@mesh-contact/participant-capabilities-response") {
+      checks.push("capability-advertisement:response-encoding-mismatch");
+    }
+    if (evidence.capabilitiesDispatchCommand !== "@mesh-contact/participant-capabilities-get") {
+      checks.push("capability-advertisement:dispatch-command-mismatch");
+    }
+    if (capabilityAdvertisement.protocolFamily !== "mesh-contact-proof") {
+      checks.push("capability-advertisement:protocol-family-mismatch");
+    }
+    if (capabilityAdvertisement.protocolSchema !== MESH_CONTACT_PROOF_EVIDENCE_SCHEMA) {
+      checks.push("capability-advertisement:protocol-schema-mismatch");
+    }
+    if (advertisedCapabilities(evidence).length < 1) {
+      checks.push("capability-advertisement:missing-capabilities");
+    }
+  }
+  if (capabilityDescriptor || capabilityAdvertisement) {
     if (capabilityEvidence.capability !== "contact-proof") checks.push("capability-descriptor:capability-mismatch");
     if (capabilityEvidence.methodName !== evidence.operation) checks.push("capability-descriptor:method-mismatch");
     if (capabilityEvidence.ownerRepo !== "mesh-v0-2") checks.push("capability-descriptor:owner-mismatch");
@@ -549,6 +618,13 @@ function createMeshContactProofEvidenceArtifactId(input: {
 
 function isRecord(value: unknown): value is JsonRecord {
   return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function advertisedCapabilities(evidence: JsonRecord | undefined): JsonRecord[] {
+  const advertisement = isRecord(evidence?.capabilityAdvertisement) ? evidence.capabilityAdvertisement : undefined;
+  return Array.isArray(advertisement?.capabilities)
+    ? advertisement.capabilities.filter(isRecord)
+    : [];
 }
 
 function stringValue(value: unknown): string | undefined {
