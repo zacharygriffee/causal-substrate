@@ -132,6 +132,7 @@ export interface MeshContactProofEvidenceValidation {
   parseableJsonObject: boolean;
   requiredEnvelopePresent: boolean;
   expectedSourceSchemaPresent: boolean;
+  appendLogRefsPresent: boolean;
   transportPosturePresent: boolean;
   directContactSeamPresent: boolean;
   distributedReadinessBlocked: boolean;
@@ -350,6 +351,7 @@ function buildArtifactFromParsedEvidence(input: {
       parseableJsonObject: input.parseableJsonObject && evidence !== undefined,
       requiredEnvelopePresent: checks.every((check) => !check.startsWith("required-envelope:")),
       expectedSourceSchemaPresent: !checks.includes("source-schema:mismatch"),
+      appendLogRefsPresent: !checks.includes("append-log-refs:missing"),
       transportPosturePresent: !checks.includes("transport-posture:missing"),
       directContactSeamPresent: !checks.includes("direct-contact-seam:missing"),
       distributedReadinessBlocked: !checks.includes("distributed-readiness-claim:blocked"),
@@ -591,6 +593,23 @@ function validateEvidence(evidence: JsonRecord | undefined, parseableJsonObject:
     checks.push("source-schema:mismatch");
   }
   const selectedTransport = isRecord(evidence.selectedTransport) ? evidence.selectedTransport : undefined;
+  const appendLogRefs = isRecord(evidence.appendLogRefs) ? evidence.appendLogRefs : undefined;
+  if (!stringValue(evidence.proofId)) checks.push("proof-id:missing");
+  if (!stringValue(evidence.payloadHash)) checks.push("payload-hash:missing");
+  if (!stringValue(evidence.payloadHashAlgorithm)) checks.push("payload-hash-algorithm:missing");
+  if (
+    !appendLogRefs ||
+    !stringValue(appendLogRefs.entryId) ||
+    !stringValue(appendLogRefs.sourceRepo) ||
+    !stringValue(appendLogRefs.sourceArtifactKind) ||
+    !stringValue(appendLogRefs.sourceSchema) ||
+    !stringValue(appendLogRefs.selectedTransportRef)
+  ) {
+    checks.push("append-log-refs:missing");
+  }
+  if (appendLogRefs?.truthClaimed === true || appendLogRefs?.completionClaimed === true) {
+    checks.push("append-log-refs-truth-or-completion:blocked");
+  }
   if (!stringValue(selectedTransport?.transportKind) || !stringValue(selectedTransport?.contactSeam)) {
     checks.push("transport-posture:missing");
   }

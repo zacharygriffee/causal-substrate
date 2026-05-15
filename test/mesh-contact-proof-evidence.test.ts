@@ -275,6 +275,7 @@ test("valid Platform local-service contact proof preserves advertised capability
   assert.equal(artifact.reviewStatus, "mesh-contact-proof-evidence-emitted");
   assert.equal(artifact.validation.status, "mesh-contact-proof-valid-evidence");
   assert.equal(artifact.source.sourceRepo, "mesh-ecology-platform");
+  assert.equal(artifact.validation.appendLogRefsPresent, true);
   assert.equal(artifact.contactRefs.proofId, "platform-local-service-contact-proof:bbbbbbbbbbbbbbbb");
   assert.equal(artifact.contactRefs.payloadHash, `sha256:${"b".repeat(64)}`);
   assert.equal(artifact.contactRefs.payloadHashAlgorithm, "sha256-canonical-json");
@@ -358,6 +359,42 @@ test("missing required envelope fields are incomplete", () => {
     assert.equal(artifact.reviewStatus, "mesh-contact-proof-incomplete-evidence", key);
     assert.ok(artifact.rejections.some((rejection) => rejection.includes(`required-envelope:${key}`)));
   }
+});
+
+test("missing append-log proof refs are incomplete", () => {
+  const evidence: Record<string, unknown> = clone(validPlatformEvidence());
+  delete evidence.proofId;
+  delete evidence.payloadHash;
+  delete evidence.appendLogRefs;
+
+  const artifact = buildMeshContactProofEvidenceArtifact({
+    evidence,
+    emittedAt: "2026-05-14T12:00:00.000Z",
+  });
+
+  assert.equal(artifact.reviewStatus, "mesh-contact-proof-incomplete-evidence");
+  assert.equal(artifact.validation.appendLogRefsPresent, false);
+  assert.ok(artifact.rejections.includes("proof-id:missing"));
+  assert.ok(artifact.rejections.includes("payload-hash:missing"));
+  assert.ok(artifact.rejections.includes("append-log-refs:missing"));
+  assert.equal(artifact.boundary.writesContinuityRecords, false);
+  assert.equal(artifact.boundary.claimsCausalTruth, false);
+});
+
+test("append-log proof refs cannot claim truth or completion", () => {
+  const evidence = clone(validPlatformEvidence());
+  evidence.appendLogRefs.truthClaimed = true;
+  evidence.appendLogRefs.completionClaimed = true;
+
+  const artifact = buildMeshContactProofEvidenceArtifact({
+    evidence,
+    emittedAt: "2026-05-14T12:00:00.000Z",
+  });
+
+  assert.equal(artifact.reviewStatus, "mesh-contact-proof-guardrail-blocked");
+  assert.ok(artifact.rejections.includes("append-log-refs-truth-or-completion:blocked"));
+  assert.equal(artifact.boundary.acceptsCanonicalBranch, false);
+  assert.equal(artifact.boundary.claimsCausalTruth, false);
 });
 
 test("wrong source schema or seam is incomplete", () => {
