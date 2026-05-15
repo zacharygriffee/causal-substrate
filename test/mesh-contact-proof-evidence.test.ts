@@ -17,8 +17,8 @@ function validEvidence() {
     schema: "mesh-v0-2/contact-proof/direct-peer/v1",
     protocolFamily: "mesh-contact-proof",
     protocolSchema: "mesh-v0-2/contact-proof/direct-peer/v1",
-    protocolSchemaVersion: 1,
-    dispatchVersion: 1,
+    protocolSchemaVersion: 2,
+    dispatchVersion: 2,
     requestEncoding: "@mesh-contact/contact-proof-request",
     responseEncoding: "@mesh-contact/contact-proof-response",
     dispatchCommand: "@mesh-contact/capability-echo",
@@ -29,6 +29,23 @@ function validEvidence() {
     participantB: "mesh-contact-client",
     operation: "capability.echo",
     methodName: "capability.echo",
+    capabilityDescriptor: {
+      capability: "contact-proof",
+      methodName: "capability.echo",
+      dispatchCommand: "@mesh-contact/capability-echo",
+      requestEncoding: "@mesh-contact/contact-proof-request",
+      responseEncoding: "@mesh-contact/contact-proof-response",
+      protocolFamily: "mesh-contact-proof",
+      protocolSchema: "mesh-v0-2/contact-proof/direct-peer/v1",
+      ownerRepo: "mesh-v0-2",
+      proofScope: "bounded_direct_participant_contact",
+      transportKind: "protomux-rpc",
+      contactSeam: "hyperdht_direct_peer",
+      localLayerDefault: true,
+      meshLayerDefault: false,
+      discoveryRequired: false,
+      participantContact: true,
+    },
     requestId: "mesh-contact-request:a",
     responseId: "mesh-contact-response:a",
     hostPublicKey: "a".repeat(64),
@@ -83,11 +100,23 @@ test("valid mesh-v0-2 contact proof yields causal-owned evidence only", () => {
   assert.equal(artifact.protocolEvidence.requestEncoding, "@mesh-contact/contact-proof-request");
   assert.equal(artifact.protocolEvidence.responseEncoding, "@mesh-contact/contact-proof-response");
   assert.equal(artifact.protocolEvidence.dispatchCommand, "@mesh-contact/capability-echo");
+  assert.equal(artifact.protocolEvidence.protocolSchemaVersion, 2);
+  assert.equal(artifact.protocolEvidence.dispatchVersion, 2);
+  assert.equal(artifact.capabilityEvidence.capability, "contact-proof");
+  assert.equal(artifact.capabilityEvidence.methodName, "capability.echo");
+  assert.equal(artifact.capabilityEvidence.ownerRepo, "mesh-v0-2");
+  assert.equal(artifact.capabilityEvidence.proofScope, "bounded_direct_participant_contact");
+  assert.equal(artifact.capabilityEvidence.localLayerDefault, true);
+  assert.equal(artifact.capabilityEvidence.meshLayerDefault, false);
+  assert.equal(artifact.capabilityEvidence.discoveryRequired, false);
+  assert.equal(artifact.capabilityEvidence.participantContact, true);
   assert.equal(artifact.continuityEvidence.observationKind, "protocol-contact-proof-observation");
   assert.equal(artifact.continuityEvidence.sourceEventKind, "adjacent-contact-attempt");
   assert.equal(artifact.continuityEvidence.causalRole, "history-evidence");
   assert.equal(artifact.continuityEvidence.branchPosture, "evidence-branch-only");
   assert.equal(artifact.continuityEvidence.protocolFamily, "mesh-contact-proof");
+  assert.equal(artifact.continuityEvidence.capability, "contact-proof");
+  assert.equal(artifact.continuityEvidence.capabilityProofScope, "bounded_direct_participant_contact");
   assert.equal(artifact.continuityEvidence.selectedContactSeam, "hyperdht_direct_peer");
   assert.equal(artifact.continuityEvidence.contactSucceededBySource, true);
   assert.equal(artifact.continuityEvidence.claimsCausalTruth, false);
@@ -114,6 +143,7 @@ test("JSON input preserves contact proof refs and transport evidence", () => {
   assert.equal(fromJson.reviewStatus, parsed.reviewStatus);
   assert.deepEqual(fromJson.contactRefs, parsed.contactRefs);
   assert.deepEqual(fromJson.protocolEvidence, parsed.protocolEvidence);
+  assert.deepEqual(fromJson.capabilityEvidence, parsed.capabilityEvidence);
   assert.deepEqual(fromJson.continuityEvidence, parsed.continuityEvidence);
   assert.deepEqual(fromJson.transportEvidence, parsed.transportEvidence);
 });
@@ -206,6 +236,23 @@ test("distributed readiness and unsafe truth claims are blocked", () => {
   assert.equal(artifact.boundary.writesContinuityRecords, false);
   assert.equal(artifact.continuityEvidence.distributedReadinessClaimed, true);
   assert.equal(artifact.continuityEvidence.claimsCausalTruth, false);
+});
+
+test("capability descriptor overclaims are blocked", () => {
+  const evidence = clone(validEvidence());
+  evidence.capabilityDescriptor.meshLayerDefault = true;
+  evidence.capabilityDescriptor.discoveryRequired = true;
+
+  const artifact = buildMeshContactProofEvidenceArtifact({
+    evidence,
+    emittedAt: "2026-05-14T12:00:00.000Z",
+  });
+
+  assert.equal(artifact.reviewStatus, "mesh-contact-proof-incomplete-evidence");
+  assert.ok(artifact.rejections.includes("capability-descriptor:mesh-layer-overclaim"));
+  assert.ok(artifact.rejections.includes("capability-descriptor:discovery-overclaim"));
+  assert.equal(artifact.boundary.claimsCausalTruth, false);
+  assert.equal(artifact.boundary.writesContinuityRecords, false);
 });
 
 test("boundary flags are explicit and non-authoritative", () => {

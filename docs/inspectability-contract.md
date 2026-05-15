@@ -123,6 +123,9 @@ It preserves:
 - whether the source proof says contact was attempted or succeeded
 - readiness scope
 - protocol family, schema, request/response encoding, and dispatch command
+- capability descriptor posture when present: capability, method, owner repo,
+  proof scope, layer defaults, discovery requirement, and participant-contact
+  flag
 - continuity posture as `protocol-contact-proof-observation` history evidence
 - failure class/message when the source proof reports failed contact
 
@@ -134,6 +137,8 @@ It blocks:
 - distributed-readiness claims
 - mesh completion claims
 - mesh truth or publication claims
+- capability descriptors that overclaim mesh-layer default, required discovery,
+  wrong owner, wrong seam, or wrong transport
 
 The artifact lets direct Protomux RPC over HyperDHT contact evidence become inspectable without making causal-substrate perform contact, own mesh runtime, accept a canonical branch, or treat local direct-peer success as distributed readiness.
 

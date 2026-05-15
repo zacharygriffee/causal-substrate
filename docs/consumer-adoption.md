@@ -135,6 +135,18 @@ It should not include:
 - app-specific vocabulary from Edge, Virtualia, or any other adjacent repo
 - consumer-specific comparison scoring policy
 
+## Append-log adjacency
+
+Adjacent repos may expose append-log-shaped projections as adoption evidence,
+but `causal-substrate` should treat those projections as source references
+before treating them as causal history.
+
+Use `causal-substrate/append-log-happening-map/v1` when a repo needs to map
+append-log entries into happening-shaped references. The map preserves
+`entryId`, payload hashes, parent refs, and source refs without replaying the
+source log, writing continuity records, accepting canonical history, starting
+Autobase, or treating local files as substrate truth.
+
 ## Adjacent tool interop
 
 Adjacent tools that need a formal request/response boundary should use the `causal-substrate/adjacent-tool-interop/v1` seam.

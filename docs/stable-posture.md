@@ -18,6 +18,8 @@ The repository is settled enough to teach the following points:
 - views are derived and replaceable
 - source continuity stays local by default
 - shared material must be emitted explicitly as artifacts
+- append-log-shaped adjacent projections can be mapped to happening refs, but
+  they are not accepted as canonical causal history by default
 - referent persistence defaults to `continuing`, `ambiguous`, or `broken`
 - emergence should prefer seeds, seats, adoption, cultivation, and materialization over magical appearance
 - multi-writer is not required by default

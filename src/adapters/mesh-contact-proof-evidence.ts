@@ -74,6 +74,19 @@ export interface MeshContactProofProtocolEvidence {
   dispatchCommand?: string;
 }
 
+export interface MeshContactProofCapabilityEvidence {
+  capability?: string;
+  methodName?: string;
+  ownerRepo?: string;
+  proofScope?: string;
+  transportKind?: string;
+  contactSeam?: string;
+  localLayerDefault: boolean;
+  meshLayerDefault: boolean;
+  discoveryRequired: boolean;
+  participantContact: boolean;
+}
+
 export interface MeshContactProofContinuityEvidence {
   observationKind: "protocol-contact-proof-observation";
   sourceEventKind: "adjacent-contact-attempt";
@@ -81,6 +94,8 @@ export interface MeshContactProofContinuityEvidence {
   branchPosture: "evidence-branch-only";
   protocolFamily?: string;
   protocolSchema?: string;
+  capability?: string;
+  capabilityProofScope?: string;
   selectedContactSeam?: string;
   contactAttemptedBySource: boolean;
   contactSucceededBySource: boolean;
@@ -126,6 +141,7 @@ export interface MeshContactProofEvidenceArtifact {
   };
   contactRefs: MeshContactProofRefs;
   protocolEvidence: MeshContactProofProtocolEvidence;
+  capabilityEvidence: MeshContactProofCapabilityEvidence;
   continuityEvidence: MeshContactProofContinuityEvidence;
   transportEvidence: MeshContactProofTransportEvidence;
   boundary: MeshContactProofEvidenceBoundary;
@@ -239,8 +255,9 @@ function buildArtifactFromParsedEvidence(input: {
   const status = determineStatus(checks, input.parseableJsonObject, evidence);
   const contactRefs = collectContactRefs(evidence, input.sourcePath);
   const protocolEvidence = collectProtocolEvidence(evidence);
+  const capabilityEvidence = collectCapabilityEvidence(evidence);
   const transportEvidence = collectTransportEvidence(evidence);
-  const continuityEvidence = buildContinuityEvidence(protocolEvidence, transportEvidence);
+  const continuityEvidence = buildContinuityEvidence(protocolEvidence, capabilityEvidence, transportEvidence);
   const reviewStatus = status === "mesh-contact-proof-valid-evidence"
     ? "mesh-contact-proof-evidence-emitted"
     : status;
@@ -271,6 +288,7 @@ function buildArtifactFromParsedEvidence(input: {
     },
     contactRefs,
     protocolEvidence,
+    capabilityEvidence,
     continuityEvidence,
     transportEvidence,
     boundary: buildBoundary(),
@@ -302,6 +320,7 @@ function buildArtifactFromParsedEvidence(input: {
 
 function buildContinuityEvidence(
   protocolEvidence: MeshContactProofProtocolEvidence,
+  capabilityEvidence: MeshContactProofCapabilityEvidence,
   transportEvidence: MeshContactProofTransportEvidence,
 ): MeshContactProofContinuityEvidence {
   return {
@@ -311,6 +330,8 @@ function buildContinuityEvidence(
     branchPosture: "evidence-branch-only",
     ...(protocolEvidence.protocolFamily ? { protocolFamily: protocolEvidence.protocolFamily } : {}),
     ...(protocolEvidence.protocolSchema ? { protocolSchema: protocolEvidence.protocolSchema } : {}),
+    ...(capabilityEvidence.capability ? { capability: capabilityEvidence.capability } : {}),
+    ...(capabilityEvidence.proofScope ? { capabilityProofScope: capabilityEvidence.proofScope } : {}),
     ...(transportEvidence.selectedContactSeam ? { selectedContactSeam: transportEvidence.selectedContactSeam } : {}),
     contactAttemptedBySource: transportEvidence.contactAttemptedBySource,
     contactSucceededBySource: transportEvidence.contactSucceededBySource,
@@ -319,6 +340,29 @@ function buildContinuityEvidence(
     acceptsCanonicalBranch: false,
     claimsCausalTruth: false,
   };
+}
+
+function collectCapabilityEvidence(evidence: JsonRecord | undefined): MeshContactProofCapabilityEvidence {
+  const descriptor = isRecord(evidence?.capabilityDescriptor) ? evidence.capabilityDescriptor : undefined;
+  const result: MeshContactProofCapabilityEvidence = {
+    localLayerDefault: descriptor?.localLayerDefault === true,
+    meshLayerDefault: descriptor?.meshLayerDefault === true,
+    discoveryRequired: descriptor?.discoveryRequired === true,
+    participantContact: descriptor?.participantContact === true,
+  };
+  const capability = stringValue(descriptor?.capability);
+  const methodName = stringValue(descriptor?.methodName);
+  const ownerRepo = stringValue(descriptor?.ownerRepo);
+  const proofScope = stringValue(descriptor?.proofScope);
+  const transportKind = stringValue(descriptor?.transportKind);
+  const contactSeam = stringValue(descriptor?.contactSeam);
+  if (capability) result.capability = capability;
+  if (methodName) result.methodName = methodName;
+  if (ownerRepo) result.ownerRepo = ownerRepo;
+  if (proofScope) result.proofScope = proofScope;
+  if (transportKind) result.transportKind = transportKind;
+  if (contactSeam) result.contactSeam = contactSeam;
+  return result;
 }
 
 function collectProtocolEvidence(evidence: JsonRecord | undefined): MeshContactProofProtocolEvidence {
@@ -415,6 +459,20 @@ function validateEvidence(evidence: JsonRecord | undefined, parseableJsonObject:
   if (transportEvidence.distributedReadinessClaimed) {
     checks.push("distributed-readiness-claim:blocked");
   }
+  const capabilityDescriptor = isRecord(evidence.capabilityDescriptor) ? evidence.capabilityDescriptor : undefined;
+  if (capabilityDescriptor) {
+    const capabilityEvidence = collectCapabilityEvidence(evidence);
+    if (capabilityEvidence.capability !== "contact-proof") checks.push("capability-descriptor:capability-mismatch");
+    if (capabilityEvidence.methodName !== evidence.operation) checks.push("capability-descriptor:method-mismatch");
+    if (capabilityEvidence.ownerRepo !== "mesh-v0-2") checks.push("capability-descriptor:owner-mismatch");
+    if (capabilityEvidence.proofScope !== "bounded_direct_participant_contact") checks.push("capability-descriptor:scope-mismatch");
+    if (capabilityEvidence.transportKind !== "protomux-rpc") checks.push("capability-descriptor:transport-mismatch");
+    if (capabilityEvidence.contactSeam !== "hyperdht_direct_peer") checks.push("capability-descriptor:seam-mismatch");
+    if (!capabilityEvidence.localLayerDefault) checks.push("capability-descriptor:local-layer-default-missing");
+    if (capabilityEvidence.meshLayerDefault) checks.push("capability-descriptor:mesh-layer-overclaim");
+    if (capabilityEvidence.discoveryRequired) checks.push("capability-descriptor:discovery-overclaim");
+    if (!capabilityEvidence.participantContact) checks.push("capability-descriptor:participant-contact-missing");
+  }
   if (UNSAFE_KEYS.some((key) => evidence[key] === true)) {
     checks.push("unsafe-claim:blocked");
   }
@@ -471,6 +529,7 @@ function buildRejections(checks: string[]): string[] {
     check.includes(":missing") ||
     check.includes(":blocked") ||
     check.includes(":mismatch") ||
+    check.startsWith("capability-descriptor:") ||
     check.startsWith("required-envelope:"),
   );
 }
