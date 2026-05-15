@@ -14,6 +14,12 @@ export const MESH_CONTACT_PROOF_EVIDENCE_ARTIFACT_KIND =
 export const MESH_CONTACT_PROOF_EVIDENCE_SCHEMA =
   "mesh-v0-2/contact-proof/direct-peer/v1" as const;
 
+export const PLATFORM_LOCAL_SERVICE_CONTACT_PROOF_EVIDENCE_ARTIFACT_KIND =
+  "platform_local_service_contact_proof_evidence" as const;
+
+export const PLATFORM_LOCAL_SERVICE_CONTACT_PROOF_EVIDENCE_SCHEMA =
+  "mesh-ecology-platform/local-service-contact-proof/direct-peer/v1" as const;
+
 export type MeshContactProofEvidenceStatus =
   | "mesh-contact-proof-evidence-emitted"
   | "mesh-contact-proof-valid-evidence"
@@ -132,8 +138,11 @@ export interface MeshContactProofEvidenceImportClassification {
   evidenceKind: "mesh_contact_proof_evidence";
   meshExpectedArtifactKind: typeof MESH_CONTACT_PROOF_EVIDENCE_ARTIFACT_KIND;
   meshExpectedSchema: typeof MESH_CONTACT_PROOF_EVIDENCE_SCHEMA;
+  platformExpectedArtifactKind: typeof PLATFORM_LOCAL_SERVICE_CONTACT_PROOF_EVIDENCE_ARTIFACT_KIND;
+  platformExpectedSchema: typeof PLATFORM_LOCAL_SERVICE_CONTACT_PROOF_EVIDENCE_SCHEMA;
   classificationOnly: true;
   meshOwnsSourceSchema: true;
+  platformOwnsSourceSchema: true;
   causalOwnsEvidenceArtifact: true;
 }
 
@@ -144,9 +153,16 @@ export interface MeshContactProofEvidenceArtifact {
   artifactId: string;
   emittedAt: string;
   source: {
-    sourceRepo: "mesh-v0-2";
-    sourceArtifactKind: typeof MESH_CONTACT_PROOF_EVIDENCE_ARTIFACT_KIND;
-    sourceSchema: typeof MESH_CONTACT_PROOF_EVIDENCE_SCHEMA;
+    sourceRepo: "mesh-v0-2" | "mesh-ecology-platform" | "unknown";
+    sourceArtifactKind:
+      | typeof MESH_CONTACT_PROOF_EVIDENCE_ARTIFACT_KIND
+      | typeof PLATFORM_LOCAL_SERVICE_CONTACT_PROOF_EVIDENCE_ARTIFACT_KIND
+      | "unknown";
+    sourceSchema:
+      | typeof MESH_CONTACT_PROOF_EVIDENCE_SCHEMA
+      | typeof PLATFORM_LOCAL_SERVICE_CONTACT_PROOF_EVIDENCE_SCHEMA
+      | "unknown";
+    sourceProfile: "mesh_direct_peer_contact" | "platform_local_service_contact" | "unknown";
     sourcePath?: string;
   };
   contactRefs: MeshContactProofRefs;
@@ -171,6 +187,22 @@ export interface BuildMeshContactProofEvidenceInput {
 }
 
 type JsonRecord = Record<string, unknown>;
+
+interface ContactProofSourceProfile {
+  sourceRepo: "mesh-v0-2" | "mesh-ecology-platform" | "unknown";
+  sourceArtifactKind:
+    | typeof MESH_CONTACT_PROOF_EVIDENCE_ARTIFACT_KIND
+    | typeof PLATFORM_LOCAL_SERVICE_CONTACT_PROOF_EVIDENCE_ARTIFACT_KIND
+    | "unknown";
+  sourceSchema:
+    | typeof MESH_CONTACT_PROOF_EVIDENCE_SCHEMA
+    | typeof PLATFORM_LOCAL_SERVICE_CONTACT_PROOF_EVIDENCE_SCHEMA
+    | "unknown";
+  sourceProfile: "mesh_direct_peer_contact" | "platform_local_service_contact" | "unknown";
+  expectedCapability?: string;
+  expectedOwnerRepo?: string;
+  expectedProofScope?: string;
+}
 
 const REQUIRED_KEYS = [
   "artifactKind",
@@ -262,6 +294,7 @@ function buildArtifactFromParsedEvidence(input: {
   sourcePath?: string;
 }): MeshContactProofEvidenceArtifact {
   const evidence = isRecord(input.parsedEvidence) ? input.parsedEvidence : undefined;
+  const sourceProfile = classifySourceProfile(evidence);
   const checks = validateEvidence(evidence, input.parseableJsonObject);
   const status = determineStatus(checks, input.parseableJsonObject, evidence);
   const contactRefs = collectContactRefs(evidence, input.sourcePath);
@@ -293,9 +326,10 @@ function buildArtifactFromParsedEvidence(input: {
     artifactId,
     emittedAt: input.emittedAt,
     source: {
-      sourceRepo: "mesh-v0-2",
-      sourceArtifactKind: MESH_CONTACT_PROOF_EVIDENCE_ARTIFACT_KIND,
-      sourceSchema: MESH_CONTACT_PROOF_EVIDENCE_SCHEMA,
+      sourceRepo: sourceProfile.sourceRepo,
+      sourceArtifactKind: sourceProfile.sourceArtifactKind,
+      sourceSchema: sourceProfile.sourceSchema,
+      sourceProfile: sourceProfile.sourceProfile,
       ...(input.sourcePath ? { sourcePath: input.sourcePath } : {}),
     },
     contactRefs,
@@ -322,8 +356,11 @@ function buildArtifactFromParsedEvidence(input: {
       evidenceKind: "mesh_contact_proof_evidence",
       meshExpectedArtifactKind: MESH_CONTACT_PROOF_EVIDENCE_ARTIFACT_KIND,
       meshExpectedSchema: MESH_CONTACT_PROOF_EVIDENCE_SCHEMA,
+      platformExpectedArtifactKind: PLATFORM_LOCAL_SERVICE_CONTACT_PROOF_EVIDENCE_ARTIFACT_KIND,
+      platformExpectedSchema: PLATFORM_LOCAL_SERVICE_CONTACT_PROOF_EVIDENCE_SCHEMA,
       classificationOnly: true,
       meshOwnsSourceSchema: true,
+      platformOwnsSourceSchema: true,
       causalOwnsEvidenceArtifact: true,
     },
     warnings: buildWarnings(status),
@@ -480,9 +517,47 @@ function collectTransportEvidence(evidence: JsonRecord | undefined): MeshContact
   return result;
 }
 
+function classifySourceProfile(evidence: JsonRecord | undefined): ContactProofSourceProfile {
+  if (
+    evidence?.artifactKind === MESH_CONTACT_PROOF_EVIDENCE_ARTIFACT_KIND &&
+    evidence.schema === MESH_CONTACT_PROOF_EVIDENCE_SCHEMA
+  ) {
+    return {
+      sourceRepo: "mesh-v0-2",
+      sourceArtifactKind: MESH_CONTACT_PROOF_EVIDENCE_ARTIFACT_KIND,
+      sourceSchema: MESH_CONTACT_PROOF_EVIDENCE_SCHEMA,
+      sourceProfile: "mesh_direct_peer_contact",
+      expectedCapability: "contact-proof",
+      expectedOwnerRepo: "mesh-v0-2",
+      expectedProofScope: "bounded_direct_participant_contact",
+    };
+  }
+  if (
+    evidence?.artifactKind === PLATFORM_LOCAL_SERVICE_CONTACT_PROOF_EVIDENCE_ARTIFACT_KIND &&
+    evidence.schema === PLATFORM_LOCAL_SERVICE_CONTACT_PROOF_EVIDENCE_SCHEMA
+  ) {
+    return {
+      sourceRepo: "mesh-ecology-platform",
+      sourceArtifactKind: PLATFORM_LOCAL_SERVICE_CONTACT_PROOF_EVIDENCE_ARTIFACT_KIND,
+      sourceSchema: PLATFORM_LOCAL_SERVICE_CONTACT_PROOF_EVIDENCE_SCHEMA,
+      sourceProfile: "platform_local_service_contact",
+      expectedCapability: "platform-local-service-contact-proof",
+      expectedOwnerRepo: "mesh-ecology-platform",
+      expectedProofScope: "bounded_platform_local_service_contact",
+    };
+  }
+  return {
+    sourceRepo: "unknown",
+    sourceArtifactKind: "unknown",
+    sourceSchema: "unknown",
+    sourceProfile: "unknown",
+  };
+}
+
 function validateEvidence(evidence: JsonRecord | undefined, parseableJsonObject: boolean): string[] {
   if (!parseableJsonObject || !evidence) return ["parseable-json-object:malformed"];
   const checks: string[] = [];
+  const sourceProfile = classifySourceProfile(evidence);
   for (const key of REQUIRED_KEYS) {
     if (key === "selectedTransport" || key === "readinessEvidence") {
       if (!isRecord(evidence[key])) checks.push(`required-envelope:${key}`);
@@ -490,10 +565,10 @@ function validateEvidence(evidence: JsonRecord | undefined, parseableJsonObject:
     }
     if (!stringValue(evidence[key])) checks.push(`required-envelope:${key}`);
   }
-  if (evidence.artifactKind !== MESH_CONTACT_PROOF_EVIDENCE_ARTIFACT_KIND) {
+  if (sourceProfile.sourceArtifactKind === "unknown") {
     checks.push("source-artifact-kind:mismatch");
   }
-  if (evidence.schema !== MESH_CONTACT_PROOF_EVIDENCE_SCHEMA) {
+  if (sourceProfile.sourceSchema === "unknown") {
     checks.push("source-schema:mismatch");
   }
   const selectedTransport = isRecord(evidence.selectedTransport) ? evidence.selectedTransport : undefined;
@@ -531,10 +606,16 @@ function validateEvidence(evidence: JsonRecord | undefined, parseableJsonObject:
     }
   }
   if (capabilityDescriptor || capabilityAdvertisement) {
-    if (capabilityEvidence.capability !== "contact-proof") checks.push("capability-descriptor:capability-mismatch");
+    if (capabilityEvidence.capability !== sourceProfile.expectedCapability) {
+      checks.push("capability-descriptor:capability-mismatch");
+    }
     if (capabilityEvidence.methodName !== evidence.operation) checks.push("capability-descriptor:method-mismatch");
-    if (capabilityEvidence.ownerRepo !== "mesh-v0-2") checks.push("capability-descriptor:owner-mismatch");
-    if (capabilityEvidence.proofScope !== "bounded_direct_participant_contact") checks.push("capability-descriptor:scope-mismatch");
+    if (capabilityEvidence.ownerRepo !== sourceProfile.expectedOwnerRepo) {
+      checks.push("capability-descriptor:owner-mismatch");
+    }
+    if (capabilityEvidence.proofScope !== sourceProfile.expectedProofScope) {
+      checks.push("capability-descriptor:scope-mismatch");
+    }
     if (capabilityEvidence.transportKind !== "protomux-rpc") checks.push("capability-descriptor:transport-mismatch");
     if (capabilityEvidence.contactSeam !== "hyperdht_direct_peer") checks.push("capability-descriptor:seam-mismatch");
     if (!capabilityEvidence.localLayerDefault) checks.push("capability-descriptor:local-layer-default-missing");

@@ -100,6 +100,66 @@ function validEvidence() {
   };
 }
 
+function validPlatformEvidence() {
+  const evidence = validEvidence();
+  const platformDescriptor = {
+    capability: "platform-local-service-contact-proof",
+    methodName: "platform.localService.capabilityEcho",
+    dispatchCommand: "@mesh-contact/capability-echo",
+    requestEncoding: "@mesh-contact/contact-proof-request",
+    responseEncoding: "@mesh-contact/contact-proof-response",
+    protocolFamily: "mesh-contact-proof",
+    protocolSchema: "mesh-v0-2/contact-proof/direct-peer/v1",
+    ownerRepo: "mesh-ecology-platform",
+    proofScope: "bounded_platform_local_service_contact",
+    transportKind: "protomux-rpc",
+    contactSeam: "hyperdht_direct_peer",
+    localLayerDefault: true,
+    meshLayerDefault: false,
+    discoveryRequired: false,
+    participantContact: true,
+  };
+  return {
+    ...evidence,
+    artifactKind: "platform_local_service_contact_proof_evidence",
+    schema: "mesh-ecology-platform/local-service-contact-proof/direct-peer/v1",
+    protocolSchemaVersion: 2,
+    dispatchVersion: 2,
+    protocolOwner: "mesh-v0-2",
+    protocolProfileRole: "platform_compatible_contact_proof_profile",
+    proofKind: "platform_local_service_contact_direct_peer_lab",
+    serviceName: "platform-local-service",
+    participantA: "platform-local-service-contact-host",
+    participantB: "platform-local-service-contact-client",
+    operation: "platform.localService.capabilityEcho",
+    methodName: "platform.localService.capabilityEcho",
+    capabilityDescriptor: platformDescriptor,
+    capabilityAdvertisement: {
+      responseId: "platform-capabilities-response:a",
+      requestId: "platform-capabilities-request:a",
+      participant: "platform-local-service-contact-host",
+      protocolFamily: "mesh-contact-proof",
+      protocolSchema: "mesh-v0-2/contact-proof/direct-peer/v1",
+      capabilities: [platformDescriptor],
+    },
+    requestId: "platform-contact-request:a",
+    responseId: "platform-contact-response:a",
+    readinessEvidence: {
+      readinessScope: "direct_peer_contact",
+      distributedReadinessClaimed: false,
+      serviceBackendClaimed: false,
+    },
+    boundary: {
+      replacesHttpLocalService: false,
+      startsServiceBackend: false,
+      grantsEdgeAuthority: false,
+      meshDiscoveryClaimed: false,
+      meshPublicationClaimed: false,
+      deploymentExpanded: false,
+    },
+  };
+}
+
 function clone<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T;
 }
@@ -161,6 +221,40 @@ test("valid mesh-v0-2 contact proof yields causal-owned evidence only", () => {
   assert.equal(artifact.transportEvidence.selectedTransportScope, "isolated_local_hyperdht");
   assert.equal(artifact.transportEvidence.contactAttemptedBySource, true);
   assert.equal(artifact.transportEvidence.contactSucceededBySource, true);
+  assert.equal(artifact.transportEvidence.distributedReadinessClaimed, false);
+  assert.deepEqual(artifact.rejections, []);
+});
+
+test("valid Platform local-service contact proof preserves advertised capability evidence", () => {
+  const artifact = buildMeshContactProofEvidenceArtifact({
+    evidence: validPlatformEvidence(),
+    emittedAt: "2026-05-14T12:00:00.000Z",
+    sourcePath: "fixtures/platform/local-service-contact-proof.json",
+  });
+
+  assertMeshContactProofEvidenceArtifact(artifact);
+  assert.equal(artifact.reviewStatus, "mesh-contact-proof-evidence-emitted");
+  assert.equal(artifact.validation.status, "mesh-contact-proof-valid-evidence");
+  assert.equal(artifact.source.sourceRepo, "mesh-ecology-platform");
+  assert.equal(artifact.source.sourceArtifactKind, "platform_local_service_contact_proof_evidence");
+  assert.equal(artifact.source.sourceSchema, "mesh-ecology-platform/local-service-contact-proof/direct-peer/v1");
+  assert.equal(artifact.source.sourceProfile, "platform_local_service_contact");
+  assert.equal(artifact.contactRefs.proofKind, "platform_local_service_contact_direct_peer_lab");
+  assert.equal(artifact.contactRefs.operation, "platform.localService.capabilityEcho");
+  assert.equal(artifact.protocolEvidence.protocolFamily, "mesh-contact-proof");
+  assert.equal(artifact.protocolEvidence.protocolSchema, "mesh-v0-2/contact-proof/direct-peer/v1");
+  assert.equal(artifact.capabilityEvidence.descriptorSource, "capability_advertisement");
+  assert.equal(artifact.capabilityEvidence.capability, "platform-local-service-contact-proof");
+  assert.equal(artifact.capabilityEvidence.methodName, "platform.localService.capabilityEcho");
+  assert.equal(artifact.capabilityEvidence.ownerRepo, "mesh-ecology-platform");
+  assert.equal(artifact.capabilityEvidence.proofScope, "bounded_platform_local_service_contact");
+  assert.equal(artifact.capabilityAdvertisementEvidence.present, true);
+  assert.equal(artifact.capabilityAdvertisementEvidence.participant, "platform-local-service-contact-host");
+  assert.equal(artifact.capabilityAdvertisementEvidence.capabilityCount, 1);
+  assert.equal(artifact.continuityEvidence.causalRole, "history-evidence");
+  assert.equal(artifact.continuityEvidence.claimsCausalTruth, false);
+  assert.equal(artifact.transportEvidence.selectedTransportKind, "protomux-rpc");
+  assert.equal(artifact.transportEvidence.selectedContactSeam, "hyperdht_direct_peer");
   assert.equal(artifact.transportEvidence.distributedReadinessClaimed, false);
   assert.deepEqual(artifact.rejections, []);
 });

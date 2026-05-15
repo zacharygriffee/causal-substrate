@@ -111,7 +111,10 @@ The artifact lets Edge later attach contact attempts and transport selection to 
 
 ## Mesh contact proof evidence artifact v1
 
-The `causal-substrate/mesh-contact-proof-evidence/v1` artifact is an evidence-only surface for `mesh-v0-2` direct contact proof evidence.
+The `causal-substrate/mesh-contact-proof-evidence/v1` artifact is an evidence-only surface for direct contact proof evidence from:
+
+- `mesh-v0-2` direct peer contact proofs
+- `mesh-ecology-platform` local-service contact proofs using the compatible `mesh-contact-proof` protocol profile
 
 It preserves:
 
@@ -123,9 +126,11 @@ It preserves:
 - whether the source proof says contact was attempted or succeeded
 - readiness scope
 - protocol family, schema, request/response encoding, and dispatch command
+- source profile: mesh direct-peer contact or Platform local-service contact
 - capability descriptor posture when present: capability, method, owner repo,
   proof scope, layer defaults, discovery requirement, and participant-contact
   flag
+- advertised participant capabilities when present
 - continuity posture as `protocol-contact-proof-observation` history evidence
 - failure class/message when the source proof reports failed contact
 
