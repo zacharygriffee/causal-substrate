@@ -64,6 +64,16 @@ export interface MeshContactProofTransportEvidence {
   failureMessage?: string;
 }
 
+export interface MeshContactProofProtocolEvidence {
+  protocolFamily?: string;
+  protocolSchema?: string;
+  protocolSchemaVersion?: number;
+  dispatchVersion?: number;
+  requestEncoding?: string;
+  responseEncoding?: string;
+  dispatchCommand?: string;
+}
+
 export interface MeshContactProofEvidenceValidation {
   status: MeshContactProofEvidenceStatus;
   parseableJsonObject: boolean;
@@ -99,6 +109,7 @@ export interface MeshContactProofEvidenceArtifact {
     sourcePath?: string;
   };
   contactRefs: MeshContactProofRefs;
+  protocolEvidence: MeshContactProofProtocolEvidence;
   transportEvidence: MeshContactProofTransportEvidence;
   boundary: MeshContactProofEvidenceBoundary;
   validation: MeshContactProofEvidenceValidation;
@@ -210,6 +221,7 @@ function buildArtifactFromParsedEvidence(input: {
   const checks = validateEvidence(evidence, input.parseableJsonObject);
   const status = determineStatus(checks, input.parseableJsonObject, evidence);
   const contactRefs = collectContactRefs(evidence, input.sourcePath);
+  const protocolEvidence = collectProtocolEvidence(evidence);
   const transportEvidence = collectTransportEvidence(evidence);
   const reviewStatus = status === "mesh-contact-proof-valid-evidence"
     ? "mesh-contact-proof-evidence-emitted"
@@ -240,6 +252,7 @@ function buildArtifactFromParsedEvidence(input: {
       ...(input.sourcePath ? { sourcePath: input.sourcePath } : {}),
     },
     contactRefs,
+    protocolEvidence,
     transportEvidence,
     boundary: buildBoundary(),
     validation: {
@@ -266,6 +279,23 @@ function buildArtifactFromParsedEvidence(input: {
     warnings: buildWarnings(status),
     rejections: buildRejections(checks),
   };
+}
+
+function collectProtocolEvidence(evidence: JsonRecord | undefined): MeshContactProofProtocolEvidence {
+  const result: MeshContactProofProtocolEvidence = {};
+  const protocolFamily = stringValue(evidence?.protocolFamily);
+  const protocolSchema = stringValue(evidence?.protocolSchema);
+  const requestEncoding = stringValue(evidence?.requestEncoding);
+  const responseEncoding = stringValue(evidence?.responseEncoding);
+  const dispatchCommand = stringValue(evidence?.dispatchCommand);
+  if (protocolFamily) result.protocolFamily = protocolFamily;
+  if (protocolSchema) result.protocolSchema = protocolSchema;
+  if (typeof evidence?.protocolSchemaVersion === "number") result.protocolSchemaVersion = evidence.protocolSchemaVersion;
+  if (typeof evidence?.dispatchVersion === "number") result.dispatchVersion = evidence.dispatchVersion;
+  if (requestEncoding) result.requestEncoding = requestEncoding;
+  if (responseEncoding) result.responseEncoding = responseEncoding;
+  if (dispatchCommand) result.dispatchCommand = dispatchCommand;
+  return result;
 }
 
 function collectContactRefs(evidence: JsonRecord | undefined, sourcePath: string | undefined): MeshContactProofRefs {

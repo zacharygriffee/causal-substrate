@@ -15,6 +15,13 @@ function validEvidence() {
   return {
     artifactKind: "mesh_contact_proof_evidence",
     schema: "mesh-v0-2/contact-proof/direct-peer/v1",
+    protocolFamily: "mesh-contact-proof",
+    protocolSchema: "mesh-v0-2/contact-proof/direct-peer/v1",
+    protocolSchemaVersion: 1,
+    dispatchVersion: 1,
+    requestEncoding: "@mesh-contact/contact-proof-request",
+    responseEncoding: "@mesh-contact/contact-proof-response",
+    dispatchCommand: "@mesh-contact/capability-echo",
     proofKind: "mesh_contact_direct_peer_lab",
     transportKind: "protomux-rpc",
     contactSeam: "hyperdht_direct_peer",
@@ -71,6 +78,11 @@ test("valid mesh-v0-2 contact proof yields causal-owned evidence only", () => {
   assert.equal(artifact.contactRefs.participantA, "mesh-contact-host");
   assert.equal(artifact.contactRefs.participantB, "mesh-contact-client");
   assert.equal(artifact.contactRefs.operation, "capability.echo");
+  assert.equal(artifact.protocolEvidence.protocolFamily, "mesh-contact-proof");
+  assert.equal(artifact.protocolEvidence.protocolSchema, "mesh-v0-2/contact-proof/direct-peer/v1");
+  assert.equal(artifact.protocolEvidence.requestEncoding, "@mesh-contact/contact-proof-request");
+  assert.equal(artifact.protocolEvidence.responseEncoding, "@mesh-contact/contact-proof-response");
+  assert.equal(artifact.protocolEvidence.dispatchCommand, "@mesh-contact/capability-echo");
   assert.equal(artifact.transportEvidence.selectedTransportKind, "protomux-rpc");
   assert.equal(artifact.transportEvidence.selectedContactSeam, "hyperdht_direct_peer");
   assert.equal(artifact.transportEvidence.selectedTransportRole, "proof_lane");
@@ -93,6 +105,7 @@ test("JSON input preserves contact proof refs and transport evidence", () => {
 
   assert.equal(fromJson.reviewStatus, parsed.reviewStatus);
   assert.deepEqual(fromJson.contactRefs, parsed.contactRefs);
+  assert.deepEqual(fromJson.protocolEvidence, parsed.protocolEvidence);
   assert.deepEqual(fromJson.transportEvidence, parsed.transportEvidence);
 });
 
