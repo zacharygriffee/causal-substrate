@@ -83,6 +83,14 @@ test("valid mesh-v0-2 contact proof yields causal-owned evidence only", () => {
   assert.equal(artifact.protocolEvidence.requestEncoding, "@mesh-contact/contact-proof-request");
   assert.equal(artifact.protocolEvidence.responseEncoding, "@mesh-contact/contact-proof-response");
   assert.equal(artifact.protocolEvidence.dispatchCommand, "@mesh-contact/capability-echo");
+  assert.equal(artifact.continuityEvidence.observationKind, "protocol-contact-proof-observation");
+  assert.equal(artifact.continuityEvidence.sourceEventKind, "adjacent-contact-attempt");
+  assert.equal(artifact.continuityEvidence.causalRole, "history-evidence");
+  assert.equal(artifact.continuityEvidence.branchPosture, "evidence-branch-only");
+  assert.equal(artifact.continuityEvidence.protocolFamily, "mesh-contact-proof");
+  assert.equal(artifact.continuityEvidence.selectedContactSeam, "hyperdht_direct_peer");
+  assert.equal(artifact.continuityEvidence.contactSucceededBySource, true);
+  assert.equal(artifact.continuityEvidence.claimsCausalTruth, false);
   assert.equal(artifact.transportEvidence.selectedTransportKind, "protomux-rpc");
   assert.equal(artifact.transportEvidence.selectedContactSeam, "hyperdht_direct_peer");
   assert.equal(artifact.transportEvidence.selectedTransportRole, "proof_lane");
@@ -106,6 +114,7 @@ test("JSON input preserves contact proof refs and transport evidence", () => {
   assert.equal(fromJson.reviewStatus, parsed.reviewStatus);
   assert.deepEqual(fromJson.contactRefs, parsed.contactRefs);
   assert.deepEqual(fromJson.protocolEvidence, parsed.protocolEvidence);
+  assert.deepEqual(fromJson.continuityEvidence, parsed.continuityEvidence);
   assert.deepEqual(fromJson.transportEvidence, parsed.transportEvidence);
 });
 
@@ -195,6 +204,8 @@ test("distributed readiness and unsafe truth claims are blocked", () => {
   assert.equal(artifact.boundary.claimsDistributedReadiness, false);
   assert.equal(artifact.boundary.claimsCausalTruth, false);
   assert.equal(artifact.boundary.writesContinuityRecords, false);
+  assert.equal(artifact.continuityEvidence.distributedReadinessClaimed, true);
+  assert.equal(artifact.continuityEvidence.claimsCausalTruth, false);
 });
 
 test("boundary flags are explicit and non-authoritative", () => {

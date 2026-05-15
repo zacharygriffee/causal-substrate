@@ -74,6 +74,22 @@ export interface MeshContactProofProtocolEvidence {
   dispatchCommand?: string;
 }
 
+export interface MeshContactProofContinuityEvidence {
+  observationKind: "protocol-contact-proof-observation";
+  sourceEventKind: "adjacent-contact-attempt";
+  causalRole: "history-evidence";
+  branchPosture: "evidence-branch-only";
+  protocolFamily?: string;
+  protocolSchema?: string;
+  selectedContactSeam?: string;
+  contactAttemptedBySource: boolean;
+  contactSucceededBySource: boolean;
+  distributedReadinessClaimed: boolean;
+  writesContinuityRecords: false;
+  acceptsCanonicalBranch: false;
+  claimsCausalTruth: false;
+}
+
 export interface MeshContactProofEvidenceValidation {
   status: MeshContactProofEvidenceStatus;
   parseableJsonObject: boolean;
@@ -110,6 +126,7 @@ export interface MeshContactProofEvidenceArtifact {
   };
   contactRefs: MeshContactProofRefs;
   protocolEvidence: MeshContactProofProtocolEvidence;
+  continuityEvidence: MeshContactProofContinuityEvidence;
   transportEvidence: MeshContactProofTransportEvidence;
   boundary: MeshContactProofEvidenceBoundary;
   validation: MeshContactProofEvidenceValidation;
@@ -223,6 +240,7 @@ function buildArtifactFromParsedEvidence(input: {
   const contactRefs = collectContactRefs(evidence, input.sourcePath);
   const protocolEvidence = collectProtocolEvidence(evidence);
   const transportEvidence = collectTransportEvidence(evidence);
+  const continuityEvidence = buildContinuityEvidence(protocolEvidence, transportEvidence);
   const reviewStatus = status === "mesh-contact-proof-valid-evidence"
     ? "mesh-contact-proof-evidence-emitted"
     : status;
@@ -253,6 +271,7 @@ function buildArtifactFromParsedEvidence(input: {
     },
     contactRefs,
     protocolEvidence,
+    continuityEvidence,
     transportEvidence,
     boundary: buildBoundary(),
     validation: {
@@ -278,6 +297,27 @@ function buildArtifactFromParsedEvidence(input: {
     },
     warnings: buildWarnings(status),
     rejections: buildRejections(checks),
+  };
+}
+
+function buildContinuityEvidence(
+  protocolEvidence: MeshContactProofProtocolEvidence,
+  transportEvidence: MeshContactProofTransportEvidence,
+): MeshContactProofContinuityEvidence {
+  return {
+    observationKind: "protocol-contact-proof-observation",
+    sourceEventKind: "adjacent-contact-attempt",
+    causalRole: "history-evidence",
+    branchPosture: "evidence-branch-only",
+    ...(protocolEvidence.protocolFamily ? { protocolFamily: protocolEvidence.protocolFamily } : {}),
+    ...(protocolEvidence.protocolSchema ? { protocolSchema: protocolEvidence.protocolSchema } : {}),
+    ...(transportEvidence.selectedContactSeam ? { selectedContactSeam: transportEvidence.selectedContactSeam } : {}),
+    contactAttemptedBySource: transportEvidence.contactAttemptedBySource,
+    contactSucceededBySource: transportEvidence.contactSucceededBySource,
+    distributedReadinessClaimed: transportEvidence.distributedReadinessClaimed,
+    writesContinuityRecords: false,
+    acceptsCanonicalBranch: false,
+    claimsCausalTruth: false,
   };
 }
 

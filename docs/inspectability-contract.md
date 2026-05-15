@@ -122,6 +122,8 @@ It preserves:
 - transport role and scope
 - whether the source proof says contact was attempted or succeeded
 - readiness scope
+- protocol family, schema, request/response encoding, and dispatch command
+- continuity posture as `protocol-contact-proof-observation` history evidence
 - failure class/message when the source proof reports failed contact
 
 It blocks:
@@ -134,6 +136,11 @@ It blocks:
 - mesh truth or publication claims
 
 The artifact lets direct Protomux RPC over HyperDHT contact evidence become inspectable without making causal-substrate perform contact, own mesh runtime, accept a canonical branch, or treat local direct-peer success as distributed readiness.
+
+The `continuityEvidence` section is deliberately descriptive. It marks the
+source as an adjacent contact attempt and preserves whether the source says
+contact succeeded, but it remains `evidence-branch-only`: it does not write
+continuity records, accept a canonical branch, or claim causal truth.
 
 ## Current strengths
 
