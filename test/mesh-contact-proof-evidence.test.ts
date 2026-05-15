@@ -17,8 +17,8 @@ function validEvidence() {
     schema: "mesh-v0-2/contact-proof/direct-peer/v1",
     protocolFamily: "mesh-contact-proof",
     protocolSchema: "mesh-v0-2/contact-proof/direct-peer/v1",
-    protocolSchemaVersion: 2,
-    dispatchVersion: 2,
+    protocolSchemaVersion: 3,
+    dispatchVersion: 3,
     requestEncoding: "@mesh-contact/contact-proof-request",
     responseEncoding: "@mesh-contact/contact-proof-response",
     dispatchCommand: "@mesh-contact/capability-echo",
@@ -100,8 +100,8 @@ test("valid mesh-v0-2 contact proof yields causal-owned evidence only", () => {
   assert.equal(artifact.protocolEvidence.requestEncoding, "@mesh-contact/contact-proof-request");
   assert.equal(artifact.protocolEvidence.responseEncoding, "@mesh-contact/contact-proof-response");
   assert.equal(artifact.protocolEvidence.dispatchCommand, "@mesh-contact/capability-echo");
-  assert.equal(artifact.protocolEvidence.protocolSchemaVersion, 2);
-  assert.equal(artifact.protocolEvidence.dispatchVersion, 2);
+  assert.equal(artifact.protocolEvidence.protocolSchemaVersion, 3);
+  assert.equal(artifact.protocolEvidence.dispatchVersion, 3);
   assert.equal(artifact.capabilityEvidence.capability, "contact-proof");
   assert.equal(artifact.capabilityEvidence.methodName, "capability.echo");
   assert.equal(artifact.capabilityEvidence.ownerRepo, "mesh-v0-2");
