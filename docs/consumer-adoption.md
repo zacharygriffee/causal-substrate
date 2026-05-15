@@ -156,6 +156,19 @@ non-authoritative. The compatibility `edge_operation_trail` source remains
 accepted, but the append-log view is the preferred read path because it carries
 explicit scaffold and backend posture.
 
+Edge's single-writer projection-log proof has a separate adoption seam:
+`causal-substrate/edge-projection-log-happening-map/v1` maps
+`edge_projection_event_log_entry.v0` into happening-shaped references. This is
+for clocked or clock-eligible projection events, not for generic storage
+acceptance. The map preserves entry id, projection event id, projection ref,
+payload hash, namespace parts, source refs, transport refs, sequence, and any
+available temporal ref. If neither the log entry nor embedded projection event
+carries a clock ref, the map stays incomplete instead of inventing one.
+
+That projection-log map does not open Edge's Corestore, replay the projection
+log, write continuity records, accept canonical history, claim causal truth, or
+promote the local store root into a repo-to-repo seam.
+
 ## Adjacent tool interop
 
 Adjacent tools that need a formal request/response boundary should use the `causal-substrate/adjacent-tool-interop/v1` seam.

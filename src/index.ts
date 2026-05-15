@@ -25,4 +25,5 @@ export * from "./adapters/edge-operation-history-evidence.js";
 export * from "./adapters/edge-contact-evidence.js";
 export * from "./adapters/mesh-contact-proof-evidence.js";
 export * from "./adapters/append-log-happening-map.js";
+export * from "./adapters/edge-projection-log-happening-map.js";
 export * from "./prototypes/continuity-workstation.js";
