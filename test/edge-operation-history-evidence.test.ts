@@ -11,7 +11,7 @@ import {
   CAUSAL_EDGE_OPERATION_HISTORY_EVIDENCE_SCHEMA_VERSION,
 } from "../src/index.js";
 
-function validTrail() {
+function validTrail(): any {
   return {
     artifactKind: "edge_operation_trail",
     operationId: "operation-a",
@@ -71,6 +71,107 @@ function validTrail() {
   };
 }
 
+function validAppendLogView(): any {
+  return {
+    artifactKind: "edge_operation_append_log_view",
+    schema: "mesh-ecology-edge/operation-append-log-view/v1",
+    sourceTrailPath: "events/operation-a.json",
+    sourceScaffold: "local_json_operation_trail",
+    sourceIsSubstrate: false,
+    appendLogBackend: "none",
+    autobaseBackend: false,
+    writesLog: false,
+    replacesOperationTrail: false,
+    operationId: "operation-a",
+    operationKind: "guided_platform_http_target_setup",
+    entryCount: 2,
+    entries: [
+      {
+        entryKind: "edge_operation_append_log_entry",
+        schema: "mesh-ecology-edge/operation-append-log-entry/v1",
+        sourceScaffold: "local_json_operation_trail",
+        logScope: "operator_local",
+        sourceTrailPath: "events/operation-a.json",
+        operationId: "operation-a",
+        sequence: 0,
+        eventId: "operation-a:event:1",
+        eventKind: "operation_opened",
+        occurredAt: "2026-05-13T00:00:00.000Z",
+        parentEventRefs: [],
+        inputRefs: [],
+        slotRefs: [],
+        receiptRefs: [],
+        evidenceRefs: [],
+        nextSafeMoves: [],
+        payloadSha256: "sha256:entry-one",
+        payloadEmbedded: false,
+        posture: {
+          localObservationOnly: true,
+          truthClaimed: false,
+          completionClaimed: false,
+          schedulerUsed: false,
+          autoRunnerUsed: false,
+          silentDiscoveryUsed: false,
+          globalMeshLookupUsed: false,
+          arbitraryRemoteExecutionUsed: false,
+          futureAuthorizationGranted: false,
+        },
+      },
+      {
+        entryKind: "edge_operation_append_log_entry",
+        schema: "mesh-ecology-edge/operation-append-log-entry/v1",
+        sourceScaffold: "local_json_operation_trail",
+        logScope: "operator_local",
+        sourceTrailPath: "events/operation-a.json",
+        operationId: "operation-a",
+        sequence: 1,
+        eventId: "operation-a:event:2",
+        eventKind: "evidence_attached",
+        occurredAt: "2026-05-13T00:01:00.000Z",
+        parentEventRefs: ["operation-a:event:1"],
+        inputRefs: [],
+        slotRefs: [],
+        receiptRefs: ["receipt:test"],
+        evidenceRefs: ["evidence:mesh-pub:1"],
+        nextSafeMoves: [],
+        payloadSha256: "sha256:entry-two",
+        payloadEmbedded: false,
+        posture: {
+          localObservationOnly: true,
+          truthClaimed: false,
+          completionClaimed: false,
+          schedulerUsed: false,
+          autoRunnerUsed: false,
+          silentDiscoveryUsed: false,
+          globalMeshLookupUsed: false,
+          arbitraryRemoteExecutionUsed: false,
+          futureAuthorizationGranted: false,
+        },
+      },
+    ],
+    boundary: {
+      readOnlyProjection: true,
+      evidenceOnly: true,
+      operatorLocal: true,
+      writesFiles: false,
+      writesAppendLog: false,
+      claimsCausalTruth: false,
+      claimsMeshTruth: false,
+      claimsCompletion: false,
+      schedulesWork: false,
+      watchesFiles: false,
+      discoversTargets: false,
+      publishesToMesh: false,
+    },
+    validation: {
+      appendOrderPreserved: true,
+      sourceTrailScaffold: true,
+      payloadsReferencedByHash: true,
+      unsafePostureCount: 0,
+    },
+  };
+}
+
 function clone<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T;
 }
@@ -114,6 +215,62 @@ test("JSON input preserves the same operation refs as parsed input", () => {
   assert.equal(fromJson.reviewStatus, parsed.reviewStatus);
   assert.deepEqual(fromJson.trailRefs, parsed.trailRefs);
   assert.deepEqual(fromJson.eventRefs, parsed.eventRefs);
+});
+
+test("Edge append-log view is the preferred operation history source and remains evidence only", () => {
+  const artifact = buildEdgeOperationHistoryEvidenceArtifact({
+    trail: validAppendLogView(),
+    emittedAt: "2026-05-14T12:00:00.000Z",
+    sourcePath: "artifacts/operation-a-append-log-view.json",
+  });
+
+  assertEdgeOperationHistoryEvidenceArtifact(artifact);
+  assert.equal(artifact.reviewStatus, "operation-history-evidence-emitted");
+  assert.equal(artifact.validation.status, "operation-history-valid-trail");
+  assert.equal(artifact.source.sourceArtifactKind, "edge_operation_append_log_view");
+  assert.equal(artifact.importClassification.preferredSourceArtifactKind, "edge_operation_append_log_view");
+  assert.deepEqual(artifact.importClassification.acceptedSourceArtifactKinds, [
+    "edge_operation_append_log_view",
+    "edge_operation_trail",
+  ]);
+  assert.equal(artifact.trailRefs.sourceProfile, "edge_operation_append_log_view");
+  assert.equal(artifact.trailRefs.sourceSchema, "mesh-ecology-edge/operation-append-log-view/v1");
+  assert.equal(artifact.trailRefs.sourceScaffold, "local_json_operation_trail");
+  assert.equal(artifact.trailRefs.sourceIsSubstrate, false);
+  assert.equal(artifact.trailRefs.appendLogBackend, "none");
+  assert.equal(artifact.trailRefs.entryCount, 2);
+  assert.deepEqual(artifact.eventRefs[1]?.parentEventRefs, ["operation-a:event:1"]);
+  assert.deepEqual(artifact.eventRefs[1]?.receiptRefs, ["receipt:test"]);
+  assert.deepEqual(artifact.eventRefs[1]?.evidenceRefs, [
+    "evidence:mesh-pub:1",
+    "sha256:entry-two",
+    "mesh-ecology-edge/operation-append-log-entry/v1",
+  ]);
+  assert.equal(artifact.boundary.replaysEvents, false);
+  assert.equal(artifact.boundary.claimsCausalTruth, false);
+  assert.equal(artifact.boundary.writesContinuityRecords, false);
+  assert.deepEqual(artifact.rejections, []);
+});
+
+test("append-log view with backend, write, or truth claims is guardrail blocked", () => {
+  const appendLogView = clone(validAppendLogView());
+  appendLogView.sourceIsSubstrate = true;
+  appendLogView.autobaseBackend = true;
+  appendLogView.boundary.claimsCausalTruth = true;
+
+  const artifact = buildEdgeOperationHistoryEvidenceArtifact({
+    trail: appendLogView,
+    emittedAt: "2026-05-14T12:00:00.000Z",
+  });
+
+  assert.equal(artifact.reviewStatus, "operation-history-guardrail-blocked");
+  assert.ok(artifact.rejections.includes("local-file-substrate-claim:blocked-by-guardrail"));
+  assert.ok(artifact.rejections.includes("append-log-backend-not-started:blocked-by-guardrail"));
+  assert.ok(artifact.rejections.includes("unsafe-posture-claims:blocked-by-guardrail"));
+  assert.equal(artifact.boundary.replaysEvents, false);
+  assert.equal(artifact.boundary.claimsCausalTruth, false);
+  assert.equal(artifact.boundary.acceptsCanonicalBranch, false);
+  assert.equal(artifact.boundary.writesContinuityRecords, false);
 });
 
 test("Edge operation history preserves attached mesh contact proof links", () => {

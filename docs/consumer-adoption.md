@@ -147,6 +147,15 @@ append-log entries into happening-shaped references. The map preserves
 source log, writing continuity records, accepting canonical history, starting
 Autobase, or treating local files as substrate truth.
 
+Edge operation history has a narrower first adoption seam:
+`causal-substrate/edge-operation-history-evidence/v1` should consume Edge's
+preferred `edge_operation_append_log_view` projection before any real backend
+prototype. It preserves operation, entry, parent, receipt, evidence, and
+payload-hash refs while keeping the source trail local, replaceable, and
+non-authoritative. The compatibility `edge_operation_trail` source remains
+accepted, but the append-log view is the preferred read path because it carries
+explicit scaffold and backend posture.
+
 ## Adjacent tool interop
 
 Adjacent tools that need a formal request/response boundary should use the `causal-substrate/adjacent-tool-interop/v1` seam.

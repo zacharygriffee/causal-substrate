@@ -9,6 +9,13 @@ export const CAUSAL_EDGE_OPERATION_HISTORY_EVIDENCE_ARTIFACT_KIND =
   "causal-edge-operation-history-evidence" as const;
 
 export const EDGE_OPERATION_TRAIL_ARTIFACT_KIND = "edge_operation_trail" as const;
+export const EDGE_OPERATION_APPEND_LOG_VIEW_ARTIFACT_KIND = "edge_operation_append_log_view" as const;
+export const EDGE_OPERATION_APPEND_LOG_VIEW_SCHEMA =
+  "mesh-ecology-edge/operation-append-log-view/v1" as const;
+
+export type EdgeOperationHistorySourceArtifactKind =
+  | typeof EDGE_OPERATION_TRAIL_ARTIFACT_KIND
+  | typeof EDGE_OPERATION_APPEND_LOG_VIEW_ARTIFACT_KIND;
 
 export type EdgeOperationHistoryEvidenceStatus =
   | "operation-history-evidence-emitted"
@@ -44,6 +51,12 @@ export interface EdgeOperationHistoryTrailRefs {
   operationStatus?: string;
   contextRef?: string;
   sourcePath?: string;
+  sourceProfile?: EdgeOperationHistorySourceArtifactKind;
+  sourceSchema?: string;
+  sourceScaffold?: string;
+  sourceIsSubstrate?: boolean;
+  appendLogBackend?: string;
+  entryCount?: number;
 }
 
 export interface EdgeOperationHistoryEventRef {
@@ -77,6 +90,11 @@ export interface EdgeOperationHistoryImportClassification {
   seamId: "edge_operation_history";
   evidenceKind: "edge_operation_history_evidence";
   edgeExpectedArtifactKind: typeof EDGE_OPERATION_TRAIL_ARTIFACT_KIND;
+  acceptedSourceArtifactKinds: readonly [
+    typeof EDGE_OPERATION_APPEND_LOG_VIEW_ARTIFACT_KIND,
+    typeof EDGE_OPERATION_TRAIL_ARTIFACT_KIND,
+  ];
+  preferredSourceArtifactKind: typeof EDGE_OPERATION_APPEND_LOG_VIEW_ARTIFACT_KIND;
   classificationOnly: true;
   edgeOwnsSchema: true;
   causalOwnsEvidenceArtifact: true;
@@ -90,7 +108,7 @@ export interface EdgeOperationHistoryEvidenceArtifact {
   emittedAt: string;
   source: {
     sourceRepo: "mesh-ecology-edge";
-    sourceArtifactKind: typeof EDGE_OPERATION_TRAIL_ARTIFACT_KIND;
+    sourceArtifactKind: EdgeOperationHistorySourceArtifactKind;
     sourcePath?: string;
   };
   trailRefs: EdgeOperationHistoryTrailRefs;
@@ -113,6 +131,12 @@ export interface BuildEdgeOperationHistoryEvidenceInput {
 type JsonRecord = Record<string, unknown>;
 
 const REQUIRED_TRAIL_KEYS = ["artifactKind", "operationId", "context", "events"] as const;
+const REQUIRED_APPEND_LOG_VIEW_KEYS = [
+  "artifactKind",
+  "operationId",
+  "entries",
+  "boundary",
+] as const;
 
 const UNSAFE_POSTURE_KEYS = [
   "truthClaimed",
@@ -125,6 +149,22 @@ const UNSAFE_POSTURE_KEYS = [
   "canonicalBranchAccepted",
   "causalTruthClaimed",
   "replayAuthorized",
+  "claimsCausalTruth",
+  "claimsMeshTruth",
+  "claimsCompletion",
+  "writesAppendLog",
+  "writesContinuityRecords",
+  "acceptsCanonicalBranch",
+  "replaysEvents",
+  "sourceIsSubstrate",
+  "replacesOperationTrail",
+  "autobaseBackend",
+  "writesLog",
+  "publishesToMesh",
+  "schedulesWork",
+  "watchesFiles",
+  "discoversTargets",
+  "edgeAuthorityGranted",
 ] as const;
 
 export function buildEdgeOperationHistoryEvidenceArtifact(
@@ -198,6 +238,7 @@ function buildArtifactFromParsedTrail(input: {
   const validationStatus = determineValidationStatus(checks, input.parseableJsonObject);
   const trailRefs = collectTrailRefs(trail, input.sourcePath);
   const eventRefs = collectEventRefs(trail);
+  const sourceArtifactKind = operationHistorySourceArtifactKind(trail);
   const reviewStatus =
     validationStatus === "operation-history-valid-trail"
       ? "operation-history-evidence-emitted"
@@ -227,7 +268,7 @@ function buildArtifactFromParsedTrail(input: {
     emittedAt: input.emittedAt,
     source: {
       sourceRepo: "mesh-ecology-edge",
-      sourceArtifactKind: EDGE_OPERATION_TRAIL_ARTIFACT_KIND,
+      sourceArtifactKind,
       ...(input.sourcePath ? { sourcePath: input.sourcePath } : {}),
     },
     trailRefs,
@@ -252,6 +293,11 @@ function buildArtifactFromParsedTrail(input: {
       seamId: "edge_operation_history",
       evidenceKind: "edge_operation_history_evidence",
       edgeExpectedArtifactKind: EDGE_OPERATION_TRAIL_ARTIFACT_KIND,
+      acceptedSourceArtifactKinds: [
+        EDGE_OPERATION_APPEND_LOG_VIEW_ARTIFACT_KIND,
+        EDGE_OPERATION_TRAIL_ARTIFACT_KIND,
+      ],
+      preferredSourceArtifactKind: EDGE_OPERATION_APPEND_LOG_VIEW_ARTIFACT_KIND,
       classificationOnly: true,
       edgeOwnsSchema: true,
       causalOwnsEvidenceArtifact: true,
@@ -284,6 +330,10 @@ function validateTrail(
       refs: [],
     },
   ];
+
+  if (trail.artifactKind === EDGE_OPERATION_APPEND_LOG_VIEW_ARTIFACT_KIND) {
+    return [...checks, ...validateAppendLogView(trail)];
+  }
 
   for (const key of REQUIRED_TRAIL_KEYS) {
     checks.push({
@@ -326,6 +376,75 @@ function validateTrail(
   return checks;
 }
 
+function validateAppendLogView(trail: JsonRecord): EdgeOperationHistoryCheck[] {
+  const checks: EdgeOperationHistoryCheck[] = [];
+  for (const key of REQUIRED_APPEND_LOG_VIEW_KEYS) {
+    checks.push({
+      checkId: `required-append-log-view-envelope:${key}`,
+      status: requiredAppendLogViewFieldPresent(trail, key) ? "present" : "missing",
+      summary: `Edge operation append-log view field '${key}' is ${
+        requiredAppendLogViewFieldPresent(trail, key) ? "present" : "missing"
+      }.`,
+      refs: [key],
+    });
+  }
+
+  const entries = Array.isArray(trail.entries) ? trail.entries : [];
+  checks.push({
+    checkId: "event-shape",
+    status: entries.length > 0 && entries.every((entry) => validAppendLogEntryShape(entry)) ? "present" : "malformed",
+    summary: "Append-log entries carry eventId, operationId, and eventKind.",
+    refs: ["entries[].eventId", "entries[].operationId", "entries[].eventKind"],
+  });
+  checks.push({
+    checkId: "events-reference-preservation",
+    status: entries.length > 0 ? "preserved-as-reference" : "missing",
+    summary: "Append-log entry event ids and parent refs are preserved as references only.",
+    refs: entries.flatMap((entry) => eventRefStrings(entry, ["eventId", "parentEventRefs"])),
+  });
+  checks.push({
+    checkId: "receipt-reference-preservation",
+    status: entries.some((entry) => eventRefStrings(entry, ["receiptRefs"]).length > 0)
+      ? "preserved-as-reference"
+      : "not-evaluated",
+    summary: "Append-log entry receipt refs are preserved as references only when present.",
+    refs: entries.flatMap((entry) => eventRefStrings(entry, ["receiptRefs"])),
+  });
+  checks.push({
+    checkId: "append-log-reference-preservation",
+    status: entries.some((entry) => eventRefStrings(entry, ["payloadSha256", "schema"]).length > 0)
+      ? "preserved-as-reference"
+      : "not-evaluated",
+    summary: "Append-log entry schemas and payload hashes are preserved as references only.",
+    refs: entries.flatMap((entry) => eventRefStrings(entry, ["payloadSha256", "schema"])),
+  });
+  checks.push({
+    checkId: "local-file-substrate-claim",
+    status: trail.sourceIsSubstrate === false ? "present" : "blocked-by-guardrail",
+    summary: "Append-log view explicitly keeps local JSON operation trails from becoming substrate truth.",
+    refs: ["sourceIsSubstrate"],
+  });
+  checks.push({
+    checkId: "append-log-backend-not-started",
+    status:
+      trail.appendLogBackend === "none" &&
+      trail.autobaseBackend === false &&
+      trail.writesLog === false &&
+      trail.replacesOperationTrail === false
+        ? "present"
+        : "blocked-by-guardrail",
+    summary: "Append-log view does not start Autobase, write logs, or replace Edge's operation trail.",
+    refs: ["appendLogBackend", "autobaseBackend", "writesLog", "replacesOperationTrail"],
+  });
+  checks.push({
+    checkId: "unsafe-posture-claims",
+    status: containsUnsafePostureClaim(trail) ? "blocked-by-guardrail" : "present",
+    summary: "Append-log view and entries do not claim truth, completion, replay, branch acceptance, or hidden execution.",
+    refs: ["boundary", "entries[].posture"],
+  });
+  return checks;
+}
+
 function determineValidationStatus(
   checks: EdgeOperationHistoryCheck[],
   parseableJsonObject: boolean,
@@ -355,6 +474,27 @@ function collectTrailRefs(
   if (!trail) {
     return sourcePath ? { sourcePath } : {};
   }
+  if (trail.artifactKind === EDGE_OPERATION_APPEND_LOG_VIEW_ARTIFACT_KIND) {
+    const operationId = stringValue(trail.operationId);
+    const operationKind = stringValue(trail.operationKind);
+    const sourceTrailPath = stringValue(trail.sourceTrailPath);
+    const sourceSchema = stringValue(trail.schema);
+    const sourceScaffold = stringValue(trail.sourceScaffold);
+    const appendLogBackend = stringValue(trail.appendLogBackend);
+    const entryCount = typeof trail.entryCount === "number" ? trail.entryCount : undefined;
+    const resolvedSourcePath = sourcePath ?? sourceTrailPath;
+    return {
+      ...(operationId ? { operationId } : {}),
+      ...(operationKind ? { operationKind } : {}),
+      sourceProfile: EDGE_OPERATION_APPEND_LOG_VIEW_ARTIFACT_KIND,
+      ...(sourceSchema ? { sourceSchema } : {}),
+      ...(sourceScaffold ? { sourceScaffold } : {}),
+      ...(typeof trail.sourceIsSubstrate === "boolean" ? { sourceIsSubstrate: trail.sourceIsSubstrate } : {}),
+      ...(appendLogBackend ? { appendLogBackend } : {}),
+      ...(entryCount !== undefined ? { entryCount } : {}),
+      ...(resolvedSourcePath ? { sourcePath: resolvedSourcePath } : {}),
+    };
+  }
   const context = isRecord(trail.context) ? trail.context : undefined;
   const operationId = stringValue(trail.operationId);
   const operationKind = stringValue(context?.operationKind);
@@ -365,11 +505,27 @@ function collectTrailRefs(
     ...(operationKind ? { operationKind } : {}),
     ...(operationStatus ? { operationStatus } : {}),
     ...(contextRef ? { contextRef } : {}),
+    sourceProfile: EDGE_OPERATION_TRAIL_ARTIFACT_KIND,
     ...(sourcePath ? { sourcePath } : {}),
   };
 }
 
 function collectEventRefs(trail: JsonRecord | undefined): EdgeOperationHistoryEventRef[] {
+  if (Array.isArray(trail?.entries)) {
+    return trail.entries.filter(isRecord).map((entry) => {
+      const operationId = stringValue(entry.operationId);
+      const eventKind = stringValue(entry.eventKind);
+      return {
+        eventId: stringValue(entry.eventId) ?? "malformed-event-ref",
+        ...(operationId ? { operationId } : {}),
+        ...(eventKind ? { eventKind } : {}),
+        parentEventRefs: stringArray(entry.parentEventRefs),
+        receiptRefs: stringArray(entry.receiptRefs),
+        evidenceRefs: collectEvidenceRefs(entry),
+        contactProofRefs: collectContactProofRefs(entry),
+      };
+    });
+  }
   if (!Array.isArray(trail?.events)) {
     return [];
   }
@@ -394,6 +550,14 @@ function collectEvidenceRefs(event: JsonRecord): string[] {
     for (const ref of stringArray(event[key])) {
       refs.add(ref);
     }
+  }
+  const payloadSha256 = stringValue(event.payloadSha256);
+  if (payloadSha256) {
+    refs.add(payloadSha256);
+  }
+  const entrySchema = stringValue(event.schema);
+  if (entrySchema) {
+    refs.add(entrySchema);
   }
   const payload = isRecord(event.payload) ? event.payload : undefined;
   for (const key of ["evidenceRef", "attachmentRef", "sourceRef", "hash", "path", "artifactPath", "evidenceSha256", "evidencePath"]) {
@@ -447,7 +611,13 @@ function containsUnsafePostureClaim(value: unknown): boolean {
   if (isRecord(value.posture) && containsUnsafePostureClaim(value.posture)) {
     return true;
   }
+  if (isRecord(value.boundary) && containsUnsafePostureClaim(value.boundary)) {
+    return true;
+  }
   if (Array.isArray(value.events) && value.events.some((event) => containsUnsafePostureClaim(event))) {
+    return true;
+  }
+  if (Array.isArray(value.entries) && value.entries.some((entry) => containsUnsafePostureClaim(entry))) {
     return true;
   }
   return false;
@@ -506,6 +676,22 @@ function requiredTrailFieldPresent(trail: JsonRecord, key: (typeof REQUIRED_TRAI
   return Array.isArray(trail.events) && trail.events.length > 0;
 }
 
+function requiredAppendLogViewFieldPresent(
+  trail: JsonRecord,
+  key: (typeof REQUIRED_APPEND_LOG_VIEW_KEYS)[number],
+): boolean {
+  if (key === "artifactKind") {
+    return trail.artifactKind === EDGE_OPERATION_APPEND_LOG_VIEW_ARTIFACT_KIND;
+  }
+  if (key === "operationId") {
+    return typeof trail.operationId === "string" && trail.operationId.length > 0;
+  }
+  if (key === "boundary") {
+    return isRecord(trail.boundary);
+  }
+  return Array.isArray(trail.entries) && trail.entries.length > 0;
+}
+
 function validEventShape(event: unknown): boolean {
   if (!isRecord(event)) {
     return false;
@@ -518,6 +704,18 @@ function validEventShape(event: unknown): boolean {
     typeof event.eventKind === "string" &&
     event.eventKind.length > 0
   );
+}
+
+function validAppendLogEntryShape(entry: unknown): boolean {
+  return validEventShape(entry);
+}
+
+function operationHistorySourceArtifactKind(
+  trail: JsonRecord | undefined,
+): EdgeOperationHistorySourceArtifactKind {
+  return trail?.artifactKind === EDGE_OPERATION_APPEND_LOG_VIEW_ARTIFACT_KIND
+    ? EDGE_OPERATION_APPEND_LOG_VIEW_ARTIFACT_KIND
+    : EDGE_OPERATION_TRAIL_ARTIFACT_KIND;
 }
 
 function eventRefStrings(event: unknown, keys: string[]): string[] {

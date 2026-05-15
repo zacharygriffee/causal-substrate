@@ -127,8 +127,8 @@ test("append-log happening map preserves entries as causal happening refs only",
 test("append-log happening map blocks source-as-substrate and backend write claims", () => {
   const view = platformAppendLogView();
   view.posture.sourceFilesAreSubstrate = true;
-  view.entries[0].posture.sourceIsSubstrate = true;
-  view.entries[1].posture.writesAppendLog = true;
+  view.entries[0]!.posture.sourceIsSubstrate = true;
+  view.entries[1]!.posture.writesAppendLog = true;
 
   const artifact = buildAppendLogHappeningMapArtifact({
     appendLogView: view,

@@ -242,8 +242,8 @@ test("valid mesh-v0-2 contact proof yields causal-owned evidence only", () => {
   assert.equal(artifact.capabilityAdvertisementEvidence.protocolFamily, "mesh-contact-proof");
   assert.equal(artifact.capabilityAdvertisementEvidence.protocolSchema, "mesh-v0-2/contact-proof/direct-peer/v1");
   assert.equal(artifact.capabilityAdvertisementEvidence.capabilityCount, 1);
-  assert.equal(artifact.capabilityAdvertisementEvidence.capabilities[0].capability, "contact-proof");
-  assert.equal(artifact.capabilityAdvertisementEvidence.capabilities[0].descriptorSource, "capability_advertisement");
+  assert.equal(artifact.capabilityAdvertisementEvidence.capabilities[0]!.capability, "contact-proof");
+  assert.equal(artifact.capabilityAdvertisementEvidence.capabilities[0]!.descriptorSource, "capability_advertisement");
   assert.equal(artifact.continuityEvidence.observationKind, "protocol-contact-proof-observation");
   assert.equal(artifact.continuityEvidence.sourceEventKind, "adjacent-contact-attempt");
   assert.equal(artifact.continuityEvidence.causalRole, "history-evidence");
@@ -417,8 +417,8 @@ test("capability descriptor overclaims are blocked", () => {
   const evidence = clone(validEvidence());
   evidence.capabilityDescriptor.meshLayerDefault = true;
   evidence.capabilityDescriptor.discoveryRequired = true;
-  evidence.capabilityAdvertisement.capabilities[0].meshLayerDefault = true;
-  evidence.capabilityAdvertisement.capabilities[0].discoveryRequired = true;
+  evidence.capabilityAdvertisement.capabilities[0]!.meshLayerDefault = true;
+  evidence.capabilityAdvertisement.capabilities[0]!.discoveryRequired = true;
 
   const artifact = buildMeshContactProofEvidenceArtifact({
     evidence,

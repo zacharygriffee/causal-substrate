@@ -31,6 +31,7 @@ The current Corestore-backed inspectability surfaces are:
 - time-ordered context and portal replay with primary-context resolution over time
 - `causal-substrate/continuity-explanation/v1` artifacts for consumers that need a portable evidence-only explanation import
 - `causal-substrate/adjacent-review-evidence/v1` artifacts for static adjacent review packet evidence
+- `causal-substrate/edge-operation-history-evidence/v1` artifacts for Edge operation history and append-log projection import
 - `causal-substrate/edge-contact-evidence/v1` artifacts for Edge contact/transport evidence import
 - `causal-substrate/mesh-contact-proof-evidence/v1` artifacts for mesh-v0-2 direct contact proof evidence import
 
@@ -83,6 +84,42 @@ It explicitly carries a non-authority boundary:
 - no mesh truth
 - no mesh publication
 - no adjacent acceptance from packet presence
+
+## Edge operation history evidence artifact v1
+
+The `causal-substrate/edge-operation-history-evidence/v1` artifact is an
+evidence-only surface for Edge operation history.
+
+It accepts two Edge-owned source profiles:
+
+- the compatibility `edge_operation_trail` local JSON trail
+- the preferred `edge_operation_append_log_view` read-only projection
+
+The append-log view is preferred because it carries entry schemas, parent refs,
+receipt refs, evidence refs, and payload hashes while still saying that the
+local JSON operation trail is scaffold and not substrate truth.
+
+The artifact preserves:
+
+- operation id, operation kind, status, context, and source-path refs
+- event ids and parent-event refs
+- receipt refs and attached evidence refs
+- append-log entry schema and payload-hash refs when the append-log view is the source
+- local scaffold posture, source-substrate posture, backend posture, and entry count
+
+It blocks:
+
+- causal truth claims
+- canonical branch acceptance
+- continuity record writes
+- event replay authority
+- mesh truth or publication claims
+- local JSON state being treated as substrate
+- Autobase or append-log backend claims before a real backend exists
+
+The artifact lets Edge operation history become inspectable before Causal
+Substrate owns any Edge runtime call, event replay, backend activation, branch
+settlement, or write path.
 
 ## Edge contact evidence artifact v1
 
