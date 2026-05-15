@@ -15,6 +15,23 @@ function validEvidence() {
   return {
     artifactKind: "mesh_contact_proof_evidence",
     schema: "mesh-v0-2/contact-proof/direct-peer/v1",
+    proofId: "mesh-contact-proof:aaaaaaaaaaaaaaaa",
+    payloadHashAlgorithm: "sha256-canonical-json",
+    payloadHash: `sha256:${"a".repeat(64)}`,
+    appendLogRefs: {
+      entryId: "mesh-contact-proof-entry:aaaaaaaaaaaaaaaa",
+      sourceRepo: "mesh-v0-2",
+      sourceArtifactKind: "mesh_contact_proof_evidence",
+      sourceSchema: "mesh-v0-2/contact-proof/direct-peer/v1",
+      proofKind: "mesh_contact_direct_peer_lab",
+      requestRef: "mesh-contact-request:a",
+      responseRef: "mesh-contact-response:a",
+      capabilityAdvertisementRef: "mesh-capabilities-response:a",
+      selectedTransportRef: "protomux-rpc:hyperdht_direct_peer",
+      parentRefs: [],
+      truthClaimed: false,
+      completionClaimed: false,
+    },
     protocolFamily: "mesh-contact-proof",
     protocolSchema: "mesh-v0-2/contact-proof/direct-peer/v1",
     protocolSchemaVersion: 3,
@@ -123,6 +140,22 @@ function validPlatformEvidence() {
     ...evidence,
     artifactKind: "platform_local_service_contact_proof_evidence",
     schema: "mesh-ecology-platform/local-service-contact-proof/direct-peer/v1",
+    proofId: "platform-local-service-contact-proof:bbbbbbbbbbbbbbbb",
+    payloadHash: `sha256:${"b".repeat(64)}`,
+    appendLogRefs: {
+      entryId: "platform-contact-proof-entry:bbbbbbbbbbbbbbbb",
+      sourceRepo: "mesh-ecology-platform",
+      sourceArtifactKind: "platform_local_service_contact_proof_evidence",
+      sourceSchema: "mesh-ecology-platform/local-service-contact-proof/direct-peer/v1",
+      proofKind: "platform_local_service_contact_direct_peer_lab",
+      requestRef: "platform-contact-request:a",
+      responseRef: "platform-contact-response:a",
+      capabilityAdvertisementRef: "platform-capabilities-response:a",
+      selectedTransportRef: "protomux-rpc:hyperdht_direct_peer",
+      parentRefs: [],
+      truthClaimed: false,
+      completionClaimed: false,
+    },
     protocolSchemaVersion: 2,
     dispatchVersion: 2,
     protocolOwner: "mesh-v0-2",
@@ -178,6 +211,12 @@ test("valid mesh-v0-2 contact proof yields causal-owned evidence only", () => {
   assert.equal(artifact.reviewStatus, "mesh-contact-proof-evidence-emitted");
   assert.equal(artifact.validation.status, "mesh-contact-proof-valid-evidence");
   assert.equal(artifact.source.sourceRepo, "mesh-v0-2");
+  assert.equal(artifact.contactRefs.proofId, "mesh-contact-proof:aaaaaaaaaaaaaaaa");
+  assert.equal(artifact.contactRefs.payloadHash, `sha256:${"a".repeat(64)}`);
+  assert.equal(artifact.contactRefs.payloadHashAlgorithm, "sha256-canonical-json");
+  assert.equal(artifact.contactRefs.appendLogEntryId, "mesh-contact-proof-entry:aaaaaaaaaaaaaaaa");
+  assert.equal(artifact.contactRefs.capabilityAdvertisementRef, "mesh-capabilities-response:a");
+  assert.equal(artifact.contactRefs.selectedTransportRef, "protomux-rpc:hyperdht_direct_peer");
   assert.equal(artifact.contactRefs.proofKind, "mesh_contact_direct_peer_lab");
   assert.equal(artifact.contactRefs.participantA, "mesh-contact-host");
   assert.equal(artifact.contactRefs.participantB, "mesh-contact-client");
@@ -236,6 +275,12 @@ test("valid Platform local-service contact proof preserves advertised capability
   assert.equal(artifact.reviewStatus, "mesh-contact-proof-evidence-emitted");
   assert.equal(artifact.validation.status, "mesh-contact-proof-valid-evidence");
   assert.equal(artifact.source.sourceRepo, "mesh-ecology-platform");
+  assert.equal(artifact.contactRefs.proofId, "platform-local-service-contact-proof:bbbbbbbbbbbbbbbb");
+  assert.equal(artifact.contactRefs.payloadHash, `sha256:${"b".repeat(64)}`);
+  assert.equal(artifact.contactRefs.payloadHashAlgorithm, "sha256-canonical-json");
+  assert.equal(artifact.contactRefs.appendLogEntryId, "platform-contact-proof-entry:bbbbbbbbbbbbbbbb");
+  assert.equal(artifact.contactRefs.capabilityAdvertisementRef, "platform-capabilities-response:a");
+  assert.equal(artifact.contactRefs.selectedTransportRef, "protomux-rpc:hyperdht_direct_peer");
   assert.equal(artifact.source.sourceArtifactKind, "platform_local_service_contact_proof_evidence");
   assert.equal(artifact.source.sourceSchema, "mesh-ecology-platform/local-service-contact-proof/direct-peer/v1");
   assert.equal(artifact.source.sourceProfile, "platform_local_service_contact");

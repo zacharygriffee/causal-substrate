@@ -44,12 +44,18 @@ export interface MeshContactProofEvidenceBoundary {
 }
 
 export interface MeshContactProofRefs {
+  proofId?: string;
+  payloadHash?: string;
+  payloadHashAlgorithm?: string;
+  appendLogEntryId?: string;
   proofKind?: string;
   participantA?: string;
   participantB?: string;
   operation?: string;
   requestId?: string;
   responseId?: string;
+  capabilityAdvertisementRef?: string;
+  selectedTransportRef?: string;
   hostPublicKey?: string;
   sourcePath?: string;
 }
@@ -470,18 +476,31 @@ function collectProtocolEvidence(evidence: JsonRecord | undefined): MeshContactP
 function collectContactRefs(evidence: JsonRecord | undefined, sourcePath: string | undefined): MeshContactProofRefs {
   const refs: MeshContactProofRefs = {};
   const proofKind = stringValue(evidence?.proofKind);
+  const proofId = stringValue(evidence?.proofId);
+  const payloadHash = stringValue(evidence?.payloadHash);
+  const payloadHashAlgorithm = stringValue(evidence?.payloadHashAlgorithm);
+  const appendLogRefs = isRecord(evidence?.appendLogRefs) ? evidence.appendLogRefs : undefined;
+  const appendLogEntryId = stringValue(appendLogRefs?.entryId);
   const participantA = stringValue(evidence?.participantA);
   const participantB = stringValue(evidence?.participantB);
   const operation = stringValue(evidence?.operation);
   const requestId = stringValue(evidence?.requestId);
   const responseId = stringValue(evidence?.responseId);
+  const capabilityAdvertisementRef = stringValue(appendLogRefs?.capabilityAdvertisementRef);
+  const selectedTransportRef = stringValue(appendLogRefs?.selectedTransportRef);
   const hostPublicKey = stringValue(evidence?.hostPublicKey);
+  if (proofId) refs.proofId = proofId;
+  if (payloadHash) refs.payloadHash = payloadHash;
+  if (payloadHashAlgorithm) refs.payloadHashAlgorithm = payloadHashAlgorithm;
+  if (appendLogEntryId) refs.appendLogEntryId = appendLogEntryId;
   if (proofKind) refs.proofKind = proofKind;
   if (participantA) refs.participantA = participantA;
   if (participantB) refs.participantB = participantB;
   if (operation) refs.operation = operation;
   if (requestId) refs.requestId = requestId;
   if (responseId) refs.responseId = responseId;
+  if (capabilityAdvertisementRef) refs.capabilityAdvertisementRef = capabilityAdvertisementRef;
+  if (selectedTransportRef) refs.selectedTransportRef = selectedTransportRef;
   if (hostPublicKey) refs.hostPublicKey = hostPublicKey;
   if (sourcePath) refs.sourcePath = sourcePath;
   return refs;

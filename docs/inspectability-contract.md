@@ -118,8 +118,10 @@ The `causal-substrate/mesh-contact-proof-evidence/v1` artifact is an evidence-on
 
 It preserves:
 
+- proof id, payload hash, hash algorithm, and append-log entry ref
 - proof kind and participant refs
 - operation, request, response, and host public-key refs
+- capability advertisement and selected transport refs
 - selected transport kind
 - selected contact seam
 - transport role and scope
