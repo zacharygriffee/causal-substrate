@@ -408,11 +408,26 @@ function collectEvidenceRefs(event: JsonRecord): string[] {
 function collectContactProofRefs(event: JsonRecord): string[] {
   const payload = isRecord(event.payload) ? event.payload : undefined;
   const posture = isRecord(payload?.contactProofPosture) ? payload.contactProofPosture : undefined;
-  if (!posture) return [];
   const refs = new Set<string>();
-  for (const key of ["sourceRepo", "sourceSchema", "proofKind", "requestId", "responseId", "hostPublicKey", "transportKind", "contactSeam", "readinessScope"]) {
-    const value = stringValue(posture[key]);
-    if (value) refs.add(`${key}:${value}`);
+  if (posture) {
+    for (const key of ["sourceRepo", "sourceSchema", "proofKind", "requestId", "responseId", "hostPublicKey", "transportKind", "contactSeam", "readinessScope"]) {
+      const value = stringValue(posture[key]);
+      if (value) refs.add(`${key}:${value}`);
+    }
+  }
+  for (const [key, refKey] of [
+    ["contactProofState", "state"],
+    ["contactProofPath", "path"],
+    ["sourceKind", "sourceKind"],
+    ["protocolFamily", "protocolFamily"],
+    ["protocolSchema", "protocolSchema"],
+    ["dispatchCommand", "dispatchCommand"],
+    ["transportKind", "transportKind"],
+    ["contactSeam", "contactSeam"],
+    ["readinessScope", "readinessScope"],
+  ] as const) {
+    const value = stringValue(payload?.[key]);
+    if (value) refs.add(`${refKey}:${value}`);
   }
   return [...refs];
 }

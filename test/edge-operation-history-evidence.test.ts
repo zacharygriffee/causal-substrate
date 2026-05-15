@@ -161,6 +161,58 @@ test("Edge operation history preserves attached mesh contact proof links", () =>
   assert.equal(artifact.boundary.writesContinuityRecords, false);
 });
 
+test("Edge operation history preserves proof-first readiness contact refs", () => {
+  const trail = clone(validTrail());
+  trail.events.push({
+    operationId: "operation-a",
+    eventId: "operation-a:event:3",
+    eventKind: "contact_proof_readiness_observed",
+    occurredAt: "2026-05-13T00:02:00.000Z",
+    parentEventRefs: ["operation-a:event:2"],
+    receiptRefs: [],
+    payload: {
+      preferredReadinessEvidence: "contact_proof",
+      contactProofState: "preferred_contact_proof_observed",
+      contactProofPath: "artifacts/contact-proof.json",
+      sourceKind: "mesh_v0_2_contact_proof",
+      protocolFamily: "mesh-contact-proof",
+      protocolSchema: "mesh-v0-2/contact-proof/direct-peer/v1",
+      dispatchCommand: "@mesh-contact/capability-echo",
+      transportKind: "protomux-rpc",
+      contactSeam: "hyperdht_direct_peer",
+      readinessScope: "direct_peer_contact",
+      distributedReadinessClaimed: false,
+    },
+    posture: {
+      truthClaimed: false,
+      completionClaimed: false,
+      schedulerUsed: false,
+    },
+  });
+
+  const artifact = buildEdgeOperationHistoryEvidenceArtifact({
+    trail,
+    emittedAt: "2026-05-14T12:00:00.000Z",
+  });
+  const readinessEvent = artifact.eventRefs[2];
+
+  assert.equal(artifact.reviewStatus, "operation-history-evidence-emitted");
+  assert.deepEqual(readinessEvent?.contactProofRefs, [
+    "state:preferred_contact_proof_observed",
+    "path:artifacts/contact-proof.json",
+    "sourceKind:mesh_v0_2_contact_proof",
+    "protocolFamily:mesh-contact-proof",
+    "protocolSchema:mesh-v0-2/contact-proof/direct-peer/v1",
+    "dispatchCommand:@mesh-contact/capability-echo",
+    "transportKind:protomux-rpc",
+    "contactSeam:hyperdht_direct_peer",
+    "readinessScope:direct_peer_contact",
+  ]);
+  assert.equal(artifact.boundary.replaysEvents, false);
+  assert.equal(artifact.boundary.claimsCausalTruth, false);
+  assert.equal(artifact.boundary.writesContinuityRecords, false);
+});
+
 test("malformed JSON yields malformed evidence without throwing", () => {
   const artifact = buildEdgeOperationHistoryEvidenceArtifactFromJson({
     trailJson: "{not-json",
