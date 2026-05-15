@@ -64,6 +64,12 @@ function validLogEntry(): any {
     entryId: `projection-log-entry:${event.eventId}:0`,
     sequence: 0,
     appendedAt: "2026-05-15T13:00:01.000Z",
+    timePosture: {
+      appendedAtMeaning: "operator_local_wall_clock_observation_metadata",
+      localCausalOrderSource: "single_writer_sequence_and_event_refs",
+      wallClockDefinesCausalOrder: false,
+      collaborativeCausalOrderRequiresAutobaseOrEquivalent: true,
+    },
     projectionEventId: event.eventId,
     projectionEventSchema: event.schemaVersion,
     projectionRef: event.projectionRef,
@@ -116,6 +122,7 @@ test("Edge projection log entry maps to a happening reference without writing co
   assert.equal(artifact.validation.status, "edge-projection-log-entry-valid");
   assert.equal(artifact.validation.entryPreservedAsReference, true);
   assert.equal(artifact.validation.temporalRefPresent, true);
+  assert.equal(artifact.validation.timePostureDistinguishesWallClock, true);
   assert.equal(artifact.source.sourceRepo, "mesh-ecology-edge");
   assert.equal(artifact.source.sourceSchema, "edge_projection_event_log_entry.v0");
   assert.equal(artifact.happeningRefs.length, 1);
@@ -127,6 +134,10 @@ test("Edge projection log entry maps to a happening reference without writing co
   assert.equal(ref.payloadHash, `sha256:${"a".repeat(64)}`);
   assert.equal(ref.temporalRef, "2026-05-15T13:00:01.000Z");
   assert.equal(ref.temporalRefSource, "log-entry");
+  assert.equal(ref.temporalRefMeaning, "wall-clock-observation-metadata");
+  assert.equal(ref.localCausalOrderSource, "single-writer-sequence-and-event-refs");
+  assert.equal(ref.wallClockDefinesCausalOrder, false);
+  assert.equal(ref.collaborativeCausalOrderCandidate, "autobase-or-equivalent-linearization");
   assert.equal(ref.causalRole, "edge-projection-log-entry-as-happening-reference");
   assert.equal(ref.acceptedAsCanonicalHistory, false);
   assert.equal(artifact.boundary.sourceCorestoreOpened, false);
@@ -134,9 +145,11 @@ test("Edge projection log entry maps to a happening reference without writing co
   assert.equal(artifact.boundary.writesContinuityRecords, false);
   assert.equal(artifact.boundary.claimsCausalTruth, false);
   assert.deepEqual(artifact.rejections, []);
+  assert.ok(artifact.warnings.includes("wall-clock-temporal-ref-is-observation-metadata-not-causal-order"));
+  assert.ok(artifact.warnings.includes("collaborative-causal-order-should-use-autobase-or-equivalent-linearization"));
 });
 
-test("Edge projection log mapping can preserve projection-event clock when log entry lacks one", () => {
+test("Edge projection log mapping can preserve projection-event observation time when log entry lacks one", () => {
   const entry = validLogEntry();
   delete entry.appendedAt;
 
@@ -151,7 +164,7 @@ test("Edge projection log mapping can preserve projection-event clock when log e
   assert.equal(artifact.happeningRefs[0]?.temporalRefSource, "projection-event");
 });
 
-test("Edge projection log mapping marks missing clock refs as incomplete", () => {
+test("Edge projection log mapping marks missing observation time refs as incomplete", () => {
   const entry = validLogEntry();
   delete entry.appendedAt;
   delete entry.projectionEvent.createdAt;
@@ -164,6 +177,22 @@ test("Edge projection log mapping marks missing clock refs as incomplete", () =>
   assert.equal(artifact.reviewStatus, "edge-projection-log-entry-incomplete");
   assert.equal(artifact.validation.temporalRefPresent, false);
   assert.ok(artifact.rejections.includes("temporal-ref-missing"));
+  assert.deepEqual(artifact.happeningRefs, []);
+});
+
+test("Edge projection log mapping blocks wall-clock-as-causal-order drift", () => {
+  const entry = validLogEntry();
+  entry.timePosture.wallClockDefinesCausalOrder = true;
+  entry.timePosture.collaborativeCausalOrderRequiresAutobaseOrEquivalent = false;
+
+  const artifact = buildEdgeProjectionLogHappeningMapArtifact({
+    projectionLogEntry: entry,
+    emittedAt: "2026-05-15T13:05:00.000Z",
+  });
+
+  assert.equal(artifact.reviewStatus, "edge-projection-log-guardrail-blocked");
+  assert.equal(artifact.validation.timePostureDistinguishesWallClock, false);
+  assert.ok(artifact.rejections.includes("time-posture-missing-or-unsafe"));
   assert.deepEqual(artifact.happeningRefs, []);
 });
 

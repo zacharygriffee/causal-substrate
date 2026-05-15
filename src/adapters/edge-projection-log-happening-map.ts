@@ -29,6 +29,10 @@ export interface EdgeProjectionLogHappeningRef {
   transportRefs: string[];
   temporalRef?: string;
   temporalRefSource: "projection-event" | "log-entry" | "missing";
+  temporalRefMeaning: "wall-clock-observation-metadata";
+  localCausalOrderSource: "single-writer-sequence-and-event-refs";
+  wallClockDefinesCausalOrder: false;
+  collaborativeCausalOrderCandidate: "autobase-or-equivalent-linearization";
   causalRole: "edge-projection-log-entry-as-happening-reference";
   acceptedAsCanonicalHistory: false;
 }
@@ -55,6 +59,7 @@ export interface EdgeProjectionLogHappeningMapValidation {
   entryPreservedAsReference: boolean;
   sourceRefsPresent: boolean;
   temporalRefPresent: boolean;
+  timePostureDistinguishesWallClock: boolean;
   namespacePartsSemantic: boolean;
   noStorageOrTransportOverclaim: boolean;
   noAuthorityOrTruthClaim: boolean;
@@ -142,6 +147,7 @@ export function buildEdgeProjectionLogHappeningMapArtifact(
       entryPreservedAsReference: status === "edge-projection-log-entry-valid",
       sourceRefsPresent: issues.includes("source-refs-missing") === false,
       temporalRefPresent,
+      timePostureDistinguishesWallClock: issues.includes("time-posture-missing-or-unsafe") === false,
       namespacePartsSemantic: issues.includes("namespace-parts-unsafe") === false,
       noStorageOrTransportOverclaim: issues.includes("storage-transport-or-store-seam-overclaim") === false,
       noAuthorityOrTruthClaim: issues.includes("authority-or-truth-claim") === false,
@@ -184,6 +190,7 @@ function validateProjectionLogEntry(entry: JsonRecord | undefined, original: unk
 
   const event = isRecord(entry.projectionEvent) ? entry.projectionEvent : {};
   const logPosture = isRecord(entry.logPosture) ? entry.logPosture : {};
+  const timePosture = isRecord(entry.timePosture) ? entry.timePosture : {};
   const claims = isRecord(entry.nonClaims) ? entry.nonClaims : {};
   const eventClaims = isRecord(event.nonClaims) ? event.nonClaims : {};
   const eventStorage = isRecord(event.storagePosture) ? event.storagePosture : {};
@@ -207,6 +214,14 @@ function validateProjectionLogEntry(entry: JsonRecord | undefined, original: unk
   if (namespaceParts.some(unsafeNamespacePart)) issues.push("namespace-parts-unsafe");
   if (transportRefs.some(transportRefIsCompatibilityScaffold)) issues.push("transport-ref-compatibility-scaffold");
   if (!temporalRef(entry, event)) issues.push("temporal-ref-missing");
+  if (
+    timePosture.appendedAtMeaning !== "operator_local_wall_clock_observation_metadata" ||
+    timePosture.localCausalOrderSource !== "single_writer_sequence_and_event_refs" ||
+    timePosture.wallClockDefinesCausalOrder !== false ||
+    timePosture.collaborativeCausalOrderRequiresAutobaseOrEquivalent !== true
+  ) {
+    issues.push("time-posture-missing-or-unsafe");
+  }
 
   if (event.schemaVersion !== EXPECTED_PROJECTION_EVENT_SCHEMA) issues.push("event-schema-mismatch");
   if (event.producerRepo !== "mesh-ecology-edge") issues.push("event-producer-mismatch");
@@ -256,6 +271,7 @@ function determineStatus(
   if (
     issues.includes("storage-transport-or-store-seam-overclaim") ||
     issues.includes("authority-or-truth-claim") ||
+    issues.includes("time-posture-missing-or-unsafe") ||
     issues.includes("namespace-parts-unsafe") ||
     issues.includes("transport-ref-compatibility-scaffold") ||
     issues.includes("event-payload-embedded")
@@ -280,6 +296,10 @@ function collectHappeningRef(entry: JsonRecord | undefined): EdgeProjectionLogHa
     sourceRefs: stringArray(safeEntry.sourceRefs),
     transportRefs: stringArray(safeEntry.transportRefs),
     temporalRefSource: temporal?.source ?? "missing",
+    temporalRefMeaning: "wall-clock-observation-metadata",
+    localCausalOrderSource: "single-writer-sequence-and-event-refs",
+    wallClockDefinesCausalOrder: false,
+    collaborativeCausalOrderCandidate: "autobase-or-equivalent-linearization",
     causalRole: "edge-projection-log-entry-as-happening-reference",
     acceptedAsCanonicalHistory: false,
   };
@@ -332,6 +352,8 @@ function buildWarnings(status: EdgeProjectionLogHappeningMapStatus, temporalRefP
   if (status === "edge-projection-log-entry-valid") {
     return [
       "edge-projection-log-entry-preserved-as-happening-reference-only",
+      "wall-clock-temporal-ref-is-observation-metadata-not-causal-order",
+      "collaborative-causal-order-should-use-autobase-or-equivalent-linearization",
       "mapping-does-not-write-continuity-records",
     ];
   }

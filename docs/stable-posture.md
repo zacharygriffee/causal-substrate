@@ -21,8 +21,12 @@ The repository is settled enough to teach the following points:
 - append-log-shaped adjacent projections can be mapped to happening refs, but
   they are not accepted as canonical causal history by default
 - Edge projection-log entries can be mapped to happening refs when they carry,
-  or preserve, an explicit temporal ref; missing clock refs stay incomplete
+  or preserve, an explicit observation-time ref; wall-clock time remains review
+  metadata, not causal order, and missing observation-time refs stay incomplete
   rather than inferred
+- single-writer causal order should come from sequence and refs; collaborative
+  local-layer causal order should point toward Autobase or equivalent
+  linearization rather than wall-clock timestamp comparison
 - referent persistence defaults to `continuing`, `ambiguous`, or `broken`
 - emergence should prefer seeds, seats, adoption, cultivation, and materialization over magical appearance
 - multi-writer is not required by default
