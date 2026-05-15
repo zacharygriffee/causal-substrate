@@ -174,6 +174,14 @@ That projection-log map does not open Edge's Corestore, replay the projection
 log, write continuity records, accept canonical history, claim causal truth, or
 promote the local store root into a repo-to-repo seam.
 
+Use `causal-substrate/local-layer-frontier-candidate-evidence/v1` when a repo
+needs to review Spine's local-layer collaborative frontier candidate before an
+Autobase backend exists. The evidence preserves writer refs, head refs,
+linearized entry refs, causal frontier refs, source projection event refs, and
+source happening refs while keeping Autobase closed and history non-canonical.
+It blocks wall-clock causal ordering, HTTP/SSH/local path seams, consensus or
+settlement claims, and authority/truth overclaims.
+
 ## Adjacent tool interop
 
 Adjacent tools that need a formal request/response boundary should use the `causal-substrate/adjacent-tool-interop/v1` seam.
