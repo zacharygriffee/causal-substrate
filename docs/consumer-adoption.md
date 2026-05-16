@@ -185,6 +185,15 @@ key as canonical history. Replica inspection can refine the contact proof by
 showing that the exchanged key reaches a visible projection-log replica, but
 that refinement remains evidence-only.
 
+Use `causal-substrate/edge-projection-replica-view-evidence/v1` when a repo
+needs to interpret Edge's `edge_projection_event_log_replica_view.v0` as
+observer-relative replica continuity evidence. The adapter preserves source core
+key, view id/hash, namespace parts, entry refs, projection event refs, semantic
+source refs, transport refs, branch/segment/happening refs, present points, and
+observer refs. It does not open Edge's Corestore, replay the projection log,
+write continuity records, claim replicated state, claim durable local-layer
+state, claim causal truth, or treat the source core key as canonical history.
+
 Use `causal-substrate/local-layer-frontier-candidate-evidence/v1` when a repo
 needs to review Spine's local-layer collaborative frontier candidate before an
 Autobase backend exists. The evidence preserves writer refs, head refs,
