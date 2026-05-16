@@ -27,4 +27,5 @@ export * from "./adapters/mesh-contact-proof-evidence.js";
 export * from "./adapters/append-log-happening-map.js";
 export * from "./adapters/edge-projection-log-happening-map.js";
 export * from "./adapters/local-layer-frontier-candidate-evidence.js";
+export * from "./adapters/resolution-refinement-evidence.js";
 export * from "./prototypes/continuity-workstation.js";
