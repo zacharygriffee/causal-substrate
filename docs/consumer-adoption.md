@@ -174,6 +174,17 @@ That projection-log map does not open Edge's Corestore, replay the projection
 log, write continuity records, accept canonical history, claim causal truth, or
 promote the local store root into a repo-to-repo seam.
 
+Use `causal-substrate/edge-projection-key-exchange-evidence/v1` when a repo
+needs to interpret Edge's HyperDHT/protomux projection-key exchange proof as
+contact and continuity evidence. The adapter preserves the source core key,
+semantic source refs, selected proof-lane posture, append-log refs, and optional
+replica-inspection refs. It does not open HyperDHT, protomux-rpc, Corestore, or
+Autobase; it does not replay the projection log, write continuity records,
+claim distributed readiness, claim replicated state, or treat the source core
+key as canonical history. Replica inspection can refine the contact proof by
+showing that the exchanged key reaches a visible projection-log replica, but
+that refinement remains evidence-only.
+
 Use `causal-substrate/local-layer-frontier-candidate-evidence/v1` when a repo
 needs to review Spine's local-layer collaborative frontier candidate before an
 Autobase backend exists. The evidence preserves writer refs, head refs,
