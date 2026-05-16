@@ -28,6 +28,7 @@ export * from "./adapters/append-log-happening-map.js";
 export * from "./adapters/edge-projection-log-happening-map.js";
 export * from "./adapters/edge-projection-key-exchange-evidence.js";
 export * from "./adapters/edge-projection-replica-view-evidence.js";
+export * from "./adapters/edge-autobase-projection-view-evidence.js";
 export * from "./adapters/local-layer-frontier-candidate-evidence.js";
 export * from "./adapters/edge-autobase-optimistic-intake-evidence.js";
 export * from "./adapters/resolution-refinement-evidence.js";
