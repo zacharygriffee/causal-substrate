@@ -19,10 +19,16 @@ export interface AppendLogHappeningRef {
   happeningId: string;
   happeningLabel: string;
   sourceEntryRef: string;
+  sourceEntryId?: string;
   sourceEntryHash?: string;
+  sourceEntryHashRef?: string;
   payloadSha256?: string;
+  payloadRef?: string;
   sourceRefs: Record<string, unknown>;
+  sourceReceiptRef?: string;
+  sourceArtifactRef?: string;
   parentEntryRefs: string[];
+  parentEntryHashRefs: string[];
   causalRole: "append-log-entry-as-happening-reference";
   acceptedAsCanonicalHistory: false;
 }
@@ -50,6 +56,7 @@ export interface AppendLogHappeningMapValidation {
   sourceFilesRemainScaffold: boolean;
   noBackendWriteClaim: boolean;
   noAuthorityOrTruthClaim: boolean;
+  platformRefSemanticsPresent: boolean;
   issues: string[];
 }
 
@@ -66,6 +73,14 @@ export interface AppendLogHappeningMapArtifact {
     sourcePath?: string;
   };
   sourceViewRef?: string;
+  sourceViewHashRef?: string;
+  appendLogRefs: {
+    entryRefs: string[];
+    entryHashRefs: string[];
+    sourceReceiptRefs: string[];
+    payloadRefs: string[];
+    artifactRefs: string[];
+  };
   happeningRefs: AppendLogHappeningRef[];
   boundary: AppendLogHappeningMapBoundary;
   validation: AppendLogHappeningMapValidation;
@@ -133,6 +148,7 @@ export function buildAppendLogHappeningMapArtifact(
       ...(sourceArtifactKind ? { sourceArtifactKind } : {}),
       ...(input.sourcePath ? { sourcePath: input.sourcePath } : {}),
     },
+    appendLogRefs: collectAppendLogRefs(view),
     happeningRefs,
     boundary: buildBoundary(),
     validation: {
@@ -143,6 +159,7 @@ export function buildAppendLogHappeningMapArtifact(
       sourceFilesRemainScaffold: !issues.includes("source-files-treated-as-substrate"),
       noBackendWriteClaim: !issues.includes("backend-write-claim"),
       noAuthorityOrTruthClaim: !issues.includes("authority-or-truth-claim"),
+      platformRefSemanticsPresent: !issues.includes("platform-ref-semantics-missing"),
       issues,
     },
     reviewStatus: status === "append-log-view-valid" ? "append-log-happening-map-emitted" : status,
@@ -150,6 +167,8 @@ export function buildAppendLogHappeningMapArtifact(
     rejections: buildRejections(status, issues),
   };
   if (viewHash) artifact.sourceViewRef = viewHash;
+  const viewHashRef = stringValue(view?.viewHashRef);
+  if (viewHashRef) artifact.sourceViewHashRef = viewHashRef;
   return artifact;
 }
 
@@ -184,6 +203,21 @@ function validateAppendLogView(view: JsonRecord | undefined, original: unknown):
   if (viewPosture.sourceFilesAreSubstrate === true) issues.push("source-files-treated-as-substrate");
   if (viewPosture.writesAppendLog === true || viewPosture.autobaseBackend === true) issues.push("backend-write-claim");
   if (viewPosture.decentralizedTruthClaimed === true) issues.push("authority-or-truth-claim");
+  const platformView = view?.artifactKind === "platform_append_log_view" ||
+    view?.schema === "mesh-ecology-platform/dock-append-log-view/v1";
+  const appendLogRefs = isRecord(view?.appendLogRefs) ? view.appendLogRefs : {};
+  if (
+    platformView &&
+    (
+      !stringValue(view?.viewHashRef) ||
+      stringArray(appendLogRefs.entryRefs).length === 0 ||
+      stringArray(appendLogRefs.entryHashRefs).length === 0 ||
+      stringArray(appendLogRefs.sourceReceiptRefs).length === 0 ||
+      stringArray(appendLogRefs.payloadRefs).length === 0
+    )
+  ) {
+    issues.push("platform-ref-semantics-missing");
+  }
 
   for (const [index, entry] of view.entries.entries()) {
     if (!isRecord(entry)) {
@@ -191,8 +225,22 @@ function validateAppendLogView(view: JsonRecord | undefined, original: unknown):
       continue;
     }
     if (!stringValue(entry.entryId)) issues.push(`entry:${index}:entryId-missing`);
+    if (platformView && !stringValue(entry.entryRef)) issues.push("platform-ref-semantics-missing");
     if (!stringValue(entry.payloadSha256)) issues.push(`entry:${index}:payloadSha256-missing`);
+    if (platformView && !stringValue(entry.payloadRef)) issues.push("platform-ref-semantics-missing");
     if (!stringValue(entry.entryHash)) issues.push(`entry:${index}:entryHash-missing`);
+    if (platformView && !stringValue(entry.entryHashRef)) issues.push("platform-ref-semantics-missing");
+    const sourceRefs = isRecord(entry.sourceRefs) ? entry.sourceRefs : {};
+    if (
+      platformView &&
+      (
+        !stringValue(sourceRefs.receiptRef) ||
+        !stringValue(sourceRefs.artifactRef) ||
+        sourceRefs.sourcePathIsSubstrate !== false
+      )
+    ) {
+      issues.push("platform-ref-semantics-missing");
+    }
     const posture = isRecord(entry.posture) ? entry.posture : {};
     if (posture.writesAppendLog === true || posture.autobaseBackend === true) issues.push("backend-write-claim");
     if (UNSAFE_POSTURE_KEYS.some((key) => posture[key] === true)) {
@@ -219,22 +267,63 @@ function collectHappeningRefs(view: JsonRecord | undefined): AppendLogHappeningR
   const entries = Array.isArray(view?.entries) ? view.entries : [];
   return entries.filter(isRecord).map((entry) => {
     const entryId = stringValue(entry.entryId) ?? "unknown-entry";
+    const entryRef = stringValue(entry.entryRef) ?? entryId;
     const payloadSha256 = stringValue(entry.payloadSha256);
     const eventKind = stringValue(entry.eventKind) ?? "append-log-entry";
+    const sourceRefs = isRecord(entry.sourceRefs) ? entry.sourceRefs : {};
     const ref: AppendLogHappeningRef = {
       happeningId: createHappeningId(entryId, payloadSha256),
       happeningLabel: eventKind,
-      sourceEntryRef: entryId,
-      sourceRefs: isRecord(entry.sourceRefs) ? entry.sourceRefs : {},
+      sourceEntryRef: entryRef,
+      sourceRefs,
       parentEntryRefs: stringArray(entry.parentEntryRefs),
+      parentEntryHashRefs: stringArray(entry.parentEntryHashRefs),
       causalRole: "append-log-entry-as-happening-reference",
       acceptedAsCanonicalHistory: false,
     };
+    if (entryRef !== entryId) ref.sourceEntryId = entryId;
     const sourceEntryHash = stringValue(entry.entryHash);
+    const sourceEntryHashRef = stringValue(entry.entryHashRef);
+    const payloadRef = stringValue(entry.payloadRef);
+    const sourceReceiptRef = stringValue(sourceRefs.receiptRef);
+    const sourceArtifactRef = stringValue(sourceRefs.artifactRef);
     if (sourceEntryHash) ref.sourceEntryHash = sourceEntryHash;
+    if (sourceEntryHashRef) ref.sourceEntryHashRef = sourceEntryHashRef;
     if (payloadSha256) ref.payloadSha256 = payloadSha256;
+    if (payloadRef) ref.payloadRef = payloadRef;
+    if (sourceReceiptRef) ref.sourceReceiptRef = sourceReceiptRef;
+    if (sourceArtifactRef) ref.sourceArtifactRef = sourceArtifactRef;
     return ref;
   });
+}
+
+function collectAppendLogRefs(view: JsonRecord | undefined): AppendLogHappeningMapArtifact["appendLogRefs"] {
+  const appendLogRefs = isRecord(view?.appendLogRefs) ? view.appendLogRefs : {};
+  const entries = Array.isArray(view?.entries) ? view.entries.filter(isRecord) : [];
+
+  return {
+    entryRefs: stringArray(appendLogRefs.entryRefs).length > 0
+      ? stringArray(appendLogRefs.entryRefs)
+      : entries.map((entry) => stringValue(entry.entryRef) ?? stringValue(entry.entryId)).filter((entry): entry is string => Boolean(entry)),
+    entryHashRefs: stringArray(appendLogRefs.entryHashRefs).length > 0
+      ? stringArray(appendLogRefs.entryHashRefs)
+      : entries.map((entry) => stringValue(entry.entryHashRef)).filter((entry): entry is string => Boolean(entry)),
+    sourceReceiptRefs: stringArray(appendLogRefs.sourceReceiptRefs).length > 0
+      ? stringArray(appendLogRefs.sourceReceiptRefs)
+      : entries.map((entry) => {
+        const sourceRefs = isRecord(entry.sourceRefs) ? entry.sourceRefs : {};
+        return stringValue(sourceRefs.receiptRef);
+      }).filter((entry): entry is string => Boolean(entry)),
+    payloadRefs: stringArray(appendLogRefs.payloadRefs).length > 0
+      ? stringArray(appendLogRefs.payloadRefs)
+      : entries.map((entry) => stringValue(entry.payloadRef)).filter((entry): entry is string => Boolean(entry)),
+    artifactRefs: stringArray(appendLogRefs.artifactRefs).length > 0
+      ? stringArray(appendLogRefs.artifactRefs)
+      : entries.map((entry) => {
+        const sourceRefs = isRecord(entry.sourceRefs) ? entry.sourceRefs : {};
+        return stringValue(sourceRefs.artifactRef);
+      }).filter((entry): entry is string => Boolean(entry)),
+  };
 }
 
 function buildBoundary(): AppendLogHappeningMapBoundary {
