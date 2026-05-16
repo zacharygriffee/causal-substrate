@@ -199,6 +199,15 @@ frontier_candidate_fixture` only when they also declare `fixtureOnly=true` and
 evidence; it is not collaborative state, actual Autobase linearization, or
 durable local-layer history.
 
+Sandboxed Edge Autobase frontier labs may use `basis.orderingSource:
+autobase_linearization` with `autobaseBackendOpened=true` only when they also
+declare `fixtureOnly=false`, `sandboxedAutobaseLab=true`,
+`labPosture.proofScope=sandboxed_two_writer_autobase_frontier_lab`, and
+durable/production/seam flags remain false. Causal-substrate may interpret
+that artifact as causal evidence produced by an Edge lab, but causal-substrate
+itself still does not open Autobase, write continuity records, accept
+canonical history, settle the layer, or claim causal truth.
+
 ## Adjacent tool interop
 
 Adjacent tools that need a formal request/response boundary should use the `causal-substrate/adjacent-tool-interop/v1` seam.

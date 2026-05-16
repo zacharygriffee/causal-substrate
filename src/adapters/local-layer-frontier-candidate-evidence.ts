@@ -194,6 +194,7 @@ function validateFrontierCandidate(candidate: JsonRecord | undefined, original: 
   const basis = isRecord(candidate.basis) ? candidate.basis : {};
   const labPosture = isRecord(candidate.labPosture) ? candidate.labPosture : {};
   const nonClaims = isRecord(candidate.nonClaims) ? candidate.nonClaims : {};
+  const sandboxedAutobaseLab = isSandboxedAutobaseLabPosture(basis, labPosture);
   const allRefs = [
     stringValue(candidate.frontierId),
     stringValue(candidate.projectionLaneRef),
@@ -222,7 +223,7 @@ function validateFrontierCandidate(candidate: JsonRecord | undefined, original: 
 
   if (!supportedOrderingSource(basis)) issues.push("ordering-source-missing-or-unsupported");
   if (basis.wallClockDefinesCausalOrder !== false) issues.push("wall-clock-causal-order-claim");
-  if (basis.autobaseBackendOpened === true) issues.push("backend-overclaim");
+  if (basis.autobaseBackendOpened === true && !sandboxedAutobaseLab) issues.push("backend-overclaim");
   if (
     basis.headsRequired !== true ||
     basis.writerRefsRequired !== true ||
@@ -245,13 +246,18 @@ function validateFrontierCandidate(candidate: JsonRecord | undefined, original: 
     issues.push("truth-authority-settlement-or-consensus-claim");
   }
   if (
-    labPosture.autobaseBackend === true ||
-    labPosture.writesAutobase === true ||
     labPosture.writesDurableLocalLayerState === true ||
+    labPosture.productionLocalLayerState === true ||
     labPosture.localStoreRootIsIntegrationSeam === true ||
     labPosture.httpSeam === true ||
     labPosture.sshSeam === true ||
     labPosture.wallClockDefinesCausalOrder === true
+  ) {
+    issues.push("backend-or-seam-overclaim");
+  }
+  if (
+    (labPosture.autobaseBackend === true || labPosture.writesAutobase === true) &&
+    !sandboxedAutobaseLab
   ) {
     issues.push("backend-or-seam-overclaim");
   }
@@ -331,11 +337,36 @@ function buildBoundary(): LocalLayerFrontierCandidateEvidenceBoundary {
 }
 
 function supportedOrderingSource(basis: JsonRecord): boolean {
-  if (basis.orderingSource === "autobase_linearization") return true;
+  if (basis.orderingSource === "autobase_linearization") {
+    if (basis.autobaseBackendOpened === true || basis.fixtureOnly === false || basis.sandboxedAutobaseLab === true) {
+      return basis.autobaseBackendOpened === true &&
+        basis.fixtureOnly === false &&
+        basis.sandboxedAutobaseLab === true;
+    }
+    return true;
+  }
   if (basis.orderingSource === "frontier_candidate_fixture") {
     return basis.fixtureOnly === true && basis.autobaseBackendOpened === false;
   }
   return false;
+}
+
+function isSandboxedAutobaseLabPosture(basis: JsonRecord, labPosture: JsonRecord): boolean {
+  return basis.orderingSource === "autobase_linearization" &&
+    basis.autobaseBackendOpened === true &&
+    basis.fixtureOnly === false &&
+    basis.sandboxedAutobaseLab === true &&
+    labPosture.ownerRepo === "mesh-ecology-edge" &&
+    labPosture.proofScope === "sandboxed_two_writer_autobase_frontier_lab" &&
+    labPosture.fixtureOnly === false &&
+    labPosture.autobaseBackend === true &&
+    labPosture.writesAutobase === true &&
+    labPosture.writesDurableLocalLayerState === false &&
+    labPosture.productionLocalLayerState === false &&
+    labPosture.localStoreRootIsIntegrationSeam === false &&
+    labPosture.httpSeam === false &&
+    labPosture.sshSeam === false &&
+    labPosture.wallClockDefinesCausalOrder === false;
 }
 
 function buildWarnings(status: LocalLayerFrontierCandidateEvidenceStatus, orderingSource?: string): string[] {
@@ -346,8 +377,8 @@ function buildWarnings(status: LocalLayerFrontierCandidateEvidenceStatus, orderi
     ];
     if (orderingSource === "frontier_candidate_fixture") {
       warnings.push("frontier-candidate-fixture-precedes-autobase-backend");
-    } else {
-      warnings.push("autobase-linearization-named-without-opening-autobase");
+    } else if (orderingSource === "autobase_linearization") {
+      warnings.push("autobase-linearization-preserved-as-causal-evidence-without-causal-substrate-opening-autobase");
     }
     return warnings;
   }
