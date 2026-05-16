@@ -89,6 +89,70 @@ test("valid local-layer frontier candidate imports as causal evidence only", () 
   assert.ok(artifact.warnings.includes("autobase-linearization-named-without-opening-autobase"));
 });
 
+test("pre-Autobase Edge frontier fixture imports as candidate evidence only", () => {
+  const candidate = validFrontierCandidate();
+  candidate.frontierId = "local-layer-frontier:6fbd2eeefed242208326ce7f";
+  candidate.projectionLaneRef = "local-layer-projection-log:edge-operator-situation";
+  candidate.sourceProjectionEventRefs = [
+    "projection:mesh-ecology-edge:operator_situation_view:6fbd2eeefed24220",
+  ];
+  candidate.sourceHappeningRefs = [
+    "causal-edge-projection-happening:device-a",
+    "causal-edge-projection-happening:device-b",
+  ];
+  candidate.sourceEntryRefs = [
+    "projection-log-entry:projection:mesh-ecology-edge:operator_situation_view:6fbd2eeefed24220:0",
+    "projection-log-entry:projection:mesh-ecology-edge:operator_situation_view:6fbd2eeefed24220:1",
+  ];
+  candidate.basis = {
+    orderingSource: "frontier_candidate_fixture",
+    wallClockDefinesCausalOrder: false,
+    headsRequired: true,
+    writerRefsRequired: true,
+    sourceRefsRequired: true,
+    lineageRefsRequired: true,
+    autobaseBackendOpened: false,
+    fixtureOnly: true,
+  };
+  candidate.nonClaims = {
+    truthClaimed: false,
+    completionClaimed: false,
+    authorityGranted: false,
+    universalConsensusClaimed: false,
+    meshSettlementClaimed: false,
+    replicatedStateClaimed: false,
+    autobaseBackendClaimed: false,
+    durableStateClaimed: false,
+  };
+  candidate.labPosture = {
+    ownerRepo: "mesh-ecology-edge",
+    proofScope: "sandboxed_two_writer_frontier_candidate",
+    fixtureOnly: true,
+    autobaseBackend: false,
+    writesAutobase: false,
+    writesDurableLocalLayerState: false,
+    localStoreRootIsIntegrationSeam: false,
+    httpSeam: false,
+    sshSeam: false,
+    wallClockDefinesCausalOrder: false,
+    selectedNextBackendProof: "edge_sandboxed_two_writer_autobase_frontier_lab",
+  };
+
+  const artifact = buildLocalLayerFrontierCandidateEvidenceArtifact({
+    frontierCandidate: candidate,
+    emittedAt: "2026-05-16T14:30:00.000Z",
+  });
+
+  assertLocalLayerFrontierCandidateEvidenceArtifact(artifact);
+  assert.equal(artifact.reviewStatus, "local-layer-frontier-candidate-evidence-emitted");
+  assert.equal(artifact.validation.status, "local-layer-frontier-candidate-valid-evidence");
+  assert.equal(artifact.orderingEvidence.orderingSource, "frontier_candidate_fixture");
+  assert.equal(artifact.boundary.opensAutobase, false);
+  assert.equal(artifact.boundary.acceptsCanonicalHistory, false);
+  assert.deepEqual(artifact.rejections, []);
+  assert.ok(artifact.warnings.includes("frontier-candidate-fixture-precedes-autobase-backend"));
+});
+
 test("frontier candidate blocks wall-clock causal order and authority claims", () => {
   const candidate = validFrontierCandidate();
   candidate.basis.wallClockDefinesCausalOrder = true;
@@ -104,6 +168,38 @@ test("frontier candidate blocks wall-clock causal order and authority claims", (
   assert.ok(artifact.rejections.includes("truth-authority-settlement-or-consensus-claim"));
   assert.equal(artifact.validation.wallClockCausalOrderBlocked, false);
   assert.equal(artifact.validation.unsafeClaimsBlocked, false);
+  assert.equal(artifact.boundary.acceptsCanonicalHistory, false);
+});
+
+test("frontier candidate blocks backend and seam overclaims from fixture posture", () => {
+  const candidate = validFrontierCandidate();
+  candidate.basis.orderingSource = "frontier_candidate_fixture";
+  candidate.basis.autobaseBackendOpened = true;
+  candidate.basis.fixtureOnly = false;
+  candidate.labPosture = {
+    autobaseBackend: true,
+    writesAutobase: true,
+    writesDurableLocalLayerState: true,
+    localStoreRootIsIntegrationSeam: true,
+    httpSeam: true,
+    sshSeam: true,
+    wallClockDefinesCausalOrder: true,
+  };
+  candidate.nonClaims.replicatedStateClaimed = true;
+  candidate.nonClaims.autobaseBackendClaimed = true;
+  candidate.nonClaims.durableStateClaimed = true;
+
+  const artifact = buildLocalLayerFrontierCandidateEvidenceArtifact({
+    frontierCandidate: candidate,
+    emittedAt: "2026-05-16T14:30:00.000Z",
+  });
+
+  assert.equal(artifact.reviewStatus, "local-layer-frontier-candidate-guardrail-blocked");
+  assert.ok(artifact.rejections.includes("ordering-source-missing-or-unsupported"));
+  assert.ok(artifact.rejections.includes("backend-overclaim"));
+  assert.ok(artifact.rejections.includes("backend-or-seam-overclaim"));
+  assert.ok(artifact.rejections.includes("truth-authority-settlement-or-consensus-claim"));
+  assert.equal(artifact.boundary.opensAutobase, false);
   assert.equal(artifact.boundary.acceptsCanonicalHistory, false);
 });
 

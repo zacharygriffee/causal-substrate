@@ -156,7 +156,7 @@ export function buildLocalLayerFrontierCandidateEvidenceArtifact(
     reviewStatus: status === "local-layer-frontier-candidate-valid-evidence"
       ? "local-layer-frontier-candidate-evidence-emitted"
       : status,
-    warnings: buildWarnings(status),
+    warnings: buildWarnings(status, orderingEvidence.orderingSource),
     rejections: buildRejections(status, issues),
   };
 }
@@ -192,6 +192,7 @@ function validateFrontierCandidate(candidate: JsonRecord | undefined, original: 
   const sourceProjectionEventRefs = stringArray(candidate.sourceProjectionEventRefs);
   const sourceHappeningRefs = stringArray(candidate.sourceHappeningRefs);
   const basis = isRecord(candidate.basis) ? candidate.basis : {};
+  const labPosture = isRecord(candidate.labPosture) ? candidate.labPosture : {};
   const nonClaims = isRecord(candidate.nonClaims) ? candidate.nonClaims : {};
   const allRefs = [
     stringValue(candidate.frontierId),
@@ -219,8 +220,9 @@ function validateFrontierCandidate(candidate: JsonRecord | undefined, original: 
   if (sourceProjectionEventRefs.length === 0 || sourceHappeningRefs.length === 0) issues.push("source-refs-missing");
   if (allRefs.some(unsafeSeamRef)) issues.push("unsafe-seam-ref");
 
-  if (basis.orderingSource !== "autobase_linearization") issues.push("ordering-source-missing-or-unsupported");
+  if (!supportedOrderingSource(basis)) issues.push("ordering-source-missing-or-unsupported");
   if (basis.wallClockDefinesCausalOrder !== false) issues.push("wall-clock-causal-order-claim");
+  if (basis.autobaseBackendOpened === true) issues.push("backend-overclaim");
   if (
     basis.headsRequired !== true ||
     basis.writerRefsRequired !== true ||
@@ -235,9 +237,23 @@ function validateFrontierCandidate(candidate: JsonRecord | undefined, original: 
     nonClaims.completionClaimed === true ||
     nonClaims.authorityGranted === true ||
     nonClaims.universalConsensusClaimed === true ||
-    nonClaims.meshSettlementClaimed === true
+    nonClaims.meshSettlementClaimed === true ||
+    nonClaims.replicatedStateClaimed === true ||
+    nonClaims.autobaseBackendClaimed === true ||
+    nonClaims.durableStateClaimed === true
   ) {
     issues.push("truth-authority-settlement-or-consensus-claim");
+  }
+  if (
+    labPosture.autobaseBackend === true ||
+    labPosture.writesAutobase === true ||
+    labPosture.writesDurableLocalLayerState === true ||
+    labPosture.localStoreRootIsIntegrationSeam === true ||
+    labPosture.httpSeam === true ||
+    labPosture.sshSeam === true ||
+    labPosture.wallClockDefinesCausalOrder === true
+  ) {
+    issues.push("backend-or-seam-overclaim");
   }
 
   return [...new Set(issues)];
@@ -251,7 +267,9 @@ function determineStatus(
   if (
     issues.includes("unsafe-seam-ref") ||
     issues.includes("wall-clock-causal-order-claim") ||
-    issues.includes("truth-authority-settlement-or-consensus-claim")
+    issues.includes("truth-authority-settlement-or-consensus-claim") ||
+    issues.includes("backend-overclaim") ||
+    issues.includes("backend-or-seam-overclaim")
   ) {
     return "local-layer-frontier-candidate-guardrail-blocked";
   }
@@ -312,13 +330,26 @@ function buildBoundary(): LocalLayerFrontierCandidateEvidenceBoundary {
   };
 }
 
-function buildWarnings(status: LocalLayerFrontierCandidateEvidenceStatus): string[] {
+function supportedOrderingSource(basis: JsonRecord): boolean {
+  if (basis.orderingSource === "autobase_linearization") return true;
+  if (basis.orderingSource === "frontier_candidate_fixture") {
+    return basis.fixtureOnly === true && basis.autobaseBackendOpened === false;
+  }
+  return false;
+}
+
+function buildWarnings(status: LocalLayerFrontierCandidateEvidenceStatus, orderingSource?: string): string[] {
   if (status === "local-layer-frontier-candidate-valid-evidence") {
-    return [
+    const warnings = [
       "frontier-candidate-preserved-as-evidence-only",
-      "autobase-linearization-named-without-opening-autobase",
       "wall-clock-time-is-observation-metadata-not-causal-order",
     ];
+    if (orderingSource === "frontier_candidate_fixture") {
+      warnings.push("frontier-candidate-fixture-precedes-autobase-backend");
+    } else {
+      warnings.push("autobase-linearization-named-without-opening-autobase");
+    }
+    return warnings;
   }
   return ["frontier-candidate-not-accepted-as-canonical-history"];
 }

@@ -193,6 +193,12 @@ source happening refs while keeping Autobase closed and history non-canonical.
 It blocks wall-clock causal ordering, HTTP/SSH/local path seams, consensus or
 settlement claims, and authority/truth overclaims.
 
+Pre-Autobase Edge fixtures may use `basis.orderingSource:
+frontier_candidate_fixture` only when they also declare `fixtureOnly=true` and
+`autobaseBackendOpened=false`. That posture is acceptable as candidate
+evidence; it is not collaborative state, actual Autobase linearization, or
+durable local-layer history.
+
 ## Adjacent tool interop
 
 Adjacent tools that need a formal request/response boundary should use the `causal-substrate/adjacent-tool-interop/v1` seam.
