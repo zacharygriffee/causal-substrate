@@ -208,6 +208,17 @@ that artifact as causal evidence produced by an Edge lab, but causal-substrate
 itself still does not open Autobase, write continuity records, accept
 canonical history, settle the layer, or claim causal truth.
 
+Use `causal-substrate/edge-autobase-optimistic-intake-evidence/v1` when Edge
+needs causal review of the sandboxed optimistic non-writer intake lab. This
+evidence preserves the accepted and rejected candidate writer refs and source
+projection refs, then checks the important distinction: optimistic append is
+candidate intake, not acceptance. A valid artifact requires the accepted
+candidate to be acknowledged through `host.ackWriter(from.key)` and
+materialized by the derived view, while the rejected candidate remains
+unmaterialized accepted state. The adapter blocks append-as-acceptance,
+pre-admitted candidate drift, unsafe HTTP/SSH/path refs, durable or replicated
+state claims, and truth/authority/settlement overclaims.
+
 ## Adjacent tool interop
 
 Adjacent tools that need a formal request/response boundary should use the `causal-substrate/adjacent-tool-interop/v1` seam.
