@@ -29,6 +29,9 @@ export interface EdgeProjectionEventHappeningRef {
   sourceHappeningRefs: string[];
   presentPointRef?: string;
   observerRef?: string;
+  causalRefsDeferred: boolean;
+  causalRefDeferralReason?: string;
+  causalRefDeferralPosture?: string;
   promotionRole: "semantic_continuity_input";
   causalRole: "projection-event-as-semantic-continuity-input";
   storageRecordPromoted: false;
@@ -71,6 +74,9 @@ export interface EdgeProjectionEventHappeningMapArtifact {
     sourceRefsPresent: boolean;
     sourceRefsSemantic: boolean;
     causalRefsPresent: boolean;
+    causalRefsDeferred: boolean;
+    causalRefDeferralValid: boolean;
+    identityHashPresent: boolean;
     writerPolicyPresent: boolean;
     readerPolicyPresent: boolean;
     noStorageOrBackendPromotion: boolean;
@@ -134,7 +140,10 @@ export function buildEdgeProjectionEventHappeningMapArtifact(
       promotedSemanticInput: issues.includes("promotion-posture-missing") === false,
       sourceRefsPresent: issues.includes("source-refs-missing") === false,
       sourceRefsSemantic: issues.includes("source-ref-compat-or-path-seam") === false,
-      causalRefsPresent: issues.includes("causal-refs-missing") === false,
+      causalRefsPresent: event ? causalRefsHaveTopology(isRecord(event.causalRefs) ? event.causalRefs : {}) : false,
+      causalRefsDeferred: event ? isRecord(event.causalRefs) && event.causalRefs.deferred === true : false,
+      causalRefDeferralValid: event ? causalRefDeferralValid(isRecord(event.causalRefs) ? event.causalRefs : {}) : false,
+      identityHashPresent: issues.includes("identity-hash-missing") === false && issues.includes("identity-hash-invalid") === false,
       writerPolicyPresent: issues.includes("writer-policy-missing-or-unsafe") === false,
       readerPolicyPresent: issues.includes("reader-policy-missing-or-unsafe") === false,
       noStorageOrBackendPromotion: issues.includes("promotion-overclaim") === false,
@@ -174,6 +183,9 @@ function validateProjectionEvent(event: JsonRecord | undefined, original: unknow
   if (!stringValue(event.projectionRef)) issues.push("projection-ref-missing");
   if (!stringValue(event.payloadHash) || !SHA256_REF.test(String(event.payloadHash))) issues.push("payload-hash-invalid");
   if (event.payloadHashAlgorithm !== "sha256-canonical-json") issues.push("payload-hash-algorithm-mismatch");
+  if (!stringValue(event.identityHash)) issues.push("identity-hash-missing");
+  if (stringValue(event.identityHash) && !SHA256_REF.test(String(event.identityHash))) issues.push("identity-hash-invalid");
+  if (event.identityHashAlgorithm !== "sha256-canonical-json") issues.push("identity-hash-algorithm-mismatch");
   if (event.derivedOnly !== true) issues.push("derived-only-missing");
   if (event.payloadEmbedded === true) issues.push("payload-embedded");
   if (sourceRefs.length === 0) issues.push("source-refs-missing");
@@ -185,6 +197,12 @@ function validateProjectionEvent(event: JsonRecord | undefined, original: unknow
     if (!Array.isArray(causalRefs.branchRefs)) issues.push("branch-refs-missing");
     if (!Array.isArray(causalRefs.segmentRefs)) issues.push("segment-refs-missing");
     if (!Array.isArray(causalRefs.happeningRefs)) issues.push("happening-refs-missing");
+    if (!causalRefsHaveTopology(causalRefs) && !causalRefDeferralValid(causalRefs)) {
+      issues.push("causal-refs-or-deferral-missing");
+    }
+    if (causalRefs.deferred === true && !causalRefDeferralValid(causalRefs)) {
+      issues.push("causal-ref-deferral-malformed");
+    }
   }
 
   if (promotion.promotedMaterial !== true || promotion.promotionRole !== "semantic_continuity_input") {
@@ -243,6 +261,12 @@ function determineStatus(
   if (
     issues.includes("source-ref-compat-or-path-seam") ||
     issues.includes("transport-ref-compatibility-scaffold") ||
+    issues.includes("causal-refs-missing") ||
+    issues.includes("causal-refs-or-deferral-missing") ||
+    issues.includes("causal-ref-deferral-malformed") ||
+    issues.includes("identity-hash-missing") ||
+    issues.includes("identity-hash-invalid") ||
+    issues.includes("identity-hash-algorithm-mismatch") ||
     issues.includes("payload-embedded") ||
     issues.includes("promotion-overclaim") ||
     issues.includes("reader-policy-missing-or-unsafe") ||
@@ -272,6 +296,7 @@ function collectHappeningRef(event: JsonRecord | undefined): EdgeProjectionEvent
     branchRefs: stringArray(causalRefs.branchRefs),
     segmentRefs: stringArray(causalRefs.segmentRefs),
     sourceHappeningRefs: stringArray(causalRefs.happeningRefs),
+    causalRefsDeferred: causalRefs.deferred === true,
     promotionRole: "semantic_continuity_input",
     causalRole: "projection-event-as-semantic-continuity-input",
     storageRecordPromoted: false,
@@ -287,6 +312,10 @@ function collectHappeningRef(event: JsonRecord | undefined): EdgeProjectionEvent
   if (presentPointRef) ref.presentPointRef = presentPointRef;
   const observerRef = stringValue(causalRefs.observerRef);
   if (observerRef) ref.observerRef = observerRef;
+  const deferralReason = stringValue(causalRefs.deferredReason);
+  if (deferralReason) ref.causalRefDeferralReason = deferralReason;
+  const deferralPosture = stringValue(causalRefs.deferralPosture);
+  if (deferralPosture) ref.causalRefDeferralPosture = deferralPosture;
   return ref;
 }
 
@@ -334,6 +363,19 @@ function refContainsUnsafeSeam(ref: string): boolean {
 
 function refContainsTransportScaffold(ref: string): boolean {
   return /http|ssh|localhost|127\.0\.0\.1/iu.test(ref);
+}
+
+function causalRefsHaveTopology(causalRefs: JsonRecord): boolean {
+  return stringArray(causalRefs.branchRefs).length > 0 ||
+    stringArray(causalRefs.segmentRefs).length > 0 ||
+    stringArray(causalRefs.happeningRefs).length > 0 ||
+    stringValue(causalRefs.presentPointRef) !== undefined;
+}
+
+function causalRefDeferralValid(causalRefs: JsonRecord): boolean {
+  return causalRefs.deferred === true &&
+    stringValue(causalRefs.deferredReason) !== undefined &&
+    causalRefsHaveTopology(causalRefs) === false;
 }
 
 function hash(value: string): string {

@@ -20,7 +20,7 @@ backend, truth engine, or authority.
 
 | Edge candidate | Causal interpretation fit | Current support | Gap before promotion |
 | --- | --- | --- | --- |
-| Local-layer projection event | source happening / projection happening with source/share boundary | supported directly by `edge-projection-event-happening-map` when refs and promotion posture are present | exact promoted event contract must keep causal refs, writer policy, reader policy, and non-promoted storage posture explicit |
+| Local-layer projection event | source happening / projection happening with source/share boundary | supported directly by `edge-projection-event-happening-map` when source refs, identity posture, causal refs or explicit causal-ref deferral, and promotion posture are present | exact promoted event contract must keep causal refs/deferral, writer policy, reader policy, and non-promoted storage posture explicit |
 | Projection event log entry | happening mapped from append-only projection entry | supported by `edge_projection_event_log_entry.v0` adapter | promotion must keep sequence/ref order distinct from causal truth and wall-clock order |
 | Operator situation view model | derived view over observer-local evidence | conceptually supported as replaceable view | should remain derived; avoid treating view as branch/source state |
 | Readiness/review statuses | observer-local review happenings or status projections | supported through multiple evidence adapters | must stay review-only and never become acceptance, truth, or authority |
@@ -65,7 +65,8 @@ Remaining gaps before promotion:
 - Acceptance and reconciliation semantics must be separated from append success,
   replica visibility, and review availability.
 - If a candidate lacks causal refs, it must say whether causal refs are
-  deferred, derived, or required before promotion.
+  explicitly deferred, derived, or required before promotion. Omitted causal
+  topology is not valid deferral.
 - Testbed must pressure the final promoted shape, not just adjacent proof
   artifacts.
 
@@ -76,7 +77,7 @@ Recommended causal posture now that projection events are selected:
 ```text
 repo-owned evidence
 -> source refs
--> causal refs
+-> causal refs or explicit causal-ref deferral
 -> projection event as source/share-boundary happening
 -> projection log entry as preservation record
 -> derived operator view as replaceable view

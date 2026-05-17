@@ -34,6 +34,8 @@ function validProjectionEvent(): any {
     transportRefs: ["protomux-rpc:hyperdht_direct_peer"],
     payloadHash: `sha256:${"a".repeat(64)}`,
     payloadHashAlgorithm: "sha256-canonical-json",
+    identityHash: `sha256:${"d".repeat(64)}`,
+    identityHashAlgorithm: "sha256-canonical-json",
     payloadEmbedded: false,
     derivedOnly: true,
     promotionPosture: {
@@ -111,6 +113,9 @@ test("Edge projection event maps as promoted semantic continuity input only", ()
   assert.equal(artifact.validation.promotedSemanticInput, true);
   assert.equal(artifact.validation.sourceRefsSemantic, true);
   assert.equal(artifact.validation.causalRefsPresent, true);
+  assert.equal(artifact.validation.causalRefsDeferred, false);
+  assert.equal(artifact.validation.causalRefDeferralValid, false);
+  assert.equal(artifact.validation.identityHashPresent, true);
   assert.equal(artifact.validation.writerPolicyPresent, true);
   assert.equal(artifact.validation.readerPolicyPresent, true);
   assert.equal(artifact.happeningRefs.length, 1);
@@ -122,6 +127,7 @@ test("Edge projection event maps as promoted semantic continuity input only", ()
   assert.equal(ref.storageRecordPromoted, false);
   assert.equal(ref.backendPromoted, false);
   assert.equal(ref.acceptedAsCanonicalHistory, false);
+  assert.equal(ref.causalRefsDeferred, false);
   assert.deepEqual(ref.branchRefs, ["branch:edge-local-layer:operator-projection"]);
   assert.deepEqual(ref.sourceHappeningRefs, ["happening:edge-status:op-status"]);
   assert.equal(artifact.boundary.edgeCalled, false);
@@ -148,7 +154,7 @@ test("Edge projection event mapping blocks path seams and promotion overclaims",
   assert.deepEqual(artifact.happeningRefs, []);
 });
 
-test("Edge projection event mapping reports missing causal posture as incomplete", () => {
+test("Edge projection event mapping blocks missing causal posture", () => {
   const event = validProjectionEvent();
   delete event.causalRefs;
 
@@ -157,9 +163,63 @@ test("Edge projection event mapping reports missing causal posture as incomplete
     emittedAt: "2026-05-16T20:00:00.000Z",
   });
 
-  assert.equal(artifact.reviewStatus, "edge-projection-event-incomplete");
+  assert.equal(artifact.reviewStatus, "edge-projection-event-guardrail-blocked");
   assert.ok(artifact.rejections.includes("causal-refs-missing"));
   assert.equal(artifact.validation.causalRefsPresent, false);
+  assert.deepEqual(artifact.happeningRefs, []);
+});
+
+test("Edge projection event mapping accepts explicit causal-ref deferral", () => {
+  const event = validProjectionEvent();
+  event.causalRefs = {
+    branchRefs: [],
+    segmentRefs: [],
+    happeningRefs: [],
+    presentPointRef: null,
+    observerRef: "observer:edge-operator",
+    deferred: true,
+    deferredReason: "status_projection_without_history_interpretation",
+    deferralPosture: "explicit_causal_ref_deferral",
+  };
+
+  const artifact = buildEdgeProjectionEventHappeningMapArtifact({
+    projectionEvent: event,
+    emittedAt: "2026-05-16T20:00:00.000Z",
+  });
+
+  assert.equal(artifact.reviewStatus, "edge-projection-event-happening-map-emitted");
+  assert.equal(artifact.validation.status, "edge-projection-event-valid");
+  assert.equal(artifact.validation.causalRefsPresent, false);
+  assert.equal(artifact.validation.causalRefsDeferred, true);
+  assert.equal(artifact.validation.causalRefDeferralValid, true);
+  assert.equal(artifact.happeningRefs.length, 1);
+  assert.equal(artifact.happeningRefs[0]!.causalRefsDeferred, true);
+  assert.equal(artifact.happeningRefs[0]!.causalRefDeferralReason, "status_projection_without_history_interpretation");
+  assert.equal(artifact.happeningRefs[0]!.causalRefDeferralPosture, "explicit_causal_ref_deferral");
+});
+
+test("Edge projection event mapping blocks malformed deferral and missing identity hash", () => {
+  const event = validProjectionEvent();
+  delete event.identityHash;
+  event.causalRefs = {
+    branchRefs: ["branch:edge-local-layer:operator-projection"],
+    segmentRefs: [],
+    happeningRefs: [],
+    presentPointRef: null,
+    observerRef: "observer:edge-operator",
+    deferred: true,
+    deferredReason: "status_projection_without_history_interpretation",
+  };
+
+  const artifact = buildEdgeProjectionEventHappeningMapArtifact({
+    projectionEvent: event,
+    emittedAt: "2026-05-16T20:00:00.000Z",
+  });
+
+  assert.equal(artifact.reviewStatus, "edge-projection-event-guardrail-blocked");
+  assert.ok(artifact.rejections.includes("causal-ref-deferral-malformed"));
+  assert.ok(artifact.rejections.includes("identity-hash-missing"));
+  assert.equal(artifact.validation.identityHashPresent, false);
   assert.deepEqual(artifact.happeningRefs, []);
 });
 
