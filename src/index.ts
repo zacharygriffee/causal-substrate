@@ -36,4 +36,5 @@ export * from "./adapters/edge-storage-lane-candidate-evidence.js";
 export * from "./adapters/edge-local-layer-node-role-lab-evidence.js";
 export * from "./adapters/resolution-refinement-evidence.js";
 export * from "./adapters/edge-self-work-trace-evidence.js";
+export * from "./adapters/edge-local-layer-continuity-event-evidence.js";
 export * from "./prototypes/continuity-workstation.js";
