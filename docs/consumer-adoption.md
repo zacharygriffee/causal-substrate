@@ -156,6 +156,16 @@ non-authoritative. The compatibility `edge_operation_trail` source remains
 accepted, but the append-log view is the preferred read path because it carries
 explicit scaffold and backend posture.
 
+Edge's promoted projection-event semantic input has a direct adoption seam:
+`causal-substrate/edge-projection-event-happening-map/v1` maps
+`mesh_ecology_local_layer_projection_event` into a happening-shaped reference
+without opening Edge, Corestore, Hypercore, Autobase, HyperDHT, or Protomux.
+The adapter requires promoted semantic-input posture, semantic source refs,
+causal refs, writer policy, reader policy, canonical hash identity, and storage
+non-promotion. It blocks local path, HTTP, SSH, backend, storage-record,
+derived-view, review-status, truth, authority, and canonical-history
+overclaims.
+
 Edge's single-writer projection-log proof has a separate adoption seam:
 `causal-substrate/edge-projection-log-happening-map/v1` maps
 `edge_projection_event_log_entry.v0` into happening-shaped references. This
