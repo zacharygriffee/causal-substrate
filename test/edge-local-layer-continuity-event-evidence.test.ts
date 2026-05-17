@@ -88,6 +88,80 @@ function validContinuityEvent(): any {
   };
 }
 
+function validRepoWorkPacketContinuityEvent(): any {
+  return {
+    ...validContinuityEvent(),
+    continuityRole: "edge_repo_work_packet_scaffold",
+    continuityCategory: "repo_work_packet",
+    eventId: "continuity:edge-repo-work-packet:edge-cross-project-work-packet:repo-work:continuity-event",
+    sourceEventRef: "edge-repo-work-packet:edge-cross-project-work-packet:repo-work:continuity-event",
+    operationRef: "edge-repo-work-packet:edge-cross-project-work-packet:repo-work:continuity-event",
+    eventKind: "repo_work_packet_proposed",
+    origin: {
+      originRef: "edge-repo-work-packet:edge-cross-project-work-packet:repo-work:continuity-event",
+      sourceRef: "edge-cross-project-work-packet:repo-work:continuity-event",
+      operatorSeatRef: "operator-seat:local",
+      deviceRef: "local-layer-device:operator-laptop",
+      repoRef: "repo:mesh-ecology-edge",
+      targetRepoRef: "repo:mesh-ecology-edge",
+      targetSurfaceRef: "edge-target-surface:mesh-ecology-edge:edge_self_work_review",
+      parentEventRefs: [],
+    },
+    provenanceRefs: [
+      "edge-cross-project-work-packet:repo-work:continuity-event",
+      "edge-repo-work-packet:edge-cross-project-work-packet:repo-work:continuity-event",
+      "repo:mesh-ecology-edge",
+      "edge-target-surface:mesh-ecology-edge:edge_self_work_review",
+      "edge-self-work-trace:evidence",
+    ],
+    evidenceRefs: ["edge-self-work-trace:evidence"],
+    receiptRefs: [],
+    membraneCrossing: {
+      crossingKind: "repo_work_packet_proposal",
+      crossingRef: "membrane-crossing:repo_work_packet_proposal:edge-cross-project-work-packet:repo-work:continuity-event",
+      sourceDomain: "edge_operator_loop",
+      targetDomain: "repo_owned_work_review",
+      validationRequired: true,
+    },
+    sourceRefPosture: {
+      canonicalRefs: ["edge-self-work-trace:evidence"],
+      scaffoldRefs: {
+        localPathRefs: ["docs/work-packets/edge-repo-work-packet-continuity-event-v0.md"],
+        transportEndpointRefs: ["http://127.0.0.1:8787/status"],
+      },
+      localPathsAreCanonicalSeams: false,
+      transportEndpointsAreCanonicalSeams: false,
+    },
+    repoWorkPacketPosture: {
+      sourceWorkPacketRef: "edge-cross-project-work-packet:repo-work:continuity-event",
+      packetMode: "edge_self_work",
+      packetState: "ready_for_operator_export",
+      targetProjectId: "mesh-ecology-edge",
+      targetRepo: "mesh-ecology-edge",
+      targetSurface: "edge_self_work_review",
+      operatorApprovalRequired: true,
+      repoOwnsImplementation: true,
+      workPacketIsAuthority: false,
+      workPacketIsCompletion: false,
+      workPacketIsTruth: false,
+    },
+    causalRefs: {
+      branchRefs: [],
+      segmentRefs: [],
+      happeningRefs: [],
+      presentPointRef: null,
+      observerRef: "edge-operator",
+      deferred: true,
+      deferredReason: "repo_work_packet_continuity_event_without_promoted_lane",
+      deferralPosture: "explicit_causal_ref_deferral",
+    },
+    storagePosture: {
+      ...validContinuityEvent().storagePosture,
+      storageKind: "local_json_or_exported_work_packet",
+    },
+  };
+}
+
 test("Edge continuity event maps as draft semantic input reference only", () => {
   const artifact = buildEdgeLocalLayerContinuityEventEvidenceArtifact({
     continuityEvent: validContinuityEvent(),
@@ -127,6 +201,34 @@ test("Edge continuity event maps as draft semantic input reference only", () => 
   assert.equal(artifact.boundary.sourceStorageOpened, false);
   assert.equal(artifact.boundary.writesContinuityRecords, false);
   assert.equal(artifact.boundary.acceptsContinuity, false);
+  assert.equal(artifact.boundary.claimsCausalTruth, false);
+});
+
+test("Edge repo-work-packet continuity event maps as draft semantic input reference only", () => {
+  const artifact = buildEdgeLocalLayerContinuityEventEvidenceArtifact({
+    continuityEvent: validRepoWorkPacketContinuityEvent(),
+    sourcePath: "edge-repo-work-packet-continuity-event.json",
+    emittedAt: "2026-05-17T16:00:00.000Z",
+  });
+
+  assert.equal(artifact.reviewStatus, "edge-local-layer-continuity-event-evidence-emitted");
+  assert.equal(artifact.validation.status, "edge-local-layer-continuity-event-valid-evidence");
+  assert.equal(artifact.happeningRefs.length, 1);
+  const ref = artifact.happeningRefs[0]!;
+  assert.equal(ref.happeningLabel, "edge-local-layer-continuity-event");
+  assert.equal(ref.sourceContinuityEventRef, "continuity:edge-repo-work-packet:edge-cross-project-work-packet:repo-work:continuity-event");
+  assert.equal(ref.sourceOperationRef, "edge-repo-work-packet:edge-cross-project-work-packet:repo-work:continuity-event");
+  assert.equal(ref.sourceEventRef, "edge-repo-work-packet:edge-cross-project-work-packet:repo-work:continuity-event");
+  assert.equal(ref.continuityRole, "edge_repo_work_packet_scaffold");
+  assert.equal(ref.continuityCategory, "repo_work_packet");
+  assert.equal(ref.membraneCrossingKind, "repo_work_packet_proposal");
+  assert.equal(ref.targetDomain, "repo_owned_work_review");
+  assert.equal(ref.causalRole, "continuity-event-as-draft-semantic-input-reference");
+  assert.equal(ref.acceptedAsContinuity, false);
+  assert.equal(ref.acceptedAsCanonicalHistory, false);
+  assert.equal(artifact.boundary.writesContinuityRecords, false);
+  assert.equal(artifact.boundary.acceptsContinuity, false);
+  assert.equal(artifact.boundary.startsBackend, false);
   assert.equal(artifact.boundary.claimsCausalTruth, false);
 });
 

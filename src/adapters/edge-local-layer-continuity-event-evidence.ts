@@ -30,6 +30,8 @@ export interface EdgeLocalLayerContinuityHappeningRef {
   evidenceRefs: string[];
   receiptRefs: string[];
   participantRefs: string[];
+  continuityRole?: string;
+  continuityCategory?: string;
   membraneCrossingKind?: string;
   membraneCrossingRef?: string;
   sourceDomain?: string;
@@ -100,6 +102,20 @@ type JsonRecord = Record<string, unknown>;
 
 const EXPECTED_ARTIFACT_KIND = "mesh_ecology_local_layer_continuity_event";
 const EXPECTED_SCHEMA = "mesh-ecology-edge/local-layer-continuity-event-draft/v0";
+const CONTINUITY_EVENT_ROLE_PROFILES = {
+  edge_operation_event_scaffold: {
+    category: "operation_event",
+    storageKind: "local_json_operation_trail",
+    crossingTargetDomain: "local_layer_continuity_draft",
+    warning: "local-json-operation-trail-remains-scaffold-storage",
+  },
+  edge_repo_work_packet_scaffold: {
+    category: "repo_work_packet",
+    storageKind: "local_json_or_exported_work_packet",
+    crossingTargetDomain: "repo_owned_work_review",
+    warning: "repo-work-packet-export-remains-scaffold-storage",
+  },
+} as const;
 
 export function buildEdgeLocalLayerContinuityEventEvidenceArtifact(
   input: BuildEdgeLocalLayerContinuityEventEvidenceInput,
@@ -189,8 +205,9 @@ function validateContinuityEvent(event: JsonRecord | undefined, original: unknow
   if (event.schemaVersion !== EXPECTED_SCHEMA) issues.push("schema-mismatch");
   if (event.draft !== true) issues.push("draft-posture-missing");
   if (event.promotedContinuity !== false) issues.push("promotion-overclaim");
-  if (event.continuityRole !== "edge_operation_event_scaffold") issues.push("continuity-role-mismatch");
-  if (event.continuityCategory !== "operation_event") issues.push("continuity-category-mismatch");
+  const roleProfile = continuityRoleProfile(event);
+  if (!roleProfile) issues.push("continuity-role-mismatch");
+  if (roleProfile && event.continuityCategory !== roleProfile.category) issues.push("continuity-category-mismatch");
   if (!stringValue(event.eventId)) issues.push("event-id-missing");
   if (!stringValue(event.sourceEventRef)) issues.push("source-event-ref-missing");
   if (!stringValue(event.operationRef)) issues.push("operation-ref-missing");
@@ -209,10 +226,12 @@ function validateContinuityEvent(event: JsonRecord | undefined, original: unknow
   if (!stringValue(crossing.crossingKind)) issues.push("crossing-kind-missing");
   if (!stringValue(crossing.crossingRef)) issues.push("crossing-ref-missing");
   if (crossing.sourceDomain !== "edge_operator_loop") issues.push("crossing-source-domain-mismatch");
-  if (crossing.targetDomain !== "local_layer_continuity_draft") issues.push("crossing-target-domain-mismatch");
+  if (roleProfile && crossing.targetDomain !== roleProfile.crossingTargetDomain) {
+    issues.push("crossing-target-domain-mismatch");
+  }
   if (crossing.validationRequired !== true) issues.push("crossing-validation-missing");
 
-  if (storage.storageKind !== "local_json_operation_trail") issues.push("storage-kind-mismatch");
+  if (roleProfile && storage.storageKind !== roleProfile.storageKind) issues.push("storage-kind-mismatch");
   if (storage.storageRole !== "compatibility_scaffold") issues.push("storage-role-mismatch");
   if (storage.scaffoldStorage !== true || storage.localFileStorage !== true) {
     issues.push("storage-scaffold-posture-missing");
@@ -297,6 +316,10 @@ function collectHappeningRef(event: JsonRecord | undefined): EdgeLocalLayerConti
   if (sourceEventRef) ref.sourceEventRef = sourceEventRef;
   const eventKind = stringValue(safeEvent.eventKind);
   if (eventKind) ref.eventKind = eventKind;
+  const continuityRole = stringValue(safeEvent.continuityRole);
+  if (continuityRole) ref.continuityRole = continuityRole;
+  const continuityCategory = stringValue(safeEvent.continuityCategory);
+  if (continuityCategory) ref.continuityCategory = continuityCategory;
   const originRef = stringValue(eventOrigin.originRef);
   if (originRef) ref.originRef = originRef;
   const operatorSeatRef = stringValue(eventOrigin.operatorSeatRef);
@@ -337,11 +360,18 @@ function buildWarnings(status: EdgeLocalLayerContinuityEventEvidenceStatus): str
     return [
       "continuity-event-preserved-as-draft-semantic-input-reference",
       "causal-substrate-does-not-write-edge-continuity-records",
-      "local-json-operation-trail-remains-scaffold-storage",
+      "local-json-operation-trail-or-work-packet-export-remains-scaffold-storage",
       "append-success-write-success-storage-visibility-and-review-status-are-not-acceptance",
     ];
   }
   return ["continuity-event-not-accepted-as-causal-history"];
+}
+
+function continuityRoleProfile(event: JsonRecord): typeof CONTINUITY_EVENT_ROLE_PROFILES[keyof typeof CONTINUITY_EVENT_ROLE_PROFILES] | undefined {
+  const role = stringValue(event.continuityRole);
+  if (role === "edge_operation_event_scaffold") return CONTINUITY_EVENT_ROLE_PROFILES.edge_operation_event_scaffold;
+  if (role === "edge_repo_work_packet_scaffold") return CONTINUITY_EVENT_ROLE_PROFILES.edge_repo_work_packet_scaffold;
+  return undefined;
 }
 
 function claimsContainAuthorityTruthStateOrSubstrate(claims: JsonRecord): boolean {
