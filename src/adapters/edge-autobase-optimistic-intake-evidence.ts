@@ -70,9 +70,25 @@ export interface EdgeAutobaseOptimisticIntakeValidation {
   nonWriterBeforeAppend: boolean;
   ackWriterAcceptancePresent: boolean;
   appendSuccessAcceptanceBlocked: boolean;
+  storageLanePosturePresent: boolean;
   unsafeSeamRefsBlocked: boolean;
   unsafeClaimsBlocked: boolean;
   issues: string[];
+}
+
+export interface EdgeAutobaseOptimisticIntakeStorageLanePosture {
+  intendedStorageLane?: string;
+  inputSemanticUnit?: string;
+  requiresPromotedProjectionEventInput: boolean;
+  sandboxedOnly: boolean;
+  productionBackendPromoted: boolean;
+  storageRecordPromoted: boolean;
+  edgeStateMigration: boolean;
+  appendSuccessIsAcceptance: boolean;
+  linearizationIsTruth: boolean;
+  replicaVisibilityIsContinuity: boolean;
+  wallClockDefinesCausalOrder: boolean;
+  discoveryAbsenceIsFailure: boolean;
 }
 
 export interface EdgeAutobaseOptimisticIntakeEvidenceArtifact {
@@ -89,6 +105,7 @@ export interface EdgeAutobaseOptimisticIntakeEvidenceArtifact {
   };
   candidateRefs: EdgeAutobaseOptimisticIntakeRefs;
   intakePosture: EdgeAutobaseOptimisticIntakePosture;
+  storageLanePosture: EdgeAutobaseOptimisticIntakeStorageLanePosture;
   boundary: EdgeAutobaseOptimisticIntakeBoundary;
   validation: EdgeAutobaseOptimisticIntakeValidation;
   reviewStatus: EdgeAutobaseOptimisticIntakeEvidenceStatus;
@@ -113,6 +130,7 @@ export function buildEdgeAutobaseOptimisticIntakeEvidenceArtifact(
   const status = determineStatus(labResult, issues);
   const candidateRefs = collectCandidateRefs(labResult);
   const intakePosture = collectIntakePosture(labResult);
+  const storageLanePosture = collectStorageLanePosture(labResult);
   const artifactId = input.artifactId ?? createArtifactId({
     emittedAt: input.emittedAt,
     ...(input.sourcePath ? { sourcePath: input.sourcePath } : {}),
@@ -144,6 +162,7 @@ export function buildEdgeAutobaseOptimisticIntakeEvidenceArtifact(
     },
     candidateRefs,
     intakePosture,
+    storageLanePosture,
     boundary: buildBoundary(),
     validation: {
       status,
@@ -154,6 +173,7 @@ export function buildEdgeAutobaseOptimisticIntakeEvidenceArtifact(
       nonWriterBeforeAppend: issues.includes("candidate-writable-before-append") === false,
       ackWriterAcceptancePresent: issues.includes("ack-writer-acceptance-missing") === false,
       appendSuccessAcceptanceBlocked: issues.includes("append-success-treated-as-acceptance") === false,
+      storageLanePosturePresent: issues.includes("storage-lane-posture-missing-or-unsafe") === false,
       unsafeSeamRefsBlocked: issues.includes("unsafe-seam-ref") === false,
       unsafeClaimsBlocked: issues.includes("truth-authority-settlement-or-state-claim") === false,
       issues,
@@ -193,6 +213,7 @@ function validateLabResult(labResult: JsonRecord | undefined, original: unknown)
 
   const refs = collectCandidateRefs(labResult);
   const labPosture = isRecord(labResult.labPosture) ? labResult.labPosture : {};
+  const storageLanePosture = isRecord(labResult.storageLanePosture) ? labResult.storageLanePosture : {};
   const nonClaims = isRecord(labResult.nonClaims) ? labResult.nonClaims : {};
   const allRefs = [
     refs.acceptedCandidateWriterRef,
@@ -233,6 +254,9 @@ function validateLabResult(labResult: JsonRecord | undefined, original: unknown)
   ) {
     issues.push("backend-or-seam-overclaim");
   }
+  if (!validStorageLanePosture(storageLanePosture)) {
+    issues.push("storage-lane-posture-missing-or-unsafe");
+  }
   if (
     nonClaims.truthClaimed === true ||
     nonClaims.completionClaimed === true ||
@@ -259,12 +283,49 @@ function determineStatus(
     issues.includes("candidate-writable-before-append") ||
     issues.includes("append-success-treated-as-acceptance") ||
     issues.includes("backend-or-seam-overclaim") ||
+    issues.includes("storage-lane-posture-missing-or-unsafe") ||
     issues.includes("truth-authority-settlement-or-state-claim")
   ) {
     return "edge-autobase-optimistic-intake-guardrail-blocked";
   }
   if (issues.length > 0) return "edge-autobase-optimistic-intake-incomplete-evidence";
   return "edge-autobase-optimistic-intake-valid-evidence";
+}
+
+function collectStorageLanePosture(labResult: JsonRecord | undefined): EdgeAutobaseOptimisticIntakeStorageLanePosture {
+  const posture = isRecord(labResult?.storageLanePosture) ? labResult.storageLanePosture : {};
+  const intendedStorageLane = stringValue(posture.intendedStorageLane);
+  const inputSemanticUnit = stringValue(posture.inputSemanticUnit);
+  const result: EdgeAutobaseOptimisticIntakeStorageLanePosture = {
+    requiresPromotedProjectionEventInput: posture.requiresPromotedProjectionEventInput === true,
+    sandboxedOnly: posture.sandboxedOnly === true,
+    productionBackendPromoted: posture.productionBackendPromoted === true,
+    storageRecordPromoted: posture.storageRecordPromoted === true,
+    edgeStateMigration: posture.edgeStateMigration === true,
+    appendSuccessIsAcceptance: posture.appendSuccessIsAcceptance === true,
+    linearizationIsTruth: posture.linearizationIsTruth === true,
+    replicaVisibilityIsContinuity: posture.replicaVisibilityIsContinuity === true,
+    wallClockDefinesCausalOrder: posture.wallClockDefinesCausalOrder === true,
+    discoveryAbsenceIsFailure: posture.discoveryAbsenceIsFailure === true,
+  };
+  if (intendedStorageLane) result.intendedStorageLane = intendedStorageLane;
+  if (inputSemanticUnit) result.inputSemanticUnit = inputSemanticUnit;
+  return result;
+}
+
+function validStorageLanePosture(posture: JsonRecord): boolean {
+  return posture.intendedStorageLane === "bounded_autobase_equivalent_linearization" &&
+    posture.inputSemanticUnit === "mesh_ecology_local_layer_projection_event" &&
+    posture.requiresPromotedProjectionEventInput === true &&
+    posture.sandboxedOnly === true &&
+    posture.productionBackendPromoted === false &&
+    posture.storageRecordPromoted === false &&
+    posture.edgeStateMigration === false &&
+    posture.appendSuccessIsAcceptance === false &&
+    posture.linearizationIsTruth === false &&
+    posture.replicaVisibilityIsContinuity === false &&
+    posture.wallClockDefinesCausalOrder === false &&
+    posture.discoveryAbsenceIsFailure === false;
 }
 
 function collectCandidateRefs(labResult: JsonRecord | undefined): EdgeAutobaseOptimisticIntakeRefs {

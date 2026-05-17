@@ -42,6 +42,20 @@ function validOptimisticIntakeLabResult(): any {
       sshSeam: false,
       wallClockDefinesCausalOrder: false,
     },
+    storageLanePosture: {
+      intendedStorageLane: "bounded_autobase_equivalent_linearization",
+      inputSemanticUnit: "mesh_ecology_local_layer_projection_event",
+      requiresPromotedProjectionEventInput: true,
+      sandboxedOnly: true,
+      productionBackendPromoted: false,
+      storageRecordPromoted: false,
+      edgeStateMigration: false,
+      appendSuccessIsAcceptance: false,
+      linearizationIsTruth: false,
+      replicaVisibilityIsContinuity: false,
+      wallClockDefinesCausalOrder: false,
+      discoveryAbsenceIsFailure: false,
+    },
     nonClaims: {
       truthClaimed: false,
       completionClaimed: false,
@@ -79,6 +93,14 @@ test("valid Edge Autobase optimistic intake lab imports as causal evidence only"
   assert.equal(artifact.intakePosture.acceptedViaAckWriter, true);
   assert.equal(artifact.intakePosture.rejectedWithoutAckWriter, true);
   assert.equal(artifact.intakePosture.appendSuccessIsAcceptance, false);
+  assert.equal(artifact.storageLanePosture.intendedStorageLane, "bounded_autobase_equivalent_linearization");
+  assert.equal(artifact.storageLanePosture.inputSemanticUnit, "mesh_ecology_local_layer_projection_event");
+  assert.equal(artifact.storageLanePosture.requiresPromotedProjectionEventInput, true);
+  assert.equal(artifact.storageLanePosture.productionBackendPromoted, false);
+  assert.equal(artifact.storageLanePosture.appendSuccessIsAcceptance, false);
+  assert.equal(artifact.storageLanePosture.linearizationIsTruth, false);
+  assert.equal(artifact.storageLanePosture.replicaVisibilityIsContinuity, false);
+  assert.equal(artifact.validation.storageLanePosturePresent, true);
   assert.equal(artifact.validation.rejectedCandidateNotMaterialized, true);
   assert.equal(artifact.validation.nonWriterBeforeAppend, true);
   assert.equal(artifact.validation.ackWriterAcceptancePresent, true);

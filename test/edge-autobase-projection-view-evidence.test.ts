@@ -64,6 +64,20 @@ function validProjectionView() {
       replicatedStateClaimed: false,
       canonicalHistoryClaimed: false,
     },
+    storageLanePosture: {
+      intendedStorageLane: "bounded_autobase_equivalent_linearization",
+      inputSemanticUnit: "mesh_ecology_local_layer_projection_event",
+      requiresPromotedProjectionEventInput: true,
+      sandboxedOnly: true,
+      productionBackendPromoted: false,
+      storageRecordPromoted: false,
+      edgeStateMigration: false,
+      appendSuccessIsAcceptance: false,
+      linearizationIsTruth: false,
+      replicaVisibilityIsContinuity: false,
+      wallClockDefinesCausalOrder: false,
+      discoveryAbsenceIsFailure: false,
+    },
     nonClaims: {
       truthClaimed: false,
       completionClaimed: false,
@@ -100,6 +114,14 @@ test("valid Edge Autobase projection view imports as collaborative evidence only
   assert.equal(evidence.orderingEvidence.collaborativeProjectionViewCandidate, true);
   assert.equal(evidence.orderingEvidence.wallClockDefinesCausalOrder, false);
   assert.equal(evidence.orderingEvidence.appendSuccessIsAcceptance, false);
+  assert.equal(evidence.storageLanePosture.intendedStorageLane, "bounded_autobase_equivalent_linearization");
+  assert.equal(evidence.storageLanePosture.inputSemanticUnit, "mesh_ecology_local_layer_projection_event");
+  assert.equal(evidence.storageLanePosture.requiresPromotedProjectionEventInput, true);
+  assert.equal(evidence.storageLanePosture.productionBackendPromoted, false);
+  assert.equal(evidence.storageLanePosture.appendSuccessIsAcceptance, false);
+  assert.equal(evidence.storageLanePosture.linearizationIsTruth, false);
+  assert.equal(evidence.storageLanePosture.replicaVisibilityIsContinuity, false);
+  assert.equal(evidence.validation.storageLanePosturePresent, true);
   assert.equal(evidence.boundary.opensAutobase, false);
   assert.equal(evidence.boundary.opensCorestore, false);
   assert.equal(evidence.boundary.claimsDurableState, false);

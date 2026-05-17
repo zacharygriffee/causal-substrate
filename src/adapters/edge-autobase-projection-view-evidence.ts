@@ -56,9 +56,25 @@ export interface EdgeAutobaseProjectionViewValidation {
   causalFrontierRefsPresent: boolean;
   sourceRefsPresent: boolean;
   sandboxedAutobaseViewPosturePresent: boolean;
+  storageLanePosturePresent: boolean;
   unsafeSeamRefsBlocked: boolean;
   unsafeClaimsBlocked: boolean;
   issues: string[];
+}
+
+export interface EdgeAutobaseStorageLanePosture {
+  intendedStorageLane?: string;
+  inputSemanticUnit?: string;
+  requiresPromotedProjectionEventInput: boolean;
+  sandboxedOnly: boolean;
+  productionBackendPromoted: boolean;
+  storageRecordPromoted: boolean;
+  edgeStateMigration: boolean;
+  appendSuccessIsAcceptance: boolean;
+  linearizationIsTruth: boolean;
+  replicaVisibilityIsContinuity: boolean;
+  wallClockDefinesCausalOrder: boolean;
+  discoveryAbsenceIsFailure: boolean;
 }
 
 export interface EdgeAutobaseProjectionViewEvidenceArtifact {
@@ -81,6 +97,7 @@ export interface EdgeAutobaseProjectionViewEvidenceArtifact {
     derivedFromAutobaseView: boolean;
     collaborativeProjectionViewCandidate: boolean;
   };
+  storageLanePosture: EdgeAutobaseStorageLanePosture;
   boundary: EdgeAutobaseProjectionViewBoundary;
   validation: EdgeAutobaseProjectionViewValidation;
   reviewStatus: EdgeAutobaseProjectionViewEvidenceStatus;
@@ -106,6 +123,7 @@ export function buildEdgeAutobaseProjectionViewEvidenceArtifact(
   const projectionView = isRecord(input.projectionView) ? input.projectionView : undefined;
   const refs = collectProjectionViewRefs(projectionView);
   const orderingEvidence = collectOrderingEvidence(projectionView);
+  const storageLanePosture = collectStorageLanePosture(projectionView);
   const issues = validateProjectionView(projectionView, input.projectionView, refs, orderingEvidence);
   const status = determineStatus(projectionView, issues);
   const sourceArtifactKind = stringValue(projectionView?.artifactKind);
@@ -131,6 +149,7 @@ export function buildEdgeAutobaseProjectionViewEvidenceArtifact(
     },
     projectionViewRefs: refs,
     orderingEvidence,
+    storageLanePosture,
     boundary: buildBoundary(),
     validation: {
       status,
@@ -142,6 +161,7 @@ export function buildEdgeAutobaseProjectionViewEvidenceArtifact(
       causalFrontierRefsPresent: issues.includes("causal-frontier-refs-missing") === false,
       sourceRefsPresent: issues.includes("source-refs-missing") === false,
       sandboxedAutobaseViewPosturePresent: issues.includes("sandboxed-autobase-view-posture-missing-or-unsafe") === false,
+      storageLanePosturePresent: issues.includes("storage-lane-posture-missing-or-unsafe") === false,
       unsafeSeamRefsBlocked: issues.includes("unsafe-seam-ref") === false,
       unsafeClaimsBlocked: issues.includes("truth-authority-state-or-backend-claim") === false,
       issues,
@@ -221,6 +241,7 @@ function validateProjectionView(
   if (!projectionView) return ["projection-view-not-object"];
 
   const posture = isRecord(projectionView.viewPosture) ? projectionView.viewPosture : {};
+  const storageLanePosture = isRecord(projectionView.storageLanePosture) ? projectionView.storageLanePosture : {};
   const nonClaims = isRecord(projectionView.nonClaims) ? projectionView.nonClaims : {};
   const allRefs = [
     refs.viewId,
@@ -268,6 +289,9 @@ function validateProjectionView(
   ) {
     issues.push("sandboxed-autobase-view-posture-missing-or-unsafe");
   }
+  if (!validStorageLanePosture(storageLanePosture)) {
+    issues.push("storage-lane-posture-missing-or-unsafe");
+  }
   if (orderingEvidence.wallClockDefinesCausalOrder || orderingEvidence.appendSuccessIsAcceptance) {
     issues.push("wall-clock-or-append-success-ordering-overclaim");
   }
@@ -299,12 +323,49 @@ function determineStatus(
     issues.includes("unsafe-seam-ref") ||
     issues.includes("truth-authority-state-or-backend-claim") ||
     issues.includes("sandboxed-autobase-view-posture-missing-or-unsafe") ||
+    issues.includes("storage-lane-posture-missing-or-unsafe") ||
     issues.includes("wall-clock-or-append-success-ordering-overclaim")
   ) {
     return "edge-autobase-projection-view-guardrail-blocked";
   }
   if (issues.length > 0) return "edge-autobase-projection-view-incomplete-evidence";
   return "edge-autobase-projection-view-valid-evidence";
+}
+
+function collectStorageLanePosture(projectionView: JsonRecord | undefined): EdgeAutobaseStorageLanePosture {
+  const posture = isRecord(projectionView?.storageLanePosture) ? projectionView.storageLanePosture : {};
+  const intendedStorageLane = stringValue(posture.intendedStorageLane);
+  const inputSemanticUnit = stringValue(posture.inputSemanticUnit);
+  const result: EdgeAutobaseStorageLanePosture = {
+    requiresPromotedProjectionEventInput: posture.requiresPromotedProjectionEventInput === true,
+    sandboxedOnly: posture.sandboxedOnly === true,
+    productionBackendPromoted: posture.productionBackendPromoted === true,
+    storageRecordPromoted: posture.storageRecordPromoted === true,
+    edgeStateMigration: posture.edgeStateMigration === true,
+    appendSuccessIsAcceptance: posture.appendSuccessIsAcceptance === true,
+    linearizationIsTruth: posture.linearizationIsTruth === true,
+    replicaVisibilityIsContinuity: posture.replicaVisibilityIsContinuity === true,
+    wallClockDefinesCausalOrder: posture.wallClockDefinesCausalOrder === true,
+    discoveryAbsenceIsFailure: posture.discoveryAbsenceIsFailure === true,
+  };
+  if (intendedStorageLane) result.intendedStorageLane = intendedStorageLane;
+  if (inputSemanticUnit) result.inputSemanticUnit = inputSemanticUnit;
+  return result;
+}
+
+function validStorageLanePosture(posture: JsonRecord): boolean {
+  return posture.intendedStorageLane === "bounded_autobase_equivalent_linearization" &&
+    posture.inputSemanticUnit === "mesh_ecology_local_layer_projection_event" &&
+    posture.requiresPromotedProjectionEventInput === true &&
+    posture.sandboxedOnly === true &&
+    posture.productionBackendPromoted === false &&
+    posture.storageRecordPromoted === false &&
+    posture.edgeStateMigration === false &&
+    posture.appendSuccessIsAcceptance === false &&
+    posture.linearizationIsTruth === false &&
+    posture.replicaVisibilityIsContinuity === false &&
+    posture.wallClockDefinesCausalOrder === false &&
+    posture.discoveryAbsenceIsFailure === false;
 }
 
 function buildBoundary(): EdgeAutobaseProjectionViewBoundary {

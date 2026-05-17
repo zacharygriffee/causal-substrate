@@ -40,11 +40,41 @@ function validFrontierCandidate(): any {
     ],
     basis: {
       orderingSource: "autobase_linearization",
+      autobaseBackendOpened: true,
+      fixtureOnly: false,
+      sandboxedAutobaseLab: true,
       wallClockDefinesCausalOrder: false,
       headsRequired: true,
       writerRefsRequired: true,
       sourceRefsRequired: true,
       lineageRefsRequired: true,
+    },
+    labPosture: {
+      ownerRepo: "mesh-ecology-edge",
+      proofScope: "sandboxed_two_writer_autobase_frontier_lab",
+      fixtureOnly: false,
+      autobaseBackend: true,
+      writesAutobase: true,
+      writesDurableLocalLayerState: false,
+      productionLocalLayerState: false,
+      localStoreRootIsIntegrationSeam: false,
+      httpSeam: false,
+      sshSeam: false,
+      wallClockDefinesCausalOrder: false,
+    },
+    storageLanePosture: {
+      intendedStorageLane: "bounded_autobase_equivalent_linearization",
+      inputSemanticUnit: "mesh_ecology_local_layer_projection_event",
+      requiresPromotedProjectionEventInput: true,
+      sandboxedOnly: true,
+      productionBackendPromoted: false,
+      storageRecordPromoted: false,
+      edgeStateMigration: false,
+      appendSuccessIsAcceptance: false,
+      linearizationIsTruth: false,
+      replicaVisibilityIsContinuity: false,
+      wallClockDefinesCausalOrder: false,
+      discoveryAbsenceIsFailure: false,
     },
     nonClaims: {
       truthClaimed: false,
@@ -80,6 +110,14 @@ test("valid local-layer frontier candidate imports as causal evidence only", () 
   assert.equal(artifact.orderingEvidence.orderingSource, "autobase_linearization");
   assert.equal(artifact.orderingEvidence.wallClockDefinesCausalOrder, false);
   assert.equal(artifact.orderingEvidence.collaborativeCausalOrderCandidate, "autobase-or-equivalent-linearization");
+  assert.equal(artifact.storageLanePosture.intendedStorageLane, "bounded_autobase_equivalent_linearization");
+  assert.equal(artifact.storageLanePosture.inputSemanticUnit, "mesh_ecology_local_layer_projection_event");
+  assert.equal(artifact.storageLanePosture.requiresPromotedProjectionEventInput, true);
+  assert.equal(artifact.storageLanePosture.productionBackendPromoted, false);
+  assert.equal(artifact.storageLanePosture.appendSuccessIsAcceptance, false);
+  assert.equal(artifact.storageLanePosture.linearizationIsTruth, false);
+  assert.equal(artifact.storageLanePosture.replicaVisibilityIsContinuity, false);
+  assert.equal(artifact.validation.storageLanePosturePresent, true);
   assert.equal(artifact.boundary.opensAutobase, false);
   assert.equal(artifact.boundary.opensCorestore, false);
   assert.equal(artifact.boundary.writesContinuityRecords, false);
@@ -303,7 +341,6 @@ test("frontier candidate blocks Autobase backend claims outside sandboxed Edge l
   });
 
   assert.equal(artifact.reviewStatus, "local-layer-frontier-candidate-guardrail-blocked");
-  assert.ok(artifact.rejections.includes("ordering-source-missing-or-unsupported"));
   assert.ok(artifact.rejections.includes("backend-overclaim"));
   assert.ok(artifact.rejections.includes("backend-or-seam-overclaim"));
   assert.equal(artifact.boundary.opensAutobase, false);

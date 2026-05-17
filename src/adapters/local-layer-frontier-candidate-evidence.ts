@@ -59,6 +59,21 @@ export interface LocalLayerFrontierCandidateOrderingEvidence {
   collaborativeCausalOrderCandidate: "autobase-or-equivalent-linearization";
 }
 
+export interface AutobaseStorageLanePosture {
+  intendedStorageLane?: string;
+  inputSemanticUnit?: string;
+  requiresPromotedProjectionEventInput: boolean;
+  sandboxedOnly: boolean;
+  productionBackendPromoted: boolean;
+  storageRecordPromoted: boolean;
+  edgeStateMigration: boolean;
+  appendSuccessIsAcceptance: boolean;
+  linearizationIsTruth: boolean;
+  replicaVisibilityIsContinuity: boolean;
+  wallClockDefinesCausalOrder: boolean;
+  discoveryAbsenceIsFailure: boolean;
+}
+
 export interface LocalLayerFrontierCandidateEvidenceValidation {
   status: LocalLayerFrontierCandidateEvidenceStatus;
   parseableObject: boolean;
@@ -71,6 +86,7 @@ export interface LocalLayerFrontierCandidateEvidenceValidation {
   wallClockCausalOrderBlocked: boolean;
   unsafeSeamRefsBlocked: boolean;
   unsafeClaimsBlocked: boolean;
+  storageLanePosturePresent: boolean;
   issues: string[];
 }
 
@@ -88,6 +104,7 @@ export interface LocalLayerFrontierCandidateEvidenceArtifact {
   };
   frontierRefs: LocalLayerFrontierCandidateRefs;
   orderingEvidence: LocalLayerFrontierCandidateOrderingEvidence;
+  storageLanePosture: AutobaseStorageLanePosture;
   boundary: LocalLayerFrontierCandidateEvidenceBoundary;
   validation: LocalLayerFrontierCandidateEvidenceValidation;
   reviewStatus: LocalLayerFrontierCandidateEvidenceStatus;
@@ -112,6 +129,7 @@ export function buildLocalLayerFrontierCandidateEvidenceArtifact(
   const status = determineStatus(candidate, issues);
   const frontierRefs = collectFrontierRefs(candidate);
   const orderingEvidence = collectOrderingEvidence(candidate);
+  const storageLanePosture = collectStorageLanePosture(candidate);
   const artifactId = input.artifactId ?? createArtifactId({
     emittedAt: input.emittedAt,
     ...(input.sourcePath ? { sourcePath: input.sourcePath } : {}),
@@ -138,6 +156,7 @@ export function buildLocalLayerFrontierCandidateEvidenceArtifact(
     },
     frontierRefs,
     orderingEvidence,
+    storageLanePosture,
     boundary: buildBoundary(),
     validation: {
       status,
@@ -151,6 +170,7 @@ export function buildLocalLayerFrontierCandidateEvidenceArtifact(
       wallClockCausalOrderBlocked: issues.includes("wall-clock-causal-order-claim") === false,
       unsafeSeamRefsBlocked: issues.includes("unsafe-seam-ref") === false,
       unsafeClaimsBlocked: issues.includes("truth-authority-settlement-or-consensus-claim") === false,
+      storageLanePosturePresent: issues.includes("storage-lane-posture-missing-or-unsafe") === false,
       issues,
     },
     reviewStatus: status === "local-layer-frontier-candidate-valid-evidence"
@@ -193,6 +213,7 @@ function validateFrontierCandidate(candidate: JsonRecord | undefined, original: 
   const sourceHappeningRefs = stringArray(candidate.sourceHappeningRefs);
   const basis = isRecord(candidate.basis) ? candidate.basis : {};
   const labPosture = isRecord(candidate.labPosture) ? candidate.labPosture : {};
+  const storageLanePosture = isRecord(candidate.storageLanePosture) ? candidate.storageLanePosture : {};
   const nonClaims = isRecord(candidate.nonClaims) ? candidate.nonClaims : {};
   const sandboxedAutobaseLab = isSandboxedAutobaseLabPosture(basis, labPosture);
   const allRefs = [
@@ -255,6 +276,9 @@ function validateFrontierCandidate(candidate: JsonRecord | undefined, original: 
   ) {
     issues.push("backend-or-seam-overclaim");
   }
+  if (!validStorageLanePosture(storageLanePosture)) {
+    issues.push("storage-lane-posture-missing-or-unsafe");
+  }
   if (
     (labPosture.autobaseBackend === true || labPosture.writesAutobase === true) &&
     !sandboxedAutobaseLab
@@ -275,12 +299,49 @@ function determineStatus(
     issues.includes("wall-clock-causal-order-claim") ||
     issues.includes("truth-authority-settlement-or-consensus-claim") ||
     issues.includes("backend-overclaim") ||
-    issues.includes("backend-or-seam-overclaim")
+    issues.includes("backend-or-seam-overclaim") ||
+    issues.includes("storage-lane-posture-missing-or-unsafe")
   ) {
     return "local-layer-frontier-candidate-guardrail-blocked";
   }
   if (issues.length > 0) return "local-layer-frontier-candidate-incomplete-evidence";
   return "local-layer-frontier-candidate-valid-evidence";
+}
+
+function collectStorageLanePosture(candidate: JsonRecord | undefined): AutobaseStorageLanePosture {
+  const posture = isRecord(candidate?.storageLanePosture) ? candidate.storageLanePosture : {};
+  const intendedStorageLane = stringValue(posture.intendedStorageLane);
+  const inputSemanticUnit = stringValue(posture.inputSemanticUnit);
+  const result: AutobaseStorageLanePosture = {
+    requiresPromotedProjectionEventInput: posture.requiresPromotedProjectionEventInput === true,
+    sandboxedOnly: posture.sandboxedOnly === true,
+    productionBackendPromoted: posture.productionBackendPromoted === true,
+    storageRecordPromoted: posture.storageRecordPromoted === true,
+    edgeStateMigration: posture.edgeStateMigration === true,
+    appendSuccessIsAcceptance: posture.appendSuccessIsAcceptance === true,
+    linearizationIsTruth: posture.linearizationIsTruth === true,
+    replicaVisibilityIsContinuity: posture.replicaVisibilityIsContinuity === true,
+    wallClockDefinesCausalOrder: posture.wallClockDefinesCausalOrder === true,
+    discoveryAbsenceIsFailure: posture.discoveryAbsenceIsFailure === true,
+  };
+  if (intendedStorageLane) result.intendedStorageLane = intendedStorageLane;
+  if (inputSemanticUnit) result.inputSemanticUnit = inputSemanticUnit;
+  return result;
+}
+
+function validStorageLanePosture(posture: JsonRecord): boolean {
+  return posture.intendedStorageLane === "bounded_autobase_equivalent_linearization" &&
+    posture.inputSemanticUnit === "mesh_ecology_local_layer_projection_event" &&
+    posture.requiresPromotedProjectionEventInput === true &&
+    posture.sandboxedOnly === true &&
+    posture.productionBackendPromoted === false &&
+    posture.storageRecordPromoted === false &&
+    posture.edgeStateMigration === false &&
+    posture.appendSuccessIsAcceptance === false &&
+    posture.linearizationIsTruth === false &&
+    posture.replicaVisibilityIsContinuity === false &&
+    posture.wallClockDefinesCausalOrder === false &&
+    posture.discoveryAbsenceIsFailure === false;
 }
 
 function collectFrontierRefs(candidate: JsonRecord | undefined): LocalLayerFrontierCandidateRefs {

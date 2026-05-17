@@ -50,6 +50,7 @@ If you are approaching the repo as a human trying to place it in the ecosystem, 
 - [`docs/multiwriter-boundary.md`](./docs/multiwriter-boundary.md): exact line between continuity-bearing histories and any future shared-writer surfaces
 - [`docs/shared-artifacts.md`](./docs/shared-artifacts.md): current artifact formalization for local-first and pre-backend work
 - [`docs/edge-promotion-fit-review.md`](./docs/edge-promotion-fit-review.md): reversible fit review for Edge local-layer promotion candidates
+- [`docs/autobase-storage-lane-fit-review.md`](./docs/autobase-storage-lane-fit-review.md): bounded Autobase storage-lane interpretation without backend ownership
 - [`docs/next-phases.md`](./docs/next-phases.md): recommended phases after the initial lab program
 - [`labs/`](./labs/README.md): lab scaffold, registry, template, and starter specs for the local lab program
 - [`prototypes/`](./prototypes/README.md): local-first prototype entrypoints built on top of the kernel
