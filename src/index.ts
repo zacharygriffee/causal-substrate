@@ -35,6 +35,7 @@ export * from "./adapters/edge-autobase-optimistic-intake-evidence.js";
 export * from "./adapters/edge-storage-lane-candidate-evidence.js";
 export * from "./adapters/edge-repo-work-packet-projection-log-candidate-evidence.js";
 export * from "./adapters/edge-repo-work-packet-projection-log-apply-result-evidence.js";
+export * from "./adapters/edge-repo-work-packet-autobase-apply-lab-evidence.js";
 export * from "./adapters/edge-local-layer-node-role-lab-evidence.js";
 export * from "./adapters/resolution-refinement-evidence.js";
 export * from "./adapters/edge-self-work-trace-evidence.js";
