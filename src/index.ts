@@ -32,6 +32,7 @@ export * from "./adapters/edge-projection-replica-view-evidence.js";
 export * from "./adapters/edge-autobase-projection-view-evidence.js";
 export * from "./adapters/local-layer-frontier-candidate-evidence.js";
 export * from "./adapters/edge-autobase-optimistic-intake-evidence.js";
+export * from "./adapters/edge-storage-lane-candidate-evidence.js";
 export * from "./adapters/resolution-refinement-evidence.js";
 export * from "./adapters/edge-self-work-trace-evidence.js";
 export * from "./prototypes/continuity-workstation.js";
