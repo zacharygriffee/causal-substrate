@@ -41,6 +41,7 @@ export * from "./adapters/edge-local-layer-writer-admission-v0-evidence.js";
 export * from "./adapters/edge-local-layer-operator-recorded-promotion-decision-evidence.js";
 export * from "./adapters/edge-local-layer-production-backend-wedge-evidence.js";
 export * from "./adapters/edge-local-layer-disposable-production-shaped-backend-lab-evidence.js";
+export * from "./adapters/edge-local-layer-production-continuity-lane-evidence.js";
 export * from "./adapters/edge-local-layer-node-role-lab-evidence.js";
 export * from "./adapters/resolution-refinement-evidence.js";
 export * from "./adapters/edge-self-work-trace-evidence.js";
