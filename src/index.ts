@@ -37,6 +37,7 @@ export * from "./adapters/edge-repo-work-packet-projection-log-candidate-evidenc
 export * from "./adapters/edge-repo-work-packet-projection-log-apply-result-evidence.js";
 export * from "./adapters/edge-repo-work-packet-autobase-apply-lab-evidence.js";
 export * from "./adapters/edge-local-layer-continuity-lane-autobase-lab-evidence.js";
+export * from "./adapters/edge-local-layer-writer-admission-v0-evidence.js";
 export * from "./adapters/edge-local-layer-node-role-lab-evidence.js";
 export * from "./adapters/resolution-refinement-evidence.js";
 export * from "./adapters/edge-self-work-trace-evidence.js";
