@@ -105,6 +105,45 @@ function productionLaneResult(overrides: Record<string, unknown> = {}) {
         sourceContinuityClaimed: false,
       },
     },
+    readerObservation: {
+      artifactKind: "edge_local_layer_production_reader_observation",
+      schemaVersion: "edge_local_layer_production_reader_observation.v0",
+      observationRef: "edge-local-layer-production-reader-observation:9999999999999999",
+      observerPath: "read-only-observer-view-replica-proof",
+      realReplicaProof: true,
+      readerRef: "local-layer-reader:operator-laptop",
+      readerDeviceRef: "edge-device:operator-laptop",
+      sourceViewKey: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      observerViewKey: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      observedResultCount: 1,
+      observedAcceptedEventCount: 1,
+      observedAcceptedEventRefs: [laneEntry.entryId],
+      observedRejectedDiagnosticCount: 0,
+      readOnlyObserverCanReadAllowedView: true,
+      observerAppendBlocked: true,
+      readOnlyObserverCannotWriteAcceptedContinuity: true,
+      replicaVisibilityIsContinuity: false,
+      viewOutputIsSourceContinuity: false,
+      authorityGranted: false,
+      transportPosture: {
+        transportKind: "corestore-protocol-stream",
+        proofScope: "in_process_second_device_shape",
+        readOnlyReplica: true,
+        liveDiscoveryRequired: false,
+        hyperswarmRequired: false,
+        httpSeam: false,
+        sshSeam: false,
+        localPathIsCanonicalSeam: false,
+      },
+      nonClaims: {
+        truthClaimed: false,
+        authorityGranted: false,
+        writerGranted: false,
+        continuityAcceptanceClaimed: false,
+        sourceContinuityClaimed: false,
+        readinessClaimed: false,
+      },
+    },
     writerRefs: [laneEntry.writerRef],
     headRefs: ["autobase-head:ffffffffffffffffffffffff"],
     linearizedEntryRefs: ["autobase-linearized-entry:local-layer-continuity-lane:0:111111111111111111111111"],
@@ -150,6 +189,9 @@ test("valid Edge production continuity lane result emits causal review evidence"
   assert.equal(evidence.refs.sourceResultRef, "edge-local-layer-production-continuity-lane:eeeeeeeeeeeeeeeeeeeeeeee");
   assert.equal(evidence.refs.laneEntryRef, "local-layer-continuity-lane-entry:aaaaaaaaaaaaaaaaaaaaaaaa");
   assert.equal(evidence.laneEntry.semanticEventEventKind, "repo_work_packet_continuity_event");
+  assert.equal(evidence.readerObservation.realReplicaProof, true);
+  assert.equal(evidence.readerObservation.readOnlyObserverCannotWriteAcceptedContinuity, true);
+  assert.equal(evidence.validation.readerObservationSafe, true);
   assert.equal(evidence.causalInterpretation.observerRelativeContinuity, true);
   assert.equal(evidence.causalInterpretation.causalTruthClaimed, false);
   assert.equal(evidence.boundary.evidenceOnly, true);
@@ -226,5 +268,25 @@ test("production continuity lane evidence blocks view-as-source continuity", () 
 
   assert.equal(evidence.reviewStatus, "edge-local-layer-production-continuity-lane-guardrail-blocked");
   assert.equal(evidence.rejections.includes("accepted-events-view-missing-or-unsafe"), true);
+  assert.equal(evidence.rejections.includes("production-continuity-authority-or-truth-overclaim"), true);
+});
+
+test("production continuity lane evidence requires safe read-only observer replica proof", () => {
+  const base = productionLaneResult();
+  const evidence = buildEdgeLocalLayerProductionContinuityLaneEvidenceArtifact({
+    productionLaneResult: {
+      ...base,
+      readerObservation: {
+        ...(base.readerObservation as Record<string, unknown>),
+        observerAppendBlocked: false,
+        readOnlyObserverCannotWriteAcceptedContinuity: false,
+        authorityGranted: true,
+      },
+    },
+    emittedAt: EMITTED_AT,
+  });
+
+  assert.equal(evidence.reviewStatus, "edge-local-layer-production-continuity-lane-guardrail-blocked");
+  assert.equal(evidence.rejections.includes("reader-observation-missing-or-unsafe"), true);
   assert.equal(evidence.rejections.includes("production-continuity-authority-or-truth-overclaim"), true);
 });

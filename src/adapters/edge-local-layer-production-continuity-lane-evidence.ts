@@ -15,6 +15,8 @@ const EXPECTED_SCHEMA = "edge_local_layer_production_continuity_lane_result.v0";
 const EXPECTED_LANE = "local-layer-continuity-lane:operator-owned-devices";
 const EXPECTED_NAMESPACE = "local-layer/continuity";
 const EXPECTED_EVENT_KIND = "repo_work_packet_continuity_event";
+const EXPECTED_READER_OBSERVATION_KIND = "edge_local_layer_production_reader_observation";
+const EXPECTED_READER_OBSERVATION_SCHEMA = "edge_local_layer_production_reader_observation.v0";
 
 export function buildEdgeLocalLayerProductionContinuityLaneEvidenceArtifact({
   productionLaneResult,
@@ -29,9 +31,10 @@ export function buildEdgeLocalLayerProductionContinuityLaneEvidenceArtifact({
   const refs = collectRefs(result);
   const laneEntry = collectLaneEntry(result);
   const acceptedEventsView = collectAcceptedEventsView(result);
+  const readerObservation = collectReaderObservation(result);
   const productionPosture = collectProductionPosture(result);
   const backend = collectBackend(result);
-  const issues = validateResult(result, productionLaneResult, refs, laneEntry, acceptedEventsView, productionPosture, backend);
+  const issues = validateResult(result, productionLaneResult, refs, laneEntry, acceptedEventsView, readerObservation, productionPosture, backend);
   const status = statusFor(result, issues);
   const id = artifactId ?? `causal-edge-local-layer-production-continuity-lane-evidence:${hash(JSON.stringify({
     emittedAt,
@@ -55,6 +58,7 @@ export function buildEdgeLocalLayerProductionContinuityLaneEvidenceArtifact({
     backend,
     laneEntry,
     acceptedEventsView,
+    readerObservation,
     productionPosture,
     causalInterpretation: {
       interpretationKind: "observer-relative-local-layer-production-continuity-lane-evidence",
@@ -88,6 +92,7 @@ export function buildEdgeLocalLayerProductionContinuityLaneEvidenceArtifact({
       backendSafe: issues.includes("backend-missing-or-unsafe") === false,
       laneEntrySafe: issues.includes("lane-entry-missing-or-unsafe") === false,
       acceptedEventsViewSafe: issues.includes("accepted-events-view-missing-or-unsafe") === false,
+      readerObservationSafe: issues.includes("reader-observation-missing-or-unsafe") === false,
       productionPostureSafe: issues.includes("production-posture-missing-or-unsafe") === false,
       refsSafe: issues.includes("unsafe-ref") === false,
       noAuthorityOrTruthOverclaim: issues.includes("production-continuity-authority-or-truth-overclaim") === false,
@@ -101,6 +106,7 @@ export function buildEdgeLocalLayerProductionContinuityLaneEvidenceArtifact({
           "production-continuity-lane-result-observed",
           "causal-substrate-review-is-not-truth",
           "accepted-lane-entry-is-not-mesh-truth",
+          "read-only-observer-replica-proof-observed",
           "edge-state-migration-still-false",
         ]
       : ["edge-local-layer-production-continuity-lane-not-reviewable"],
@@ -114,6 +120,7 @@ function validateResult(
   refs: ReturnType<typeof collectRefs>,
   laneEntry: ReturnType<typeof collectLaneEntry>,
   acceptedEventsView: ReturnType<typeof collectAcceptedEventsView>,
+  readerObservation: ReturnType<typeof collectReaderObservation>,
   productionPosture: ReturnType<typeof collectProductionPosture>,
   backend: ReturnType<typeof collectBackend>,
 ) {
@@ -134,12 +141,13 @@ function validateResult(
   ) {
     issues.push("refs-missing");
   }
-  if (allRefs(refs, backend, laneEntry, acceptedEventsView).some(unsafeRef)) issues.push("unsafe-ref");
+  if (allRefs(refs, backend, laneEntry, acceptedEventsView, readerObservation).some(unsafeRef)) issues.push("unsafe-ref");
   if (!validBackend(backend)) issues.push("backend-missing-or-unsafe");
   if (!validLaneEntry(laneEntry)) issues.push("lane-entry-missing-or-unsafe");
   if (!validAcceptedEventsView(acceptedEventsView, laneEntry)) issues.push("accepted-events-view-missing-or-unsafe");
+  if (!validReaderObservation(readerObservation, laneEntry)) issues.push("reader-observation-missing-or-unsafe");
   if (!validProductionPosture(productionPosture)) issues.push("production-posture-missing-or-unsafe");
-  if (overclaim(result, laneEntry, acceptedEventsView, productionPosture, backend)) {
+  if (overclaim(result, laneEntry, acceptedEventsView, readerObservation, productionPosture, backend)) {
     issues.push("production-continuity-authority-or-truth-overclaim");
   }
   return [...new Set(issues)];
@@ -247,6 +255,44 @@ function collectAcceptedEventsView(result: JsonRecord | undefined) {
   };
 }
 
+function collectReaderObservation(result: JsonRecord | undefined) {
+  const observation = isRecord(result?.readerObservation) ? result.readerObservation : {};
+  const transportPosture = isRecord(observation.transportPosture) ? observation.transportPosture : {};
+  const nonClaims = isRecord(observation.nonClaims) ? observation.nonClaims : {};
+  return {
+    artifactKind: stringValue(observation.artifactKind),
+    schemaVersion: stringValue(observation.schemaVersion),
+    observationRef: stringValue(observation.observationRef),
+    observerPath: stringValue(observation.observerPath),
+    realReplicaProof: observation.realReplicaProof === true,
+    readerRef: stringValue(observation.readerRef),
+    readerDeviceRef: stringValue(observation.readerDeviceRef),
+    sourceViewKey: stringValue(observation.sourceViewKey),
+    observerViewKey: stringValue(observation.observerViewKey),
+    observedResultCount: numberValue(observation.observedResultCount),
+    observedAcceptedEventCount: numberValue(observation.observedAcceptedEventCount),
+    observedAcceptedEventRefs: stringArray(observation.observedAcceptedEventRefs),
+    observedRejectedDiagnosticCount: numberValue(observation.observedRejectedDiagnosticCount),
+    readOnlyObserverCanReadAllowedView: observation.readOnlyObserverCanReadAllowedView === true,
+    observerAppendBlocked: observation.observerAppendBlocked === true,
+    readOnlyObserverCannotWriteAcceptedContinuity: observation.readOnlyObserverCannotWriteAcceptedContinuity === true,
+    replicaVisibilityIsContinuity: observation.replicaVisibilityIsContinuity === true,
+    viewOutputIsSourceContinuity: observation.viewOutputIsSourceContinuity === true,
+    authorityGranted: observation.authorityGranted === true,
+    transportKind: stringValue(transportPosture.transportKind),
+    readOnlyReplica: transportPosture.readOnlyReplica === true,
+    httpSeam: transportPosture.httpSeam === true,
+    sshSeam: transportPosture.sshSeam === true,
+    localPathIsCanonicalSeam: transportPosture.localPathIsCanonicalSeam === true,
+    truthClaimed: nonClaims.truthClaimed === true,
+    authorityNonClaimGranted: nonClaims.authorityGranted === true,
+    writerGranted: nonClaims.writerGranted === true,
+    continuityAcceptanceClaimed: nonClaims.continuityAcceptanceClaimed === true,
+    sourceContinuityClaimed: nonClaims.sourceContinuityClaimed === true,
+    readinessClaimed: nonClaims.readinessClaimed === true,
+  };
+}
+
 function collectProductionPosture(result: JsonRecord | undefined) {
   const posture = isRecord(result?.productionPosture) ? result.productionPosture : {};
   const nonClaims = isRecord(result?.nonClaims) ? result.nonClaims : {};
@@ -333,6 +379,41 @@ function validAcceptedEventsView(
     view.sourceContinuityClaimed === false;
 }
 
+function validReaderObservation(
+  observation: ReturnType<typeof collectReaderObservation>,
+  entry: ReturnType<typeof collectLaneEntry>,
+) {
+  return observation.artifactKind === EXPECTED_READER_OBSERVATION_KIND &&
+    observation.schemaVersion === EXPECTED_READER_OBSERVATION_SCHEMA &&
+    observation.observationRef !== undefined &&
+    observation.observerPath === "read-only-observer-view-replica-proof" &&
+    observation.realReplicaProof === true &&
+    observation.readerRef !== undefined &&
+    observation.readerDeviceRef !== undefined &&
+    observation.sourceViewKey !== undefined &&
+    observation.observerViewKey !== undefined &&
+    observation.observedResultCount >= 1 &&
+    observation.observedAcceptedEventCount >= 1 &&
+    observation.observedAcceptedEventRefs.includes(entry.entryId ?? "") &&
+    observation.readOnlyObserverCanReadAllowedView === true &&
+    observation.observerAppendBlocked === true &&
+    observation.readOnlyObserverCannotWriteAcceptedContinuity === true &&
+    observation.replicaVisibilityIsContinuity === false &&
+    observation.viewOutputIsSourceContinuity === false &&
+    observation.authorityGranted === false &&
+    observation.transportKind === "corestore-protocol-stream" &&
+    observation.readOnlyReplica === true &&
+    observation.httpSeam === false &&
+    observation.sshSeam === false &&
+    observation.localPathIsCanonicalSeam === false &&
+    observation.truthClaimed === false &&
+    observation.authorityNonClaimGranted === false &&
+    observation.writerGranted === false &&
+    observation.continuityAcceptanceClaimed === false &&
+    observation.sourceContinuityClaimed === false &&
+    observation.readinessClaimed === false;
+}
+
 function validProductionPosture(posture: ReturnType<typeof collectProductionPosture>) {
   return posture.productionLanePromoted === true &&
     posture.productionLocalLayerContinuity === true &&
@@ -356,6 +437,7 @@ function overclaim(
   result: JsonRecord,
   laneEntry: ReturnType<typeof collectLaneEntry>,
   view: ReturnType<typeof collectAcceptedEventsView>,
+  readerObservation: ReturnType<typeof collectReaderObservation>,
   posture: ReturnType<typeof collectProductionPosture>,
   backend: ReturnType<typeof collectBackend>,
 ) {
@@ -375,6 +457,18 @@ function overclaim(
     view.truthClaimed ||
     view.authorityGranted ||
     view.sourceContinuityClaimed ||
+    readerObservation.replicaVisibilityIsContinuity ||
+    readerObservation.viewOutputIsSourceContinuity ||
+    readerObservation.authorityGranted ||
+    readerObservation.httpSeam ||
+    readerObservation.sshSeam ||
+    readerObservation.localPathIsCanonicalSeam ||
+    readerObservation.truthClaimed ||
+    readerObservation.authorityNonClaimGranted ||
+    readerObservation.writerGranted ||
+    readerObservation.continuityAcceptanceClaimed ||
+    readerObservation.sourceContinuityClaimed ||
+    readerObservation.readinessClaimed ||
     posture.edgeStateMigration ||
     posture.defaultBackendSwitch ||
     posture.jsonCompatibilityRemoved ||
@@ -394,6 +488,7 @@ function allRefs(
   backend: ReturnType<typeof collectBackend>,
   entry: ReturnType<typeof collectLaneEntry>,
   view: ReturnType<typeof collectAcceptedEventsView>,
+  readerObservation: ReturnType<typeof collectReaderObservation>,
 ) {
   return [
     refs.sourceResultRef,
@@ -413,6 +508,12 @@ function allRefs(
     ...entry.sourceRefs,
     view.viewRef,
     ...view.acceptedEventRefs,
+    readerObservation.observationRef,
+    readerObservation.readerRef,
+    readerObservation.readerDeviceRef,
+    readerObservation.sourceViewKey,
+    readerObservation.observerViewKey,
+    ...readerObservation.observedAcceptedEventRefs,
   ].filter((ref): ref is string => typeof ref === "string");
 }
 
