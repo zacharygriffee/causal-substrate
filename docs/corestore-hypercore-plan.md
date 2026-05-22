@@ -46,8 +46,13 @@ Favor:
 
 Working split:
 
-- `Hypercore` = truth-bearing continuity and artifact streams
+- `Hypercore` = append-only continuity-bearing and artifact streams
 - `Hyperbee` = lookup, discovery, and catalog overlays
+
+This is storage-lane posture, not a truth claim. Append success,
+linearization, replication visibility, and replayability are evidence for
+continuity reconstruction; they do not create authority, settlement, global
+truth, policy execution, or adjacent-repo acceptance by themselves.
 
 ## First Serious Artifact Classes
 
@@ -77,7 +82,8 @@ Add Hyperbee only when we need:
 - named artifact lookup
 - concern indexing
 
-Hyperbee should not become the primary truth substrate unless strong implementation pressure justifies it.
+Hyperbee should not become the primary continuity substrate unless strong
+implementation pressure justifies it.
 
 ## Current Decision After Corestore-Only Pressure
 

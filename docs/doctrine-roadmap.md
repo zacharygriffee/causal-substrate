@@ -1,5 +1,9 @@
 # Doctrine Roadmap
 
+Status: historical roadmap. Use `stable-posture.md`, `consumer-adoption.md`,
+current source/tests, and active repo-family packets before using this roadmap
+as implementation direction.
+
 ## Phase 1: Ontology Freeze
 
 Deliver:

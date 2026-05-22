@@ -1,5 +1,9 @@
 # Phase 117 Edge Causal Fixture Consumption
 
+Status: historical review evidence. This document records a completed static
+fixture review path and must not be treated as a current command surface,
+runtime integration, replay instruction, or active Edge import plan.
+
 Phase 117 lets `causal-substrate` consume the Edge Phase 116A causal continuity adjacent review packet fixture as a static review input only.
 
 The static fixture path in this repository is:
