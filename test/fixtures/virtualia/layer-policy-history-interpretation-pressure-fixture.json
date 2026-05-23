@@ -1,0 +1,58 @@
+{
+  "artifactKind": "causal_policy_history_interpretation_pressure_fixture",
+  "schema": "causal-substrate/policy-history-interpretation-pressure-fixture/v1",
+  "schemaVersion": 1,
+  "fixtureId": "fixture:causal-substrate:virtualia-layer-policy-history-pressure:moon-garden:rbc-v1",
+  "reviewScope": "virtualia_layer_opaque_pressure_chain",
+  "sourceChain": {
+    "sourceRepos": [
+      "Virtualia",
+      "mesh-ecology-layer",
+      "mesh-ecology-edge"
+    ],
+    "policyHistoryRef": "policy-history:moon-garden:rbc-v1",
+    "effectiveRulebookViewRef": "effective-rulebook-view:moon-garden:baseline",
+    "compatibilityBoundaryRef": "compatibility-boundary:moon-garden:seed-admission",
+    "targetContextReviewRef": "assessment:target-context-review:missing-quorum",
+    "eventRef": "event:moon-garden:new-quorum-evidence"
+  },
+  "interpretationPressure": {
+    "pressureKind": "policy_history_interpretation_pressure",
+    "causalQuestion": "Does the opaque pressure chain need preserved policy-history context before any adjacent repo reinterprets rulebook compatibility?",
+    "historyRefsPreservedOnly": true,
+    "effectiveRulebookTreatedAsView": true,
+    "compatibilityBoundaryTreatedAsContext": true,
+    "targetContextReviewTreatedAsAssessmentRef": true,
+    "eventTreatedAsEvidenceRef": true
+  },
+  "observedChainStatuses": {
+    "layerAdmissionStatus": "not_admitted",
+    "layerLiftStatus": "not_performed",
+    "virtualiaAdmissionStatus": "not_admitted",
+    "quorumStatus": "not_satisfied",
+    "rbcInterpretationStatus": "not_interpreted",
+    "edgeReviewPosture": "operator_review_only"
+  },
+  "causalBoundary": {
+    "fixtureOnly": true,
+    "interpretationOnly": true,
+    "evidenceOnly": true,
+    "executesPolicy": false,
+    "grantsAuthority": false,
+    "decidesTruth": false,
+    "selectsStorage": false,
+    "schedulesWork": false,
+    "admitsContent": false,
+    "liftsContent": false,
+    "interpretsRulebook": false,
+    "claimsQuorumSatisfied": false,
+    "claimsCanonicalHistory": false,
+    "writesContinuityRecords": false,
+    "publishesToMesh": false
+  },
+  "reviewFinding": {
+    "status": "interpretation_pressure_recorded",
+    "summary": "Causal-substrate may preserve policy-history interpretation pressure for review, but the owning repos keep admission, rulebook interpretation, operator review, and storage decisions.",
+    "nextSafeUse": "Adjacent consumers may cite this fixture as a causal-history review prompt only."
+  }
+}
