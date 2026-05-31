@@ -9,9 +9,11 @@ import { promisify } from "node:util";
 import {
   assertEdgeLayerSeamHistoryObservationResult,
   assertEdgeLayerSeamHistoryEdgeProjectionFixture,
+  assertEdgeLayerSeamHistoryEdgeProjectionHandoffReadback,
   assertEdgeLayerSeamHistoryObservationReadbackContract,
   buildEdgeLayerSeamHistoryObservationResult,
   buildEdgeLayerSeamHistoryEdgeProjectionFixture,
+  buildEdgeLayerSeamHistoryEdgeProjectionHandoffReadback,
   buildEdgeLayerSeamHistoryObservationReadbackContract,
   buildEdgeLayerSeamHistoryObservationResultFromJson,
   CAUSAL_EDGE_LAYER_SEAM_HISTORY_OBSERVATION_ARTIFACT_KIND,
@@ -720,6 +722,59 @@ test("Edge projection fixture guardrail matrix rejects projection overclaims", (
       () => assertEdgeLayerSeamHistoryEdgeProjectionFixture(mutated),
       new RegExp(String(finalSegment)),
     );
+  }
+});
+
+test("Edge projection handoff fixture readback preserves handoff refs and non-claims", async () => {
+  const tempRoot = await mkdtemp(path.join(tmpdir(), "causal-seam-history-handoff-readback-"));
+  const fixturePath = path.join(tempRoot, "edge-projection-fixture.json");
+  try {
+    const observationResult = buildEdgeLayerSeamHistoryObservationResult({
+      seamHistory: operationShapedSeamHistory(),
+      emittedAt: "2026-05-31T12:18:30.000Z",
+      sourcePath: "layer-owned-edge-seam-status:edge-projection-handoff-readback",
+    });
+    const fixture = buildEdgeLayerSeamHistoryEdgeProjectionFixture({
+      observationResult,
+      emittedAt: "2026-05-31T12:18:31.000Z",
+    });
+    await writeFile(fixturePath, JSON.stringify(fixture, null, 2), "utf8");
+    const readbackFixture = JSON.parse(await readFile(fixturePath, "utf8"));
+
+    const readback = buildEdgeLayerSeamHistoryEdgeProjectionHandoffReadback({
+      fixture: readbackFixture,
+      emittedAt: "2026-05-31T12:18:32.000Z",
+    });
+
+    assertEdgeLayerSeamHistoryEdgeProjectionHandoffReadback(readback);
+    assert.equal(readback.reviewStatus, "edge-layer-seam-history-edge-projection-handoff-readback-valid");
+    assert.equal(readback.validation.handoffFixtureConsumed, true);
+    assert.equal(readback.validation.sourceRefsPreserved, true);
+    assert.equal(readback.readback.fixtureReadable, true);
+    assert.equal(readback.readback.handoffEnvelopeReadable, true);
+    assert.equal(readback.readback.sourceRefsPreserved, true);
+    assert.equal(readback.readback.classificationSummaryPreserved, true);
+    assert.equal(readback.readback.proofLabelPreserved, true);
+    assert.equal(readback.readback.nonClaimsPreserved, true);
+    assert.equal(readback.source.sourceFixtureArtifactId, fixture.artifactId);
+    assert.equal(readback.source.sourceObservationArtifactId, observationResult.artifactId);
+    assert.equal(readback.source.sourceObservationNormalizedProofLabel, "local_supplied_material");
+    assert.deepEqual(readback.preservedSourceRefs.requestIds, [
+      "edge-layer-report-only-seam-request:causal-observation:linked",
+      "edge-layer-report-only-seam-request:causal-observation:damaged",
+    ]);
+    assert.deepEqual(readback.preservedSourceRefs.receiptHashes, [
+      `sha256:${"b".repeat(64)}`,
+      `sha256:${"d".repeat(64)}`,
+    ]);
+    assert.equal(readback.boundary.writesEdgeProjection, false);
+    assert.equal(readback.boundary.acceptsCanonicalHistory, false);
+    assert.equal(readback.boundary.admitsLayerEvidence, false);
+    assert.equal(readback.boundary.interpretsRbc, false);
+    assert.equal(readback.boundary.grantsAuthority, false);
+    assert.equal(readback.boundary.promotesReferents, false);
+  } finally {
+    await rm(tempRoot, { recursive: true, force: true });
   }
 });
 
