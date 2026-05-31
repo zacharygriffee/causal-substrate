@@ -8,6 +8,7 @@ import test from "node:test";
 import {
   activeManagedCorestoreCount,
   assertEdgeLayerSeamHistoryObservationResult,
+  buildEdgeLayerSeamHistoryHyperswarmInputLaneReadiness,
   createHyperswarmReplicationSwarm,
   parseHyperswarmBootstrap,
   runEdgeLayerSeamHistoryHyperswarmReader,
@@ -164,6 +165,43 @@ function seamHistoryMaterial(): any {
     ],
   };
 }
+
+test("Hyperswarm seam-history input lane readiness is explicit without claiming proof", () => {
+  const ready = buildEdgeLayerSeamHistoryHyperswarmInputLaneReadiness({
+    durableCorestoreReaderAvailable: true,
+    hyperswarmFactoryAvailable: true,
+    namespaceParts: ["hyperswarm-seam-history-reader", "readiness"],
+    seamHistoryInputAvailable: true,
+  });
+
+  assert.equal(ready.status, "edge-layer-seam-history-hyperswarm-input-lane-ready-to-run");
+  assert.equal(ready.gates.durableCorestoreReaderAvailable, true);
+  assert.equal(ready.gates.hyperswarmFactoryAvailable, true);
+  assert.equal(ready.gates.namespaceConfigured, true);
+  assert.equal(ready.gates.seamHistoryInputAvailable, true);
+  assert.equal(ready.proofPosture.readinessOnly, true);
+  assert.equal(ready.proofPosture.dhtHyperswarmProofClaimedNow, false);
+  assert.equal(ready.proofPosture.canReachHigherProofRungOnlyAfterRun, true);
+  assert.equal(ready.boundary.opensSwarm, false);
+  assert.equal(ready.boundary.opensCorestore, false);
+  assert.equal(ready.boundary.readsDurableHistory, false);
+  assert.equal(ready.boundary.writesRecords, false);
+  assert.deepEqual(ready.issues, []);
+
+  const incomplete = buildEdgeLayerSeamHistoryHyperswarmInputLaneReadiness({
+    durableCorestoreReaderAvailable: true,
+    hyperswarmFactoryAvailable: false,
+    namespaceParts: [],
+    seamHistoryInputAvailable: false,
+  });
+
+  assert.equal(incomplete.status, "edge-layer-seam-history-hyperswarm-input-lane-incomplete");
+  assert.equal(incomplete.proofPosture.dhtHyperswarmProofClaimedNow, false);
+  assert.equal(incomplete.proofPosture.canReachHigherProofRungOnlyAfterRun, false);
+  assert.ok(incomplete.issues.includes("hyperswarm-factory-missing"));
+  assert.ok(incomplete.issues.includes("namespace-parts-missing"));
+  assert.ok(incomplete.issues.includes("seam-history-input-missing"));
+});
 
 test(
   "Hyperswarm reader consumes replicated durable Edge Layer seam history before observing it",

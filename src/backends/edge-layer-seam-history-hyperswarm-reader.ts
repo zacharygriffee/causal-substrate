@@ -21,6 +21,13 @@ export const EDGE_LAYER_SEAM_HISTORY_DURABLE_RECORD_KIND =
 export const EDGE_LAYER_SEAM_HISTORY_DURABLE_RECORD_SCHEMA =
   "causal-substrate/edge-layer-seam-history-durable-record/v1" as const;
 
+export const EDGE_LAYER_SEAM_HISTORY_HYPERSWARM_INPUT_LANE_READINESS_SCHEMA =
+  "causal-substrate/edge-layer-seam-history-hyperswarm-input-lane-readiness/v1" as const;
+
+export type EdgeLayerSeamHistoryHyperswarmInputLaneReadinessStatus =
+  | "edge-layer-seam-history-hyperswarm-input-lane-ready-to-run"
+  | "edge-layer-seam-history-hyperswarm-input-lane-incomplete";
+
 export interface EdgeLayerSeamHistoryDurableRecord {
   artifactKind: typeof EDGE_LAYER_SEAM_HISTORY_DURABLE_RECORD_KIND;
   schema: typeof EDGE_LAYER_SEAM_HISTORY_DURABLE_RECORD_SCHEMA;
@@ -54,6 +61,35 @@ export interface EdgeLayerSeamHistoryHyperswarmReaderReport {
   readerProof: EdgeLayerSeamHistoryHyperswarmReaderProof;
 }
 
+export interface EdgeLayerSeamHistoryHyperswarmInputLaneReadiness {
+  schema: typeof EDGE_LAYER_SEAM_HISTORY_HYPERSWARM_INPUT_LANE_READINESS_SCHEMA;
+  schemaVersion: 1;
+  status: EdgeLayerSeamHistoryHyperswarmInputLaneReadinessStatus;
+  gates: {
+    durableCorestoreReaderAvailable: boolean;
+    hyperswarmFactoryAvailable: boolean;
+    namespaceConfigured: boolean;
+    seamHistoryInputAvailable: boolean;
+  };
+  proofPosture: {
+    readinessOnly: true;
+    dhtHyperswarmProofClaimedNow: false;
+    canReachHigherProofRungOnlyAfterRun: boolean;
+    higherProofRequiresDurableCorestoreRead: true;
+    higherProofRequiresHyperswarmTransport: true;
+    higherProofRequiresReplicatedRecordReadback: true;
+  };
+  boundary: {
+    opensSwarm: false;
+    opensCorestore: false;
+    readsDurableHistory: false;
+    writesRecords: false;
+    publishesToMesh: false;
+    grantsAuthority: false;
+  };
+  issues: string[];
+}
+
 export interface EdgeLayerSeamHistoryHyperswarmReaderOptions {
   storageDirA: string;
   storageDirB: string;
@@ -71,6 +107,13 @@ export interface EdgeLayerSeamHistoryHyperswarmReaderOptions {
   replicationTimeoutMs?: number | undefined;
 }
 
+export interface BuildEdgeLayerSeamHistoryHyperswarmInputLaneReadinessInput {
+  durableCorestoreReaderAvailable: boolean;
+  hyperswarmFactoryAvailable: boolean;
+  namespaceParts?: string[] | undefined;
+  seamHistoryInputAvailable: boolean;
+}
+
 type OpenedConcern = Awaited<ReturnType<typeof openConcernCores>>;
 
 const DEFAULT_SWARM_FLUSH_TIMEOUT_MS = 30_000;
@@ -79,6 +122,49 @@ const DEFAULT_JOIN_OPTIONS = {
   client: true,
   server: true,
 } satisfies Record<string, boolean>;
+
+export function buildEdgeLayerSeamHistoryHyperswarmInputLaneReadiness(
+  input: BuildEdgeLayerSeamHistoryHyperswarmInputLaneReadinessInput,
+): EdgeLayerSeamHistoryHyperswarmInputLaneReadiness {
+  const namespaceConfigured = Array.isArray(input.namespaceParts) && input.namespaceParts.length > 0;
+  const issues: string[] = [];
+  if (!input.durableCorestoreReaderAvailable) issues.push("durable-corestore-reader-missing");
+  if (!input.hyperswarmFactoryAvailable) issues.push("hyperswarm-factory-missing");
+  if (!namespaceConfigured) issues.push("namespace-parts-missing");
+  if (!input.seamHistoryInputAvailable) issues.push("seam-history-input-missing");
+  const ready = issues.length === 0;
+
+  return {
+    schema: EDGE_LAYER_SEAM_HISTORY_HYPERSWARM_INPUT_LANE_READINESS_SCHEMA,
+    schemaVersion: 1,
+    status: ready
+      ? "edge-layer-seam-history-hyperswarm-input-lane-ready-to-run"
+      : "edge-layer-seam-history-hyperswarm-input-lane-incomplete",
+    gates: {
+      durableCorestoreReaderAvailable: input.durableCorestoreReaderAvailable,
+      hyperswarmFactoryAvailable: input.hyperswarmFactoryAvailable,
+      namespaceConfigured,
+      seamHistoryInputAvailable: input.seamHistoryInputAvailable,
+    },
+    proofPosture: {
+      readinessOnly: true,
+      dhtHyperswarmProofClaimedNow: false,
+      canReachHigherProofRungOnlyAfterRun: ready,
+      higherProofRequiresDurableCorestoreRead: true,
+      higherProofRequiresHyperswarmTransport: true,
+      higherProofRequiresReplicatedRecordReadback: true,
+    },
+    boundary: {
+      opensSwarm: false,
+      opensCorestore: false,
+      readsDurableHistory: false,
+      writesRecords: false,
+      publishesToMesh: false,
+      grantsAuthority: false,
+    },
+    issues,
+  };
+}
 
 export async function runEdgeLayerSeamHistoryHyperswarmReader(
   options: EdgeLayerSeamHistoryHyperswarmReaderOptions,
