@@ -8,12 +8,14 @@ import { promisify } from "node:util";
 
 import {
   assertEdgeLayerSeamHistoryObservationContractSnapshot,
+  assertEdgeLayerSeamHistoryOutwardLaneCompletionGate,
   assertEdgeLayerSeamHistoryObservationResult,
   assertEdgeLayerSeamHistoryEdgeProjectionConsumerFixture,
   assertEdgeLayerSeamHistoryEdgeProjectionFixture,
   assertEdgeLayerSeamHistoryEdgeProjectionHandoffReadback,
   assertEdgeLayerSeamHistoryObservationReadbackContract,
   buildEdgeLayerSeamHistoryObservationContractSnapshot,
+  buildEdgeLayerSeamHistoryOutwardLaneCompletionGate,
   buildEdgeLayerSeamHistoryObservationResult,
   buildEdgeLayerSeamHistoryEdgeProjectionConsumerFixture,
   buildEdgeLayerSeamHistoryEdgeProjectionFixture,
@@ -493,6 +495,67 @@ test("observation contract snapshot preserves stable consumer fields", () => {
   assert.equal(snapshot.boundary.admitsLayerEvidence, false);
   assert.equal(snapshot.boundary.interpretsRbc, false);
   assert.equal(snapshot.boundary.grantsAuthority, false);
+});
+
+test("outward lane completion gate marks observation lane complete without overclaims", () => {
+  const result = buildEdgeLayerSeamHistoryObservationResult({
+    seamHistory: operationShapedSeamHistory(),
+    emittedAt: "2026-05-31T12:03:45.000Z",
+    sourcePath: "layer-owned-edge-seam-status:outward-lane-completion",
+    inputReadByCausalSubstrate: true,
+  });
+
+  const gate = buildEdgeLayerSeamHistoryOutwardLaneCompletionGate(result);
+
+  assertEdgeLayerSeamHistoryOutwardLaneCompletionGate(gate);
+  assert.equal(gate.sourceObservation.artifactId, result.artifactId);
+  assert.equal(gate.sourceObservation.schema, result.schema);
+  assert.equal(gate.completion.currentLane, "edge_layer_seam_history_observation_v0");
+  assert.equal(gate.completion.currentLaneComplete, true);
+  assert.equal(gate.completion.suitableForEdgeProjectionHandoff, true);
+  assert.equal(gate.completion.suitableForLayerReceiptRuntimeEvidenceReview, true);
+  assert.equal(
+    gate.completion.strongestProofRung,
+    "local_causal_observation_over_supplied_seam_history_material",
+  );
+  assert.equal(gate.completion.normalizedProofLabel, "local_supplied_material");
+  assert.equal(gate.completion.decentralizedSeamProofClaimed, false);
+  assert.deepEqual(gate.checks, {
+    operationRan: true,
+    seamHistoryInputConsumed: true,
+    linkedPairClassified: true,
+    damagedOrUnlinkedPairClassified: true,
+    sourceIdsAndHashesPreserved: true,
+    sourceReposPreserved: true,
+    durableRefsPreserved: true,
+    writerRefsPreserved: true,
+    linkageStatusPreserved: true,
+    noCanonicalHistoryClaim: true,
+    noLayerAdmissionClaim: true,
+    noRbcInterpretationClaim: true,
+    noAuthorityClaim: true,
+  });
+  assert.deepEqual(gate.sourceRefs.requestIds, [
+    "edge-layer-report-only-seam-request:causal-observation:linked",
+    "edge-layer-report-only-seam-request:causal-observation:damaged",
+  ]);
+  assert.deepEqual(gate.sourceRefs.receiptHashes, [
+    `sha256:${"b".repeat(64)}`,
+    `sha256:${"d".repeat(64)}`,
+  ]);
+  assert.equal(gate.nextConsumers.edgeMayProjectObservationCandidate, true);
+  assert.equal(gate.nextConsumers.layerMayReviewReceiptRuntimeEvidenceLater, true);
+  assert.equal(gate.nextConsumers.meshPublicationDeferred, true);
+  assert.equal(gate.nextConsumers.authorityDecisionDeferred, true);
+  assert.equal(gate.boundary.gateOnly, true);
+  assert.equal(gate.boundary.writesProjectionArtifact, false);
+  assert.equal(gate.boundary.acceptsCanonicalHistory, false);
+  assert.equal(gate.boundary.admitsLayerEvidence, false);
+  assert.equal(gate.boundary.interpretsRbc, false);
+  assert.equal(gate.boundary.grantsAuthority, false);
+  assert.equal(gate.boundary.publishesToMesh, false);
+  assert.equal(gate.boundary.writesProductionContinuity, false);
+  assert.deepEqual(gate.issues, []);
 });
 
 test("supplied material guardrail matrix keeps local input from self-claiming higher lanes", () => {

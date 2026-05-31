@@ -21,6 +21,14 @@ export const CAUSAL_EDGE_LAYER_SEAM_HISTORY_OBSERVATION_CONTRACT_SNAPSHOT_SCHEMA
 export const CAUSAL_EDGE_LAYER_SEAM_HISTORY_OBSERVATION_CONTRACT_SNAPSHOT_ARTIFACT_KIND =
   "causal-edge-layer-seam-history-observation-contract-snapshot" as const;
 
+export const CAUSAL_EDGE_LAYER_SEAM_HISTORY_OUTWARD_LANE_COMPLETION_GATE_SCHEMA =
+  "causal-substrate/edge-layer-seam-history-outward-lane-completion-gate/v1" as const;
+
+export const CAUSAL_EDGE_LAYER_SEAM_HISTORY_OUTWARD_LANE_COMPLETION_GATE_SCHEMA_VERSION = 1 as const;
+
+export const CAUSAL_EDGE_LAYER_SEAM_HISTORY_OUTWARD_LANE_COMPLETION_GATE_ARTIFACT_KIND =
+  "causal-edge-layer-seam-history-outward-lane-completion-gate" as const;
+
 export type EdgeLayerSeamHistoryObservationStatus =
   | "edge-layer-seam-history-observation-emitted"
   | "edge-layer-seam-history-observation-valid"
@@ -440,6 +448,64 @@ export interface EdgeLayerSeamHistoryObservationContractSnapshot {
   };
 }
 
+export interface EdgeLayerSeamHistoryOutwardLaneCompletionGate {
+  artifactKind: typeof CAUSAL_EDGE_LAYER_SEAM_HISTORY_OUTWARD_LANE_COMPLETION_GATE_ARTIFACT_KIND;
+  schema: typeof CAUSAL_EDGE_LAYER_SEAM_HISTORY_OUTWARD_LANE_COMPLETION_GATE_SCHEMA;
+  schemaVersion: typeof CAUSAL_EDGE_LAYER_SEAM_HISTORY_OUTWARD_LANE_COMPLETION_GATE_SCHEMA_VERSION;
+  sourceObservation: {
+    artifactId: string;
+    schema: typeof CAUSAL_EDGE_LAYER_SEAM_HISTORY_OBSERVATION_SCHEMA;
+    schemaVersion: typeof CAUSAL_EDGE_LAYER_SEAM_HISTORY_OBSERVATION_SCHEMA_VERSION;
+  };
+  completion: {
+    currentLane: "edge_layer_seam_history_observation_v0";
+    currentLaneComplete: boolean;
+    suitableForEdgeProjectionHandoff: boolean;
+    suitableForLayerReceiptRuntimeEvidenceReview: boolean;
+    strongestProofRung: EdgeLayerSeamHistoryProofRung;
+    normalizedProofLabel: EdgeLayerSeamHistoryNormalizedProofLabel;
+    decentralizedSeamProofClaimed: boolean;
+  };
+  checks: {
+    operationRan: boolean;
+    seamHistoryInputConsumed: boolean;
+    linkedPairClassified: boolean;
+    damagedOrUnlinkedPairClassified: boolean;
+    sourceIdsAndHashesPreserved: boolean;
+    sourceReposPreserved: boolean;
+    durableRefsPreserved: boolean;
+    writerRefsPreserved: boolean;
+    linkageStatusPreserved: boolean;
+    noCanonicalHistoryClaim: boolean;
+    noLayerAdmissionClaim: boolean;
+    noRbcInterpretationClaim: boolean;
+    noAuthorityClaim: boolean;
+  };
+  sourceRefs: {
+    requestIds: string[];
+    requestHashes: string[];
+    receiptIds: string[];
+    receiptHashes: string[];
+  };
+  nextConsumers: {
+    edgeMayProjectObservationCandidate: boolean;
+    layerMayReviewReceiptRuntimeEvidenceLater: boolean;
+    meshPublicationDeferred: true;
+    authorityDecisionDeferred: true;
+  };
+  boundary: {
+    gateOnly: true;
+    writesProjectionArtifact: false;
+    acceptsCanonicalHistory: false;
+    admitsLayerEvidence: false;
+    interpretsRbc: false;
+    grantsAuthority: false;
+    publishesToMesh: false;
+    writesProductionContinuity: false;
+  };
+  issues: string[];
+}
+
 export interface BuildEdgeLayerSeamHistoryObservationInput {
   seamHistory: unknown;
   emittedAt: string;
@@ -700,6 +766,107 @@ export function assertEdgeLayerSeamHistoryObservationContractSnapshot(
   assertEqual(nonClaims.authorityGranted, false, "nonClaims.authorityGranted");
   const boundary = assertObject(candidate.boundary, "boundary");
   assertEqual(boundary.consumerSnapshotOnly, true, "boundary.consumerSnapshotOnly");
+  assertEqual(boundary.acceptsCanonicalHistory, false, "boundary.acceptsCanonicalHistory");
+  assertEqual(boundary.admitsLayerEvidence, false, "boundary.admitsLayerEvidence");
+  assertEqual(boundary.interpretsRbc, false, "boundary.interpretsRbc");
+  assertEqual(boundary.grantsAuthority, false, "boundary.grantsAuthority");
+  assertEqual(boundary.publishesToMesh, false, "boundary.publishesToMesh");
+  assertEqual(boundary.writesProductionContinuity, false, "boundary.writesProductionContinuity");
+}
+
+export function buildEdgeLayerSeamHistoryOutwardLaneCompletionGate(
+  observationResult: unknown,
+): EdgeLayerSeamHistoryOutwardLaneCompletionGate {
+  assertEdgeLayerSeamHistoryObservationResult(observationResult);
+  const checks = {
+    operationRan: observationResult.reviewStatus === "edge-layer-seam-history-observation-emitted",
+    seamHistoryInputConsumed: observationResult.validation.seamHistoryInputConsumed,
+    linkedPairClassified: observationResult.validation.linkedPairDetected,
+    damagedOrUnlinkedPairClassified: observationResult.validation.damagedOrUnlinkedPairDetected,
+    sourceIdsAndHashesPreserved: observationResult.validation.sourceIdsAndHashesPreserved,
+    sourceReposPreserved: observationResult.validation.sourceReposPreserved,
+    durableRefsPreserved: observationResult.validation.durableRefsPreserved,
+    writerRefsPreserved: observationResult.validation.writerRefsPreserved,
+    linkageStatusPreserved: observationResult.validation.linkageStatusPreserved,
+    noCanonicalHistoryClaim: observationResult.validation.noCanonicalHistoryClaim,
+    noLayerAdmissionClaim: observationResult.validation.noLayerAdmissionClaim,
+    noRbcInterpretationClaim: observationResult.validation.noRbcInterpretationClaim,
+    noAuthorityClaim: observationResult.validation.noAuthorityClaim,
+  };
+  const currentLaneComplete = Object.values(checks).every((value) => value === true);
+
+  return {
+    artifactKind: CAUSAL_EDGE_LAYER_SEAM_HISTORY_OUTWARD_LANE_COMPLETION_GATE_ARTIFACT_KIND,
+    schema: CAUSAL_EDGE_LAYER_SEAM_HISTORY_OUTWARD_LANE_COMPLETION_GATE_SCHEMA,
+    schemaVersion: CAUSAL_EDGE_LAYER_SEAM_HISTORY_OUTWARD_LANE_COMPLETION_GATE_SCHEMA_VERSION,
+    sourceObservation: {
+      artifactId: observationResult.artifactId,
+      schema: observationResult.schema,
+      schemaVersion: observationResult.schemaVersion,
+    },
+    completion: {
+      currentLane: "edge_layer_seam_history_observation_v0",
+      currentLaneComplete,
+      suitableForEdgeProjectionHandoff:
+        currentLaneComplete &&
+        observationResult.compatibilityEnvelope.projectionSuitability === "edge_projection_candidate",
+      suitableForLayerReceiptRuntimeEvidenceReview: observationResult.layerReceiptFit.receiptIdsAndHashesPreserved,
+      strongestProofRung: observationResult.proof.strongestProofRung,
+      normalizedProofLabel: observationResult.proof.normalizedProofLabel,
+      decentralizedSeamProofClaimed: observationResult.proof.decentralizedSeamProofClaimed,
+    },
+    checks,
+    sourceRefs: {
+      requestIds: uniqueStrings(observationResult.observations.map((observation) => observation.request.id)),
+      requestHashes: uniqueStrings(observationResult.observations.map((observation) => observation.request.hash)),
+      receiptIds: uniqueStrings(observationResult.observations.map((observation) => observation.receipt.id)),
+      receiptHashes: uniqueStrings(observationResult.observations.map((observation) => observation.receipt.hash)),
+    },
+    nextConsumers: {
+      edgeMayProjectObservationCandidate: currentLaneComplete,
+      layerMayReviewReceiptRuntimeEvidenceLater: observationResult.layerReceiptFit.receiptIdsAndHashesPreserved,
+      meshPublicationDeferred: true,
+      authorityDecisionDeferred: true,
+    },
+    boundary: {
+      gateOnly: true,
+      writesProjectionArtifact: false,
+      acceptsCanonicalHistory: false,
+      admitsLayerEvidence: false,
+      interpretsRbc: false,
+      grantsAuthority: false,
+      publishesToMesh: false,
+      writesProductionContinuity: false,
+    },
+    issues: currentLaneComplete ? [] : observationResult.validation.issues,
+  };
+}
+
+export function assertEdgeLayerSeamHistoryOutwardLaneCompletionGate(
+  value: unknown,
+): asserts value is EdgeLayerSeamHistoryOutwardLaneCompletionGate {
+  const candidate = assertObject(value, "edge layer seam history outward lane completion gate");
+  assertEqual(
+    candidate.artifactKind,
+    CAUSAL_EDGE_LAYER_SEAM_HISTORY_OUTWARD_LANE_COMPLETION_GATE_ARTIFACT_KIND,
+    "artifactKind",
+  );
+  assertEqual(candidate.schema, CAUSAL_EDGE_LAYER_SEAM_HISTORY_OUTWARD_LANE_COMPLETION_GATE_SCHEMA, "schema");
+  assertEqual(
+    candidate.schemaVersion,
+    CAUSAL_EDGE_LAYER_SEAM_HISTORY_OUTWARD_LANE_COMPLETION_GATE_SCHEMA_VERSION,
+    "schemaVersion",
+  );
+  const completion = assertObject(candidate.completion, "completion");
+  assertEqual(completion.currentLane, "edge_layer_seam_history_observation_v0", "completion.currentLane");
+  const checks = assertObject(candidate.checks, "checks");
+  assertEqual(checks.noCanonicalHistoryClaim, true, "checks.noCanonicalHistoryClaim");
+  assertEqual(checks.noLayerAdmissionClaim, true, "checks.noLayerAdmissionClaim");
+  assertEqual(checks.noRbcInterpretationClaim, true, "checks.noRbcInterpretationClaim");
+  assertEqual(checks.noAuthorityClaim, true, "checks.noAuthorityClaim");
+  const boundary = assertObject(candidate.boundary, "boundary");
+  assertEqual(boundary.gateOnly, true, "boundary.gateOnly");
+  assertEqual(boundary.writesProjectionArtifact, false, "boundary.writesProjectionArtifact");
   assertEqual(boundary.acceptsCanonicalHistory, false, "boundary.acceptsCanonicalHistory");
   assertEqual(boundary.admitsLayerEvidence, false, "boundary.admitsLayerEvidence");
   assertEqual(boundary.interpretsRbc, false, "boundary.interpretsRbc");
