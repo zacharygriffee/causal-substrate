@@ -49,4 +49,5 @@ export * from "./adapters/edge-self-work-trace-evidence.js";
 export * from "./adapters/edge-operator-sidecar-repair-suggestion-evidence.js";
 export * from "./adapters/edge-validated-resource-ref-result-evidence.js";
 export * from "./adapters/edge-local-layer-continuity-event-evidence.js";
+export * from "./adapters/edge-layer-seam-history-observation.js";
 export * from "./prototypes/continuity-workstation.js";
