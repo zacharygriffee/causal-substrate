@@ -457,3 +457,62 @@ test("Edge projection fixture is derived from observation result without writing
   assert.equal(fixture.boundary.opensEdgeRuntime, false);
   assert.equal(fixture.boundary.promotesReferents, false);
 });
+
+test("Edge projection fixture guardrail matrix rejects projection overclaims", () => {
+  const observationResult = buildEdgeLayerSeamHistoryObservationResult({
+    seamHistory: operationShapedSeamHistory(),
+    emittedAt: "2026-05-31T12:17:00.000Z",
+    sourcePath: "layer-owned-edge-seam-status:edge-projection-guardrails",
+  });
+  const fixture = buildEdgeLayerSeamHistoryEdgeProjectionFixture({
+    observationResult,
+    emittedAt: "2026-05-31T12:18:00.000Z",
+  });
+
+  const overclaimCases = [
+    { path: ["boundary", "acceptsCanonicalHistory"], value: true },
+    { path: ["boundary", "admitsLayerEvidence"], value: true },
+    { path: ["boundary", "interpretsRbc"], value: true },
+    { path: ["boundary", "grantsAuthority"], value: true },
+    { path: ["boundary", "promotesReferents"], value: true },
+    { path: ["boundary", "publishesToMesh"], value: true },
+    { path: ["validation", "noCanonicalHistoryClaim"], value: false },
+    { path: ["validation", "noLayerAdmissionClaim"], value: false },
+    { path: ["validation", "noRbcInterpretationClaim"], value: false },
+    { path: ["validation", "noAuthorityClaim"], value: false },
+    { path: ["validation", "noReferentPromotion"], value: false },
+    { path: ["edgeProjectionMaterial", "compatibleRefs", 0, "acceptedAsCanonicalHistory"], value: true },
+    { path: ["edgeProjectionMaterial", "compatibleRefs", 0, "layerEvidenceAdmitted"], value: true },
+    { path: ["edgeProjectionMaterial", "compatibleRefs", 0, "rbcInterpreted"], value: true },
+    { path: ["edgeProjectionMaterial", "compatibleRefs", 0, "authorityGranted"], value: true },
+    { path: ["edgeProjectionMaterial", "compatibleRefs", 0, "referentPromoted"], value: true },
+    { path: ["edgeProjectionMaterial", "unresolvedOrDamagedRefs", 0, "acceptedAsCanonicalHistory"], value: true },
+    { path: ["edgeProjectionMaterial", "unresolvedOrDamagedRefs", 0, "layerEvidenceAdmitted"], value: true },
+    { path: ["edgeProjectionMaterial", "unresolvedOrDamagedRefs", 0, "rbcInterpreted"], value: true },
+    { path: ["edgeProjectionMaterial", "unresolvedOrDamagedRefs", 0, "authorityGranted"], value: true },
+    { path: ["edgeProjectionMaterial", "unresolvedOrDamagedRefs", 0, "referentPromoted"], value: true },
+  ] as const;
+
+  for (const overclaimCase of overclaimCases) {
+    const pathSegments = overclaimCase.path;
+    const mutated = JSON.parse(JSON.stringify(fixture));
+    let target: Record<string, unknown> | unknown[] = mutated;
+    for (const segment of pathSegments.slice(0, -1)) {
+      target = (Array.isArray(target)
+        ? target[Number(segment)]
+        : (target as Record<string, unknown>)[segment]) as Record<string, unknown> | unknown[];
+    }
+    const finalSegment = pathSegments.at(-1);
+    assert.ok(finalSegment !== undefined);
+    if (Array.isArray(target)) {
+      target[Number(finalSegment)] = overclaimCase.value;
+    } else {
+      (target as Record<string, unknown>)[finalSegment] = overclaimCase.value;
+    }
+
+    assert.throws(
+      () => assertEdgeLayerSeamHistoryEdgeProjectionFixture(mutated),
+      new RegExp(String(finalSegment)),
+    );
+  }
+});

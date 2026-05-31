@@ -196,6 +196,11 @@ export function assertEdgeLayerSeamHistoryEdgeProjectionFixture(
     "edgeProjectionMaterial.compatibilityEnvelopeKind",
   );
   assertEqual(material.compatibilityBasis, "request_receipt_linkage_only", "edgeProjectionMaterial.compatibilityBasis");
+  assertProjectionRefs(arrayRecords(material.compatibleRefs), "edgeProjectionMaterial.compatibleRefs");
+  assertProjectionRefs(
+    arrayRecords(material.unresolvedOrDamagedRefs),
+    "edgeProjectionMaterial.unresolvedOrDamagedRefs",
+  );
   const boundary = assertObject(candidate.boundary, "boundary");
   assertEqual(boundary.fixtureOnly, true, "boundary.fixtureOnly");
   assertEqual(boundary.edgeProjectionCandidateOnly, true, "boundary.edgeProjectionCandidateOnly");
@@ -210,6 +215,12 @@ export function assertEdgeLayerSeamHistoryEdgeProjectionFixture(
   assertEqual(boundary.grantsAuthority, false, "boundary.grantsAuthority");
   assertEqual(boundary.promotesReferents, false, "boundary.promotesReferents");
   assertEqual(boundary.publishesToMesh, false, "boundary.publishesToMesh");
+  const validation = assertObject(candidate.validation, "validation");
+  assertEqual(validation.noCanonicalHistoryClaim, true, "validation.noCanonicalHistoryClaim");
+  assertEqual(validation.noLayerAdmissionClaim, true, "validation.noLayerAdmissionClaim");
+  assertEqual(validation.noRbcInterpretationClaim, true, "validation.noRbcInterpretationClaim");
+  assertEqual(validation.noAuthorityClaim, true, "validation.noAuthorityClaim");
+  assertEqual(validation.noReferentPromotion, true, "validation.noReferentPromotion");
 }
 
 function parseObservationResult(value: unknown): EdgeLayerSeamHistoryObservationResult | undefined {
@@ -313,6 +324,20 @@ function buildWarnings(status: EdgeLayerSeamHistoryEdgeProjectionFixtureStatus):
   return warnings;
 }
 
+function assertProjectionRefs(refs: JsonRecord[], label: string): void {
+  refs.forEach((ref, index) => {
+    assertEqual(
+      ref.acceptedAsCanonicalHistory,
+      false,
+      `${label}[${index}].acceptedAsCanonicalHistory`,
+    );
+    assertEqual(ref.layerEvidenceAdmitted, false, `${label}[${index}].layerEvidenceAdmitted`);
+    assertEqual(ref.rbcInterpreted, false, `${label}[${index}].rbcInterpreted`);
+    assertEqual(ref.authorityGranted, false, `${label}[${index}].authorityGranted`);
+    assertEqual(ref.referentPromoted, false, `${label}[${index}].referentPromoted`);
+  });
+}
+
 function createArtifactId(input: { emittedAt: string; sourceObservationArtifactId?: string }): string {
   return `causal-edge-layer-seam-history-edge-projection-fixture:${hash(stableJson(input)).slice(0, 16)}`;
 }
@@ -340,6 +365,10 @@ function assertObject(value: unknown, label: string): JsonRecord {
     throw new Error(`${label} must be an object`);
   }
   return value;
+}
+
+function arrayRecords(value: unknown): JsonRecord[] {
+  return Array.isArray(value) ? value.filter(isRecord) : [];
 }
 
 function assertEqual(actual: unknown, expected: unknown, label: string): void {
