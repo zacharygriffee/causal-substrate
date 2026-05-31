@@ -154,6 +154,36 @@ test("Edge Layer seam-history observation classifies linked and damaged request 
     result.validation.strongestProofRung,
     "local_causal_observation_over_supplied_seam_history_material",
   );
+  assert.equal(
+    result.compatibilityEnvelope.envelopeKind,
+    "causal-edge-layer-seam-history-compatibility-envelope",
+  );
+  assert.equal(result.compatibilityEnvelope.envelopeVersion, 1);
+  assert.equal(result.compatibilityEnvelope.projectionSuitability, "edge_projection_candidate");
+  assert.equal(result.compatibilityEnvelope.compatibilityBasis, "request_receipt_linkage_only");
+  assert.deepEqual(result.compatibilityEnvelope.classificationSummary, {
+    compatibleObservationIds: [linked.observationId],
+    unresolvedOrDamagedObservationIds: [damaged.observationId],
+    linkedPairDetected: true,
+    damagedOrUnlinkedPairDetected: true,
+  });
+  assert.deepEqual(result.compatibilityEnvelope.sourceReferenceContract, {
+    requestIdsPreserved: true,
+    requestHashesPreserved: true,
+    receiptIdsPreserved: true,
+    receiptHashesPreserved: true,
+    sourceRefsPreserved: true,
+  });
+  assert.deepEqual(result.compatibilityEnvelope.consumerBoundary, {
+    edgeMayProjectLater: true,
+    consumeAsObservationOnly: true,
+    compatibleDoesNotMeanCanonical: true,
+    compatibleDoesNotAdmitLayerEvidence: true,
+    compatibleDoesNotInterpretRbc: true,
+    compatibleDoesNotGrantAuthority: true,
+    projectionDoesNotPromoteReferents: true,
+    writesProjectionArtifact: false,
+  });
 });
 
 test("Layer-owned seam status linkedPairs shape can be observed without claiming swarm proof", () => {

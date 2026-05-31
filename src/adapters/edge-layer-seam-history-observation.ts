@@ -8,6 +8,11 @@ export const CAUSAL_EDGE_LAYER_SEAM_HISTORY_OBSERVATION_SCHEMA_VERSION = 1 as co
 export const CAUSAL_EDGE_LAYER_SEAM_HISTORY_OBSERVATION_ARTIFACT_KIND =
   "causal-edge-layer-seam-history-observation" as const;
 
+export const CAUSAL_EDGE_LAYER_SEAM_HISTORY_COMPATIBILITY_ENVELOPE_KIND =
+  "causal-edge-layer-seam-history-compatibility-envelope" as const;
+
+export const CAUSAL_EDGE_LAYER_SEAM_HISTORY_COMPATIBILITY_ENVELOPE_VERSION = 1 as const;
+
 export type EdgeLayerSeamHistoryObservationStatus =
   | "edge-layer-seam-history-observation-emitted"
   | "edge-layer-seam-history-observation-valid"
@@ -109,6 +114,36 @@ export interface EdgeLayerSeamHistoryObservationProof {
   proofLabelHonest: true;
 }
 
+export interface EdgeLayerSeamHistoryCompatibilityEnvelope {
+  envelopeKind: typeof CAUSAL_EDGE_LAYER_SEAM_HISTORY_COMPATIBILITY_ENVELOPE_KIND;
+  envelopeVersion: typeof CAUSAL_EDGE_LAYER_SEAM_HISTORY_COMPATIBILITY_ENVELOPE_VERSION;
+  projectionSuitability: "edge_projection_candidate" | "not_edge_projection_ready";
+  compatibilityBasis: "request_receipt_linkage_only";
+  classificationSummary: {
+    compatibleObservationIds: string[];
+    unresolvedOrDamagedObservationIds: string[];
+    linkedPairDetected: boolean;
+    damagedOrUnlinkedPairDetected: boolean;
+  };
+  sourceReferenceContract: {
+    requestIdsPreserved: boolean;
+    requestHashesPreserved: boolean;
+    receiptIdsPreserved: boolean;
+    receiptHashesPreserved: boolean;
+    sourceRefsPreserved: boolean;
+  };
+  consumerBoundary: {
+    edgeMayProjectLater: true;
+    consumeAsObservationOnly: true;
+    compatibleDoesNotMeanCanonical: true;
+    compatibleDoesNotAdmitLayerEvidence: true;
+    compatibleDoesNotInterpretRbc: true;
+    compatibleDoesNotGrantAuthority: true;
+    projectionDoesNotPromoteReferents: true;
+    writesProjectionArtifact: false;
+  };
+}
+
 export interface EdgeLayerSeamHistoryObservationResult {
   artifactKind: typeof CAUSAL_EDGE_LAYER_SEAM_HISTORY_OBSERVATION_ARTIFACT_KIND;
   schema: typeof CAUSAL_EDGE_LAYER_SEAM_HISTORY_OBSERVATION_SCHEMA;
@@ -123,6 +158,7 @@ export interface EdgeLayerSeamHistoryObservationResult {
   };
   observationScope: EdgeLayerSeamHistoryProofRung;
   observations: EdgeLayerSeamHappeningObservation[];
+  compatibilityEnvelope: EdgeLayerSeamHistoryCompatibilityEnvelope;
   boundary: EdgeLayerSeamHistoryObservationBoundary;
   proof: EdgeLayerSeamHistoryObservationProof;
   validation: EdgeLayerSeamHistoryObservationValidation;
@@ -200,6 +236,11 @@ export function buildEdgeLayerSeamHistoryObservationResult(
     },
     observationScope: proof.strongestProofRung,
     observations,
+    compatibilityEnvelope: buildCompatibilityEnvelope({
+      observations,
+      status,
+      sourceIdsAndHashesPreserved,
+    }),
     boundary: buildBoundary(),
     proof,
     validation: {
@@ -296,6 +337,59 @@ export function assertEdgeLayerSeamHistoryObservationResult(
     assertEqual(proof.inputMaterialKind, "supplied_seam_history_material", "proof.inputMaterialKind");
     assertEqual(proof.localSuppliedMaterialOnly, true, "proof.localSuppliedMaterialOnly");
   }
+  const compatibilityEnvelope = assertObject(candidate.compatibilityEnvelope, "compatibilityEnvelope");
+  assertEqual(
+    compatibilityEnvelope.envelopeKind,
+    CAUSAL_EDGE_LAYER_SEAM_HISTORY_COMPATIBILITY_ENVELOPE_KIND,
+    "compatibilityEnvelope.envelopeKind",
+  );
+  assertEqual(
+    compatibilityEnvelope.envelopeVersion,
+    CAUSAL_EDGE_LAYER_SEAM_HISTORY_COMPATIBILITY_ENVELOPE_VERSION,
+    "compatibilityEnvelope.envelopeVersion",
+  );
+  assertEqual(
+    compatibilityEnvelope.compatibilityBasis,
+    "request_receipt_linkage_only",
+    "compatibilityEnvelope.compatibilityBasis",
+  );
+  const consumerBoundary = assertObject(compatibilityEnvelope.consumerBoundary, "compatibilityEnvelope.consumerBoundary");
+  assertEqual(consumerBoundary.edgeMayProjectLater, true, "compatibilityEnvelope.consumerBoundary.edgeMayProjectLater");
+  assertEqual(
+    consumerBoundary.consumeAsObservationOnly,
+    true,
+    "compatibilityEnvelope.consumerBoundary.consumeAsObservationOnly",
+  );
+  assertEqual(
+    consumerBoundary.compatibleDoesNotMeanCanonical,
+    true,
+    "compatibilityEnvelope.consumerBoundary.compatibleDoesNotMeanCanonical",
+  );
+  assertEqual(
+    consumerBoundary.compatibleDoesNotAdmitLayerEvidence,
+    true,
+    "compatibilityEnvelope.consumerBoundary.compatibleDoesNotAdmitLayerEvidence",
+  );
+  assertEqual(
+    consumerBoundary.compatibleDoesNotInterpretRbc,
+    true,
+    "compatibilityEnvelope.consumerBoundary.compatibleDoesNotInterpretRbc",
+  );
+  assertEqual(
+    consumerBoundary.compatibleDoesNotGrantAuthority,
+    true,
+    "compatibilityEnvelope.consumerBoundary.compatibleDoesNotGrantAuthority",
+  );
+  assertEqual(
+    consumerBoundary.projectionDoesNotPromoteReferents,
+    true,
+    "compatibilityEnvelope.consumerBoundary.projectionDoesNotPromoteReferents",
+  );
+  assertEqual(
+    consumerBoundary.writesProjectionArtifact,
+    false,
+    "compatibilityEnvelope.consumerBoundary.writesProjectionArtifact",
+  );
 }
 
 function validateInput(
@@ -544,6 +638,55 @@ function buildProof(input: {
     decentralizedSeamProofClaimed: higherProof,
     localSuppliedMaterialOnly: !higherProof,
     proofLabelHonest: true,
+  };
+}
+
+function buildCompatibilityEnvelope(input: {
+  observations: EdgeLayerSeamHappeningObservation[];
+  status: EdgeLayerSeamHistoryObservationStatus;
+  sourceIdsAndHashesPreserved: boolean;
+}): EdgeLayerSeamHistoryCompatibilityEnvelope {
+  const compatibleObservationIds = input.observations
+    .filter((observation) => observation.classification === "compatible_seam_happening")
+    .map((observation) => observation.observationId);
+  const unresolvedOrDamagedObservationIds = input.observations
+    .filter((observation) => observation.classification === "unresolved_or_damaged_seam_happening")
+    .map((observation) => observation.observationId);
+
+  return {
+    envelopeKind: CAUSAL_EDGE_LAYER_SEAM_HISTORY_COMPATIBILITY_ENVELOPE_KIND,
+    envelopeVersion: CAUSAL_EDGE_LAYER_SEAM_HISTORY_COMPATIBILITY_ENVELOPE_VERSION,
+    projectionSuitability: input.status === "edge-layer-seam-history-observation-valid"
+      ? "edge_projection_candidate"
+      : "not_edge_projection_ready",
+    compatibilityBasis: "request_receipt_linkage_only",
+    classificationSummary: {
+      compatibleObservationIds,
+      unresolvedOrDamagedObservationIds,
+      linkedPairDetected: compatibleObservationIds.length > 0,
+      damagedOrUnlinkedPairDetected: unresolvedOrDamagedObservationIds.length > 0,
+    },
+    sourceReferenceContract: {
+      requestIdsPreserved: input.observations.length > 0 &&
+        input.observations.every((observation) => Boolean(observation.request.id)),
+      requestHashesPreserved: input.observations.length > 0 &&
+        input.observations.every((observation) => Boolean(observation.request.hash)),
+      receiptIdsPreserved: input.observations.length > 0 &&
+        input.observations.every((observation) => Boolean(observation.receipt.id)),
+      receiptHashesPreserved: input.observations.length > 0 &&
+        input.observations.every((observation) => Boolean(observation.receipt.hash)),
+      sourceRefsPreserved: input.sourceIdsAndHashesPreserved,
+    },
+    consumerBoundary: {
+      edgeMayProjectLater: true,
+      consumeAsObservationOnly: true,
+      compatibleDoesNotMeanCanonical: true,
+      compatibleDoesNotAdmitLayerEvidence: true,
+      compatibleDoesNotInterpretRbc: true,
+      compatibleDoesNotGrantAuthority: true,
+      projectionDoesNotPromoteReferents: true,
+      writesProjectionArtifact: false,
+    },
   };
 }
 
