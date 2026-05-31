@@ -220,6 +220,37 @@ export interface EdgeLayerSeamHistoryLayerReceiptFit {
   receiptDoesNotGrantAuthority: true;
 }
 
+export type EdgeLayerSeamHistoryLayerReceiptIncompleteReason =
+  | "receipt-id-missing"
+  | "receipt-hash-missing"
+  | "receipt-durable-ref-missing"
+  | "receipt-writer-ref-missing"
+  | "receipt-source-request-ref-missing";
+
+export interface EdgeLayerSeamHistoryLayerReceiptIncompleteCase {
+  observationId: string;
+  classification: EdgeLayerSeamHappeningClassification;
+  linkageStatus: EdgeLayerSeamLinkageStatus;
+  receiptId?: string;
+  receiptHash?: string;
+  reasons: EdgeLayerSeamHistoryLayerReceiptIncompleteReason[];
+}
+
+export interface EdgeLayerSeamHistoryLayerReceiptIncompleteCaseMatrix {
+  matrixKind: "edge_layer_seam_history_layer_receipt_incomplete_case_matrix";
+  complete: boolean;
+  incompleteCaseCount: number;
+  cases: EdgeLayerSeamHistoryLayerReceiptIncompleteCase[];
+  boundary: {
+    matrixOnly: true;
+    receiptRefsAreCausalInputOnly: true;
+    doesNotAdmitLayerEvidence: true;
+    doesNotDecideLayerAdmission: true;
+    doesNotInterpretRbc: true;
+    doesNotGrantAuthority: true;
+  };
+}
+
 export interface EdgeLayerSeamHistorySuppliedMaterialGuardrailMatrix {
   guardrailKind: "supplied_seam_history_material_guardrail_matrix";
   proofLabel: EdgeLayerSeamHistoryNormalizedProofLabel;
@@ -331,6 +362,7 @@ export interface EdgeLayerSeamHistoryObservationResult {
   boundary: EdgeLayerSeamHistoryObservationBoundary;
   nonClaims: EdgeLayerSeamHistoryNonClaims;
   layerReceiptFit: EdgeLayerSeamHistoryLayerReceiptFit;
+  layerReceiptIncompleteCaseMatrix: EdgeLayerSeamHistoryLayerReceiptIncompleteCaseMatrix;
   sourceReferenceCompletenessReport: EdgeLayerSeamHistorySourceReferenceCompletenessReport;
   suppliedMaterialGuardrailMatrix: EdgeLayerSeamHistorySuppliedMaterialGuardrailMatrix;
   outwardLaneTriggerNote: EdgeLayerSeamHistoryOutwardLaneTriggerNote;
@@ -498,6 +530,7 @@ export function buildEdgeLayerSeamHistoryObservationResult(
     boundary: buildBoundary(),
     nonClaims: buildNonClaims(),
     layerReceiptFit: buildLayerReceiptFit(observations),
+    layerReceiptIncompleteCaseMatrix: buildLayerReceiptIncompleteCaseMatrix(observations),
     sourceReferenceCompletenessReport: buildSourceReferenceCompletenessReport(observations),
     suppliedMaterialGuardrailMatrix: buildSuppliedMaterialGuardrailMatrix(proof),
     outwardLaneTriggerNote: buildOutwardLaneTriggerNote(proof),
@@ -724,6 +757,49 @@ export function assertEdgeLayerSeamHistoryObservationResult(
   assertEqual(layerReceiptFit.admissionDecided, false, "layerReceiptFit.admissionDecided");
   assertEqual(layerReceiptFit.receiptDoesNotPromoteReferents, true, "layerReceiptFit.receiptDoesNotPromoteReferents");
   assertEqual(layerReceiptFit.receiptDoesNotGrantAuthority, true, "layerReceiptFit.receiptDoesNotGrantAuthority");
+  const layerReceiptIncompleteCaseMatrix = assertObject(
+    candidate.layerReceiptIncompleteCaseMatrix,
+    "layerReceiptIncompleteCaseMatrix",
+  );
+  assertEqual(
+    layerReceiptIncompleteCaseMatrix.matrixKind,
+    "edge_layer_seam_history_layer_receipt_incomplete_case_matrix",
+    "layerReceiptIncompleteCaseMatrix.matrixKind",
+  );
+  const layerReceiptIncompleteCaseBoundary = assertObject(
+    layerReceiptIncompleteCaseMatrix.boundary,
+    "layerReceiptIncompleteCaseMatrix.boundary",
+  );
+  assertEqual(
+    layerReceiptIncompleteCaseBoundary.matrixOnly,
+    true,
+    "layerReceiptIncompleteCaseMatrix.boundary.matrixOnly",
+  );
+  assertEqual(
+    layerReceiptIncompleteCaseBoundary.receiptRefsAreCausalInputOnly,
+    true,
+    "layerReceiptIncompleteCaseMatrix.boundary.receiptRefsAreCausalInputOnly",
+  );
+  assertEqual(
+    layerReceiptIncompleteCaseBoundary.doesNotAdmitLayerEvidence,
+    true,
+    "layerReceiptIncompleteCaseMatrix.boundary.doesNotAdmitLayerEvidence",
+  );
+  assertEqual(
+    layerReceiptIncompleteCaseBoundary.doesNotDecideLayerAdmission,
+    true,
+    "layerReceiptIncompleteCaseMatrix.boundary.doesNotDecideLayerAdmission",
+  );
+  assertEqual(
+    layerReceiptIncompleteCaseBoundary.doesNotInterpretRbc,
+    true,
+    "layerReceiptIncompleteCaseMatrix.boundary.doesNotInterpretRbc",
+  );
+  assertEqual(
+    layerReceiptIncompleteCaseBoundary.doesNotGrantAuthority,
+    true,
+    "layerReceiptIncompleteCaseMatrix.boundary.doesNotGrantAuthority",
+  );
   const sourceReferenceCompletenessReport = assertObject(
     candidate.sourceReferenceCompletenessReport,
     "sourceReferenceCompletenessReport",
@@ -1336,6 +1412,52 @@ function buildLayerReceiptFit(
     receiptDoesNotPromoteReferents: true,
     receiptDoesNotGrantAuthority: true,
   };
+}
+
+function buildLayerReceiptIncompleteCaseMatrix(
+  observations: EdgeLayerSeamHappeningObservation[],
+): EdgeLayerSeamHistoryLayerReceiptIncompleteCaseMatrix {
+  const cases = observations.flatMap((observation) => {
+    const reasons = collectLayerReceiptIncompleteReasons(observation);
+    if (reasons.length === 0) return [];
+    return [{
+      observationId: observation.observationId,
+      classification: observation.classification,
+      linkageStatus: observation.linkageStatus,
+      ...(observation.receipt.id ? { receiptId: observation.receipt.id } : {}),
+      ...(observation.receipt.hash ? { receiptHash: observation.receipt.hash } : {}),
+      reasons,
+    }];
+  });
+
+  return {
+    matrixKind: "edge_layer_seam_history_layer_receipt_incomplete_case_matrix",
+    complete: cases.length === 0,
+    incompleteCaseCount: cases.length,
+    cases,
+    boundary: {
+      matrixOnly: true,
+      receiptRefsAreCausalInputOnly: true,
+      doesNotAdmitLayerEvidence: true,
+      doesNotDecideLayerAdmission: true,
+      doesNotInterpretRbc: true,
+      doesNotGrantAuthority: true,
+    },
+  };
+}
+
+function collectLayerReceiptIncompleteReasons(
+  observation: EdgeLayerSeamHappeningObservation,
+): EdgeLayerSeamHistoryLayerReceiptIncompleteReason[] {
+  const reasons: EdgeLayerSeamHistoryLayerReceiptIncompleteReason[] = [];
+  if (!observation.receipt.id) reasons.push("receipt-id-missing");
+  if (!observation.receipt.hash) reasons.push("receipt-hash-missing");
+  if (!observation.receipt.durableRef) reasons.push("receipt-durable-ref-missing");
+  if (!observation.receipt.writerRef) reasons.push("receipt-writer-ref-missing");
+  if (!observation.receiptSourceRequestId && !observation.receiptSourceRequestHash) {
+    reasons.push("receipt-source-request-ref-missing");
+  }
+  return reasons;
 }
 
 function buildSourceReferenceCompletenessReport(

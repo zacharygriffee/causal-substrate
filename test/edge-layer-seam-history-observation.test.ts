@@ -191,6 +191,20 @@ test("Edge Layer seam-history observation classifies linked and damaged request 
     receiptDoesNotPromoteReferents: true,
     receiptDoesNotGrantAuthority: true,
   });
+  assert.deepEqual(result.layerReceiptIncompleteCaseMatrix, {
+    matrixKind: "edge_layer_seam_history_layer_receipt_incomplete_case_matrix",
+    complete: true,
+    incompleteCaseCount: 0,
+    cases: [],
+    boundary: {
+      matrixOnly: true,
+      receiptRefsAreCausalInputOnly: true,
+      doesNotAdmitLayerEvidence: true,
+      doesNotDecideLayerAdmission: true,
+      doesNotInterpretRbc: true,
+      doesNotGrantAuthority: true,
+    },
+  });
   assert.deepEqual(result.sourceReferenceCompletenessReport, {
     reportKind: "edge_layer_seam_history_source_reference_completeness_failure_report",
     complete: true,
@@ -571,6 +585,38 @@ test("Layer-owned seam status linkedPairs shape can be observed without claiming
   assert.equal(result.validation.durableRefsPreserved, false);
   assert.equal(result.validation.writerRefsPreserved, false);
   assert.equal(result.validation.linkageStatusPreserved, true);
+  assert.equal(result.layerReceiptIncompleteCaseMatrix.complete, false);
+  assert.equal(result.layerReceiptIncompleteCaseMatrix.incompleteCaseCount, 2);
+  assert.deepEqual(result.layerReceiptIncompleteCaseMatrix.cases, [
+    {
+      observationId: result.observations[0]!.observationId,
+      classification: "compatible_seam_happening",
+      linkageStatus: "linked",
+      receiptId: "layer-report-only-edge-seam-receipt:status-shape:linked",
+      receiptHash: `sha256:${"2".repeat(64)}`,
+      reasons: [
+        "receipt-durable-ref-missing",
+        "receipt-writer-ref-missing",
+      ],
+    },
+    {
+      observationId: result.observations[1]!.observationId,
+      classification: "unresolved_or_damaged_seam_happening",
+      linkageStatus: "unlinked",
+      reasons: [
+        "receipt-id-missing",
+        "receipt-hash-missing",
+        "receipt-durable-ref-missing",
+        "receipt-writer-ref-missing",
+      ],
+    },
+  ]);
+  assert.equal(result.layerReceiptIncompleteCaseMatrix.boundary.matrixOnly, true);
+  assert.equal(result.layerReceiptIncompleteCaseMatrix.boundary.receiptRefsAreCausalInputOnly, true);
+  assert.equal(result.layerReceiptIncompleteCaseMatrix.boundary.doesNotAdmitLayerEvidence, true);
+  assert.equal(result.layerReceiptIncompleteCaseMatrix.boundary.doesNotDecideLayerAdmission, true);
+  assert.equal(result.layerReceiptIncompleteCaseMatrix.boundary.doesNotInterpretRbc, true);
+  assert.equal(result.layerReceiptIncompleteCaseMatrix.boundary.doesNotGrantAuthority, true);
   assert.equal(result.sourceReferenceCompletenessReport.complete, false);
   assert.equal(result.sourceReferenceCompletenessReport.failureCount, 2);
   assert.deepEqual(result.sourceReferenceCompletenessReport.missingFieldNames, [
