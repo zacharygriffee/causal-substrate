@@ -432,7 +432,14 @@ test("seam-history observation command reads supplied material, writes result, a
     assertEdgeLayerSeamHistoryObservationReadbackContract(contract);
     assert.equal(contract.validation.observationArtifactConsumed, true);
     assert.equal(contract.validation.sourceRefsPreserved, true);
+    assert.equal(contract.validation.sourceReposPreserved, true);
+    assert.equal(contract.validation.durableRefsPreserved, true);
+    assert.equal(contract.validation.writerRefsPreserved, true);
+    assert.equal(contract.validation.linkageStatusPreserved, true);
+    assert.equal(contract.validation.boundaryAndNonClaimsPreserved, true);
+    assert.equal(contract.validation.proofLabelsPreserved, true);
     assert.equal(contract.readback.proofRungPreserved, result.proof.strongestProofRung);
+    assert.equal(contract.readback.normalizedProofLabelPreserved, result.proof.normalizedProofLabel);
     assert.equal(contract.boundary.writesObservationArtifact, false);
     assert.equal(contract.boundary.acceptsCanonicalHistory, false);
   } finally {
@@ -580,9 +587,20 @@ test("observation readback contract validates JSON round-trip and preserves sour
     assert.equal(contract.reviewStatus, "edge-layer-seam-history-observation-readback-contract-valid");
     assert.equal(contract.validation.observationArtifactConsumed, true);
     assert.equal(contract.validation.sourceRefsPreserved, true);
+    assert.equal(contract.validation.sourceReposPreserved, true);
+    assert.equal(contract.validation.durableRefsPreserved, true);
+    assert.equal(contract.validation.writerRefsPreserved, true);
+    assert.equal(contract.validation.linkageStatusPreserved, true);
+    assert.equal(contract.validation.boundaryAndNonClaimsPreserved, true);
+    assert.equal(contract.validation.proofLabelsPreserved, true);
     assert.equal(contract.readback.artifactReadable, true);
     assert.equal(contract.readback.observationResultValid, true);
     assert.equal(contract.readback.sourceIdsAndHashesPreserved, true);
+    assert.equal(contract.readback.sourceReposPreserved, true);
+    assert.equal(contract.readback.durableRefsPreserved, true);
+    assert.equal(contract.readback.writerRefsPreserved, true);
+    assert.equal(contract.readback.linkageStatusPreserved, true);
+    assert.equal(contract.readback.boundaryAndNonClaimsPreserved, true);
     assert.equal(contract.readback.pairCount, 2);
     assert.equal(contract.readback.compatiblePairCount, 1);
     assert.equal(contract.readback.unresolvedOrDamagedPairCount, 1);
@@ -590,6 +608,12 @@ test("observation readback contract validates JSON round-trip and preserves sour
       contract.readback.proofRungPreserved,
       "local_causal_observation_over_supplied_seam_history_material",
     );
+    assert.equal(contract.readback.normalizedProofLabelPreserved, "local_supplied_material");
+    assert.equal(contract.source.sourceObservationNormalizedProofLabel, "local_supplied_material");
+    assert.deepEqual(contract.preservedSourceRefs.sourceRepos, [
+      "mesh-ecology-edge",
+      "mesh-ecology-layer",
+    ]);
     assert.deepEqual(contract.preservedSourceRefs.requestIds, [
       "edge-layer-report-only-seam-request:causal-observation:linked",
       "edge-layer-report-only-seam-request:causal-observation:damaged",
@@ -597,6 +621,13 @@ test("observation readback contract validates JSON round-trip and preserves sour
     assert.deepEqual(contract.preservedSourceRefs.requestHashes, [
       `sha256:${"a".repeat(64)}`,
       `sha256:${"c".repeat(64)}`,
+    ]);
+    assert.deepEqual(contract.preservedSourceRefs.requestDurableRefs, [
+      "autobase-view-record:edge-layer-report-only-seam-view:0",
+      "autobase-view-record:edge-layer-report-only-seam-view:2",
+    ]);
+    assert.deepEqual(contract.preservedSourceRefs.requestWriterRefs, [
+      "autobase-writer:edge",
     ]);
     assert.deepEqual(contract.preservedSourceRefs.receiptIds, [
       "layer-report-only-edge-seam-receipt:causal-observation:linked",
@@ -606,6 +637,14 @@ test("observation readback contract validates JSON round-trip and preserves sour
       `sha256:${"b".repeat(64)}`,
       `sha256:${"d".repeat(64)}`,
     ]);
+    assert.deepEqual(contract.preservedSourceRefs.receiptDurableRefs, [
+      "autobase-view-record:edge-layer-report-only-seam-view:1",
+      "autobase-view-record:edge-layer-report-only-seam-view:3",
+    ]);
+    assert.deepEqual(contract.preservedSourceRefs.receiptWriterRefs, [
+      "autobase-writer:layer",
+    ]);
+    assert.deepEqual(contract.preservedSourceRefs.linkageStatuses, ["linked", "damaged"]);
     assert.equal(contract.boundary.writesObservationArtifact, false);
     assert.equal(contract.boundary.acceptsCanonicalHistory, false);
     assert.equal(contract.boundary.admitsLayerEvidence, false);
@@ -614,6 +653,27 @@ test("observation readback contract validates JSON round-trip and preserves sour
   } finally {
     await rm(tempRoot, { recursive: true, force: true });
   }
+});
+
+test("observation readback contract rejects readback artifacts with weakened source-ref preservation", () => {
+  const observationResult = buildEdgeLayerSeamHistoryObservationResult({
+    seamHistory: operationShapedSeamHistory(),
+    emittedAt: "2026-05-31T12:20:30.000Z",
+    sourcePath: "layer-owned-edge-seam-status:readback-source-ref-audit",
+  });
+  const weakened = JSON.parse(JSON.stringify(observationResult));
+  weakened.validation.durableRefsPreserved = false;
+
+  const contract = buildEdgeLayerSeamHistoryObservationReadbackContract({
+    observationResult: weakened,
+    emittedAt: "2026-05-31T12:20:31.000Z",
+  });
+
+  assertEdgeLayerSeamHistoryObservationReadbackContract(contract);
+  assert.equal(contract.reviewStatus, "edge-layer-seam-history-observation-readback-contract-invalid");
+  assert.equal(contract.readback.durableRefsPreserved, false);
+  assert.equal(contract.validation.durableRefsPreserved, false);
+  assert.ok(contract.validation.issues.includes("durable-refs-not-preserved"));
 });
 
 test("deferred attachment point map is inspectable but inactive", () => {

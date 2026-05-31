@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import {
   assertEdgeLayerSeamHistoryObservationResult,
   CAUSAL_EDGE_LAYER_SEAM_HISTORY_OBSERVATION_SCHEMA,
+  type EdgeLayerSeamHistoryNormalizedProofLabel,
   type EdgeLayerSeamHistoryObservationResult,
   type EdgeLayerSeamHistoryProofRung,
 } from "./edge-layer-seam-history-observation.js";
@@ -29,22 +30,35 @@ export interface EdgeLayerSeamHistoryObservationReadbackContract {
     sourceObservationArtifactId?: string;
     sourceObservationSchema?: typeof CAUSAL_EDGE_LAYER_SEAM_HISTORY_OBSERVATION_SCHEMA;
     sourceObservationProofRung?: EdgeLayerSeamHistoryProofRung;
+    sourceObservationNormalizedProofLabel?: EdgeLayerSeamHistoryNormalizedProofLabel;
     sourceRepos: string[];
   };
   readback: {
     artifactReadable: boolean;
     observationResultValid: boolean;
     sourceIdsAndHashesPreserved: boolean;
+    sourceReposPreserved: boolean;
+    durableRefsPreserved: boolean;
+    writerRefsPreserved: boolean;
+    linkageStatusPreserved: boolean;
+    boundaryAndNonClaimsPreserved: boolean;
     proofRungPreserved?: EdgeLayerSeamHistoryProofRung;
+    normalizedProofLabelPreserved?: EdgeLayerSeamHistoryNormalizedProofLabel;
     pairCount: number;
     compatiblePairCount: number;
     unresolvedOrDamagedPairCount: number;
   };
   preservedSourceRefs: {
+    sourceRepos: string[];
     requestIds: string[];
     requestHashes: string[];
+    requestDurableRefs: string[];
+    requestWriterRefs: string[];
     receiptIds: string[];
     receiptHashes: string[];
+    receiptDurableRefs: string[];
+    receiptWriterRefs: string[];
+    linkageStatuses: string[];
   };
   boundary: {
     readbackOnly: true;
@@ -59,6 +73,12 @@ export interface EdgeLayerSeamHistoryObservationReadbackContract {
     status: EdgeLayerSeamHistoryObservationReadbackContractStatus;
     observationArtifactConsumed: boolean;
     sourceRefsPreserved: boolean;
+    sourceReposPreserved: boolean;
+    durableRefsPreserved: boolean;
+    writerRefsPreserved: boolean;
+    linkageStatusPreserved: boolean;
+    boundaryAndNonClaimsPreserved: boolean;
+    proofLabelsPreserved: boolean;
     noCanonicalHistoryClaim: true;
     noLayerAdmissionClaim: true;
     noRbcInterpretationClaim: true;
@@ -81,6 +101,20 @@ export function buildEdgeLayerSeamHistoryObservationReadbackContract(
 ): EdgeLayerSeamHistoryObservationReadbackContract {
   const observationResult = parseObservationResult(input.observationResult);
   const issues = observationResult ? validateObservationResult(observationResult) : ["observation-result-invalid"];
+  const sourceRefsPreserved = issues.includes("source-refs-not-preserved") === false &&
+    observationResult !== undefined;
+  const sourceReposPreserved = issues.includes("source-repos-not-preserved") === false &&
+    observationResult !== undefined;
+  const durableRefsPreserved = issues.includes("durable-refs-not-preserved") === false &&
+    observationResult !== undefined;
+  const writerRefsPreserved = issues.includes("writer-refs-not-preserved") === false &&
+    observationResult !== undefined;
+  const linkageStatusPreserved = issues.includes("linkage-status-not-preserved") === false &&
+    observationResult !== undefined;
+  const boundaryAndNonClaimsPreserved = issues.includes("observation-boundary-or-non-claims-not-preserved") === false &&
+    observationResult !== undefined;
+  const proofLabelsPreserved = issues.includes("proof-labels-not-preserved") === false &&
+    observationResult !== undefined;
   const status: EdgeLayerSeamHistoryObservationReadbackContractStatus = issues.length === 0
     ? "edge-layer-seam-history-observation-readback-contract-valid"
     : "edge-layer-seam-history-observation-readback-contract-invalid";
@@ -99,14 +133,20 @@ export function buildEdgeLayerSeamHistoryObservationReadbackContract(
       ...(observationResult ? { sourceObservationArtifactId: observationResult.artifactId } : {}),
       ...(observationResult ? { sourceObservationSchema: observationResult.schema } : {}),
       ...(observationResult ? { sourceObservationProofRung: observationResult.proof.strongestProofRung } : {}),
+      ...(observationResult ? { sourceObservationNormalizedProofLabel: observationResult.proof.normalizedProofLabel } : {}),
       sourceRepos: observationResult?.source.sourceRepos ?? [],
     },
     readback: {
       artifactReadable: observationResult !== undefined,
       observationResultValid: observationResult !== undefined,
-      sourceIdsAndHashesPreserved: issues.includes("source-refs-not-preserved") === false &&
-        observationResult !== undefined,
+      sourceIdsAndHashesPreserved: sourceRefsPreserved,
+      sourceReposPreserved,
+      durableRefsPreserved,
+      writerRefsPreserved,
+      linkageStatusPreserved,
+      boundaryAndNonClaimsPreserved,
       ...(observationResult ? { proofRungPreserved: observationResult.proof.strongestProofRung } : {}),
+      ...(observationResult ? { normalizedProofLabelPreserved: observationResult.proof.normalizedProofLabel } : {}),
       pairCount: observationResult?.validation.pairCount ?? 0,
       compatiblePairCount: observationResult?.validation.compatiblePairCount ?? 0,
       unresolvedOrDamagedPairCount: observationResult?.validation.unresolvedOrDamagedPairCount ?? 0,
@@ -116,7 +156,13 @@ export function buildEdgeLayerSeamHistoryObservationReadbackContract(
     validation: {
       status,
       observationArtifactConsumed: observationResult !== undefined,
-      sourceRefsPreserved: issues.includes("source-refs-not-preserved") === false && observationResult !== undefined,
+      sourceRefsPreserved,
+      sourceReposPreserved,
+      durableRefsPreserved,
+      writerRefsPreserved,
+      linkageStatusPreserved,
+      boundaryAndNonClaimsPreserved,
+      proofLabelsPreserved,
       noCanonicalHistoryClaim: true,
       noLayerAdmissionClaim: true,
       noRbcInterpretationClaim: true,
@@ -155,10 +201,31 @@ export function assertEdgeLayerSeamHistoryObservationReadbackContract(
   assertEqual(boundary.grantsAuthority, false, "boundary.grantsAuthority");
   assertEqual(boundary.publishesToMesh, false, "boundary.publishesToMesh");
   const validation = assertObject(candidate.validation, "validation");
+  assertStatus(validation.status, "validation.status");
   assertEqual(validation.noCanonicalHistoryClaim, true, "validation.noCanonicalHistoryClaim");
   assertEqual(validation.noLayerAdmissionClaim, true, "validation.noLayerAdmissionClaim");
   assertEqual(validation.noRbcInterpretationClaim, true, "validation.noRbcInterpretationClaim");
   assertEqual(validation.noAuthorityClaim, true, "validation.noAuthorityClaim");
+  assertStatus(candidate.reviewStatus, "reviewStatus");
+  const readback = assertObject(candidate.readback, "readback");
+  if (validation.status === "edge-layer-seam-history-observation-readback-contract-valid") {
+    assertEqual(validation.observationArtifactConsumed, true, "validation.observationArtifactConsumed");
+    assertEqual(validation.sourceRefsPreserved, true, "validation.sourceRefsPreserved");
+    assertEqual(validation.sourceReposPreserved, true, "validation.sourceReposPreserved");
+    assertEqual(validation.durableRefsPreserved, true, "validation.durableRefsPreserved");
+    assertEqual(validation.writerRefsPreserved, true, "validation.writerRefsPreserved");
+    assertEqual(validation.linkageStatusPreserved, true, "validation.linkageStatusPreserved");
+    assertEqual(validation.boundaryAndNonClaimsPreserved, true, "validation.boundaryAndNonClaimsPreserved");
+    assertEqual(validation.proofLabelsPreserved, true, "validation.proofLabelsPreserved");
+    assertEqual(readback.artifactReadable, true, "readback.artifactReadable");
+    assertEqual(readback.observationResultValid, true, "readback.observationResultValid");
+    assertEqual(readback.sourceIdsAndHashesPreserved, true, "readback.sourceIdsAndHashesPreserved");
+    assertEqual(readback.sourceReposPreserved, true, "readback.sourceReposPreserved");
+    assertEqual(readback.durableRefsPreserved, true, "readback.durableRefsPreserved");
+    assertEqual(readback.writerRefsPreserved, true, "readback.writerRefsPreserved");
+    assertEqual(readback.linkageStatusPreserved, true, "readback.linkageStatusPreserved");
+    assertEqual(readback.boundaryAndNonClaimsPreserved, true, "readback.boundaryAndNonClaimsPreserved");
+  }
 }
 
 function parseObservationResult(value: unknown): EdgeLayerSeamHistoryObservationResult | undefined {
@@ -175,8 +242,40 @@ function validateObservationResult(observationResult: EdgeLayerSeamHistoryObserv
   if (!observationResult.validation.sourceIdsAndHashesPreserved) {
     issues.push("source-refs-not-preserved");
   }
+  if (!observationResult.validation.sourceReposPreserved) {
+    issues.push("source-repos-not-preserved");
+  }
+  if (!observationResult.validation.durableRefsPreserved) {
+    issues.push("durable-refs-not-preserved");
+  }
+  if (!observationResult.validation.writerRefsPreserved) {
+    issues.push("writer-refs-not-preserved");
+  }
+  if (!observationResult.validation.linkageStatusPreserved) {
+    issues.push("linkage-status-not-preserved");
+  }
   if (!observationResult.validation.seamHistoryInputConsumed) {
     issues.push("seam-history-input-not-consumed");
+  }
+  if (
+    !observationResult.boundary.reviewOnly ||
+    !observationResult.boundary.observationOnly ||
+    observationResult.boundary.acceptsCanonicalHistory ||
+    observationResult.boundary.admitsLayerEvidence ||
+    observationResult.boundary.interpretsRbc ||
+    observationResult.boundary.grantsAuthority ||
+    observationResult.nonClaims.canonicalHistoryClaimed ||
+    observationResult.nonClaims.layerEvidenceAdmitted ||
+    observationResult.nonClaims.rbcInterpreted ||
+    observationResult.nonClaims.authorityGranted
+  ) {
+    issues.push("observation-boundary-or-non-claims-not-preserved");
+  }
+  if (
+    observationResult.validation.strongestProofRung !== observationResult.proof.strongestProofRung ||
+    observationResult.validation.normalizedProofLabel !== observationResult.proof.normalizedProofLabel
+  ) {
+    issues.push("proof-labels-not-preserved");
   }
   return issues;
 }
@@ -186,10 +285,19 @@ function collectPreservedSourceRefs(
 ): EdgeLayerSeamHistoryObservationReadbackContract["preservedSourceRefs"] {
   const observations = observationResult?.observations ?? [];
   return {
+    sourceRepos: uniqueStrings(observations.flatMap((observation) => [
+      observation.request.sourceRepo,
+      observation.receipt.sourceRepo,
+    ])),
     requestIds: uniqueStrings(observations.map((observation) => observation.request.id)),
     requestHashes: uniqueStrings(observations.map((observation) => observation.request.hash)),
+    requestDurableRefs: uniqueStrings(observations.map((observation) => observation.request.durableRef)),
+    requestWriterRefs: uniqueStrings(observations.map((observation) => observation.request.writerRef)),
     receiptIds: uniqueStrings(observations.map((observation) => observation.receipt.id)),
     receiptHashes: uniqueStrings(observations.map((observation) => observation.receipt.hash)),
+    receiptDurableRefs: uniqueStrings(observations.map((observation) => observation.receipt.durableRef)),
+    receiptWriterRefs: uniqueStrings(observations.map((observation) => observation.receipt.writerRef)),
+    linkageStatuses: uniqueStrings(observations.map((observation) => observation.linkageStatus)),
   };
 }
 
@@ -255,6 +363,15 @@ function assertObject(value: unknown, label: string): JsonRecord {
 function assertEqual(actual: unknown, expected: unknown, label: string): void {
   if (actual !== expected) {
     throw new Error(`${label} must be ${String(expected)}`);
+  }
+}
+
+function assertStatus(value: unknown, label: string): asserts value is EdgeLayerSeamHistoryObservationReadbackContractStatus {
+  if (
+    value !== "edge-layer-seam-history-observation-readback-contract-valid" &&
+    value !== "edge-layer-seam-history-observation-readback-contract-invalid"
+  ) {
+    throw new Error(`${label} must be a readback contract status`);
   }
 }
 
