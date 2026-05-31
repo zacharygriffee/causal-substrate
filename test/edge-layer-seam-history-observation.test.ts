@@ -103,6 +103,20 @@ test("Edge Layer seam-history observation classifies linked and damaged request 
   assert.equal(result.artifactKind, CAUSAL_EDGE_LAYER_SEAM_HISTORY_OBSERVATION_ARTIFACT_KIND);
   assert.equal(result.schema, CAUSAL_EDGE_LAYER_SEAM_HISTORY_OBSERVATION_SCHEMA);
   assert.equal(result.schemaVersion, CAUSAL_EDGE_LAYER_SEAM_HISTORY_OBSERVATION_SCHEMA_VERSION);
+  assert.deepEqual(result.schemaVersionNote, {
+    noteKind: "edge_layer_seam_history_observation_schema_version_note",
+    schema: CAUSAL_EDGE_LAYER_SEAM_HISTORY_OBSERVATION_SCHEMA,
+    schemaVersion: CAUSAL_EDGE_LAYER_SEAM_HISTORY_OBSERVATION_SCHEMA_VERSION,
+    compatibilityPosture: "v1_additive_observation_fields_only",
+    consumerExpectation: "preserve_unknown_fields_and_read_declared_schema_version",
+    boundary: {
+      noteOnly: true,
+      doesNotClaimCanonicalHistory: true,
+      doesNotAdmitLayerEvidence: true,
+      doesNotInterpretRbc: true,
+      doesNotGrantAuthority: true,
+    },
+  });
   assert.equal(result.reviewStatus, "edge-layer-seam-history-observation-emitted");
   assert.equal(result.validation.seamHistoryInputConsumed, true);
   assert.equal(result.validation.linkedPairDetected, true);

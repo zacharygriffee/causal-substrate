@@ -324,6 +324,21 @@ export interface EdgeLayerSeamHistorySourceReferenceCompletenessReport {
   };
 }
 
+export interface EdgeLayerSeamHistoryObservationSchemaVersionNote {
+  noteKind: "edge_layer_seam_history_observation_schema_version_note";
+  schema: typeof CAUSAL_EDGE_LAYER_SEAM_HISTORY_OBSERVATION_SCHEMA;
+  schemaVersion: typeof CAUSAL_EDGE_LAYER_SEAM_HISTORY_OBSERVATION_SCHEMA_VERSION;
+  compatibilityPosture: "v1_additive_observation_fields_only";
+  consumerExpectation: "preserve_unknown_fields_and_read_declared_schema_version";
+  boundary: {
+    noteOnly: true;
+    doesNotClaimCanonicalHistory: true;
+    doesNotAdmitLayerEvidence: true;
+    doesNotInterpretRbc: true;
+    doesNotGrantAuthority: true;
+  };
+}
+
 export type EdgeLayerSeamHistoryDeferredAttachmentKey =
   | "referentPromotion"
   | "branchCompatibilityGraph"
@@ -357,6 +372,7 @@ export interface EdgeLayerSeamHistoryObservationResult {
     sourcePath?: string;
   };
   observationScope: EdgeLayerSeamHistoryProofRung;
+  schemaVersionNote: EdgeLayerSeamHistoryObservationSchemaVersionNote;
   observations: EdgeLayerSeamHappeningObservation[];
   compatibilityEnvelope: EdgeLayerSeamHistoryCompatibilityEnvelope;
   boundary: EdgeLayerSeamHistoryObservationBoundary;
@@ -517,6 +533,7 @@ export function buildEdgeLayerSeamHistoryObservationResult(
       ...(input.sourcePath ? { sourcePath: input.sourcePath } : {}),
     },
     observationScope: proof.strongestProofRung,
+    schemaVersionNote: buildSchemaVersionNote(),
     observations,
     compatibilityEnvelope: buildCompatibilityEnvelope({
       observations,
@@ -700,6 +717,45 @@ export function assertEdgeLayerSeamHistoryObservationResult(
   assertEqual(candidate.schemaVersion, CAUSAL_EDGE_LAYER_SEAM_HISTORY_OBSERVATION_SCHEMA_VERSION, "schemaVersion");
   assertString(candidate.artifactId, "artifactId");
   assertString(candidate.emittedAt, "emittedAt");
+  const schemaVersionNote = assertObject(candidate.schemaVersionNote, "schemaVersionNote");
+  assertEqual(
+    schemaVersionNote.noteKind,
+    "edge_layer_seam_history_observation_schema_version_note",
+    "schemaVersionNote.noteKind",
+  );
+  assertEqual(schemaVersionNote.schema, CAUSAL_EDGE_LAYER_SEAM_HISTORY_OBSERVATION_SCHEMA, "schemaVersionNote.schema");
+  assertEqual(
+    schemaVersionNote.schemaVersion,
+    CAUSAL_EDGE_LAYER_SEAM_HISTORY_OBSERVATION_SCHEMA_VERSION,
+    "schemaVersionNote.schemaVersion",
+  );
+  assertEqual(
+    schemaVersionNote.compatibilityPosture,
+    "v1_additive_observation_fields_only",
+    "schemaVersionNote.compatibilityPosture",
+  );
+  const schemaVersionNoteBoundary = assertObject(schemaVersionNote.boundary, "schemaVersionNote.boundary");
+  assertEqual(schemaVersionNoteBoundary.noteOnly, true, "schemaVersionNote.boundary.noteOnly");
+  assertEqual(
+    schemaVersionNoteBoundary.doesNotClaimCanonicalHistory,
+    true,
+    "schemaVersionNote.boundary.doesNotClaimCanonicalHistory",
+  );
+  assertEqual(
+    schemaVersionNoteBoundary.doesNotAdmitLayerEvidence,
+    true,
+    "schemaVersionNote.boundary.doesNotAdmitLayerEvidence",
+  );
+  assertEqual(
+    schemaVersionNoteBoundary.doesNotInterpretRbc,
+    true,
+    "schemaVersionNote.boundary.doesNotInterpretRbc",
+  );
+  assertEqual(
+    schemaVersionNoteBoundary.doesNotGrantAuthority,
+    true,
+    "schemaVersionNote.boundary.doesNotGrantAuthority",
+  );
   const boundary = assertObject(candidate.boundary, "boundary");
   assertEqual(boundary.reviewOnly, true, "boundary.reviewOnly");
   assertEqual(boundary.observationOnly, true, "boundary.observationOnly");
@@ -1387,6 +1443,23 @@ function buildNonClaims(): EdgeLayerSeamHistoryNonClaims {
     authorityGranted: false,
     meshPublished: false,
     productionContinuityWritten: false,
+  };
+}
+
+function buildSchemaVersionNote(): EdgeLayerSeamHistoryObservationSchemaVersionNote {
+  return {
+    noteKind: "edge_layer_seam_history_observation_schema_version_note",
+    schema: CAUSAL_EDGE_LAYER_SEAM_HISTORY_OBSERVATION_SCHEMA,
+    schemaVersion: CAUSAL_EDGE_LAYER_SEAM_HISTORY_OBSERVATION_SCHEMA_VERSION,
+    compatibilityPosture: "v1_additive_observation_fields_only",
+    consumerExpectation: "preserve_unknown_fields_and_read_declared_schema_version",
+    boundary: {
+      noteOnly: true,
+      doesNotClaimCanonicalHistory: true,
+      doesNotAdmitLayerEvidence: true,
+      doesNotInterpretRbc: true,
+      doesNotGrantAuthority: true,
+    },
   };
 }
 
