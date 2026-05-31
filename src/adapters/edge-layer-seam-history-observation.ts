@@ -403,7 +403,7 @@ export function assertEdgeLayerSeamHistoryObservationResult(
   assertEqual(layerReceiptFit.rbcEnforced, false, "layerReceiptFit.rbcEnforced");
   assertEqual(layerReceiptFit.admissionDecided, false, "layerReceiptFit.admissionDecided");
   const deferredAttachmentPoints = assertObject(candidate.deferredAttachmentPoints, "deferredAttachmentPoints");
-  for (const key of DEFERRED_ATTACHMENT_KEYS) {
+  for (const key of EDGE_LAYER_SEAM_HISTORY_DEFERRED_ATTACHMENT_KEYS) {
     const point = assertObject(deferredAttachmentPoints[key], `deferredAttachmentPoints.${key}`);
     assertEqual(point.status, "deferred", `deferredAttachmentPoints.${key}.status`);
     assertEqual(point.active, false, `deferredAttachmentPoints.${key}.active`);
@@ -776,7 +776,7 @@ function buildLayerReceiptFit(): EdgeLayerSeamHistoryLayerReceiptFit {
   };
 }
 
-const DEFERRED_ATTACHMENT_KEYS = [
+export const EDGE_LAYER_SEAM_HISTORY_DEFERRED_ATTACHMENT_KEYS = [
   "referentPromotion",
   "branchCompatibilityGraph",
   "canonicalContinuityState",
@@ -788,7 +788,7 @@ const DEFERRED_ATTACHMENT_KEYS = [
 ] as const satisfies readonly EdgeLayerSeamHistoryDeferredAttachmentKey[];
 
 function buildDeferredAttachmentPoints(): EdgeLayerSeamHistoryDeferredAttachmentPoints {
-  return Object.fromEntries(DEFERRED_ATTACHMENT_KEYS.map((key) => [
+  return Object.fromEntries(EDGE_LAYER_SEAM_HISTORY_DEFERRED_ATTACHMENT_KEYS.map((key) => [
     key,
     {
       status: "deferred",

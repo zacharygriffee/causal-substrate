@@ -17,6 +17,7 @@ import {
   CAUSAL_EDGE_LAYER_SEAM_HISTORY_OBSERVATION_ARTIFACT_KIND,
   CAUSAL_EDGE_LAYER_SEAM_HISTORY_OBSERVATION_SCHEMA,
   CAUSAL_EDGE_LAYER_SEAM_HISTORY_OBSERVATION_SCHEMA_VERSION,
+  EDGE_LAYER_SEAM_HISTORY_DEFERRED_ATTACHMENT_KEYS,
 } from "../src/index.js";
 
 const execFileAsync = promisify(execFile);
@@ -584,4 +585,32 @@ test("observation readback contract validates JSON round-trip and preserves sour
   } finally {
     await rm(tempRoot, { recursive: true, force: true });
   }
+});
+
+test("deferred attachment point map is inspectable but inactive", () => {
+  const result = buildEdgeLayerSeamHistoryObservationResult({
+    seamHistory: operationShapedSeamHistory(),
+    emittedAt: "2026-05-31T12:21:00.000Z",
+    sourcePath: "layer-owned-edge-seam-status:deferred-attachment-map",
+  });
+
+  assert.deepEqual(Object.keys(result.deferredAttachmentPoints), [
+    ...EDGE_LAYER_SEAM_HISTORY_DEFERRED_ATTACHMENT_KEYS,
+  ]);
+  for (const key of EDGE_LAYER_SEAM_HISTORY_DEFERRED_ATTACHMENT_KEYS) {
+    assert.deepEqual(result.deferredAttachmentPoints[key], {
+      status: "deferred",
+      active: false,
+      interpreted: false,
+      writes: false,
+    });
+  }
+  assert.equal(result.deferredAttachmentPoints.referentPromotion.active, false);
+  assert.equal(result.deferredAttachmentPoints.branchCompatibilityGraph.interpreted, false);
+  assert.equal(result.deferredAttachmentPoints.canonicalContinuityState.writes, false);
+  assert.equal(result.deferredAttachmentPoints.rbcInterpretation.interpreted, false);
+  assert.equal(result.deferredAttachmentPoints.layerAdmission.active, false);
+  assert.equal(result.deferredAttachmentPoints.meshPublication.writes, false);
+  assert.equal(result.deferredAttachmentPoints.authorityDecisions.active, false);
+  assert.equal(result.deferredAttachmentPoints.productionCausalHistory.writes, false);
 });
