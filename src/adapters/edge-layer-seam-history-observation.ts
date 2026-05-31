@@ -184,10 +184,18 @@ export interface EdgeLayerSeamHistoryNonClaims {
 
 export interface EdgeLayerSeamHistoryLayerReceiptFit {
   receiptRefsAcceptedAsCausalInputRefsOnly: true;
+  receiptIdsAndHashesPreserved: boolean;
+  receiptDurableRefsPreserved: boolean;
+  receiptWriterRefsPreserved: boolean;
+  receiptSourceRequestRefsObserved: boolean;
+  receiptSourceRequestRefsInterpretedAsLinkageOnly: true;
+  layerRuntimeOpened: false;
   layerEvidenceAdmitted: false;
   layerPolicyInterpreted: false;
   rbcEnforced: false;
   admissionDecided: false;
+  receiptDoesNotPromoteReferents: true;
+  receiptDoesNotGrantAuthority: true;
 }
 
 export interface EdgeLayerSeamHistorySuppliedMaterialGuardrailMatrix {
@@ -351,7 +359,7 @@ export function buildEdgeLayerSeamHistoryObservationResult(
     }),
     boundary: buildBoundary(),
     nonClaims: buildNonClaims(),
-    layerReceiptFit: buildLayerReceiptFit(),
+    layerReceiptFit: buildLayerReceiptFit(observations),
     suppliedMaterialGuardrailMatrix: buildSuppliedMaterialGuardrailMatrix(proof),
     deferredAttachmentPoints: buildDeferredAttachmentPoints(),
     proof,
@@ -459,10 +467,18 @@ export function assertEdgeLayerSeamHistoryObservationResult(
     true,
     "layerReceiptFit.receiptRefsAcceptedAsCausalInputRefsOnly",
   );
+  assertEqual(
+    layerReceiptFit.receiptSourceRequestRefsInterpretedAsLinkageOnly,
+    true,
+    "layerReceiptFit.receiptSourceRequestRefsInterpretedAsLinkageOnly",
+  );
+  assertEqual(layerReceiptFit.layerRuntimeOpened, false, "layerReceiptFit.layerRuntimeOpened");
   assertEqual(layerReceiptFit.layerEvidenceAdmitted, false, "layerReceiptFit.layerEvidenceAdmitted");
   assertEqual(layerReceiptFit.layerPolicyInterpreted, false, "layerReceiptFit.layerPolicyInterpreted");
   assertEqual(layerReceiptFit.rbcEnforced, false, "layerReceiptFit.rbcEnforced");
   assertEqual(layerReceiptFit.admissionDecided, false, "layerReceiptFit.admissionDecided");
+  assertEqual(layerReceiptFit.receiptDoesNotPromoteReferents, true, "layerReceiptFit.receiptDoesNotPromoteReferents");
+  assertEqual(layerReceiptFit.receiptDoesNotGrantAuthority, true, "layerReceiptFit.receiptDoesNotGrantAuthority");
   const suppliedMaterialGuardrailMatrix = assertObject(
     candidate.suppliedMaterialGuardrailMatrix,
     "suppliedMaterialGuardrailMatrix",
@@ -946,13 +962,27 @@ function buildNonClaims(): EdgeLayerSeamHistoryNonClaims {
   };
 }
 
-function buildLayerReceiptFit(): EdgeLayerSeamHistoryLayerReceiptFit {
+function buildLayerReceiptFit(
+  observations: EdgeLayerSeamHappeningObservation[],
+): EdgeLayerSeamHistoryLayerReceiptFit {
   return {
     receiptRefsAcceptedAsCausalInputRefsOnly: true,
+    receiptIdsAndHashesPreserved: observations.every((observation) =>
+      Boolean(observation.receipt.id) && Boolean(observation.receipt.hash)
+    ),
+    receiptDurableRefsPreserved: observations.every((observation) => Boolean(observation.receipt.durableRef)),
+    receiptWriterRefsPreserved: observations.every((observation) => Boolean(observation.receipt.writerRef)),
+    receiptSourceRequestRefsObserved: observations.some((observation) =>
+      Boolean(observation.receiptSourceRequestId) || Boolean(observation.receiptSourceRequestHash)
+    ),
+    receiptSourceRequestRefsInterpretedAsLinkageOnly: true,
+    layerRuntimeOpened: false,
     layerEvidenceAdmitted: false,
     layerPolicyInterpreted: false,
     rbcEnforced: false,
     admissionDecided: false,
+    receiptDoesNotPromoteReferents: true,
+    receiptDoesNotGrantAuthority: true,
   };
 }
 

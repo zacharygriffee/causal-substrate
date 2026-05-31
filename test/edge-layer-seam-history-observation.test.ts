@@ -168,10 +168,18 @@ test("Edge Layer seam-history observation classifies linked and damaged request 
   });
   assert.deepEqual(result.layerReceiptFit, {
     receiptRefsAcceptedAsCausalInputRefsOnly: true,
+    receiptIdsAndHashesPreserved: true,
+    receiptDurableRefsPreserved: true,
+    receiptWriterRefsPreserved: true,
+    receiptSourceRequestRefsObserved: true,
+    receiptSourceRequestRefsInterpretedAsLinkageOnly: true,
+    layerRuntimeOpened: false,
     layerEvidenceAdmitted: false,
     layerPolicyInterpreted: false,
     rbcEnforced: false,
     admissionDecided: false,
+    receiptDoesNotPromoteReferents: true,
+    receiptDoesNotGrantAuthority: true,
   });
   assert.deepEqual(result.deferredAttachmentPoints, {
     referentPromotion: { status: "deferred", active: false, interpreted: false, writes: false },
@@ -294,6 +302,7 @@ test("seam-history observation readback guardrails reject claim overclaims", () 
     ["layerReceiptFit", "layerEvidenceAdmitted"],
     ["layerReceiptFit", "rbcEnforced"],
     ["layerReceiptFit", "admissionDecided"],
+    ["layerReceiptFit", "layerRuntimeOpened"],
     ["deferredAttachmentPoints", "meshPublication", "active"],
     ["deferredAttachmentPoints", "productionCausalHistory", "writes"],
   ] as const;
@@ -326,6 +335,10 @@ test("seam-history observation readback guardrails reject claim overclaims", () 
     ["suppliedMaterialGuardrailMatrix", "productionContinuityWriteBlocked"],
     ["suppliedMaterialGuardrailMatrix", "sourceReferencePreservationRequired"],
     ["suppliedMaterialGuardrailMatrix", "edgeProjectionOnlyAfterObservation"],
+    ["layerReceiptFit", "receiptRefsAcceptedAsCausalInputRefsOnly"],
+    ["layerReceiptFit", "receiptSourceRequestRefsInterpretedAsLinkageOnly"],
+    ["layerReceiptFit", "receiptDoesNotPromoteReferents"],
+    ["layerReceiptFit", "receiptDoesNotGrantAuthority"],
   ] as const;
 
   for (const pathSegments of weakenedGuardrailPaths) {
