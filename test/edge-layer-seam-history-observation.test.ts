@@ -136,13 +136,47 @@ test("Edge Layer seam-history observation classifies linked and damaged request 
 
   assert.equal(result.boundary.acceptsCanonicalHistory, false);
   assert.equal(result.boundary.admitsLayerEvidence, false);
+  assert.equal(result.boundary.layerReceiptRefsAsCausalInputOnly, true);
   assert.equal(result.boundary.interpretsRbc, false);
+  assert.equal(result.boundary.claimsQuorumSatisfaction, false);
   assert.equal(result.boundary.grantsAuthority, false);
+  assert.equal(result.boundary.publishesToMesh, false);
   assert.equal(result.boundary.writesContinuityRecords, false);
+  assert.equal(result.boundary.writesProductionContinuity, false);
+  assert.deepEqual(result.nonClaims, {
+    canonicalHistoryClaimed: false,
+    layerEvidenceAdmitted: false,
+    layerAdmissionDecided: false,
+    rbcInterpreted: false,
+    quorumSatisfied: false,
+    authorityGranted: false,
+    meshPublished: false,
+    productionContinuityWritten: false,
+  });
+  assert.deepEqual(result.layerReceiptFit, {
+    receiptRefsAcceptedAsCausalInputRefsOnly: true,
+    layerEvidenceAdmitted: false,
+    layerPolicyInterpreted: false,
+    rbcEnforced: false,
+    admissionDecided: false,
+  });
+  assert.deepEqual(result.deferredAttachmentPoints, {
+    referentPromotion: { status: "deferred", active: false, interpreted: false, writes: false },
+    branchCompatibilityGraph: { status: "deferred", active: false, interpreted: false, writes: false },
+    canonicalContinuityState: { status: "deferred", active: false, interpreted: false, writes: false },
+    rbcInterpretation: { status: "deferred", active: false, interpreted: false, writes: false },
+    layerAdmission: { status: "deferred", active: false, interpreted: false, writes: false },
+    meshPublication: { status: "deferred", active: false, interpreted: false, writes: false },
+    authorityDecisions: { status: "deferred", active: false, interpreted: false, writes: false },
+    productionCausalHistory: { status: "deferred", active: false, interpreted: false, writes: false },
+  });
   assert.equal(result.validation.noCanonicalHistoryClaim, true);
   assert.equal(result.validation.noLayerAdmissionClaim, true);
   assert.equal(result.validation.noRbcInterpretationClaim, true);
+  assert.equal(result.validation.noQuorumSatisfactionClaim, true);
   assert.equal(result.validation.noAuthorityClaim, true);
+  assert.equal(result.validation.noMeshPublicationClaim, true);
+  assert.equal(result.validation.noProductionContinuityWriteClaim, true);
   assert.equal(result.validation.decentralizedSeamProofClaimed, false);
   assert.equal(result.proof.inputMaterialKind, "supplied_seam_history_material");
   assert.equal(result.proof.inputReadByCausalSubstrate, false);
@@ -182,10 +216,61 @@ test("Edge Layer seam-history observation classifies linked and damaged request 
     compatibleDoesNotMeanCanonical: true,
     compatibleDoesNotAdmitLayerEvidence: true,
     compatibleDoesNotInterpretRbc: true,
+    compatibleDoesNotSatisfyQuorum: true,
     compatibleDoesNotGrantAuthority: true,
     projectionDoesNotPromoteReferents: true,
+    projectionDoesNotPublishToMesh: true,
+    projectionDoesNotWriteProductionContinuity: true,
+    projectionDoesNotDecideLayerAdmission: true,
     writesProjectionArtifact: false,
   });
+});
+
+test("seam-history observation readback guardrails reject claim overclaims", () => {
+  const result = buildEdgeLayerSeamHistoryObservationResult({
+    seamHistory: operationShapedSeamHistory(),
+    emittedAt: "2026-05-31T12:03:00.000Z",
+  });
+
+  const overclaimPaths = [
+    ["proof", "decentralizedSeamProofClaimed"],
+    ["boundary", "acceptsCanonicalHistory"],
+    ["boundary", "admitsLayerEvidence"],
+    ["boundary", "interpretsRbc"],
+    ["boundary", "claimsQuorumSatisfaction"],
+    ["boundary", "grantsAuthority"],
+    ["boundary", "publishesToMesh"],
+    ["boundary", "writesProductionContinuity"],
+    ["nonClaims", "canonicalHistoryClaimed"],
+    ["nonClaims", "layerEvidenceAdmitted"],
+    ["nonClaims", "layerAdmissionDecided"],
+    ["nonClaims", "rbcInterpreted"],
+    ["nonClaims", "quorumSatisfied"],
+    ["nonClaims", "authorityGranted"],
+    ["nonClaims", "meshPublished"],
+    ["nonClaims", "productionContinuityWritten"],
+    ["layerReceiptFit", "layerEvidenceAdmitted"],
+    ["layerReceiptFit", "rbcEnforced"],
+    ["layerReceiptFit", "admissionDecided"],
+    ["deferredAttachmentPoints", "meshPublication", "active"],
+    ["deferredAttachmentPoints", "productionCausalHistory", "writes"],
+  ] as const;
+
+  for (const pathSegments of overclaimPaths) {
+    const mutated = JSON.parse(JSON.stringify(result));
+    let target: Record<string, unknown> = mutated;
+    for (const segment of pathSegments.slice(0, -1)) {
+      target = target[segment] as Record<string, unknown>;
+    }
+    const finalSegment = pathSegments.at(-1);
+    assert.ok(finalSegment);
+    target[finalSegment] = true;
+
+    assert.throws(
+      () => assertEdgeLayerSeamHistoryObservationResult(mutated),
+      new RegExp(pathSegments.join("\\.")),
+    );
+  }
 });
 
 test("Layer-owned seam status linkedPairs shape can be observed without claiming swarm proof", () => {

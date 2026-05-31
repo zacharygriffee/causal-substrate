@@ -60,7 +60,10 @@ export interface EdgeLayerSeamHappeningObservation {
     canonicalHistoryClaimed: false;
     layerEvidenceAdmitted: false;
     rbcInterpreted: false;
+    quorumSatisfied: false;
     authorityGranted: false;
+    meshPublished: false;
+    productionContinuityWritten: false;
   };
 }
 
@@ -76,9 +79,12 @@ export interface EdgeLayerSeamHistoryObservationBoundary {
   acceptsCanonicalHistory: false;
   claimsCausalTruth: false;
   admitsLayerEvidence: false;
+  layerReceiptRefsAsCausalInputOnly: true;
   interpretsRbc: false;
+  claimsQuorumSatisfaction: false;
   grantsAuthority: false;
   publishesToMesh: false;
+  writesProductionContinuity: false;
 }
 
 export interface EdgeLayerSeamHistoryObservationValidation {
@@ -94,7 +100,10 @@ export interface EdgeLayerSeamHistoryObservationValidation {
   noCanonicalHistoryClaim: true;
   noLayerAdmissionClaim: true;
   noRbcInterpretationClaim: true;
+  noQuorumSatisfactionClaim: true;
   noAuthorityClaim: true;
+  noMeshPublicationClaim: true;
+  noProductionContinuityWriteClaim: true;
   decentralizedSeamProofClaimed: boolean;
   strongestProofRung: EdgeLayerSeamHistoryProofRung;
   issues: string[];
@@ -138,11 +147,54 @@ export interface EdgeLayerSeamHistoryCompatibilityEnvelope {
     compatibleDoesNotMeanCanonical: true;
     compatibleDoesNotAdmitLayerEvidence: true;
     compatibleDoesNotInterpretRbc: true;
+    compatibleDoesNotSatisfyQuorum: true;
     compatibleDoesNotGrantAuthority: true;
     projectionDoesNotPromoteReferents: true;
+    projectionDoesNotPublishToMesh: true;
+    projectionDoesNotWriteProductionContinuity: true;
+    projectionDoesNotDecideLayerAdmission: true;
     writesProjectionArtifact: false;
   };
 }
+
+export interface EdgeLayerSeamHistoryNonClaims {
+  canonicalHistoryClaimed: false;
+  layerEvidenceAdmitted: false;
+  layerAdmissionDecided: false;
+  rbcInterpreted: false;
+  quorumSatisfied: false;
+  authorityGranted: false;
+  meshPublished: false;
+  productionContinuityWritten: false;
+}
+
+export interface EdgeLayerSeamHistoryLayerReceiptFit {
+  receiptRefsAcceptedAsCausalInputRefsOnly: true;
+  layerEvidenceAdmitted: false;
+  layerPolicyInterpreted: false;
+  rbcEnforced: false;
+  admissionDecided: false;
+}
+
+export type EdgeLayerSeamHistoryDeferredAttachmentKey =
+  | "referentPromotion"
+  | "branchCompatibilityGraph"
+  | "canonicalContinuityState"
+  | "rbcInterpretation"
+  | "layerAdmission"
+  | "meshPublication"
+  | "authorityDecisions"
+  | "productionCausalHistory";
+
+export type EdgeLayerSeamHistoryDeferredAttachmentPoints = Record<
+  EdgeLayerSeamHistoryDeferredAttachmentKey,
+  {
+    status: "deferred";
+    active: false;
+    interpreted: false;
+    writes: false;
+  }
+>;
 
 export interface EdgeLayerSeamHistoryObservationResult {
   artifactKind: typeof CAUSAL_EDGE_LAYER_SEAM_HISTORY_OBSERVATION_ARTIFACT_KIND;
@@ -160,6 +212,9 @@ export interface EdgeLayerSeamHistoryObservationResult {
   observations: EdgeLayerSeamHappeningObservation[];
   compatibilityEnvelope: EdgeLayerSeamHistoryCompatibilityEnvelope;
   boundary: EdgeLayerSeamHistoryObservationBoundary;
+  nonClaims: EdgeLayerSeamHistoryNonClaims;
+  layerReceiptFit: EdgeLayerSeamHistoryLayerReceiptFit;
+  deferredAttachmentPoints: EdgeLayerSeamHistoryDeferredAttachmentPoints;
   proof: EdgeLayerSeamHistoryObservationProof;
   validation: EdgeLayerSeamHistoryObservationValidation;
   reviewStatus: EdgeLayerSeamHistoryObservationStatus;
@@ -242,6 +297,9 @@ export function buildEdgeLayerSeamHistoryObservationResult(
       sourceIdsAndHashesPreserved,
     }),
     boundary: buildBoundary(),
+    nonClaims: buildNonClaims(),
+    layerReceiptFit: buildLayerReceiptFit(),
+    deferredAttachmentPoints: buildDeferredAttachmentPoints(),
     proof,
     validation: {
       status,
@@ -256,7 +314,10 @@ export function buildEdgeLayerSeamHistoryObservationResult(
       noCanonicalHistoryClaim: true,
       noLayerAdmissionClaim: true,
       noRbcInterpretationClaim: true,
+      noQuorumSatisfactionClaim: true,
       noAuthorityClaim: true,
+      noMeshPublicationClaim: true,
+      noProductionContinuityWriteClaim: true,
       decentralizedSeamProofClaimed: proof.decentralizedSeamProofClaimed,
       strongestProofRung: proof.strongestProofRung,
       issues,
@@ -304,10 +365,65 @@ export function assertEdgeLayerSeamHistoryObservationResult(
   assertEqual(boundary.acceptsCanonicalHistory, false, "boundary.acceptsCanonicalHistory");
   assertEqual(boundary.claimsCausalTruth, false, "boundary.claimsCausalTruth");
   assertEqual(boundary.admitsLayerEvidence, false, "boundary.admitsLayerEvidence");
+  assertEqual(boundary.layerReceiptRefsAsCausalInputOnly, true, "boundary.layerReceiptRefsAsCausalInputOnly");
   assertEqual(boundary.interpretsRbc, false, "boundary.interpretsRbc");
+  assertEqual(boundary.claimsQuorumSatisfaction, false, "boundary.claimsQuorumSatisfaction");
   assertEqual(boundary.grantsAuthority, false, "boundary.grantsAuthority");
   assertEqual(boundary.publishesToMesh, false, "boundary.publishesToMesh");
+  assertEqual(boundary.writesProductionContinuity, false, "boundary.writesProductionContinuity");
+  const validation = assertObject(candidate.validation, "validation");
+  assertEqual(validation.noCanonicalHistoryClaim, true, "validation.noCanonicalHistoryClaim");
+  assertEqual(validation.noLayerAdmissionClaim, true, "validation.noLayerAdmissionClaim");
+  assertEqual(validation.noRbcInterpretationClaim, true, "validation.noRbcInterpretationClaim");
+  assertEqual(validation.noQuorumSatisfactionClaim, true, "validation.noQuorumSatisfactionClaim");
+  assertEqual(validation.noAuthorityClaim, true, "validation.noAuthorityClaim");
+  assertEqual(validation.noMeshPublicationClaim, true, "validation.noMeshPublicationClaim");
+  assertEqual(
+    validation.noProductionContinuityWriteClaim,
+    true,
+    "validation.noProductionContinuityWriteClaim",
+  );
+  const nonClaims = assertObject(candidate.nonClaims, "nonClaims");
+  assertEqual(nonClaims.canonicalHistoryClaimed, false, "nonClaims.canonicalHistoryClaimed");
+  assertEqual(nonClaims.layerEvidenceAdmitted, false, "nonClaims.layerEvidenceAdmitted");
+  assertEqual(nonClaims.layerAdmissionDecided, false, "nonClaims.layerAdmissionDecided");
+  assertEqual(nonClaims.rbcInterpreted, false, "nonClaims.rbcInterpreted");
+  assertEqual(nonClaims.quorumSatisfied, false, "nonClaims.quorumSatisfied");
+  assertEqual(nonClaims.authorityGranted, false, "nonClaims.authorityGranted");
+  assertEqual(nonClaims.meshPublished, false, "nonClaims.meshPublished");
+  assertEqual(nonClaims.productionContinuityWritten, false, "nonClaims.productionContinuityWritten");
+  const layerReceiptFit = assertObject(candidate.layerReceiptFit, "layerReceiptFit");
+  assertEqual(
+    layerReceiptFit.receiptRefsAcceptedAsCausalInputRefsOnly,
+    true,
+    "layerReceiptFit.receiptRefsAcceptedAsCausalInputRefsOnly",
+  );
+  assertEqual(layerReceiptFit.layerEvidenceAdmitted, false, "layerReceiptFit.layerEvidenceAdmitted");
+  assertEqual(layerReceiptFit.layerPolicyInterpreted, false, "layerReceiptFit.layerPolicyInterpreted");
+  assertEqual(layerReceiptFit.rbcEnforced, false, "layerReceiptFit.rbcEnforced");
+  assertEqual(layerReceiptFit.admissionDecided, false, "layerReceiptFit.admissionDecided");
+  const deferredAttachmentPoints = assertObject(candidate.deferredAttachmentPoints, "deferredAttachmentPoints");
+  for (const key of DEFERRED_ATTACHMENT_KEYS) {
+    const point = assertObject(deferredAttachmentPoints[key], `deferredAttachmentPoints.${key}`);
+    assertEqual(point.status, "deferred", `deferredAttachmentPoints.${key}.status`);
+    assertEqual(point.active, false, `deferredAttachmentPoints.${key}.active`);
+    assertEqual(point.interpreted, false, `deferredAttachmentPoints.${key}.interpreted`);
+    assertEqual(point.writes, false, `deferredAttachmentPoints.${key}.writes`);
+  }
   const proof = assertObject(candidate.proof, "proof");
+  const proofClaimsDecentralized =
+    proof.strongestProofRung === "dht_hyperswarm_replicated_durable_seam_history_observation" &&
+    proof.inputMaterialKind === "dht_hyperswarm_replicated_durable_seam_history_material" &&
+    proof.inputReadByCausalSubstrate === true &&
+    proof.durableCorestoreHistoryRead === true &&
+    proof.dhtOrHyperswarmInputObservedByCausalSubstrate === true &&
+    proof.replicatedViaHyperswarmTransport === true &&
+    proof.localSuppliedMaterialOnly === false;
+  assertEqual(
+    proof.decentralizedSeamProofClaimed,
+    proofClaimsDecentralized,
+    "proof.decentralizedSeamProofClaimed",
+  );
   if (proof.decentralizedSeamProofClaimed === true) {
     assertEqual(
       proof.strongestProofRung,
@@ -376,6 +492,11 @@ export function assertEdgeLayerSeamHistoryObservationResult(
     "compatibilityEnvelope.consumerBoundary.compatibleDoesNotInterpretRbc",
   );
   assertEqual(
+    consumerBoundary.compatibleDoesNotSatisfyQuorum,
+    true,
+    "compatibilityEnvelope.consumerBoundary.compatibleDoesNotSatisfyQuorum",
+  );
+  assertEqual(
     consumerBoundary.compatibleDoesNotGrantAuthority,
     true,
     "compatibilityEnvelope.consumerBoundary.compatibleDoesNotGrantAuthority",
@@ -384,6 +505,21 @@ export function assertEdgeLayerSeamHistoryObservationResult(
     consumerBoundary.projectionDoesNotPromoteReferents,
     true,
     "compatibilityEnvelope.consumerBoundary.projectionDoesNotPromoteReferents",
+  );
+  assertEqual(
+    consumerBoundary.projectionDoesNotPublishToMesh,
+    true,
+    "compatibilityEnvelope.consumerBoundary.projectionDoesNotPublishToMesh",
+  );
+  assertEqual(
+    consumerBoundary.projectionDoesNotWriteProductionContinuity,
+    true,
+    "compatibilityEnvelope.consumerBoundary.projectionDoesNotWriteProductionContinuity",
+  );
+  assertEqual(
+    consumerBoundary.projectionDoesNotDecideLayerAdmission,
+    true,
+    "compatibilityEnvelope.consumerBoundary.projectionDoesNotDecideLayerAdmission",
   );
   assertEqual(
     consumerBoundary.writesProjectionArtifact,
@@ -483,7 +619,10 @@ function observePair(pair: JsonRecord, index: number): EdgeLayerSeamHappeningObs
       canonicalHistoryClaimed: false,
       layerEvidenceAdmitted: false,
       rbcInterpreted: false,
+      quorumSatisfied: false,
       authorityGranted: false,
+      meshPublished: false,
+      productionContinuityWritten: false,
     },
   };
 }
@@ -605,10 +744,59 @@ function buildBoundary(): EdgeLayerSeamHistoryObservationBoundary {
     acceptsCanonicalHistory: false,
     claimsCausalTruth: false,
     admitsLayerEvidence: false,
+    layerReceiptRefsAsCausalInputOnly: true,
     interpretsRbc: false,
+    claimsQuorumSatisfaction: false,
     grantsAuthority: false,
     publishesToMesh: false,
+    writesProductionContinuity: false,
   };
+}
+
+function buildNonClaims(): EdgeLayerSeamHistoryNonClaims {
+  return {
+    canonicalHistoryClaimed: false,
+    layerEvidenceAdmitted: false,
+    layerAdmissionDecided: false,
+    rbcInterpreted: false,
+    quorumSatisfied: false,
+    authorityGranted: false,
+    meshPublished: false,
+    productionContinuityWritten: false,
+  };
+}
+
+function buildLayerReceiptFit(): EdgeLayerSeamHistoryLayerReceiptFit {
+  return {
+    receiptRefsAcceptedAsCausalInputRefsOnly: true,
+    layerEvidenceAdmitted: false,
+    layerPolicyInterpreted: false,
+    rbcEnforced: false,
+    admissionDecided: false,
+  };
+}
+
+const DEFERRED_ATTACHMENT_KEYS = [
+  "referentPromotion",
+  "branchCompatibilityGraph",
+  "canonicalContinuityState",
+  "rbcInterpretation",
+  "layerAdmission",
+  "meshPublication",
+  "authorityDecisions",
+  "productionCausalHistory",
+] as const satisfies readonly EdgeLayerSeamHistoryDeferredAttachmentKey[];
+
+function buildDeferredAttachmentPoints(): EdgeLayerSeamHistoryDeferredAttachmentPoints {
+  return Object.fromEntries(DEFERRED_ATTACHMENT_KEYS.map((key) => [
+    key,
+    {
+      status: "deferred",
+      active: false,
+      interpreted: false,
+      writes: false,
+    },
+  ])) as EdgeLayerSeamHistoryDeferredAttachmentPoints;
 }
 
 function buildProof(input: {
@@ -683,8 +871,12 @@ function buildCompatibilityEnvelope(input: {
       compatibleDoesNotMeanCanonical: true,
       compatibleDoesNotAdmitLayerEvidence: true,
       compatibleDoesNotInterpretRbc: true,
+      compatibleDoesNotSatisfyQuorum: true,
       compatibleDoesNotGrantAuthority: true,
       projectionDoesNotPromoteReferents: true,
+      projectionDoesNotPublishToMesh: true,
+      projectionDoesNotWriteProductionContinuity: true,
+      projectionDoesNotDecideLayerAdmission: true,
       writesProjectionArtifact: false,
     },
   };
@@ -698,7 +890,10 @@ function buildWarnings(status: EdgeLayerSeamHistoryObservationStatus): string[] 
     "observation-does-not-claim-canonical-history",
     "observation-does-not-admit-layer-evidence",
     "observation-does-not-interpret-rbc",
+    "observation-does-not-satisfy-quorum",
     "observation-does-not-grant-authority",
+    "observation-does-not-publish-to-mesh",
+    "observation-does-not-write-production-continuity",
   ];
   if (status !== "edge-layer-seam-history-observation-valid") {
     warnings.push("seam-history-observation-not-complete-proof");
