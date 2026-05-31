@@ -119,8 +119,12 @@ test("Edge Layer seam-history observation classifies linked and damaged request 
   assert.equal(linked.interpretedFields.receiptReferencesRequestHash, true);
   assert.ok(linked.sourceRefs.includes(linked.request.id));
   assert.ok(linked.sourceRefs.includes(linked.request.hash));
+  assert.ok(linked.sourceRefs.includes(linked.request.durableRef!));
+  assert.ok(linked.sourceRefs.includes(linked.request.writerRef!));
   assert.ok(linked.sourceRefs.includes(linked.receipt.id));
   assert.ok(linked.sourceRefs.includes(linked.receipt.hash));
+  assert.ok(linked.sourceRefs.includes(linked.receipt.durableRef!));
+  assert.ok(linked.sourceRefs.includes(linked.receipt.writerRef!));
 
   const damaged = result.observations[1]!;
   assert.equal(damaged.classification, "unresolved_or_damaged_seam_happening");
@@ -134,8 +138,12 @@ test("Edge Layer seam-history observation classifies linked and damaged request 
   assert.equal(damaged.interpretedFields.receiptReferencesRequestHash, false);
   assert.ok(damaged.sourceRefs.includes(damaged.request.id));
   assert.ok(damaged.sourceRefs.includes(damaged.request.hash));
+  assert.ok(damaged.sourceRefs.includes(damaged.request.durableRef!));
+  assert.ok(damaged.sourceRefs.includes(damaged.request.writerRef!));
   assert.ok(damaged.sourceRefs.includes(damaged.receipt.id));
   assert.ok(damaged.sourceRefs.includes(damaged.receipt.hash));
+  assert.ok(damaged.sourceRefs.includes(damaged.receipt.durableRef!));
+  assert.ok(damaged.sourceRefs.includes(damaged.receipt.writerRef!));
 
   assert.equal(result.boundary.acceptsCanonicalHistory, false);
   assert.equal(result.boundary.admitsLayerEvidence, false);
@@ -180,6 +188,10 @@ test("Edge Layer seam-history observation classifies linked and damaged request 
   assert.equal(result.validation.noAuthorityClaim, true);
   assert.equal(result.validation.noMeshPublicationClaim, true);
   assert.equal(result.validation.noProductionContinuityWriteClaim, true);
+  assert.equal(result.validation.sourceReposPreserved, true);
+  assert.equal(result.validation.durableRefsPreserved, true);
+  assert.equal(result.validation.writerRefsPreserved, true);
+  assert.equal(result.validation.linkageStatusPreserved, true);
   assert.equal(result.validation.decentralizedSeamProofClaimed, false);
   assert.equal(result.validation.normalizedProofLabel, "local_supplied_material");
   assert.equal(result.proof.normalizedProofLabel, "local_supplied_material");
@@ -214,6 +226,10 @@ test("Edge Layer seam-history observation classifies linked and damaged request 
     receiptIdsPreserved: true,
     receiptHashesPreserved: true,
     sourceRefsPreserved: true,
+    sourceReposPreserved: true,
+    durableRefsPreserved: true,
+    writerRefsPreserved: true,
+    linkageStatusPreserved: true,
   });
   assert.deepEqual(result.compatibilityEnvelope.consumerBoundary, {
     edgeMayProjectLater: true,
@@ -323,6 +339,10 @@ test("Layer-owned seam status linkedPairs shape can be observed without claiming
   assert.equal(result.observations[0]?.classification, "compatible_seam_happening");
   assert.equal(result.observations[1]?.classification, "unresolved_or_damaged_seam_happening");
   assert.equal(result.observations[1]?.linkageStatus, "unlinked");
+  assert.equal(result.validation.sourceReposPreserved, true);
+  assert.equal(result.validation.durableRefsPreserved, false);
+  assert.equal(result.validation.writerRefsPreserved, false);
+  assert.equal(result.validation.linkageStatusPreserved, true);
   assert.equal(result.boundary.opensLayerRuntime, false);
   assert.equal(result.boundary.acceptsCanonicalHistory, false);
   assert.equal(result.proof.dhtOrHyperswarmInputObservedByCausalSubstrate, false);
@@ -387,6 +407,10 @@ test("seam-history observation command reads supplied material, writes result, a
     assert.equal(result.validation.linkedPairDetected, true);
     assert.equal(result.validation.damagedOrUnlinkedPairDetected, true);
     assert.equal(result.validation.sourceIdsAndHashesPreserved, true);
+    assert.equal(result.validation.sourceReposPreserved, true);
+    assert.equal(result.validation.durableRefsPreserved, true);
+    assert.equal(result.validation.writerRefsPreserved, true);
+    assert.equal(result.validation.linkageStatusPreserved, true);
     assert.equal(result.proof.inputReadByCausalSubstrate, true);
     assert.equal(result.proof.dhtOrHyperswarmInputObservedByCausalSubstrate, false);
     assert.equal(result.proof.decentralizedSeamProofClaimed, false);

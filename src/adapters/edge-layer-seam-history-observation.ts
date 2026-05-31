@@ -101,6 +101,10 @@ export interface EdgeLayerSeamHistoryObservationValidation {
   linkedPairDetected: boolean;
   damagedOrUnlinkedPairDetected: boolean;
   sourceIdsAndHashesPreserved: boolean;
+  sourceReposPreserved: boolean;
+  durableRefsPreserved: boolean;
+  writerRefsPreserved: boolean;
+  linkageStatusPreserved: boolean;
   noCanonicalHistoryClaim: true;
   noLayerAdmissionClaim: true;
   noRbcInterpretationClaim: true;
@@ -146,6 +150,10 @@ export interface EdgeLayerSeamHistoryCompatibilityEnvelope {
     receiptIdsPreserved: boolean;
     receiptHashesPreserved: boolean;
     sourceRefsPreserved: boolean;
+    sourceReposPreserved: boolean;
+    durableRefsPreserved: boolean;
+    writerRefsPreserved: boolean;
+    linkageStatusPreserved: boolean;
   };
   consumerBoundary: {
     edgeMayProjectLater: true;
@@ -257,6 +265,20 @@ export function buildEdgeLayerSeamHistoryObservationResult(
   if (!sourceIdsAndHashesPreserved && observations.length > 0) {
     issues.push("source-ids-or-hashes-missing");
   }
+  const sourceReposPreserved = observations.every((observation) =>
+    Boolean(observation.request.sourceRepo) && Boolean(observation.receipt.sourceRepo)
+  );
+  const durableRefsPreserved = observations.every((observation) =>
+    Boolean(observation.request.durableRef) && Boolean(observation.receipt.durableRef)
+  );
+  const writerRefsPreserved = observations.every((observation) =>
+    Boolean(observation.request.writerRef) && Boolean(observation.receipt.writerRef)
+  );
+  const linkageStatusPreserved = observations.every((observation) =>
+    observation.linkageStatus === "linked" ||
+    observation.linkageStatus === "damaged" ||
+    observation.linkageStatus === "unlinked"
+  );
   const compatiblePairCount = observations.filter((observation) =>
     observation.classification === "compatible_seam_happening"
   ).length;
@@ -301,6 +323,10 @@ export function buildEdgeLayerSeamHistoryObservationResult(
       observations,
       status,
       sourceIdsAndHashesPreserved,
+      sourceReposPreserved,
+      durableRefsPreserved,
+      writerRefsPreserved,
+      linkageStatusPreserved,
     }),
     boundary: buildBoundary(),
     nonClaims: buildNonClaims(),
@@ -317,6 +343,10 @@ export function buildEdgeLayerSeamHistoryObservationResult(
       linkedPairDetected: compatiblePairCount > 0,
       damagedOrUnlinkedPairDetected: unresolvedOrDamagedPairCount > 0,
       sourceIdsAndHashesPreserved,
+      sourceReposPreserved,
+      durableRefsPreserved,
+      writerRefsPreserved,
+      linkageStatusPreserved,
       noCanonicalHistoryClaim: true,
       noLayerAdmissionClaim: true,
       noRbcInterpretationClaim: true,
@@ -379,6 +409,8 @@ export function assertEdgeLayerSeamHistoryObservationResult(
   assertEqual(boundary.publishesToMesh, false, "boundary.publishesToMesh");
   assertEqual(boundary.writesProductionContinuity, false, "boundary.writesProductionContinuity");
   const validation = assertObject(candidate.validation, "validation");
+  assertEqual(validation.sourceReposPreserved, true, "validation.sourceReposPreserved");
+  assertEqual(validation.linkageStatusPreserved, true, "validation.linkageStatusPreserved");
   assertEqual(validation.noCanonicalHistoryClaim, true, "validation.noCanonicalHistoryClaim");
   assertEqual(validation.noLayerAdmissionClaim, true, "validation.noLayerAdmissionClaim");
   assertEqual(validation.noRbcInterpretationClaim, true, "validation.noRbcInterpretationClaim");
@@ -481,6 +513,20 @@ export function assertEdgeLayerSeamHistoryObservationResult(
     compatibilityEnvelope.compatibilityBasis,
     "request_receipt_linkage_only",
     "compatibilityEnvelope.compatibilityBasis",
+  );
+  const sourceReferenceContract = assertObject(
+    compatibilityEnvelope.sourceReferenceContract,
+    "compatibilityEnvelope.sourceReferenceContract",
+  );
+  assertEqual(
+    sourceReferenceContract.sourceReposPreserved,
+    true,
+    "compatibilityEnvelope.sourceReferenceContract.sourceReposPreserved",
+  );
+  assertEqual(
+    sourceReferenceContract.linkageStatusPreserved,
+    true,
+    "compatibilityEnvelope.sourceReferenceContract.linkageStatusPreserved",
   );
   const consumerBoundary = assertObject(compatibilityEnvelope.consumerBoundary, "compatibilityEnvelope.consumerBoundary");
   assertEqual(consumerBoundary.edgeMayProjectLater, true, "compatibilityEnvelope.consumerBoundary.edgeMayProjectLater");
@@ -849,6 +895,10 @@ function buildCompatibilityEnvelope(input: {
   observations: EdgeLayerSeamHappeningObservation[];
   status: EdgeLayerSeamHistoryObservationStatus;
   sourceIdsAndHashesPreserved: boolean;
+  sourceReposPreserved: boolean;
+  durableRefsPreserved: boolean;
+  writerRefsPreserved: boolean;
+  linkageStatusPreserved: boolean;
 }): EdgeLayerSeamHistoryCompatibilityEnvelope {
   const compatibleObservationIds = input.observations
     .filter((observation) => observation.classification === "compatible_seam_happening")
@@ -880,6 +930,10 @@ function buildCompatibilityEnvelope(input: {
       receiptHashesPreserved: input.observations.length > 0 &&
         input.observations.every((observation) => Boolean(observation.receipt.hash)),
       sourceRefsPreserved: input.sourceIdsAndHashesPreserved,
+      sourceReposPreserved: input.sourceReposPreserved,
+      durableRefsPreserved: input.durableRefsPreserved,
+      writerRefsPreserved: input.writerRefsPreserved,
+      linkageStatusPreserved: input.linkageStatusPreserved,
     },
     consumerBoundary: {
       edgeMayProjectLater: true,

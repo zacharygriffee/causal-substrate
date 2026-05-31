@@ -214,6 +214,10 @@ test(
       assert.equal(report.observationResult.validation.linkedPairDetected, true);
       assert.equal(report.observationResult.validation.damagedOrUnlinkedPairDetected, true);
       assert.equal(report.observationResult.validation.sourceIdsAndHashesPreserved, true);
+      assert.equal(report.observationResult.validation.sourceReposPreserved, true);
+      assert.equal(report.observationResult.validation.durableRefsPreserved, true);
+      assert.equal(report.observationResult.validation.writerRefsPreserved, true);
+      assert.equal(report.observationResult.validation.linkageStatusPreserved, true);
       assert.equal(report.observationResult.observations[0]?.classification, "compatible_seam_happening");
       assert.equal(
         report.observationResult.observations[1]?.classification,
