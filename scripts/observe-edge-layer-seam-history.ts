@@ -2,8 +2,12 @@ import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import {
+  assertEdgeLayerSeamHistoryEdgeProjectionFixture,
+  assertEdgeLayerSeamHistoryEdgeProjectionHandoffReadback,
   assertEdgeLayerSeamHistoryObservationResult,
   assertEdgeLayerSeamHistoryObservationReadbackContract,
+  buildEdgeLayerSeamHistoryEdgeProjectionFixture,
+  buildEdgeLayerSeamHistoryEdgeProjectionHandoffReadback,
   buildEdgeLayerSeamHistoryObservationResult,
   buildEdgeLayerSeamHistoryObservationReadbackContract,
 } from "../src/index.js";
@@ -12,6 +16,8 @@ interface CliArgs {
   input?: string;
   output?: string;
   contractOutput?: string;
+  handoffOutput?: string;
+  handoffReadbackOutput?: string;
   emittedAt: string;
   readback: boolean;
 }
@@ -23,6 +29,12 @@ void main().catch((error) => {
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
+  if (args.contractOutput && !args.output) {
+    throw new Error("contract_output_requires_output");
+  }
+  if (args.handoffReadbackOutput && !args.handoffOutput) {
+    throw new Error("handoff_readback_output_requires_handoff_output");
+  }
   const inputText = args.input
     ? await readFile(path.resolve(args.input), "utf8")
     : await readStdin();
@@ -35,6 +47,38 @@ async function main() {
   });
 
   const outputText = `${JSON.stringify(result, null, 2)}\n`;
+  const observationForDerivedOutputs = args.output
+    ? await writeAndMaybeReadObservationOutput(args, outputText)
+    : result;
+
+  if (args.handoffOutput) {
+    const handoffFixture = buildEdgeLayerSeamHistoryEdgeProjectionFixture({
+      observationResult: observationForDerivedOutputs,
+      emittedAt: args.emittedAt,
+    });
+    assertEdgeLayerSeamHistoryEdgeProjectionFixture(handoffFixture);
+    const handoffOutputPath = path.resolve(args.handoffOutput);
+    await writeFile(handoffOutputPath, `${JSON.stringify(handoffFixture, null, 2)}\n`, "utf8");
+
+    if (args.handoffReadbackOutput) {
+      const handoffReadbackFixture = JSON.parse(await readFile(handoffOutputPath, "utf8")) as unknown;
+      const handoffReadback = buildEdgeLayerSeamHistoryEdgeProjectionHandoffReadback({
+        fixture: handoffReadbackFixture,
+        emittedAt: args.emittedAt,
+      });
+      assertEdgeLayerSeamHistoryEdgeProjectionHandoffReadback(handoffReadback);
+      await writeFile(path.resolve(args.handoffReadbackOutput), `${JSON.stringify(handoffReadback, null, 2)}\n`, "utf8");
+    }
+  }
+
+  if (args.output) {
+    return;
+  }
+
+  process.stdout.write(outputText);
+}
+
+async function writeAndMaybeReadObservationOutput(args: CliArgs, outputText: string): Promise<unknown> {
   if (args.output) {
     const outputPath = path.resolve(args.output);
     await writeFile(outputPath, outputText, "utf8");
@@ -50,13 +94,10 @@ async function main() {
         await writeFile(path.resolve(args.contractOutput), `${JSON.stringify(contract, null, 2)}\n`, "utf8");
       }
     }
-    return;
+    return JSON.parse(await readFile(outputPath, "utf8")) as unknown;
   }
 
-  if (args.contractOutput) {
-    throw new Error("contract_output_requires_output");
-  }
-  process.stdout.write(outputText);
+  return JSON.parse(outputText) as unknown;
 }
 
 function assertObservationReadback(value: unknown): void {
@@ -109,6 +150,16 @@ function parseArgs(argv: string[]): CliArgs {
       index += 1;
       continue;
     }
+    if (arg === "--handoff-output") {
+      args.handoffOutput = requireNext(argv, index, arg);
+      index += 1;
+      continue;
+    }
+    if (arg === "--handoff-readback-output") {
+      args.handoffReadbackOutput = requireNext(argv, index, arg);
+      index += 1;
+      continue;
+    }
     if (arg === "--emitted-at") {
       args.emittedAt = requireNext(argv, index, arg);
       index += 1;
@@ -149,10 +200,12 @@ async function readStdin(): Promise<string> {
 
 function printUsage(): void {
   process.stdout.write([
-    "Usage: tsx scripts/observe-edge-layer-seam-history.ts [--input path] [--output path] [--contract-output path] [--emitted-at iso] [--readback]",
+    "Usage: tsx scripts/observe-edge-layer-seam-history.ts [--input path] [--output path] [--contract-output path] [--handoff-output path] [--handoff-readback-output path] [--emitted-at iso] [--readback]",
     "",
     "Reads supplied Edge/Layer seam-history JSON and emits a bounded local causal observation.",
     "With --contract-output, writes a readback contract over the emitted observation file.",
+    "With --handoff-output, writes an Edge projection handoff fixture derived from the observation result.",
+    "With --handoff-readback-output, writes a readback artifact over the emitted handoff fixture.",
     "This command does not claim DHT/Hyperswarm or decentralized seam proof.",
     "",
   ].join("\n"));

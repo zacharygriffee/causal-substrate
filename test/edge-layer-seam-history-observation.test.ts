@@ -591,6 +591,8 @@ test("seam-history observation command reads supplied material, writes result, a
   const inputPath = path.join(tempRoot, "seam-history.json");
   const outputPath = path.join(tempRoot, "observation-result.json");
   const contractPath = path.join(tempRoot, "observation-readback-contract.json");
+  const handoffPath = path.join(tempRoot, "edge-projection-handoff.json");
+  const handoffReadbackPath = path.join(tempRoot, "edge-projection-handoff-readback.json");
   try {
     await writeFile(inputPath, JSON.stringify(operationShapedSeamHistory(), null, 2), "utf8");
 
@@ -603,6 +605,10 @@ test("seam-history observation command reads supplied material, writes result, a
       outputPath,
       "--contract-output",
       contractPath,
+      "--handoff-output",
+      handoffPath,
+      "--handoff-readback-output",
+      handoffReadbackPath,
       "--emitted-at",
       "2026-05-31T12:10:00.000Z",
       "--readback",
@@ -653,6 +659,48 @@ test("seam-history observation command reads supplied material, writes result, a
     assert.equal(contract.readback.normalizedProofLabelPreserved, result.proof.normalizedProofLabel);
     assert.equal(contract.boundary.writesObservationArtifact, false);
     assert.equal(contract.boundary.acceptsCanonicalHistory, false);
+    const handoff = JSON.parse(await readFile(handoffPath, "utf8"));
+    assertEdgeLayerSeamHistoryEdgeProjectionFixture(handoff);
+    assert.equal(handoff.validation.observationResultConsumed, true);
+    assert.equal(handoff.validation.sourceRefsPreserved, true);
+    assert.equal(handoff.source.sourceObservationArtifactId, result.artifactId);
+    assert.equal(
+      handoff.source.sourceObservationProofRung,
+      "local_causal_observation_over_supplied_seam_history_material",
+    );
+    assert.equal(handoff.handoffEnvelope.sourceObservation.normalizedProofLabel, "local_supplied_material");
+    assert.deepEqual(handoff.handoffEnvelope.sourceReferences.requestIds, [
+      "edge-layer-report-only-seam-request:causal-observation:linked",
+      "edge-layer-report-only-seam-request:causal-observation:damaged",
+    ]);
+    assert.deepEqual(handoff.handoffEnvelope.sourceReferences.receiptHashes, [
+      `sha256:${"b".repeat(64)}`,
+      `sha256:${"d".repeat(64)}`,
+    ]);
+    assert.equal(handoff.handoffEnvelope.consumerBoundary.edgeMayConsume, true);
+    assert.equal(handoff.handoffEnvelope.consumerBoundary.writesEdgeProjection, false);
+    assert.equal(handoff.handoffEnvelope.consumerBoundary.acceptsCanonicalHistory, false);
+    assert.equal(handoff.handoffEnvelope.consumerBoundary.admitsLayerEvidence, false);
+    assert.equal(handoff.handoffEnvelope.consumerBoundary.interpretsRbc, false);
+    assert.equal(handoff.handoffEnvelope.consumerBoundary.grantsAuthority, false);
+
+    const handoffReadback = JSON.parse(await readFile(handoffReadbackPath, "utf8"));
+    assertEdgeLayerSeamHistoryEdgeProjectionHandoffReadback(handoffReadback);
+    assert.equal(handoffReadback.validation.handoffFixtureConsumed, true);
+    assert.equal(handoffReadback.validation.sourceRefsPreserved, true);
+    assert.equal(handoffReadback.readback.nonClaimsPreserved, true);
+    assert.equal(handoffReadback.source.sourceFixtureArtifactId, handoff.artifactId);
+    assert.equal(handoffReadback.source.sourceObservationArtifactId, result.artifactId);
+    assert.equal(handoffReadback.source.sourceObservationNormalizedProofLabel, "local_supplied_material");
+    assert.deepEqual(handoffReadback.preservedSourceRefs.requestHashes, [
+      `sha256:${"a".repeat(64)}`,
+      `sha256:${"c".repeat(64)}`,
+    ]);
+    assert.equal(handoffReadback.boundary.writesEdgeProjection, false);
+    assert.equal(handoffReadback.boundary.acceptsCanonicalHistory, false);
+    assert.equal(handoffReadback.boundary.admitsLayerEvidence, false);
+    assert.equal(handoffReadback.boundary.interpretsRbc, false);
+    assert.equal(handoffReadback.boundary.grantsAuthority, false);
   } finally {
     await rm(tempRoot, { recursive: true, force: true });
   }
