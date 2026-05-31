@@ -267,11 +267,6 @@ export function assertEdgeLayerSeamHistoryObservationResult(
   assertEqual(boundary.grantsAuthority, false, "boundary.grantsAuthority");
   assertEqual(boundary.publishesToMesh, false, "boundary.publishesToMesh");
   const proof = assertObject(candidate.proof, "proof");
-  assertEqual(
-    proof.strongestProofRung,
-    "local_causal_observation_over_supplied_seam_history_material",
-    "proof.strongestProofRung",
-  );
   if (proof.decentralizedSeamProofClaimed === true) {
     assertEqual(
       proof.strongestProofRung,

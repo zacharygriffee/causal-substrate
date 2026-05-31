@@ -1,12 +1,13 @@
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
 
 import {
   activeManagedCorestoreCount,
+  assertEdgeLayerSeamHistoryObservationResult,
   createHyperswarmReplicationSwarm,
   parseHyperswarmBootstrap,
   runEdgeLayerSeamHistoryHyperswarmReader,
@@ -173,6 +174,7 @@ test(
   async () => {
     const sourceDir = await mkdtemp(path.join(tmpdir(), "causal-seam-hs-source-"));
     const replicaDir = await mkdtemp(path.join(tmpdir(), "causal-seam-hs-replica-"));
+    const readbackPath = path.join(replicaDir, "observation-readback.json");
     const harness = await openHyperswarmHarness();
     try {
       const report = await runEdgeLayerSeamHistoryHyperswarmReader({
@@ -221,6 +223,34 @@ test(
         report.observationResult.observations[0]?.receipt.hash,
         `sha256:${"b".repeat(64)}`,
       );
+
+      await writeFile(readbackPath, JSON.stringify(report.observationResult, null, 2), "utf8");
+      const readback = JSON.parse(await readFile(readbackPath, "utf8")) as unknown;
+      assertEdgeLayerSeamHistoryObservationResult(readback);
+      assert.equal(
+        readback.proof.strongestProofRung,
+        "dht_hyperswarm_replicated_durable_seam_history_observation",
+      );
+      assert.equal(
+        readback.observations[0]?.request.id,
+        "edge-layer-report-only-seam-request:hyperswarm-reader:linked",
+      );
+      assert.equal(readback.observations[0]?.request.hash, `sha256:${"a".repeat(64)}`);
+      assert.equal(
+        readback.observations[0]?.receipt.id,
+        "layer-report-only-edge-seam-receipt:hyperswarm-reader:linked",
+      );
+      assert.equal(readback.observations[0]?.receipt.hash, `sha256:${"b".repeat(64)}`);
+      assert.equal(
+        readback.observations[1]?.request.id,
+        "edge-layer-report-only-seam-request:hyperswarm-reader:unlinked",
+      );
+      assert.equal(readback.observations[1]?.request.hash, `sha256:${"c".repeat(64)}`);
+      assert.equal(
+        readback.observations[1]?.receipt.id,
+        "layer-report-only-edge-seam-receipt:hyperswarm-reader:unlinked",
+      );
+      assert.equal(readback.observations[1]?.receipt.hash, `sha256:${"d".repeat(64)}`);
       assert.equal(activeManagedCorestoreCount(), 0);
     } finally {
       await harness.close();
