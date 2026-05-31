@@ -9,11 +9,13 @@ import { promisify } from "node:util";
 import {
   assertEdgeLayerSeamHistoryObservationContractSnapshot,
   assertEdgeLayerSeamHistoryObservationResult,
+  assertEdgeLayerSeamHistoryEdgeProjectionConsumerFixture,
   assertEdgeLayerSeamHistoryEdgeProjectionFixture,
   assertEdgeLayerSeamHistoryEdgeProjectionHandoffReadback,
   assertEdgeLayerSeamHistoryObservationReadbackContract,
   buildEdgeLayerSeamHistoryObservationContractSnapshot,
   buildEdgeLayerSeamHistoryObservationResult,
+  buildEdgeLayerSeamHistoryEdgeProjectionConsumerFixture,
   buildEdgeLayerSeamHistoryEdgeProjectionFixture,
   buildEdgeLayerSeamHistoryEdgeProjectionHandoffReadback,
   buildEdgeLayerSeamHistoryObservationReadbackContract,
@@ -903,6 +905,75 @@ test("Edge projection fixture is derived from observation result without writing
   assert.equal(fixture.boundary.opensEdgeRuntime, false);
   assert.equal(fixture.boundary.promotesReferents, false);
   assert.equal(fixture.boundary.writesProductionContinuity, false);
+});
+
+test("Edge projection consumer fixture variant exposes observation-only material", () => {
+  const observationResult = buildEdgeLayerSeamHistoryObservationResult({
+    seamHistory: operationShapedSeamHistory(),
+    emittedAt: "2026-05-31T12:16:20.000Z",
+    sourcePath: "layer-owned-edge-seam-status:edge-projection-consumer-fixture",
+  });
+  const fixture = buildEdgeLayerSeamHistoryEdgeProjectionFixture({
+    observationResult,
+    emittedAt: "2026-05-31T12:16:21.000Z",
+  });
+
+  const consumerFixture = buildEdgeLayerSeamHistoryEdgeProjectionConsumerFixture({
+    fixture,
+    emittedAt: "2026-05-31T12:16:22.000Z",
+  });
+
+  assertEdgeLayerSeamHistoryEdgeProjectionConsumerFixture(consumerFixture);
+  assert.equal(
+    consumerFixture.reviewStatus,
+    "edge-layer-seam-history-edge-projection-consumer-fixture-ready",
+  );
+  assert.equal(consumerFixture.validation.sourceFixtureConsumed, true);
+  assert.equal(consumerFixture.validation.compatibleRefsPresent, true);
+  assert.equal(consumerFixture.validation.unresolvedOrDamagedRefsPresent, true);
+  assert.equal(consumerFixture.validation.sourceRefsPreserved, true);
+  assert.equal(consumerFixture.validation.classificationSummaryPreserved, true);
+  assert.equal(consumerFixture.source.sourceFixtureArtifactId, fixture.artifactId);
+  assert.equal(consumerFixture.source.sourceObservationArtifactId, observationResult.artifactId);
+  assert.equal(
+    consumerFixture.source.sourceObservationProofRung,
+    "local_causal_observation_over_supplied_seam_history_material",
+  );
+  assert.equal(consumerFixture.source.sourceObservationNormalizedProofLabel, "local_supplied_material");
+  assert.equal(consumerFixture.consumerMaterial.materialKind, "edge_projection_observation_consumer_material");
+  assert.equal(consumerFixture.consumerMaterial.consumeAs, "causal_observation_projection_input_only");
+  assert.equal(consumerFixture.consumerMaterial.compatibleRefs.length, 1);
+  assert.equal(consumerFixture.consumerMaterial.unresolvedOrDamagedRefs.length, 1);
+  assert.equal(
+    consumerFixture.consumerMaterial.compatibleRefs[0]!.observationId,
+    observationResult.observations[0]!.observationId,
+  );
+  assert.equal(
+    consumerFixture.consumerMaterial.unresolvedOrDamagedRefs[0]!.observationId,
+    observationResult.observations[1]!.observationId,
+  );
+  assert.deepEqual(consumerFixture.consumerMaterial.sourceReferences.requestIds, [
+    "edge-layer-report-only-seam-request:causal-observation:linked",
+    "edge-layer-report-only-seam-request:causal-observation:damaged",
+  ]);
+  assert.deepEqual(consumerFixture.consumerMaterial.sourceReferences.receiptHashes, [
+    `sha256:${"b".repeat(64)}`,
+    `sha256:${"d".repeat(64)}`,
+  ]);
+  assert.deepEqual(consumerFixture.consumerMaterial.classificationSummary.linkageStatuses, [
+    "linked",
+    "damaged",
+  ]);
+  assert.equal(consumerFixture.boundary.edgeMayConsume, true);
+  assert.equal(consumerFixture.boundary.consumeAsObservationOnly, true);
+  assert.equal(consumerFixture.boundary.writesEdgeProjection, false);
+  assert.equal(consumerFixture.boundary.acceptsCanonicalHistory, false);
+  assert.equal(consumerFixture.boundary.admitsLayerEvidence, false);
+  assert.equal(consumerFixture.boundary.interpretsRbc, false);
+  assert.equal(consumerFixture.boundary.grantsAuthority, false);
+  assert.equal(consumerFixture.boundary.promotesReferents, false);
+  assert.equal(consumerFixture.boundary.publishesToMesh, false);
+  assert.equal(consumerFixture.boundary.writesProductionContinuity, false);
 });
 
 test("Edge projection fixture guardrail matrix rejects projection overclaims", () => {

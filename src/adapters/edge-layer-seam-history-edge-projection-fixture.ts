@@ -29,6 +29,14 @@ export const CAUSAL_EDGE_LAYER_SEAM_HISTORY_EDGE_PROJECTION_HANDOFF_READBACK_SCH
 export const CAUSAL_EDGE_LAYER_SEAM_HISTORY_EDGE_PROJECTION_HANDOFF_READBACK_ARTIFACT_KIND =
   "causal-edge-layer-seam-history-edge-projection-handoff-readback" as const;
 
+export const CAUSAL_EDGE_LAYER_SEAM_HISTORY_EDGE_PROJECTION_CONSUMER_FIXTURE_SCHEMA =
+  "causal-substrate/edge-layer-seam-history-edge-projection-consumer-fixture/v1" as const;
+
+export const CAUSAL_EDGE_LAYER_SEAM_HISTORY_EDGE_PROJECTION_CONSUMER_FIXTURE_SCHEMA_VERSION = 1 as const;
+
+export const CAUSAL_EDGE_LAYER_SEAM_HISTORY_EDGE_PROJECTION_CONSUMER_FIXTURE_ARTIFACT_KIND =
+  "causal-edge-layer-seam-history-edge-projection-consumer-fixture" as const;
+
 export type EdgeLayerSeamHistoryEdgeProjectionFixtureStatus =
   | "edge-layer-seam-history-edge-projection-fixture-ready"
   | "edge-layer-seam-history-edge-projection-fixture-incomplete"
@@ -37,6 +45,10 @@ export type EdgeLayerSeamHistoryEdgeProjectionFixtureStatus =
 export type EdgeLayerSeamHistoryEdgeProjectionHandoffReadbackStatus =
   | "edge-layer-seam-history-edge-projection-handoff-readback-valid"
   | "edge-layer-seam-history-edge-projection-handoff-readback-invalid";
+
+export type EdgeLayerSeamHistoryEdgeProjectionConsumerFixtureStatus =
+  | "edge-layer-seam-history-edge-projection-consumer-fixture-ready"
+  | "edge-layer-seam-history-edge-projection-consumer-fixture-incomplete";
 
 export interface EdgeLayerSeamHistoryEdgeProjectionRef {
   sourceObservationArtifactId: string;
@@ -215,7 +227,65 @@ export interface EdgeLayerSeamHistoryEdgeProjectionHandoffReadback {
   rejections: string[];
 }
 
+export interface EdgeLayerSeamHistoryEdgeProjectionConsumerFixture {
+  artifactKind: typeof CAUSAL_EDGE_LAYER_SEAM_HISTORY_EDGE_PROJECTION_CONSUMER_FIXTURE_ARTIFACT_KIND;
+  schema: typeof CAUSAL_EDGE_LAYER_SEAM_HISTORY_EDGE_PROJECTION_CONSUMER_FIXTURE_SCHEMA;
+  schemaVersion: typeof CAUSAL_EDGE_LAYER_SEAM_HISTORY_EDGE_PROJECTION_CONSUMER_FIXTURE_SCHEMA_VERSION;
+  artifactId: string;
+  emittedAt: string;
+  source: {
+    sourceFixtureArtifactId?: string;
+    sourceObservationArtifactId?: string;
+    sourceObservationProofRung?: EdgeLayerSeamHistoryProofRung;
+    sourceObservationNormalizedProofLabel?: EdgeLayerSeamHistoryNormalizedProofLabel;
+  };
+  consumerMaterial: {
+    materialKind: "edge_projection_observation_consumer_material";
+    consumeAs: "causal_observation_projection_input_only";
+    compatibleRefs: EdgeLayerSeamHistoryEdgeProjectionRef[];
+    unresolvedOrDamagedRefs: EdgeLayerSeamHistoryEdgeProjectionRef[];
+    sourceReferences: EdgeLayerSeamHistoryEdgeProjectionHandoffEnvelope["sourceReferences"];
+    classificationSummary: EdgeLayerSeamHistoryEdgeProjectionHandoffEnvelope["classificationSummary"];
+  };
+  boundary: {
+    consumerFixtureOnly: true;
+    edgeMayConsume: true;
+    consumeAsObservationOnly: true;
+    writesEdgeProjection: false;
+    acceptsCanonicalHistory: false;
+    admitsLayerEvidence: false;
+    interpretsRbc: false;
+    grantsAuthority: false;
+    promotesReferents: false;
+    publishesToMesh: false;
+    writesProductionContinuity: false;
+  };
+  validation: {
+    status: EdgeLayerSeamHistoryEdgeProjectionConsumerFixtureStatus;
+    sourceFixtureConsumed: boolean;
+    compatibleRefsPresent: boolean;
+    unresolvedOrDamagedRefsPresent: boolean;
+    sourceRefsPreserved: boolean;
+    classificationSummaryPreserved: boolean;
+    noCanonicalHistoryClaim: true;
+    noLayerAdmissionClaim: true;
+    noRbcInterpretationClaim: true;
+    noAuthorityClaim: true;
+    noReferentPromotion: true;
+    issues: string[];
+  };
+  reviewStatus: EdgeLayerSeamHistoryEdgeProjectionConsumerFixtureStatus;
+  warnings: string[];
+  rejections: string[];
+}
+
 export interface BuildEdgeLayerSeamHistoryEdgeProjectionHandoffReadbackInput {
+  fixture: unknown;
+  emittedAt: string;
+  artifactId?: string;
+}
+
+export interface BuildEdgeLayerSeamHistoryEdgeProjectionConsumerFixtureInput {
   fixture: unknown;
   emittedAt: string;
   artifactId?: string;
@@ -360,6 +430,86 @@ export function buildEdgeLayerSeamHistoryEdgeProjectionHandoffReadback(
   };
 }
 
+export function buildEdgeLayerSeamHistoryEdgeProjectionConsumerFixture(
+  input: BuildEdgeLayerSeamHistoryEdgeProjectionConsumerFixtureInput,
+): EdgeLayerSeamHistoryEdgeProjectionConsumerFixture {
+  const fixture = parseProjectionFixture(input.fixture);
+  const issues = validateConsumerFixture(fixture);
+  const status: EdgeLayerSeamHistoryEdgeProjectionConsumerFixtureStatus = issues.length === 0
+    ? "edge-layer-seam-history-edge-projection-consumer-fixture-ready"
+    : "edge-layer-seam-history-edge-projection-consumer-fixture-incomplete";
+  const artifactId = input.artifactId ?? createConsumerFixtureArtifactId({
+    emittedAt: input.emittedAt,
+    ...(fixture ? { sourceFixtureArtifactId: fixture.artifactId } : {}),
+  });
+
+  return {
+    artifactKind: CAUSAL_EDGE_LAYER_SEAM_HISTORY_EDGE_PROJECTION_CONSUMER_FIXTURE_ARTIFACT_KIND,
+    schema: CAUSAL_EDGE_LAYER_SEAM_HISTORY_EDGE_PROJECTION_CONSUMER_FIXTURE_SCHEMA,
+    schemaVersion: CAUSAL_EDGE_LAYER_SEAM_HISTORY_EDGE_PROJECTION_CONSUMER_FIXTURE_SCHEMA_VERSION,
+    artifactId,
+    emittedAt: input.emittedAt,
+    source: {
+      ...(fixture ? { sourceFixtureArtifactId: fixture.artifactId } : {}),
+      ...(fixture?.handoffEnvelope.sourceObservation.artifactId
+        ? { sourceObservationArtifactId: fixture.handoffEnvelope.sourceObservation.artifactId }
+        : {}),
+      ...(fixture?.handoffEnvelope.sourceObservation.proofRung
+        ? { sourceObservationProofRung: fixture.handoffEnvelope.sourceObservation.proofRung }
+        : {}),
+      ...(fixture?.handoffEnvelope.sourceObservation.normalizedProofLabel
+        ? { sourceObservationNormalizedProofLabel: fixture.handoffEnvelope.sourceObservation.normalizedProofLabel }
+        : {}),
+    },
+    consumerMaterial: {
+      materialKind: "edge_projection_observation_consumer_material",
+      consumeAs: "causal_observation_projection_input_only",
+      compatibleRefs: fixture?.edgeProjectionMaterial.compatibleRefs ?? [],
+      unresolvedOrDamagedRefs: fixture?.edgeProjectionMaterial.unresolvedOrDamagedRefs ?? [],
+      sourceReferences: fixture?.handoffEnvelope.sourceReferences ?? emptySourceReferences(),
+      classificationSummary: fixture?.handoffEnvelope.classificationSummary ?? {
+        compatibleObservationIds: [],
+        unresolvedOrDamagedObservationIds: [],
+        linkageStatuses: [],
+        damageOrUnresolvedDetails: [],
+      },
+    },
+    boundary: {
+      consumerFixtureOnly: true,
+      edgeMayConsume: true,
+      consumeAsObservationOnly: true,
+      writesEdgeProjection: false,
+      acceptsCanonicalHistory: false,
+      admitsLayerEvidence: false,
+      interpretsRbc: false,
+      grantsAuthority: false,
+      promotesReferents: false,
+      publishesToMesh: false,
+      writesProductionContinuity: false,
+    },
+    validation: {
+      status,
+      sourceFixtureConsumed: fixture !== undefined,
+      compatibleRefsPresent: (fixture?.edgeProjectionMaterial.compatibleRefs.length ?? 0) > 0,
+      unresolvedOrDamagedRefsPresent: (fixture?.edgeProjectionMaterial.unresolvedOrDamagedRefs.length ?? 0) > 0,
+      sourceRefsPreserved: issues.includes("consumer-source-refs-not-preserved") === false && fixture !== undefined,
+      classificationSummaryPreserved:
+        issues.includes("consumer-classification-summary-not-preserved") === false && fixture !== undefined,
+      noCanonicalHistoryClaim: true,
+      noLayerAdmissionClaim: true,
+      noRbcInterpretationClaim: true,
+      noAuthorityClaim: true,
+      noReferentPromotion: true,
+      issues,
+    },
+    reviewStatus: status,
+    warnings: status === "edge-layer-seam-history-edge-projection-consumer-fixture-ready"
+      ? []
+      : ["edge-projection-consumer-fixture-is-incomplete"],
+    rejections: status === "edge-layer-seam-history-edge-projection-consumer-fixture-ready" ? [] : issues,
+  };
+}
+
 export function assertEdgeLayerSeamHistoryEdgeProjectionFixture(
   value: unknown,
 ): asserts value is EdgeLayerSeamHistoryEdgeProjectionFixture {
@@ -476,6 +626,50 @@ export function assertEdgeLayerSeamHistoryEdgeProjectionHandoffReadback(
   assertHandoffReadbackStatus(candidate.reviewStatus, "reviewStatus");
 }
 
+export function assertEdgeLayerSeamHistoryEdgeProjectionConsumerFixture(
+  value: unknown,
+): asserts value is EdgeLayerSeamHistoryEdgeProjectionConsumerFixture {
+  const candidate = assertObject(value, "edge layer seam history edge projection consumer fixture");
+  assertEqual(
+    candidate.artifactKind,
+    CAUSAL_EDGE_LAYER_SEAM_HISTORY_EDGE_PROJECTION_CONSUMER_FIXTURE_ARTIFACT_KIND,
+    "artifactKind",
+  );
+  assertEqual(candidate.schema, CAUSAL_EDGE_LAYER_SEAM_HISTORY_EDGE_PROJECTION_CONSUMER_FIXTURE_SCHEMA, "schema");
+  assertEqual(
+    candidate.schemaVersion,
+    CAUSAL_EDGE_LAYER_SEAM_HISTORY_EDGE_PROJECTION_CONSUMER_FIXTURE_SCHEMA_VERSION,
+    "schemaVersion",
+  );
+  assertString(candidate.artifactId, "artifactId");
+  assertString(candidate.emittedAt, "emittedAt");
+  const material = assertObject(candidate.consumerMaterial, "consumerMaterial");
+  assertEqual(material.materialKind, "edge_projection_observation_consumer_material", "consumerMaterial.materialKind");
+  assertEqual(material.consumeAs, "causal_observation_projection_input_only", "consumerMaterial.consumeAs");
+  assertProjectionRefs(arrayRecords(material.compatibleRefs), "consumerMaterial.compatibleRefs");
+  assertProjectionRefs(arrayRecords(material.unresolvedOrDamagedRefs), "consumerMaterial.unresolvedOrDamagedRefs");
+  const boundary = assertObject(candidate.boundary, "boundary");
+  assertEqual(boundary.consumerFixtureOnly, true, "boundary.consumerFixtureOnly");
+  assertEqual(boundary.edgeMayConsume, true, "boundary.edgeMayConsume");
+  assertEqual(boundary.consumeAsObservationOnly, true, "boundary.consumeAsObservationOnly");
+  assertEqual(boundary.writesEdgeProjection, false, "boundary.writesEdgeProjection");
+  assertEqual(boundary.acceptsCanonicalHistory, false, "boundary.acceptsCanonicalHistory");
+  assertEqual(boundary.admitsLayerEvidence, false, "boundary.admitsLayerEvidence");
+  assertEqual(boundary.interpretsRbc, false, "boundary.interpretsRbc");
+  assertEqual(boundary.grantsAuthority, false, "boundary.grantsAuthority");
+  assertEqual(boundary.promotesReferents, false, "boundary.promotesReferents");
+  assertEqual(boundary.publishesToMesh, false, "boundary.publishesToMesh");
+  assertEqual(boundary.writesProductionContinuity, false, "boundary.writesProductionContinuity");
+  const validation = assertObject(candidate.validation, "validation");
+  assertConsumerFixtureStatus(validation.status, "validation.status");
+  assertEqual(validation.noCanonicalHistoryClaim, true, "validation.noCanonicalHistoryClaim");
+  assertEqual(validation.noLayerAdmissionClaim, true, "validation.noLayerAdmissionClaim");
+  assertEqual(validation.noRbcInterpretationClaim, true, "validation.noRbcInterpretationClaim");
+  assertEqual(validation.noAuthorityClaim, true, "validation.noAuthorityClaim");
+  assertEqual(validation.noReferentPromotion, true, "validation.noReferentPromotion");
+  assertConsumerFixtureStatus(candidate.reviewStatus, "reviewStatus");
+}
+
 function parseObservationResult(value: unknown): EdgeLayerSeamHistoryObservationResult | undefined {
   try {
     assertEdgeLayerSeamHistoryObservationResult(value);
@@ -540,6 +734,45 @@ function validateHandoffReadback(fixture: EdgeLayerSeamHistoryEdgeProjectionFixt
     handoffEnvelope.consumerBoundary.writesProductionContinuity
   ) {
     issues.push("handoff-non-claims-not-preserved");
+  }
+  return [...new Set(issues)];
+}
+
+function validateConsumerFixture(fixture: EdgeLayerSeamHistoryEdgeProjectionFixture | undefined): string[] {
+  const issues: string[] = [];
+  if (!fixture) return ["consumer-source-fixture-invalid"];
+  if (fixture.edgeProjectionMaterial.compatibleRefs.length === 0) {
+    issues.push("consumer-compatible-refs-missing");
+  }
+  if (fixture.edgeProjectionMaterial.unresolvedOrDamagedRefs.length === 0) {
+    issues.push("consumer-unresolved-or-damaged-refs-missing");
+  }
+  if (
+    fixture.handoffEnvelope.sourceReferences.sourceRepos.length === 0 ||
+    fixture.handoffEnvelope.sourceReferences.requestIds.length === 0 ||
+    fixture.handoffEnvelope.sourceReferences.requestHashes.length === 0 ||
+    fixture.handoffEnvelope.sourceReferences.receiptIds.length === 0 ||
+    fixture.handoffEnvelope.sourceReferences.receiptHashes.length === 0
+  ) {
+    issues.push("consumer-source-refs-not-preserved");
+  }
+  if (
+    fixture.handoffEnvelope.classificationSummary.compatibleObservationIds.length === 0 ||
+    fixture.handoffEnvelope.classificationSummary.unresolvedOrDamagedObservationIds.length === 0
+  ) {
+    issues.push("consumer-classification-summary-not-preserved");
+  }
+  if (
+    fixture.boundary.edgeProjectionWritten ||
+    fixture.boundary.acceptsCanonicalHistory ||
+    fixture.boundary.admitsLayerEvidence ||
+    fixture.boundary.interpretsRbc ||
+    fixture.boundary.grantsAuthority ||
+    fixture.boundary.promotesReferents ||
+    fixture.boundary.publishesToMesh ||
+    fixture.boundary.writesProductionContinuity
+  ) {
+    issues.push("consumer-boundary-overclaim");
   }
   return [...new Set(issues)];
 }
@@ -700,6 +933,20 @@ function buildHandoffReadbackBoundary(): EdgeLayerSeamHistoryEdgeProjectionHando
   };
 }
 
+function emptySourceReferences(): EdgeLayerSeamHistoryEdgeProjectionHandoffEnvelope["sourceReferences"] {
+  return {
+    sourceRepos: [],
+    requestIds: [],
+    requestHashes: [],
+    requestDurableRefs: [],
+    requestWriterRefs: [],
+    receiptIds: [],
+    receiptHashes: [],
+    receiptDurableRefs: [],
+    receiptWriterRefs: [],
+  };
+}
+
 function buildWarnings(status: EdgeLayerSeamHistoryEdgeProjectionFixtureStatus): string[] {
   const warnings = [
     "edge-projection-fixture-is-derived-from-causal-observation-result",
@@ -806,6 +1053,10 @@ function createHandoffReadbackArtifactId(input: { emittedAt: string; sourceFixtu
   return `causal-edge-layer-seam-history-edge-projection-handoff-readback:${hash(stableJson(input)).slice(0, 16)}`;
 }
 
+function createConsumerFixtureArtifactId(input: { emittedAt: string; sourceFixtureArtifactId?: string }): string {
+  return `causal-edge-layer-seam-history-edge-projection-consumer-fixture:${hash(stableJson(input)).slice(0, 16)}`;
+}
+
 type JsonRecord = Record<string, unknown>;
 
 function stableJson(value: unknown): string {
@@ -864,6 +1115,18 @@ function assertHandoffReadbackStatus(
     value !== "edge-layer-seam-history-edge-projection-handoff-readback-invalid"
   ) {
     throw new Error(`${label} must be a handoff readback status`);
+  }
+}
+
+function assertConsumerFixtureStatus(
+  value: unknown,
+  label: string,
+): asserts value is EdgeLayerSeamHistoryEdgeProjectionConsumerFixtureStatus {
+  if (
+    value !== "edge-layer-seam-history-edge-projection-consumer-fixture-ready" &&
+    value !== "edge-layer-seam-history-edge-projection-consumer-fixture-incomplete"
+  ) {
+    throw new Error(`${label} must be a consumer fixture status`);
   }
 }
 
