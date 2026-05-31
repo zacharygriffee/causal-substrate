@@ -3,12 +3,15 @@ import path from "node:path";
 
 import {
   assertEdgeLayerSeamHistoryObservationResult,
+  assertEdgeLayerSeamHistoryObservationReadbackContract,
   buildEdgeLayerSeamHistoryObservationResult,
+  buildEdgeLayerSeamHistoryObservationReadbackContract,
 } from "../src/index.js";
 
 interface CliArgs {
   input?: string;
   output?: string;
+  contractOutput?: string;
   emittedAt: string;
   readback: boolean;
 }
@@ -35,13 +38,24 @@ async function main() {
   if (args.output) {
     const outputPath = path.resolve(args.output);
     await writeFile(outputPath, outputText, "utf8");
-    if (args.readback) {
+    if (args.readback || args.contractOutput) {
       const readback = JSON.parse(await readFile(outputPath, "utf8")) as unknown;
       assertObservationReadback(readback);
+      if (args.contractOutput) {
+        const contract = buildEdgeLayerSeamHistoryObservationReadbackContract({
+          observationResult: readback,
+          emittedAt: args.emittedAt,
+        });
+        assertEdgeLayerSeamHistoryObservationReadbackContract(contract);
+        await writeFile(path.resolve(args.contractOutput), `${JSON.stringify(contract, null, 2)}\n`, "utf8");
+      }
     }
     return;
   }
 
+  if (args.contractOutput) {
+    throw new Error("contract_output_requires_output");
+  }
   process.stdout.write(outputText);
 }
 
@@ -87,6 +101,11 @@ function parseArgs(argv: string[]): CliArgs {
       index += 1;
       continue;
     }
+    if (arg === "--contract-output") {
+      args.contractOutput = requireNext(argv, index, arg);
+      index += 1;
+      continue;
+    }
     if (arg === "--emitted-at") {
       args.emittedAt = requireNext(argv, index, arg);
       index += 1;
@@ -127,9 +146,10 @@ async function readStdin(): Promise<string> {
 
 function printUsage(): void {
   process.stdout.write([
-    "Usage: tsx scripts/observe-edge-layer-seam-history.ts [--input path] [--output path] [--emitted-at iso] [--readback]",
+    "Usage: tsx scripts/observe-edge-layer-seam-history.ts [--input path] [--output path] [--contract-output path] [--emitted-at iso] [--readback]",
     "",
     "Reads supplied Edge/Layer seam-history JSON and emits a bounded local causal observation.",
+    "With --contract-output, writes a readback contract over the emitted observation file.",
     "This command does not claim DHT/Hyperswarm or decentralized seam proof.",
     "",
   ].join("\n"));

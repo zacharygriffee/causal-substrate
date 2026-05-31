@@ -354,6 +354,7 @@ test("seam-history observation command reads supplied material, writes result, a
   const tempRoot = await mkdtemp(path.join(tmpdir(), "causal-seam-history-observation-"));
   const inputPath = path.join(tempRoot, "seam-history.json");
   const outputPath = path.join(tempRoot, "observation-result.json");
+  const contractPath = path.join(tempRoot, "observation-readback-contract.json");
   try {
     await writeFile(inputPath, JSON.stringify(operationShapedSeamHistory(), null, 2), "utf8");
 
@@ -364,6 +365,8 @@ test("seam-history observation command reads supplied material, writes result, a
       inputPath,
       "--output",
       outputPath,
+      "--contract-output",
+      contractPath,
       "--emitted-at",
       "2026-05-31T12:10:00.000Z",
       "--readback",
@@ -395,6 +398,13 @@ test("seam-history observation command reads supplied material, writes result, a
       result.observations[1]!.classification,
       "unresolved_or_damaged_seam_happening",
     );
+    const contract = JSON.parse(await readFile(contractPath, "utf8"));
+    assertEdgeLayerSeamHistoryObservationReadbackContract(contract);
+    assert.equal(contract.validation.observationArtifactConsumed, true);
+    assert.equal(contract.validation.sourceRefsPreserved, true);
+    assert.equal(contract.readback.proofRungPreserved, result.proof.strongestProofRung);
+    assert.equal(contract.boundary.writesObservationArtifact, false);
+    assert.equal(contract.boundary.acceptsCanonicalHistory, false);
   } finally {
     await rm(tempRoot, { recursive: true, force: true });
   }
