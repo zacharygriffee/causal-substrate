@@ -593,6 +593,7 @@ test("seam-history observation command reads supplied material, writes result, a
   const contractPath = path.join(tempRoot, "observation-readback-contract.json");
   const handoffPath = path.join(tempRoot, "edge-projection-handoff.json");
   const handoffReadbackPath = path.join(tempRoot, "edge-projection-handoff-readback.json");
+  const hyperswarmReadinessPath = path.join(tempRoot, "hyperswarm-input-lane-readiness.json");
   try {
     await writeFile(inputPath, JSON.stringify(operationShapedSeamHistory(), null, 2), "utf8");
 
@@ -609,6 +610,10 @@ test("seam-history observation command reads supplied material, writes result, a
       handoffPath,
       "--handoff-readback-output",
       handoffReadbackPath,
+      "--hyperswarm-readiness-output",
+      hyperswarmReadinessPath,
+      "--hyperswarm-namespace",
+      "hyperswarm-seam-history-reader,cli-readiness",
       "--emitted-at",
       "2026-05-31T12:10:00.000Z",
       "--readback",
@@ -701,6 +706,30 @@ test("seam-history observation command reads supplied material, writes result, a
     assert.equal(handoffReadback.boundary.admitsLayerEvidence, false);
     assert.equal(handoffReadback.boundary.interpretsRbc, false);
     assert.equal(handoffReadback.boundary.grantsAuthority, false);
+
+    const hyperswarmReadiness = JSON.parse(await readFile(hyperswarmReadinessPath, "utf8"));
+    assert.equal(
+      hyperswarmReadiness.schema,
+      "causal-substrate/edge-layer-seam-history-hyperswarm-input-lane-readiness/v1",
+    );
+    assert.equal(
+      hyperswarmReadiness.status,
+      "edge-layer-seam-history-hyperswarm-input-lane-ready-to-run",
+    );
+    assert.equal(hyperswarmReadiness.gates.durableCorestoreReaderAvailable, true);
+    assert.equal(hyperswarmReadiness.gates.hyperswarmFactoryAvailable, true);
+    assert.equal(hyperswarmReadiness.gates.namespaceConfigured, true);
+    assert.equal(hyperswarmReadiness.gates.seamHistoryInputAvailable, true);
+    assert.equal(hyperswarmReadiness.proofPosture.readinessOnly, true);
+    assert.equal(hyperswarmReadiness.proofPosture.dhtHyperswarmProofClaimedNow, false);
+    assert.equal(hyperswarmReadiness.proofPosture.canReachHigherProofRungOnlyAfterRun, true);
+    assert.equal(hyperswarmReadiness.boundary.opensSwarm, false);
+    assert.equal(hyperswarmReadiness.boundary.opensCorestore, false);
+    assert.equal(hyperswarmReadiness.boundary.readsDurableHistory, false);
+    assert.equal(hyperswarmReadiness.boundary.writesRecords, false);
+    assert.equal(hyperswarmReadiness.boundary.publishesToMesh, false);
+    assert.equal(hyperswarmReadiness.boundary.grantsAuthority, false);
+    assert.deepEqual(hyperswarmReadiness.issues, []);
   } finally {
     await rm(tempRoot, { recursive: true, force: true });
   }
