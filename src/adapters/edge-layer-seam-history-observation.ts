@@ -29,6 +29,10 @@ export type EdgeLayerSeamHistoryProofRung =
   | "local_causal_observation_over_supplied_seam_history_material"
   | "dht_hyperswarm_replicated_durable_seam_history_observation";
 
+export type EdgeLayerSeamHistoryNormalizedProofLabel =
+  | "local_supplied_material"
+  | "dht_hyperswarm_durable_seam_history_material";
+
 export interface EdgeLayerSeamHistorySourceRef {
   sourceRepo?: string;
   id?: string;
@@ -106,11 +110,13 @@ export interface EdgeLayerSeamHistoryObservationValidation {
   noProductionContinuityWriteClaim: true;
   decentralizedSeamProofClaimed: boolean;
   strongestProofRung: EdgeLayerSeamHistoryProofRung;
+  normalizedProofLabel: EdgeLayerSeamHistoryNormalizedProofLabel;
   issues: string[];
 }
 
 export interface EdgeLayerSeamHistoryObservationProof {
   strongestProofRung: EdgeLayerSeamHistoryProofRung;
+  normalizedProofLabel: EdgeLayerSeamHistoryNormalizedProofLabel;
   inputMaterialKind:
     | "supplied_seam_history_material"
     | "dht_hyperswarm_replicated_durable_seam_history_material";
@@ -320,6 +326,7 @@ export function buildEdgeLayerSeamHistoryObservationResult(
       noProductionContinuityWriteClaim: true,
       decentralizedSeamProofClaimed: proof.decentralizedSeamProofClaimed,
       strongestProofRung: proof.strongestProofRung,
+      normalizedProofLabel: proof.normalizedProofLabel,
       issues,
     },
     reviewStatus: status === "edge-layer-seam-history-observation-valid"
@@ -431,6 +438,11 @@ export function assertEdgeLayerSeamHistoryObservationResult(
       "proof.strongestProofRung",
     );
     assertEqual(
+      proof.normalizedProofLabel,
+      "dht_hyperswarm_durable_seam_history_material",
+      "proof.normalizedProofLabel",
+    );
+    assertEqual(
       proof.inputMaterialKind,
       "dht_hyperswarm_replicated_durable_seam_history_material",
       "proof.inputMaterialKind",
@@ -450,6 +462,7 @@ export function assertEdgeLayerSeamHistoryObservationResult(
       "local_causal_observation_over_supplied_seam_history_material",
       "proof.strongestProofRung",
     );
+    assertEqual(proof.normalizedProofLabel, "local_supplied_material", "proof.normalizedProofLabel");
     assertEqual(proof.inputMaterialKind, "supplied_seam_history_material", "proof.inputMaterialKind");
     assertEqual(proof.localSuppliedMaterialOnly, true, "proof.localSuppliedMaterialOnly");
   }
@@ -815,6 +828,9 @@ function buildProof(input: {
     strongestProofRung: higherProof
       ? "dht_hyperswarm_replicated_durable_seam_history_observation"
       : "local_causal_observation_over_supplied_seam_history_material",
+    normalizedProofLabel: higherProof
+      ? "dht_hyperswarm_durable_seam_history_material"
+      : "local_supplied_material",
     inputMaterialKind: higherProof
       ? "dht_hyperswarm_replicated_durable_seam_history_material"
       : "supplied_seam_history_material",

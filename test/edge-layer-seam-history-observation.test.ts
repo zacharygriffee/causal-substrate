@@ -181,6 +181,8 @@ test("Edge Layer seam-history observation classifies linked and damaged request 
   assert.equal(result.validation.noMeshPublicationClaim, true);
   assert.equal(result.validation.noProductionContinuityWriteClaim, true);
   assert.equal(result.validation.decentralizedSeamProofClaimed, false);
+  assert.equal(result.validation.normalizedProofLabel, "local_supplied_material");
+  assert.equal(result.proof.normalizedProofLabel, "local_supplied_material");
   assert.equal(result.proof.inputMaterialKind, "supplied_seam_history_material");
   assert.equal(result.proof.inputReadByCausalSubstrate, false);
   assert.equal(result.proof.durableCorestoreHistoryRead, false);
@@ -325,6 +327,7 @@ test("Layer-owned seam status linkedPairs shape can be observed without claiming
   assert.equal(result.boundary.acceptsCanonicalHistory, false);
   assert.equal(result.proof.dhtOrHyperswarmInputObservedByCausalSubstrate, false);
   assert.equal(result.proof.decentralizedSeamProofClaimed, false);
+  assert.equal(result.proof.normalizedProofLabel, "local_supplied_material");
   assert.ok(result.warnings.includes("local-supplied-seam-history-material-is-lower-proof-rung"));
   assert.ok(result.warnings.includes("observation-does-not-claim-dht-or-hyperswarm-seam-proof"));
   assert.equal(
@@ -348,6 +351,7 @@ test("local observer cannot claim higher proof without all DHT Hyperswarm gates"
   assert.equal(result.proof.durableCorestoreHistoryRead, false);
   assert.equal(result.proof.replicatedViaHyperswarmTransport, false);
   assert.equal(result.proof.decentralizedSeamProofClaimed, false);
+  assert.equal(result.proof.normalizedProofLabel, "local_supplied_material");
   assert.equal(result.validation.decentralizedSeamProofClaimed, false);
 });
 
@@ -386,6 +390,7 @@ test("seam-history observation command reads supplied material, writes result, a
     assert.equal(result.proof.inputReadByCausalSubstrate, true);
     assert.equal(result.proof.dhtOrHyperswarmInputObservedByCausalSubstrate, false);
     assert.equal(result.proof.decentralizedSeamProofClaimed, false);
+    assert.equal(result.proof.normalizedProofLabel, "local_supplied_material");
     assert.equal(result.validation.decentralizedSeamProofClaimed, false);
     assert.equal(
       result.proof.strongestProofRung,

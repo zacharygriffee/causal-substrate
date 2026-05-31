@@ -202,6 +202,10 @@ test(
         report.observationResult.proof.strongestProofRung,
         "dht_hyperswarm_replicated_durable_seam_history_observation",
       );
+      assert.equal(
+        report.observationResult.proof.normalizedProofLabel,
+        "dht_hyperswarm_durable_seam_history_material",
+      );
       assert.equal(report.observationResult.proof.durableCorestoreHistoryRead, true);
       assert.equal(report.observationResult.proof.dhtOrHyperswarmInputObservedByCausalSubstrate, true);
       assert.equal(report.observationResult.proof.replicatedViaHyperswarmTransport, true);
@@ -231,6 +235,7 @@ test(
         readback.proof.strongestProofRung,
         "dht_hyperswarm_replicated_durable_seam_history_observation",
       );
+      assert.equal(readback.proof.normalizedProofLabel, "dht_hyperswarm_durable_seam_history_material");
       assert.equal(
         readback.observations[0]?.request.id,
         "edge-layer-report-only-seam-request:hyperswarm-reader:linked",

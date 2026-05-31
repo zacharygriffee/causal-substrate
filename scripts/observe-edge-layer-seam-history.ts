@@ -76,6 +76,9 @@ function assertObservationReadback(value: unknown): void {
   if (value.proof.strongestProofRung !== "local_causal_observation_over_supplied_seam_history_material") {
     throw new Error("proof_rung_overclaimed");
   }
+  if (value.proof.normalizedProofLabel !== "local_supplied_material") {
+    throw new Error("normalized_proof_label_overclaimed");
+  }
   if (value.proof.dhtOrHyperswarmInputObservedByCausalSubstrate !== false) {
     throw new Error("dht_or_hyperswarm_input_overclaimed");
   }
