@@ -21,7 +21,8 @@ export type EdgeLayerSeamHappeningClassification =
 export type EdgeLayerSeamLinkageStatus = "linked" | "unlinked" | "damaged";
 
 export type EdgeLayerSeamHistoryProofRung =
-  "local_causal_observation_over_supplied_seam_history_material";
+  | "local_causal_observation_over_supplied_seam_history_material"
+  | "dht_hyperswarm_replicated_durable_seam_history_observation";
 
 export interface EdgeLayerSeamHistorySourceRef {
   sourceRepo?: string;
@@ -89,18 +90,22 @@ export interface EdgeLayerSeamHistoryObservationValidation {
   noLayerAdmissionClaim: true;
   noRbcInterpretationClaim: true;
   noAuthorityClaim: true;
-  decentralizedSeamProofClaimed: false;
+  decentralizedSeamProofClaimed: boolean;
   strongestProofRung: EdgeLayerSeamHistoryProofRung;
   issues: string[];
 }
 
 export interface EdgeLayerSeamHistoryObservationProof {
   strongestProofRung: EdgeLayerSeamHistoryProofRung;
-  inputMaterialKind: "supplied_seam_history_material";
+  inputMaterialKind:
+    | "supplied_seam_history_material"
+    | "dht_hyperswarm_replicated_durable_seam_history_material";
   inputReadByCausalSubstrate: boolean;
-  dhtOrHyperswarmInputObservedByCausalSubstrate: false;
-  decentralizedSeamProofClaimed: false;
-  localSuppliedMaterialOnly: true;
+  durableCorestoreHistoryRead: boolean;
+  dhtOrHyperswarmInputObservedByCausalSubstrate: boolean;
+  replicatedViaHyperswarmTransport: boolean;
+  decentralizedSeamProofClaimed: boolean;
+  localSuppliedMaterialOnly: boolean;
   proofLabelHonest: true;
 }
 
@@ -116,8 +121,7 @@ export interface EdgeLayerSeamHistoryObservationResult {
     historyHash?: string;
     sourcePath?: string;
   };
-  observationScope:
-    "local_causal_observation_over_supplied_seam_history_material";
+  observationScope: EdgeLayerSeamHistoryProofRung;
   observations: EdgeLayerSeamHappeningObservation[];
   boundary: EdgeLayerSeamHistoryObservationBoundary;
   proof: EdgeLayerSeamHistoryObservationProof;
@@ -133,6 +137,9 @@ export interface BuildEdgeLayerSeamHistoryObservationInput {
   artifactId?: string;
   sourcePath?: string;
   inputReadByCausalSubstrate?: boolean;
+  durableCorestoreHistoryRead?: boolean;
+  dhtOrHyperswarmInputObservedByCausalSubstrate?: boolean;
+  replicatedViaHyperswarmTransport?: boolean;
 }
 
 type JsonRecord = Record<string, unknown>;
@@ -171,6 +178,13 @@ export function buildEdgeLayerSeamHistoryObservationResult(
     ...(historyHash ? { historyHash } : {}),
     ...(input.sourcePath ? { sourcePath: input.sourcePath } : {}),
   });
+  const proof = buildProof({
+    inputReadByCausalSubstrate: input.inputReadByCausalSubstrate === true,
+    durableCorestoreHistoryRead: input.durableCorestoreHistoryRead === true,
+    dhtOrHyperswarmInputObservedByCausalSubstrate:
+      input.dhtOrHyperswarmInputObservedByCausalSubstrate === true,
+    replicatedViaHyperswarmTransport: input.replicatedViaHyperswarmTransport === true,
+  });
 
   return {
     artifactKind: CAUSAL_EDGE_LAYER_SEAM_HISTORY_OBSERVATION_ARTIFACT_KIND,
@@ -184,10 +198,10 @@ export function buildEdgeLayerSeamHistoryObservationResult(
       ...(historyHash ? { historyHash } : {}),
       ...(input.sourcePath ? { sourcePath: input.sourcePath } : {}),
     },
-    observationScope: "local_causal_observation_over_supplied_seam_history_material",
+    observationScope: proof.strongestProofRung,
     observations,
     boundary: buildBoundary(),
-    proof: buildProof(input.inputReadByCausalSubstrate === true),
+    proof,
     validation: {
       status,
       parseableObject: seamHistory !== undefined,
@@ -202,8 +216,8 @@ export function buildEdgeLayerSeamHistoryObservationResult(
       noLayerAdmissionClaim: true,
       noRbcInterpretationClaim: true,
       noAuthorityClaim: true,
-      decentralizedSeamProofClaimed: false,
-      strongestProofRung: "local_causal_observation_over_supplied_seam_history_material",
+      decentralizedSeamProofClaimed: proof.decentralizedSeamProofClaimed,
+      strongestProofRung: proof.strongestProofRung,
       issues,
     },
     reviewStatus: status === "edge-layer-seam-history-observation-valid"
@@ -239,7 +253,6 @@ export function assertEdgeLayerSeamHistoryObservationResult(
   assertEqual(candidate.schemaVersion, CAUSAL_EDGE_LAYER_SEAM_HISTORY_OBSERVATION_SCHEMA_VERSION, "schemaVersion");
   assertString(candidate.artifactId, "artifactId");
   assertString(candidate.emittedAt, "emittedAt");
-  assertEqual(candidate.observationScope, "local_causal_observation_over_supplied_seam_history_material", "observationScope");
   const boundary = assertObject(candidate.boundary, "boundary");
   assertEqual(boundary.reviewOnly, true, "boundary.reviewOnly");
   assertEqual(boundary.observationOnly, true, "boundary.observationOnly");
@@ -259,13 +272,35 @@ export function assertEdgeLayerSeamHistoryObservationResult(
     "local_causal_observation_over_supplied_seam_history_material",
     "proof.strongestProofRung",
   );
-  assertEqual(proof.inputMaterialKind, "supplied_seam_history_material", "proof.inputMaterialKind");
-  assertEqual(
-    proof.dhtOrHyperswarmInputObservedByCausalSubstrate,
-    false,
-    "proof.dhtOrHyperswarmInputObservedByCausalSubstrate",
-  );
-  assertEqual(proof.decentralizedSeamProofClaimed, false, "proof.decentralizedSeamProofClaimed");
+  if (proof.decentralizedSeamProofClaimed === true) {
+    assertEqual(
+      proof.strongestProofRung,
+      "dht_hyperswarm_replicated_durable_seam_history_observation",
+      "proof.strongestProofRung",
+    );
+    assertEqual(
+      proof.inputMaterialKind,
+      "dht_hyperswarm_replicated_durable_seam_history_material",
+      "proof.inputMaterialKind",
+    );
+    assertEqual(proof.inputReadByCausalSubstrate, true, "proof.inputReadByCausalSubstrate");
+    assertEqual(proof.durableCorestoreHistoryRead, true, "proof.durableCorestoreHistoryRead");
+    assertEqual(
+      proof.dhtOrHyperswarmInputObservedByCausalSubstrate,
+      true,
+      "proof.dhtOrHyperswarmInputObservedByCausalSubstrate",
+    );
+    assertEqual(proof.replicatedViaHyperswarmTransport, true, "proof.replicatedViaHyperswarmTransport");
+    assertEqual(proof.localSuppliedMaterialOnly, false, "proof.localSuppliedMaterialOnly");
+  } else {
+    assertEqual(
+      proof.strongestProofRung,
+      "local_causal_observation_over_supplied_seam_history_material",
+      "proof.strongestProofRung",
+    );
+    assertEqual(proof.inputMaterialKind, "supplied_seam_history_material", "proof.inputMaterialKind");
+    assertEqual(proof.localSuppliedMaterialOnly, true, "proof.localSuppliedMaterialOnly");
+  }
 }
 
 function validateInput(
@@ -487,14 +522,32 @@ function buildBoundary(): EdgeLayerSeamHistoryObservationBoundary {
   };
 }
 
-function buildProof(inputReadByCausalSubstrate: boolean): EdgeLayerSeamHistoryObservationProof {
+function buildProof(input: {
+  inputReadByCausalSubstrate: boolean;
+  durableCorestoreHistoryRead: boolean;
+  dhtOrHyperswarmInputObservedByCausalSubstrate: boolean;
+  replicatedViaHyperswarmTransport: boolean;
+}): EdgeLayerSeamHistoryObservationProof {
+  const higherProof =
+    input.inputReadByCausalSubstrate &&
+    input.durableCorestoreHistoryRead &&
+    input.dhtOrHyperswarmInputObservedByCausalSubstrate &&
+    input.replicatedViaHyperswarmTransport;
+
   return {
-    strongestProofRung: "local_causal_observation_over_supplied_seam_history_material",
-    inputMaterialKind: "supplied_seam_history_material",
-    inputReadByCausalSubstrate,
-    dhtOrHyperswarmInputObservedByCausalSubstrate: false,
-    decentralizedSeamProofClaimed: false,
-    localSuppliedMaterialOnly: true,
+    strongestProofRung: higherProof
+      ? "dht_hyperswarm_replicated_durable_seam_history_observation"
+      : "local_causal_observation_over_supplied_seam_history_material",
+    inputMaterialKind: higherProof
+      ? "dht_hyperswarm_replicated_durable_seam_history_material"
+      : "supplied_seam_history_material",
+    inputReadByCausalSubstrate: input.inputReadByCausalSubstrate,
+    durableCorestoreHistoryRead: input.durableCorestoreHistoryRead,
+    dhtOrHyperswarmInputObservedByCausalSubstrate:
+      input.dhtOrHyperswarmInputObservedByCausalSubstrate,
+    replicatedViaHyperswarmTransport: input.replicatedViaHyperswarmTransport,
+    decentralizedSeamProofClaimed: higherProof,
+    localSuppliedMaterialOnly: !higherProof,
     proofLabelHonest: true,
   };
 }

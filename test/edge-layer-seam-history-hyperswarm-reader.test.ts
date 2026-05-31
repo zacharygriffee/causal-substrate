@@ -196,6 +196,15 @@ test(
       assert.equal(report.readerProof.replicaRecordCount, 1);
 
       assert.equal(report.observationResult.validation.seamHistoryInputConsumed, true);
+      assert.equal(
+        report.observationResult.proof.strongestProofRung,
+        "dht_hyperswarm_replicated_durable_seam_history_observation",
+      );
+      assert.equal(report.observationResult.proof.durableCorestoreHistoryRead, true);
+      assert.equal(report.observationResult.proof.dhtOrHyperswarmInputObservedByCausalSubstrate, true);
+      assert.equal(report.observationResult.proof.replicatedViaHyperswarmTransport, true);
+      assert.equal(report.observationResult.proof.decentralizedSeamProofClaimed, true);
+      assert.equal(report.observationResult.validation.decentralizedSeamProofClaimed, true);
       assert.equal(report.observationResult.validation.linkedPairDetected, true);
       assert.equal(report.observationResult.validation.damagedOrUnlinkedPairDetected, true);
       assert.equal(report.observationResult.validation.sourceIdsAndHashesPreserved, true);

@@ -144,7 +144,9 @@ test("Edge Layer seam-history observation classifies linked and damaged request 
   assert.equal(result.validation.decentralizedSeamProofClaimed, false);
   assert.equal(result.proof.inputMaterialKind, "supplied_seam_history_material");
   assert.equal(result.proof.inputReadByCausalSubstrate, false);
+  assert.equal(result.proof.durableCorestoreHistoryRead, false);
   assert.equal(result.proof.dhtOrHyperswarmInputObservedByCausalSubstrate, false);
+  assert.equal(result.proof.replicatedViaHyperswarmTransport, false);
   assert.equal(result.proof.decentralizedSeamProofClaimed, false);
   assert.equal(result.proof.localSuppliedMaterialOnly, true);
   assert.equal(result.proof.proofLabelHonest, true);
@@ -209,6 +211,24 @@ test("Layer-owned seam status linkedPairs shape can be observed without claiming
     result.validation.strongestProofRung,
     "local_causal_observation_over_supplied_seam_history_material",
   );
+});
+
+test("local observer cannot claim higher proof without all DHT Hyperswarm gates", () => {
+  const result = buildEdgeLayerSeamHistoryObservationResult({
+    seamHistory: operationShapedSeamHistory(),
+    emittedAt: "2026-05-31T12:07:00.000Z",
+    inputReadByCausalSubstrate: true,
+    dhtOrHyperswarmInputObservedByCausalSubstrate: true,
+  });
+
+  assert.equal(
+    result.proof.strongestProofRung,
+    "local_causal_observation_over_supplied_seam_history_material",
+  );
+  assert.equal(result.proof.durableCorestoreHistoryRead, false);
+  assert.equal(result.proof.replicatedViaHyperswarmTransport, false);
+  assert.equal(result.proof.decentralizedSeamProofClaimed, false);
+  assert.equal(result.validation.decentralizedSeamProofClaimed, false);
 });
 
 test("seam-history observation command reads supplied material, writes result, and readbacks lower proof rung", async () => {

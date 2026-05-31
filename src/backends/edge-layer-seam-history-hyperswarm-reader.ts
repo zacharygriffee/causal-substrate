@@ -153,6 +153,9 @@ export async function runEdgeLayerSeamHistoryHyperswarmReader(
       emittedAt: options.emittedAt,
       sourcePath: replicatedRecord.recordId,
       inputReadByCausalSubstrate: true,
+      durableCorestoreHistoryRead: true,
+      dhtOrHyperswarmInputObservedByCausalSubstrate: true,
+      replicatedViaHyperswarmTransport: true,
     });
 
     return {
