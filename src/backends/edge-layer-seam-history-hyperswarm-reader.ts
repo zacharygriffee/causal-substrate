@@ -24,6 +24,12 @@ export const EDGE_LAYER_SEAM_HISTORY_DURABLE_RECORD_SCHEMA =
 export const EDGE_LAYER_SEAM_HISTORY_HYPERSWARM_INPUT_LANE_READINESS_SCHEMA =
   "causal-substrate/edge-layer-seam-history-hyperswarm-input-lane-readiness/v1" as const;
 
+export const EDGE_LAYER_SEAM_HISTORY_REAL_HYPERSWARM_PROOF_RUN_INSTRUCTIONS_SCHEMA =
+  "causal-substrate/edge-layer-seam-history-real-hyperswarm-proof-run-instructions/v1" as const;
+
+export const EDGE_LAYER_SEAM_HISTORY_REAL_HYPERSWARM_PROOF_RUN_INSTRUCTIONS_ARTIFACT_KIND =
+  "edge-layer-seam-history-real-hyperswarm-proof-run-instructions" as const;
+
 export type EdgeLayerSeamHistoryHyperswarmInputLaneReadinessStatus =
   | "edge-layer-seam-history-hyperswarm-input-lane-ready-to-run"
   | "edge-layer-seam-history-hyperswarm-input-lane-incomplete";
@@ -90,6 +96,50 @@ export interface EdgeLayerSeamHistoryHyperswarmInputLaneReadiness {
   issues: string[];
 }
 
+export interface EdgeLayerSeamHistoryRealHyperswarmProofRunInstructions {
+  artifactKind: typeof EDGE_LAYER_SEAM_HISTORY_REAL_HYPERSWARM_PROOF_RUN_INSTRUCTIONS_ARTIFACT_KIND;
+  schema: typeof EDGE_LAYER_SEAM_HISTORY_REAL_HYPERSWARM_PROOF_RUN_INSTRUCTIONS_SCHEMA;
+  schemaVersion: 1;
+  emittedAt: string;
+  lane: "real_hyperswarm_edge_layer_seam_history_observation";
+  requiredEnvironment: {
+    realHyperswarmEnv: "CAUSAL_SUBSTRATE_REAL_HYPERSWARM=1";
+    publicHyperswarmEnv: "CAUSAL_SUBSTRATE_HYPERSWARM_PUBLIC=1";
+    optionalBootstrapEnv: "CAUSAL_SUBSTRATE_HYPERSWARM_BOOTSTRAP=host:port,host:port";
+  };
+  commands: {
+    localTestnetProofRun: string;
+    publicOrConfiguredBootstrapProofRun: string;
+  };
+  proofGate: {
+    instructionsOnly: true;
+    dhtHyperswarmProofClaimedNow: false;
+    proofOnlyIfCommandRunsAndPasses: true;
+    requiresDurableCorestoreRead: true;
+    requiresHyperswarmTransport: true;
+    requiresReplicatedRecordReadback: true;
+    expectedStrongestProofRungAfterPassingRun:
+      "dht_hyperswarm_replicated_durable_seam_history_observation";
+  };
+  expectedOutputRefs: {
+    observationResult: "observationResult";
+    readerProof: "readerProof";
+    sourceRecord: "record";
+    replicatedRecord: "replicatedRecord";
+  };
+  namespaceParts: string[];
+  boundary: {
+    opensSwarmNow: false;
+    opensCorestoreNow: false;
+    readsDurableHistoryNow: false;
+    writesRecordsNow: false;
+    publishesToMesh: false;
+    grantsAuthority: false;
+    admitsLayerEvidence: false;
+    interpretsRbc: false;
+  };
+}
+
 export interface EdgeLayerSeamHistoryHyperswarmReaderOptions {
   storageDirA: string;
   storageDirB: string;
@@ -112,6 +162,11 @@ export interface BuildEdgeLayerSeamHistoryHyperswarmInputLaneReadinessInput {
   hyperswarmFactoryAvailable: boolean;
   namespaceParts?: string[] | undefined;
   seamHistoryInputAvailable: boolean;
+}
+
+export interface BuildEdgeLayerSeamHistoryRealHyperswarmProofRunInstructionsInput {
+  emittedAt: string;
+  namespaceParts?: string[] | undefined;
 }
 
 type OpenedConcern = Awaited<ReturnType<typeof openConcernCores>>;
@@ -163,6 +218,56 @@ export function buildEdgeLayerSeamHistoryHyperswarmInputLaneReadiness(
       grantsAuthority: false,
     },
     issues,
+  };
+}
+
+export function buildEdgeLayerSeamHistoryRealHyperswarmProofRunInstructions(
+  input: BuildEdgeLayerSeamHistoryRealHyperswarmProofRunInstructionsInput,
+): EdgeLayerSeamHistoryRealHyperswarmProofRunInstructions {
+  return {
+    artifactKind: EDGE_LAYER_SEAM_HISTORY_REAL_HYPERSWARM_PROOF_RUN_INSTRUCTIONS_ARTIFACT_KIND,
+    schema: EDGE_LAYER_SEAM_HISTORY_REAL_HYPERSWARM_PROOF_RUN_INSTRUCTIONS_SCHEMA,
+    schemaVersion: 1,
+    emittedAt: input.emittedAt,
+    lane: "real_hyperswarm_edge_layer_seam_history_observation",
+    requiredEnvironment: {
+      realHyperswarmEnv: "CAUSAL_SUBSTRATE_REAL_HYPERSWARM=1",
+      publicHyperswarmEnv: "CAUSAL_SUBSTRATE_HYPERSWARM_PUBLIC=1",
+      optionalBootstrapEnv: "CAUSAL_SUBSTRATE_HYPERSWARM_BOOTSTRAP=host:port,host:port",
+    },
+    commands: {
+      localTestnetProofRun:
+        "CAUSAL_SUBSTRATE_REAL_HYPERSWARM=1 npx tsx --test test/edge-layer-seam-history-hyperswarm-reader.test.ts",
+      publicOrConfiguredBootstrapProofRun:
+        "CAUSAL_SUBSTRATE_REAL_HYPERSWARM=1 CAUSAL_SUBSTRATE_HYPERSWARM_PUBLIC=1 npx tsx --test test/edge-layer-seam-history-hyperswarm-reader.test.ts",
+    },
+    proofGate: {
+      instructionsOnly: true,
+      dhtHyperswarmProofClaimedNow: false,
+      proofOnlyIfCommandRunsAndPasses: true,
+      requiresDurableCorestoreRead: true,
+      requiresHyperswarmTransport: true,
+      requiresReplicatedRecordReadback: true,
+      expectedStrongestProofRungAfterPassingRun:
+        "dht_hyperswarm_replicated_durable_seam_history_observation",
+    },
+    expectedOutputRefs: {
+      observationResult: "observationResult",
+      readerProof: "readerProof",
+      sourceRecord: "record",
+      replicatedRecord: "replicatedRecord",
+    },
+    namespaceParts: input.namespaceParts ?? [],
+    boundary: {
+      opensSwarmNow: false,
+      opensCorestoreNow: false,
+      readsDurableHistoryNow: false,
+      writesRecordsNow: false,
+      publishesToMesh: false,
+      grantsAuthority: false,
+      admitsLayerEvidence: false,
+      interpretsRbc: false,
+    },
   };
 }
 

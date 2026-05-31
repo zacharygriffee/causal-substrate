@@ -9,6 +9,7 @@ import {
   activeManagedCorestoreCount,
   assertEdgeLayerSeamHistoryObservationResult,
   buildEdgeLayerSeamHistoryHyperswarmInputLaneReadiness,
+  buildEdgeLayerSeamHistoryRealHyperswarmProofRunInstructions,
   createHyperswarmReplicationSwarm,
   parseHyperswarmBootstrap,
   runEdgeLayerSeamHistoryHyperswarmReader,
@@ -201,6 +202,53 @@ test("Hyperswarm seam-history input lane readiness is explicit without claiming 
   assert.ok(incomplete.issues.includes("hyperswarm-factory-missing"));
   assert.ok(incomplete.issues.includes("namespace-parts-missing"));
   assert.ok(incomplete.issues.includes("seam-history-input-missing"));
+});
+
+test("real Hyperswarm proof run instructions artifact stays instructions-only", () => {
+  const instructions = buildEdgeLayerSeamHistoryRealHyperswarmProofRunInstructions({
+    emittedAt: "2026-05-31T12:21:00.000Z",
+    namespaceParts: ["hyperswarm-seam-history-reader", "real-proof"],
+  });
+
+  assert.equal(
+    instructions.artifactKind,
+    "edge-layer-seam-history-real-hyperswarm-proof-run-instructions",
+  );
+  assert.equal(
+    instructions.schema,
+    "causal-substrate/edge-layer-seam-history-real-hyperswarm-proof-run-instructions/v1",
+  );
+  assert.equal(instructions.lane, "real_hyperswarm_edge_layer_seam_history_observation");
+  assert.equal(instructions.requiredEnvironment.realHyperswarmEnv, "CAUSAL_SUBSTRATE_REAL_HYPERSWARM=1");
+  assert.match(
+    instructions.commands.localTestnetProofRun,
+    /CAUSAL_SUBSTRATE_REAL_HYPERSWARM=1 npx tsx --test test\/edge-layer-seam-history-hyperswarm-reader\.test\.ts/,
+  );
+  assert.match(
+    instructions.commands.publicOrConfiguredBootstrapProofRun,
+    /CAUSAL_SUBSTRATE_HYPERSWARM_PUBLIC=1 npx tsx --test test\/edge-layer-seam-history-hyperswarm-reader\.test\.ts/,
+  );
+  assert.equal(instructions.proofGate.instructionsOnly, true);
+  assert.equal(instructions.proofGate.dhtHyperswarmProofClaimedNow, false);
+  assert.equal(instructions.proofGate.proofOnlyIfCommandRunsAndPasses, true);
+  assert.equal(instructions.proofGate.requiresDurableCorestoreRead, true);
+  assert.equal(instructions.proofGate.requiresHyperswarmTransport, true);
+  assert.equal(instructions.proofGate.requiresReplicatedRecordReadback, true);
+  assert.equal(
+    instructions.proofGate.expectedStrongestProofRungAfterPassingRun,
+    "dht_hyperswarm_replicated_durable_seam_history_observation",
+  );
+  assert.equal(instructions.expectedOutputRefs.observationResult, "observationResult");
+  assert.equal(instructions.expectedOutputRefs.readerProof, "readerProof");
+  assert.deepEqual(instructions.namespaceParts, ["hyperswarm-seam-history-reader", "real-proof"]);
+  assert.equal(instructions.boundary.opensSwarmNow, false);
+  assert.equal(instructions.boundary.opensCorestoreNow, false);
+  assert.equal(instructions.boundary.readsDurableHistoryNow, false);
+  assert.equal(instructions.boundary.writesRecordsNow, false);
+  assert.equal(instructions.boundary.publishesToMesh, false);
+  assert.equal(instructions.boundary.grantsAuthority, false);
+  assert.equal(instructions.boundary.admitsLayerEvidence, false);
+  assert.equal(instructions.boundary.interpretsRbc, false);
 });
 
 test(
