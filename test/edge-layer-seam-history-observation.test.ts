@@ -9,8 +9,10 @@ import { promisify } from "node:util";
 import {
   assertEdgeLayerSeamHistoryObservationResult,
   assertEdgeLayerSeamHistoryEdgeProjectionFixture,
+  assertEdgeLayerSeamHistoryObservationReadbackContract,
   buildEdgeLayerSeamHistoryObservationResult,
   buildEdgeLayerSeamHistoryEdgeProjectionFixture,
+  buildEdgeLayerSeamHistoryObservationReadbackContract,
   buildEdgeLayerSeamHistoryObservationResultFromJson,
   CAUSAL_EDGE_LAYER_SEAM_HISTORY_OBSERVATION_ARTIFACT_KIND,
   CAUSAL_EDGE_LAYER_SEAM_HISTORY_OBSERVATION_SCHEMA,
@@ -514,5 +516,62 @@ test("Edge projection fixture guardrail matrix rejects projection overclaims", (
       () => assertEdgeLayerSeamHistoryEdgeProjectionFixture(mutated),
       new RegExp(String(finalSegment)),
     );
+  }
+});
+
+test("observation readback contract validates JSON round-trip and preserves source refs", async () => {
+  const tempRoot = await mkdtemp(path.join(tmpdir(), "causal-seam-history-readback-contract-"));
+  const observationPath = path.join(tempRoot, "observation-result.json");
+  try {
+    const observationResult = buildEdgeLayerSeamHistoryObservationResult({
+      seamHistory: operationShapedSeamHistory(),
+      emittedAt: "2026-05-31T12:19:00.000Z",
+      sourcePath: "layer-owned-edge-seam-status:readback-contract",
+    });
+    await writeFile(observationPath, JSON.stringify(observationResult, null, 2), "utf8");
+    const readback = JSON.parse(await readFile(observationPath, "utf8"));
+
+    const contract = buildEdgeLayerSeamHistoryObservationReadbackContract({
+      observationResult: readback,
+      emittedAt: "2026-05-31T12:20:00.000Z",
+    });
+
+    assertEdgeLayerSeamHistoryObservationReadbackContract(contract);
+    assert.equal(contract.reviewStatus, "edge-layer-seam-history-observation-readback-contract-valid");
+    assert.equal(contract.validation.observationArtifactConsumed, true);
+    assert.equal(contract.validation.sourceRefsPreserved, true);
+    assert.equal(contract.readback.artifactReadable, true);
+    assert.equal(contract.readback.observationResultValid, true);
+    assert.equal(contract.readback.sourceIdsAndHashesPreserved, true);
+    assert.equal(contract.readback.pairCount, 2);
+    assert.equal(contract.readback.compatiblePairCount, 1);
+    assert.equal(contract.readback.unresolvedOrDamagedPairCount, 1);
+    assert.equal(
+      contract.readback.proofRungPreserved,
+      "local_causal_observation_over_supplied_seam_history_material",
+    );
+    assert.deepEqual(contract.preservedSourceRefs.requestIds, [
+      "edge-layer-report-only-seam-request:causal-observation:linked",
+      "edge-layer-report-only-seam-request:causal-observation:damaged",
+    ]);
+    assert.deepEqual(contract.preservedSourceRefs.requestHashes, [
+      `sha256:${"a".repeat(64)}`,
+      `sha256:${"c".repeat(64)}`,
+    ]);
+    assert.deepEqual(contract.preservedSourceRefs.receiptIds, [
+      "layer-report-only-edge-seam-receipt:causal-observation:linked",
+      "layer-report-only-edge-seam-receipt:causal-observation:damaged",
+    ]);
+    assert.deepEqual(contract.preservedSourceRefs.receiptHashes, [
+      `sha256:${"b".repeat(64)}`,
+      `sha256:${"d".repeat(64)}`,
+    ]);
+    assert.equal(contract.boundary.writesObservationArtifact, false);
+    assert.equal(contract.boundary.acceptsCanonicalHistory, false);
+    assert.equal(contract.boundary.admitsLayerEvidence, false);
+    assert.equal(contract.boundary.interpretsRbc, false);
+    assert.equal(contract.boundary.grantsAuthority, false);
+  } finally {
+    await rm(tempRoot, { recursive: true, force: true });
   }
 });

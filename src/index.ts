@@ -52,4 +52,5 @@ export * from "./adapters/edge-validated-resource-ref-result-evidence.js";
 export * from "./adapters/edge-local-layer-continuity-event-evidence.js";
 export * from "./adapters/edge-layer-seam-history-observation.js";
 export * from "./adapters/edge-layer-seam-history-edge-projection-fixture.js";
+export * from "./adapters/edge-layer-seam-history-observation-readback-contract.js";
 export * from "./prototypes/continuity-workstation.js";
