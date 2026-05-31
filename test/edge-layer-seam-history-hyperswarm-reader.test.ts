@@ -248,6 +248,11 @@ test(
       assert.equal(report.observationResult.proof.dhtOrHyperswarmInputObservedByCausalSubstrate, true);
       assert.equal(report.observationResult.proof.replicatedViaHyperswarmTransport, true);
       assert.equal(report.observationResult.proof.decentralizedSeamProofClaimed, true);
+      assert.equal(
+        report.observationResult.outwardLaneTriggerNote.currentProofLabel,
+        "dht_hyperswarm_durable_seam_history_material",
+      );
+      assert.equal(report.observationResult.outwardLaneTriggerNote.shouldLookOutwardForDurableSeamHistory, false);
       assert.equal(report.observationResult.validation.decentralizedSeamProofClaimed, true);
       assert.equal(report.observationResult.validation.linkedPairDetected, true);
       assert.equal(report.observationResult.validation.damagedOrUnlinkedPairDetected, true);

@@ -238,6 +238,26 @@ test("Edge Layer seam-history observation classifies linked and damaged request 
     sourceReferencePreservationRequired: true,
     edgeProjectionOnlyAfterObservation: true,
   });
+  assert.deepEqual(result.outwardLaneTriggerNote, {
+    noteKind: "edge_layer_seam_history_outward_lane_trigger",
+    currentProofLabel: "local_supplied_material",
+    shouldLookOutwardForDurableSeamHistory: true,
+    triggerReasons: [
+      "local-supplied-material-is-lower-proof-rung",
+      "dht-hyperswarm-proof-requires-durable-edge-layer-seam-history",
+    ],
+    suggestedNextInputs: ["edge_durable_request_history", "layer_durable_receipt_history"],
+    boundary: {
+      noteOnly: true,
+      doesNotOpenEdgeRuntime: true,
+      doesNotOpenLayerRuntime: true,
+      doesNotClaimSwarmProof: true,
+      doesNotAdmitLayerEvidence: true,
+      doesNotInterpretRbc: true,
+      doesNotGrantAuthority: true,
+      doesNotPublishToMesh: true,
+    },
+  });
   assert.equal(
     result.validation.strongestProofRung,
     "local_causal_observation_over_supplied_seam_history_material",
@@ -349,6 +369,14 @@ test("seam-history observation readback guardrails reject claim overclaims", () 
     ["layerReceiptFit", "receiptSourceRequestRefsInterpretedAsLinkageOnly"],
     ["layerReceiptFit", "receiptDoesNotPromoteReferents"],
     ["layerReceiptFit", "receiptDoesNotGrantAuthority"],
+    ["outwardLaneTriggerNote", "boundary", "noteOnly"],
+    ["outwardLaneTriggerNote", "boundary", "doesNotOpenEdgeRuntime"],
+    ["outwardLaneTriggerNote", "boundary", "doesNotOpenLayerRuntime"],
+    ["outwardLaneTriggerNote", "boundary", "doesNotClaimSwarmProof"],
+    ["outwardLaneTriggerNote", "boundary", "doesNotAdmitLayerEvidence"],
+    ["outwardLaneTriggerNote", "boundary", "doesNotInterpretRbc"],
+    ["outwardLaneTriggerNote", "boundary", "doesNotGrantAuthority"],
+    ["outwardLaneTriggerNote", "boundary", "doesNotPublishToMesh"],
   ] as const;
 
   for (const pathSegments of weakenedGuardrailPaths) {

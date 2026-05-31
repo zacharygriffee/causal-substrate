@@ -232,6 +232,24 @@ export interface EdgeLayerSeamHistorySuppliedMaterialGuardrailMatrix {
   edgeProjectionOnlyAfterObservation: true;
 }
 
+export interface EdgeLayerSeamHistoryOutwardLaneTriggerNote {
+  noteKind: "edge_layer_seam_history_outward_lane_trigger";
+  currentProofLabel: EdgeLayerSeamHistoryNormalizedProofLabel;
+  shouldLookOutwardForDurableSeamHistory: boolean;
+  triggerReasons: string[];
+  suggestedNextInputs: Array<"edge_durable_request_history" | "layer_durable_receipt_history">;
+  boundary: {
+    noteOnly: true;
+    doesNotOpenEdgeRuntime: true;
+    doesNotOpenLayerRuntime: true;
+    doesNotClaimSwarmProof: true;
+    doesNotAdmitLayerEvidence: true;
+    doesNotInterpretRbc: true;
+    doesNotGrantAuthority: true;
+    doesNotPublishToMesh: true;
+  };
+}
+
 export type EdgeLayerSeamHistoryDeferredAttachmentKey =
   | "referentPromotion"
   | "branchCompatibilityGraph"
@@ -271,6 +289,7 @@ export interface EdgeLayerSeamHistoryObservationResult {
   nonClaims: EdgeLayerSeamHistoryNonClaims;
   layerReceiptFit: EdgeLayerSeamHistoryLayerReceiptFit;
   suppliedMaterialGuardrailMatrix: EdgeLayerSeamHistorySuppliedMaterialGuardrailMatrix;
+  outwardLaneTriggerNote: EdgeLayerSeamHistoryOutwardLaneTriggerNote;
   deferredAttachmentPoints: EdgeLayerSeamHistoryDeferredAttachmentPoints;
   proof: EdgeLayerSeamHistoryObservationProof;
   validation: EdgeLayerSeamHistoryObservationValidation;
@@ -377,6 +396,7 @@ export function buildEdgeLayerSeamHistoryObservationResult(
     nonClaims: buildNonClaims(),
     layerReceiptFit: buildLayerReceiptFit(observations),
     suppliedMaterialGuardrailMatrix: buildSuppliedMaterialGuardrailMatrix(proof),
+    outwardLaneTriggerNote: buildOutwardLaneTriggerNote(proof),
     deferredAttachmentPoints: buildDeferredAttachmentPoints(),
     proof,
     validation: {
@@ -563,6 +583,49 @@ export function assertEdgeLayerSeamHistoryObservationResult(
     true,
     "suppliedMaterialGuardrailMatrix.edgeProjectionOnlyAfterObservation",
   );
+  const outwardLaneTriggerNote = assertObject(candidate.outwardLaneTriggerNote, "outwardLaneTriggerNote");
+  assertEqual(
+    outwardLaneTriggerNote.noteKind,
+    "edge_layer_seam_history_outward_lane_trigger",
+    "outwardLaneTriggerNote.noteKind",
+  );
+  const outwardLaneBoundary = assertObject(outwardLaneTriggerNote.boundary, "outwardLaneTriggerNote.boundary");
+  assertEqual(outwardLaneBoundary.noteOnly, true, "outwardLaneTriggerNote.boundary.noteOnly");
+  assertEqual(
+    outwardLaneBoundary.doesNotOpenEdgeRuntime,
+    true,
+    "outwardLaneTriggerNote.boundary.doesNotOpenEdgeRuntime",
+  );
+  assertEqual(
+    outwardLaneBoundary.doesNotOpenLayerRuntime,
+    true,
+    "outwardLaneTriggerNote.boundary.doesNotOpenLayerRuntime",
+  );
+  assertEqual(
+    outwardLaneBoundary.doesNotClaimSwarmProof,
+    true,
+    "outwardLaneTriggerNote.boundary.doesNotClaimSwarmProof",
+  );
+  assertEqual(
+    outwardLaneBoundary.doesNotAdmitLayerEvidence,
+    true,
+    "outwardLaneTriggerNote.boundary.doesNotAdmitLayerEvidence",
+  );
+  assertEqual(
+    outwardLaneBoundary.doesNotInterpretRbc,
+    true,
+    "outwardLaneTriggerNote.boundary.doesNotInterpretRbc",
+  );
+  assertEqual(
+    outwardLaneBoundary.doesNotGrantAuthority,
+    true,
+    "outwardLaneTriggerNote.boundary.doesNotGrantAuthority",
+  );
+  assertEqual(
+    outwardLaneBoundary.doesNotPublishToMesh,
+    true,
+    "outwardLaneTriggerNote.boundary.doesNotPublishToMesh",
+  );
   const deferredAttachmentPoints = assertObject(candidate.deferredAttachmentPoints, "deferredAttachmentPoints");
   for (const key of EDGE_LAYER_SEAM_HISTORY_DEFERRED_ATTACHMENT_KEYS) {
     const point = assertObject(deferredAttachmentPoints[key], `deferredAttachmentPoints.${key}`);
@@ -620,6 +683,11 @@ export function assertEdgeLayerSeamHistoryObservationResult(
       false,
       "suppliedMaterialGuardrailMatrix.localSuppliedMaterialGuardrailActive",
     );
+    assertEqual(
+      outwardLaneTriggerNote.shouldLookOutwardForDurableSeamHistory,
+      false,
+      "outwardLaneTriggerNote.shouldLookOutwardForDurableSeamHistory",
+    );
   } else {
     assertEqual(
       proof.strongestProofRung,
@@ -653,6 +721,16 @@ export function assertEdgeLayerSeamHistoryObservationResult(
       suppliedMaterialGuardrailMatrix.dhtHyperswarmProofClaimBlockedForSuppliedMaterial,
       true,
       "suppliedMaterialGuardrailMatrix.dhtHyperswarmProofClaimBlockedForSuppliedMaterial",
+    );
+    assertEqual(
+      outwardLaneTriggerNote.currentProofLabel,
+      "local_supplied_material",
+      "outwardLaneTriggerNote.currentProofLabel",
+    );
+    assertEqual(
+      outwardLaneTriggerNote.shouldLookOutwardForDurableSeamHistory,
+      true,
+      "outwardLaneTriggerNote.shouldLookOutwardForDurableSeamHistory",
     );
   }
   const compatibilityEnvelope = assertObject(candidate.compatibilityEnvelope, "compatibilityEnvelope");
@@ -1034,6 +1112,36 @@ function buildSuppliedMaterialGuardrailMatrix(
     productionContinuityWriteBlocked: true,
     sourceReferencePreservationRequired: true,
     edgeProjectionOnlyAfterObservation: true,
+  };
+}
+
+function buildOutwardLaneTriggerNote(
+  proof: EdgeLayerSeamHistoryObservationProof,
+): EdgeLayerSeamHistoryOutwardLaneTriggerNote {
+  const localSuppliedMaterial = proof.normalizedProofLabel === "local_supplied_material";
+  return {
+    noteKind: "edge_layer_seam_history_outward_lane_trigger",
+    currentProofLabel: proof.normalizedProofLabel,
+    shouldLookOutwardForDurableSeamHistory: localSuppliedMaterial,
+    triggerReasons: localSuppliedMaterial
+      ? [
+        "local-supplied-material-is-lower-proof-rung",
+        "dht-hyperswarm-proof-requires-durable-edge-layer-seam-history",
+      ]
+      : [],
+    suggestedNextInputs: localSuppliedMaterial
+      ? ["edge_durable_request_history", "layer_durable_receipt_history"]
+      : [],
+    boundary: {
+      noteOnly: true,
+      doesNotOpenEdgeRuntime: true,
+      doesNotOpenLayerRuntime: true,
+      doesNotClaimSwarmProof: true,
+      doesNotAdmitLayerEvidence: true,
+      doesNotInterpretRbc: true,
+      doesNotGrantAuthority: true,
+      doesNotPublishToMesh: true,
+    },
   };
 }
 
