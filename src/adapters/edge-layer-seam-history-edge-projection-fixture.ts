@@ -468,6 +468,10 @@ export function assertEdgeLayerSeamHistoryEdgeProjectionHandoffReadback(
     assertEqual(readback.classificationSummaryPreserved, true, "readback.classificationSummaryPreserved");
     assertEqual(readback.proofLabelPreserved, true, "readback.proofLabelPreserved");
     assertEqual(readback.nonClaimsPreserved, true, "readback.nonClaimsPreserved");
+  } else {
+    const readback = assertObject(candidate.readback, "readback");
+    assertEqual(readback.fixtureValid, false, "readback.fixtureValid");
+    assertNonEmptyArray(candidate.rejections, "rejections");
   }
   assertHandoffReadbackStatus(candidate.reviewStatus, "reviewStatus");
 }

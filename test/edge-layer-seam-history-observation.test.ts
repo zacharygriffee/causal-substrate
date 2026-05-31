@@ -945,6 +945,47 @@ test("Edge projection handoff fixture readback preserves handoff refs and non-cl
   }
 });
 
+test("Edge projection handoff fixture readback rejects invalid handoff material", () => {
+  const invalidReadback = buildEdgeLayerSeamHistoryEdgeProjectionHandoffReadback({
+    fixture: {
+      artifactKind: "not-a-causal-edge-layer-seam-history-edge-projection-fixture",
+      schema: "causal-substrate/edge-layer-seam-history-edge-projection-fixture/v1",
+      schemaVersion: 1,
+      artifactId: "invalid-handoff-fixture",
+      emittedAt: "2026-05-31T12:18:40.000Z",
+    },
+    emittedAt: "2026-05-31T12:18:41.000Z",
+  });
+
+  assertEdgeLayerSeamHistoryEdgeProjectionHandoffReadback(invalidReadback);
+  assert.equal(
+    invalidReadback.reviewStatus,
+    "edge-layer-seam-history-edge-projection-handoff-readback-invalid",
+  );
+  assert.equal(
+    invalidReadback.validation.status,
+    "edge-layer-seam-history-edge-projection-handoff-readback-invalid",
+  );
+  assert.equal(invalidReadback.validation.handoffFixtureConsumed, false);
+  assert.equal(invalidReadback.validation.sourceRefsPreserved, false);
+  assert.deepEqual(invalidReadback.validation.issues, ["handoff-fixture-invalid"]);
+  assert.deepEqual(invalidReadback.rejections, ["handoff-fixture-invalid"]);
+  assert.equal(invalidReadback.readback.fixtureReadable, false);
+  assert.equal(invalidReadback.readback.fixtureValid, false);
+  assert.equal(invalidReadback.readback.handoffEnvelopeReadable, false);
+  assert.equal(invalidReadback.readback.sourceRefsPreserved, false);
+  assert.equal(invalidReadback.readback.classificationSummaryPreserved, false);
+  assert.equal(invalidReadback.readback.proofLabelPreserved, false);
+  assert.equal(invalidReadback.readback.nonClaimsPreserved, false);
+  assert.deepEqual(invalidReadback.preservedSourceRefs.requestIds, []);
+  assert.deepEqual(invalidReadback.preservedSourceRefs.receiptHashes, []);
+  assert.equal(invalidReadback.boundary.writesEdgeProjection, false);
+  assert.equal(invalidReadback.boundary.acceptsCanonicalHistory, false);
+  assert.equal(invalidReadback.boundary.admitsLayerEvidence, false);
+  assert.equal(invalidReadback.boundary.interpretsRbc, false);
+  assert.equal(invalidReadback.boundary.grantsAuthority, false);
+});
+
 test("observation readback contract validates JSON round-trip and preserves source refs", async () => {
   const tempRoot = await mkdtemp(path.join(tmpdir(), "causal-seam-history-readback-contract-"));
   const observationPath = path.join(tempRoot, "observation-result.json");
