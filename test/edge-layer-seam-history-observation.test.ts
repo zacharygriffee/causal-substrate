@@ -8,7 +8,9 @@ import { promisify } from "node:util";
 
 import {
   assertEdgeLayerSeamHistoryObservationResult,
+  assertEdgeLayerSeamHistoryEdgeProjectionFixture,
   buildEdgeLayerSeamHistoryObservationResult,
+  buildEdgeLayerSeamHistoryEdgeProjectionFixture,
   buildEdgeLayerSeamHistoryObservationResultFromJson,
   CAUSAL_EDGE_LAYER_SEAM_HISTORY_OBSERVATION_ARTIFACT_KIND,
   CAUSAL_EDGE_LAYER_SEAM_HISTORY_OBSERVATION_SCHEMA,
@@ -309,4 +311,64 @@ test("seam-history observation command reads supplied material, writes result, a
   } finally {
     await rm(tempRoot, { recursive: true, force: true });
   }
+});
+
+test("Edge projection fixture is derived from observation result without writing Edge projection state", () => {
+  const observationResult = buildEdgeLayerSeamHistoryObservationResult({
+    seamHistory: operationShapedSeamHistory(),
+    emittedAt: "2026-05-31T12:15:00.000Z",
+    sourcePath: "layer-owned-edge-seam-status:edge-projection-fixture",
+  });
+
+  const fixture = buildEdgeLayerSeamHistoryEdgeProjectionFixture({
+    observationResult,
+    emittedAt: "2026-05-31T12:16:00.000Z",
+  });
+
+  assertEdgeLayerSeamHistoryEdgeProjectionFixture(fixture);
+  assert.equal(fixture.reviewStatus, "edge-layer-seam-history-edge-projection-fixture-ready");
+  assert.equal(fixture.validation.observationResultConsumed, true);
+  assert.equal(fixture.validation.compatibilityEnvelopeConsumed, true);
+  assert.equal(fixture.validation.sourceRefsPreserved, true);
+  assert.equal(fixture.validation.compatibleRefsPresent, true);
+  assert.equal(fixture.validation.unresolvedOrDamagedRefsPresent, true);
+  assert.equal(fixture.validation.noCanonicalHistoryClaim, true);
+  assert.equal(fixture.validation.noLayerAdmissionClaim, true);
+  assert.equal(fixture.validation.noRbcInterpretationClaim, true);
+  assert.equal(fixture.validation.noAuthorityClaim, true);
+  assert.equal(fixture.validation.noReferentPromotion, true);
+  assert.deepEqual(fixture.rejections, []);
+  assert.equal(fixture.source.sourceObservationArtifactId, observationResult.artifactId);
+  assert.equal(
+    fixture.source.sourceObservationProofRung,
+    "local_causal_observation_over_supplied_seam_history_material",
+  );
+  assert.equal(
+    fixture.edgeProjectionMaterial.projectionSuitability,
+    "edge_projection_candidate",
+  );
+  assert.equal(fixture.edgeProjectionMaterial.compatibleRefs.length, 1);
+  assert.equal(fixture.edgeProjectionMaterial.unresolvedOrDamagedRefs.length, 1);
+
+  const compatibleRef = fixture.edgeProjectionMaterial.compatibleRefs[0]!;
+  assert.equal(compatibleRef.sourceObservationArtifactId, observationResult.artifactId);
+  assert.equal(compatibleRef.observationId, observationResult.observations[0]!.observationId);
+  assert.equal(compatibleRef.request.id, "edge-layer-report-only-seam-request:causal-observation:linked");
+  assert.equal(compatibleRef.request.hash, `sha256:${"a".repeat(64)}`);
+  assert.equal(compatibleRef.receipt.id, "layer-report-only-edge-seam-receipt:causal-observation:linked");
+  assert.equal(compatibleRef.receipt.hash, `sha256:${"b".repeat(64)}`);
+  assert.equal(compatibleRef.acceptedAsCanonicalHistory, false);
+  assert.equal(compatibleRef.layerEvidenceAdmitted, false);
+  assert.equal(compatibleRef.rbcInterpreted, false);
+  assert.equal(compatibleRef.authorityGranted, false);
+  assert.equal(compatibleRef.referentPromoted, false);
+
+  const unresolvedRef = fixture.edgeProjectionMaterial.unresolvedOrDamagedRefs[0]!;
+  assert.equal(unresolvedRef.observationId, observationResult.observations[1]!.observationId);
+  assert.equal(unresolvedRef.classification, "unresolved_or_damaged_seam_happening");
+  assert.equal(unresolvedRef.request.hash, `sha256:${"c".repeat(64)}`);
+  assert.equal(unresolvedRef.receipt.hash, `sha256:${"d".repeat(64)}`);
+  assert.equal(fixture.boundary.edgeProjectionWritten, false);
+  assert.equal(fixture.boundary.opensEdgeRuntime, false);
+  assert.equal(fixture.boundary.promotesReferents, false);
 });
