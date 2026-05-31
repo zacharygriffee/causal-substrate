@@ -7,10 +7,12 @@ import test from "node:test";
 import { promisify } from "node:util";
 
 import {
+  assertEdgeLayerSeamHistoryObservationContractSnapshot,
   assertEdgeLayerSeamHistoryObservationResult,
   assertEdgeLayerSeamHistoryEdgeProjectionFixture,
   assertEdgeLayerSeamHistoryEdgeProjectionHandoffReadback,
   assertEdgeLayerSeamHistoryObservationReadbackContract,
+  buildEdgeLayerSeamHistoryObservationContractSnapshot,
   buildEdgeLayerSeamHistoryObservationResult,
   buildEdgeLayerSeamHistoryEdgeProjectionFixture,
   buildEdgeLayerSeamHistoryEdgeProjectionHandoffReadback,
@@ -394,6 +396,58 @@ test("seam-history observation readback guardrails reject claim overclaims", () 
       new RegExp(pathSegments.join("\\.")),
     );
   }
+});
+
+test("observation contract snapshot preserves stable consumer fields", () => {
+  const result = buildEdgeLayerSeamHistoryObservationResult({
+    seamHistory: operationShapedSeamHistory(),
+    emittedAt: "2026-05-31T12:03:30.000Z",
+    sourcePath: "layer-owned-edge-seam-status:contract-snapshot",
+  });
+
+  const snapshot = buildEdgeLayerSeamHistoryObservationContractSnapshot(result);
+
+  assertEdgeLayerSeamHistoryObservationContractSnapshot(snapshot);
+  assert.equal(snapshot.sourceObservation.artifactId, result.artifactId);
+  assert.equal(snapshot.sourceObservation.schema, result.schema);
+  assert.deepEqual(snapshot.source.sourceRepos, ["mesh-ecology-edge", "mesh-ecology-layer"]);
+  assert.equal(snapshot.proof.normalizedProofLabel, "local_supplied_material");
+  assert.equal(snapshot.proof.strongestProofRung, "local_causal_observation_over_supplied_seam_history_material");
+  assert.equal(snapshot.proof.decentralizedSeamProofClaimed, false);
+  assert.deepEqual(snapshot.sourceRefs.requestIds, [
+    "edge-layer-report-only-seam-request:causal-observation:linked",
+    "edge-layer-report-only-seam-request:causal-observation:damaged",
+  ]);
+  assert.deepEqual(snapshot.sourceRefs.requestHashes, [
+    `sha256:${"a".repeat(64)}`,
+    `sha256:${"c".repeat(64)}`,
+  ]);
+  assert.deepEqual(snapshot.sourceRefs.receiptIds, [
+    "layer-report-only-edge-seam-receipt:causal-observation:linked",
+    "layer-report-only-edge-seam-receipt:causal-observation:damaged",
+  ]);
+  assert.deepEqual(snapshot.sourceRefs.receiptHashes, [
+    `sha256:${"b".repeat(64)}`,
+    `sha256:${"d".repeat(64)}`,
+  ]);
+  assert.deepEqual(snapshot.observationRefs.map((ref) => ref.classification), [
+    "compatible_seam_happening",
+    "unresolved_or_damaged_seam_happening",
+  ]);
+  assert.deepEqual(snapshot.observationRefs.map((ref) => ref.linkageStatus), ["linked", "damaged"]);
+  assert.equal(snapshot.classificationSummary.linkedPairDetected, true);
+  assert.equal(snapshot.classificationSummary.damagedPairDetected, true);
+  assert.equal(snapshot.sourceReferenceContract.sourceRefsPreserved, true);
+  assert.equal(snapshot.sourceReferenceContract.sourceReposPreserved, true);
+  assert.equal(snapshot.nonClaims.canonicalHistoryClaimed, false);
+  assert.equal(snapshot.nonClaims.layerEvidenceAdmitted, false);
+  assert.equal(snapshot.nonClaims.rbcInterpreted, false);
+  assert.equal(snapshot.nonClaims.authorityGranted, false);
+  assert.equal(snapshot.deferredAttachmentPoints.layerAdmission.active, false);
+  assert.equal(snapshot.boundary.acceptsCanonicalHistory, false);
+  assert.equal(snapshot.boundary.admitsLayerEvidence, false);
+  assert.equal(snapshot.boundary.interpretsRbc, false);
+  assert.equal(snapshot.boundary.grantsAuthority, false);
 });
 
 test("supplied material guardrail matrix keeps local input from self-claiming higher lanes", () => {

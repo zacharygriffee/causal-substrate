@@ -13,6 +13,14 @@ export const CAUSAL_EDGE_LAYER_SEAM_HISTORY_COMPATIBILITY_ENVELOPE_KIND =
 
 export const CAUSAL_EDGE_LAYER_SEAM_HISTORY_COMPATIBILITY_ENVELOPE_VERSION = 1 as const;
 
+export const CAUSAL_EDGE_LAYER_SEAM_HISTORY_OBSERVATION_CONTRACT_SNAPSHOT_SCHEMA =
+  "causal-substrate/edge-layer-seam-history-observation-contract-snapshot/v1" as const;
+
+export const CAUSAL_EDGE_LAYER_SEAM_HISTORY_OBSERVATION_CONTRACT_SNAPSHOT_SCHEMA_VERSION = 1 as const;
+
+export const CAUSAL_EDGE_LAYER_SEAM_HISTORY_OBSERVATION_CONTRACT_SNAPSHOT_ARTIFACT_KIND =
+  "causal-edge-layer-seam-history-observation-contract-snapshot" as const;
+
 export type EdgeLayerSeamHistoryObservationStatus =
   | "edge-layer-seam-history-observation-emitted"
   | "edge-layer-seam-history-observation-valid"
@@ -298,6 +306,56 @@ export interface EdgeLayerSeamHistoryObservationResult {
   rejections: string[];
 }
 
+export interface EdgeLayerSeamHistoryObservationContractSnapshot {
+  artifactKind: typeof CAUSAL_EDGE_LAYER_SEAM_HISTORY_OBSERVATION_CONTRACT_SNAPSHOT_ARTIFACT_KIND;
+  schema: typeof CAUSAL_EDGE_LAYER_SEAM_HISTORY_OBSERVATION_CONTRACT_SNAPSHOT_SCHEMA;
+  schemaVersion: typeof CAUSAL_EDGE_LAYER_SEAM_HISTORY_OBSERVATION_CONTRACT_SNAPSHOT_SCHEMA_VERSION;
+  sourceObservation: {
+    artifactId: string;
+    schema: typeof CAUSAL_EDGE_LAYER_SEAM_HISTORY_OBSERVATION_SCHEMA;
+    schemaVersion: typeof CAUSAL_EDGE_LAYER_SEAM_HISTORY_OBSERVATION_SCHEMA_VERSION;
+  };
+  source: {
+    sourceRepos: string[];
+    historyId?: string;
+    historyHash?: string;
+  };
+  proof: {
+    strongestProofRung: EdgeLayerSeamHistoryProofRung;
+    normalizedProofLabel: EdgeLayerSeamHistoryNormalizedProofLabel;
+    decentralizedSeamProofClaimed: boolean;
+  };
+  sourceRefs: {
+    requestIds: string[];
+    requestHashes: string[];
+    requestDurableRefs: string[];
+    requestWriterRefs: string[];
+    receiptIds: string[];
+    receiptHashes: string[];
+    receiptDurableRefs: string[];
+    receiptWriterRefs: string[];
+  };
+  observationRefs: Array<{
+    observationId: string;
+    classification: EdgeLayerSeamHappeningClassification;
+    linkageStatus: EdgeLayerSeamLinkageStatus;
+    damageOrUnresolvedDetail: EdgeLayerSeamDamageOrUnresolvedDetail;
+  }>;
+  classificationSummary: EdgeLayerSeamHistoryCompatibilityEnvelope["classificationSummary"];
+  sourceReferenceContract: EdgeLayerSeamHistoryCompatibilityEnvelope["sourceReferenceContract"];
+  nonClaims: EdgeLayerSeamHistoryNonClaims;
+  deferredAttachmentPoints: EdgeLayerSeamHistoryDeferredAttachmentPoints;
+  boundary: {
+    consumerSnapshotOnly: true;
+    acceptsCanonicalHistory: false;
+    admitsLayerEvidence: false;
+    interpretsRbc: false;
+    grantsAuthority: false;
+    publishesToMesh: false;
+    writesProductionContinuity: false;
+  };
+}
+
 export interface BuildEdgeLayerSeamHistoryObservationInput {
   seamHistory: unknown;
   emittedAt: string;
@@ -451,6 +509,107 @@ export function buildEdgeLayerSeamHistoryObservationResultFromJson(
       seamHistory: undefined,
     });
   }
+}
+
+export function buildEdgeLayerSeamHistoryObservationContractSnapshot(
+  observationResult: unknown,
+): EdgeLayerSeamHistoryObservationContractSnapshot {
+  assertEdgeLayerSeamHistoryObservationResult(observationResult);
+  const observations = observationResult.observations;
+
+  return {
+    artifactKind: CAUSAL_EDGE_LAYER_SEAM_HISTORY_OBSERVATION_CONTRACT_SNAPSHOT_ARTIFACT_KIND,
+    schema: CAUSAL_EDGE_LAYER_SEAM_HISTORY_OBSERVATION_CONTRACT_SNAPSHOT_SCHEMA,
+    schemaVersion: CAUSAL_EDGE_LAYER_SEAM_HISTORY_OBSERVATION_CONTRACT_SNAPSHOT_SCHEMA_VERSION,
+    sourceObservation: {
+      artifactId: observationResult.artifactId,
+      schema: observationResult.schema,
+      schemaVersion: observationResult.schemaVersion,
+    },
+    source: {
+      sourceRepos: observationResult.source.sourceRepos,
+      ...(observationResult.source.historyId ? { historyId: observationResult.source.historyId } : {}),
+      ...(observationResult.source.historyHash ? { historyHash: observationResult.source.historyHash } : {}),
+    },
+    proof: {
+      strongestProofRung: observationResult.proof.strongestProofRung,
+      normalizedProofLabel: observationResult.proof.normalizedProofLabel,
+      decentralizedSeamProofClaimed: observationResult.proof.decentralizedSeamProofClaimed,
+    },
+    sourceRefs: {
+      requestIds: uniqueStrings(observations.map((observation) => observation.request.id)),
+      requestHashes: uniqueStrings(observations.map((observation) => observation.request.hash)),
+      requestDurableRefs: uniqueStrings(observations.map((observation) => observation.request.durableRef)),
+      requestWriterRefs: uniqueStrings(observations.map((observation) => observation.request.writerRef)),
+      receiptIds: uniqueStrings(observations.map((observation) => observation.receipt.id)),
+      receiptHashes: uniqueStrings(observations.map((observation) => observation.receipt.hash)),
+      receiptDurableRefs: uniqueStrings(observations.map((observation) => observation.receipt.durableRef)),
+      receiptWriterRefs: uniqueStrings(observations.map((observation) => observation.receipt.writerRef)),
+    },
+    observationRefs: observations.map((observation) => ({
+      observationId: observation.observationId,
+      classification: observation.classification,
+      linkageStatus: observation.linkageStatus,
+      damageOrUnresolvedDetail: observation.damageOrUnresolvedDetail,
+    })),
+    classificationSummary: observationResult.compatibilityEnvelope.classificationSummary,
+    sourceReferenceContract: observationResult.compatibilityEnvelope.sourceReferenceContract,
+    nonClaims: observationResult.nonClaims,
+    deferredAttachmentPoints: observationResult.deferredAttachmentPoints,
+    boundary: {
+      consumerSnapshotOnly: true,
+      acceptsCanonicalHistory: false,
+      admitsLayerEvidence: false,
+      interpretsRbc: false,
+      grantsAuthority: false,
+      publishesToMesh: false,
+      writesProductionContinuity: false,
+    },
+  };
+}
+
+export function assertEdgeLayerSeamHistoryObservationContractSnapshot(
+  value: unknown,
+): asserts value is EdgeLayerSeamHistoryObservationContractSnapshot {
+  const candidate = assertObject(value, "edge layer seam history observation contract snapshot");
+  assertEqual(
+    candidate.artifactKind,
+    CAUSAL_EDGE_LAYER_SEAM_HISTORY_OBSERVATION_CONTRACT_SNAPSHOT_ARTIFACT_KIND,
+    "artifactKind",
+  );
+  assertEqual(candidate.schema, CAUSAL_EDGE_LAYER_SEAM_HISTORY_OBSERVATION_CONTRACT_SNAPSHOT_SCHEMA, "schema");
+  assertEqual(
+    candidate.schemaVersion,
+    CAUSAL_EDGE_LAYER_SEAM_HISTORY_OBSERVATION_CONTRACT_SNAPSHOT_SCHEMA_VERSION,
+    "schemaVersion",
+  );
+  const sourceObservation = assertObject(candidate.sourceObservation, "sourceObservation");
+  assertString(sourceObservation.artifactId, "sourceObservation.artifactId");
+  assertEqual(sourceObservation.schema, CAUSAL_EDGE_LAYER_SEAM_HISTORY_OBSERVATION_SCHEMA, "sourceObservation.schema");
+  assertEqual(
+    sourceObservation.schemaVersion,
+    CAUSAL_EDGE_LAYER_SEAM_HISTORY_OBSERVATION_SCHEMA_VERSION,
+    "sourceObservation.schemaVersion",
+  );
+  const sourceRefs = assertObject(candidate.sourceRefs, "sourceRefs");
+  assertNonEmptyArray(sourceRefs.requestIds, "sourceRefs.requestIds");
+  assertNonEmptyArray(sourceRefs.requestHashes, "sourceRefs.requestHashes");
+  assertNonEmptyArray(sourceRefs.receiptIds, "sourceRefs.receiptIds");
+  assertNonEmptyArray(sourceRefs.receiptHashes, "sourceRefs.receiptHashes");
+  assertNonEmptyArray(candidate.observationRefs, "observationRefs");
+  const nonClaims = assertObject(candidate.nonClaims, "nonClaims");
+  assertEqual(nonClaims.canonicalHistoryClaimed, false, "nonClaims.canonicalHistoryClaimed");
+  assertEqual(nonClaims.layerEvidenceAdmitted, false, "nonClaims.layerEvidenceAdmitted");
+  assertEqual(nonClaims.rbcInterpreted, false, "nonClaims.rbcInterpreted");
+  assertEqual(nonClaims.authorityGranted, false, "nonClaims.authorityGranted");
+  const boundary = assertObject(candidate.boundary, "boundary");
+  assertEqual(boundary.consumerSnapshotOnly, true, "boundary.consumerSnapshotOnly");
+  assertEqual(boundary.acceptsCanonicalHistory, false, "boundary.acceptsCanonicalHistory");
+  assertEqual(boundary.admitsLayerEvidence, false, "boundary.admitsLayerEvidence");
+  assertEqual(boundary.interpretsRbc, false, "boundary.interpretsRbc");
+  assertEqual(boundary.grantsAuthority, false, "boundary.grantsAuthority");
+  assertEqual(boundary.publishesToMesh, false, "boundary.publishesToMesh");
+  assertEqual(boundary.writesProductionContinuity, false, "boundary.writesProductionContinuity");
 }
 
 export function assertEdgeLayerSeamHistoryObservationResult(
@@ -1363,5 +1522,11 @@ function assertEqual(actual: unknown, expected: unknown, label: string): void {
 function assertString(value: unknown, label: string): void {
   if (!stringValue(value)) {
     throw new Error(`${label} must be a non-empty string`);
+  }
+}
+
+function assertNonEmptyArray(value: unknown, label: string): void {
+  if (!Array.isArray(value) || value.length === 0) {
+    throw new Error(`${label} must be a non-empty array`);
   }
 }
