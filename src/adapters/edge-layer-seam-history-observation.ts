@@ -190,6 +190,26 @@ export interface EdgeLayerSeamHistoryLayerReceiptFit {
   admissionDecided: false;
 }
 
+export interface EdgeLayerSeamHistorySuppliedMaterialGuardrailMatrix {
+  guardrailKind: "supplied_seam_history_material_guardrail_matrix";
+  proofLabel: EdgeLayerSeamHistoryNormalizedProofLabel;
+  inputMaterialKind: EdgeLayerSeamHistoryObservationProof["inputMaterialKind"];
+  localSuppliedMaterialGuardrailActive: boolean;
+  localSuppliedMaterialIsLowerProofRung: boolean;
+  dhtHyperswarmProofClaimBlockedForSuppliedMaterial: boolean;
+  dhtHyperswarmProofRequiresDurableTransport: true;
+  canonicalHistoryBlocked: true;
+  layerAdmissionBlocked: true;
+  layerEvidenceAdmissionBlocked: true;
+  rbcInterpretationBlocked: true;
+  quorumSatisfactionBlocked: true;
+  authorityGrantBlocked: true;
+  meshPublicationBlocked: true;
+  productionContinuityWriteBlocked: true;
+  sourceReferencePreservationRequired: true;
+  edgeProjectionOnlyAfterObservation: true;
+}
+
 export type EdgeLayerSeamHistoryDeferredAttachmentKey =
   | "referentPromotion"
   | "branchCompatibilityGraph"
@@ -228,6 +248,7 @@ export interface EdgeLayerSeamHistoryObservationResult {
   boundary: EdgeLayerSeamHistoryObservationBoundary;
   nonClaims: EdgeLayerSeamHistoryNonClaims;
   layerReceiptFit: EdgeLayerSeamHistoryLayerReceiptFit;
+  suppliedMaterialGuardrailMatrix: EdgeLayerSeamHistorySuppliedMaterialGuardrailMatrix;
   deferredAttachmentPoints: EdgeLayerSeamHistoryDeferredAttachmentPoints;
   proof: EdgeLayerSeamHistoryObservationProof;
   validation: EdgeLayerSeamHistoryObservationValidation;
@@ -331,6 +352,7 @@ export function buildEdgeLayerSeamHistoryObservationResult(
     boundary: buildBoundary(),
     nonClaims: buildNonClaims(),
     layerReceiptFit: buildLayerReceiptFit(),
+    suppliedMaterialGuardrailMatrix: buildSuppliedMaterialGuardrailMatrix(proof),
     deferredAttachmentPoints: buildDeferredAttachmentPoints(),
     proof,
     validation: {
@@ -441,6 +463,70 @@ export function assertEdgeLayerSeamHistoryObservationResult(
   assertEqual(layerReceiptFit.layerPolicyInterpreted, false, "layerReceiptFit.layerPolicyInterpreted");
   assertEqual(layerReceiptFit.rbcEnforced, false, "layerReceiptFit.rbcEnforced");
   assertEqual(layerReceiptFit.admissionDecided, false, "layerReceiptFit.admissionDecided");
+  const suppliedMaterialGuardrailMatrix = assertObject(
+    candidate.suppliedMaterialGuardrailMatrix,
+    "suppliedMaterialGuardrailMatrix",
+  );
+  assertEqual(
+    suppliedMaterialGuardrailMatrix.guardrailKind,
+    "supplied_seam_history_material_guardrail_matrix",
+    "suppliedMaterialGuardrailMatrix.guardrailKind",
+  );
+  assertEqual(
+    suppliedMaterialGuardrailMatrix.dhtHyperswarmProofRequiresDurableTransport,
+    true,
+    "suppliedMaterialGuardrailMatrix.dhtHyperswarmProofRequiresDurableTransport",
+  );
+  assertEqual(
+    suppliedMaterialGuardrailMatrix.canonicalHistoryBlocked,
+    true,
+    "suppliedMaterialGuardrailMatrix.canonicalHistoryBlocked",
+  );
+  assertEqual(
+    suppliedMaterialGuardrailMatrix.layerAdmissionBlocked,
+    true,
+    "suppliedMaterialGuardrailMatrix.layerAdmissionBlocked",
+  );
+  assertEqual(
+    suppliedMaterialGuardrailMatrix.layerEvidenceAdmissionBlocked,
+    true,
+    "suppliedMaterialGuardrailMatrix.layerEvidenceAdmissionBlocked",
+  );
+  assertEqual(
+    suppliedMaterialGuardrailMatrix.rbcInterpretationBlocked,
+    true,
+    "suppliedMaterialGuardrailMatrix.rbcInterpretationBlocked",
+  );
+  assertEqual(
+    suppliedMaterialGuardrailMatrix.quorumSatisfactionBlocked,
+    true,
+    "suppliedMaterialGuardrailMatrix.quorumSatisfactionBlocked",
+  );
+  assertEqual(
+    suppliedMaterialGuardrailMatrix.authorityGrantBlocked,
+    true,
+    "suppliedMaterialGuardrailMatrix.authorityGrantBlocked",
+  );
+  assertEqual(
+    suppliedMaterialGuardrailMatrix.meshPublicationBlocked,
+    true,
+    "suppliedMaterialGuardrailMatrix.meshPublicationBlocked",
+  );
+  assertEqual(
+    suppliedMaterialGuardrailMatrix.productionContinuityWriteBlocked,
+    true,
+    "suppliedMaterialGuardrailMatrix.productionContinuityWriteBlocked",
+  );
+  assertEqual(
+    suppliedMaterialGuardrailMatrix.sourceReferencePreservationRequired,
+    true,
+    "suppliedMaterialGuardrailMatrix.sourceReferencePreservationRequired",
+  );
+  assertEqual(
+    suppliedMaterialGuardrailMatrix.edgeProjectionOnlyAfterObservation,
+    true,
+    "suppliedMaterialGuardrailMatrix.edgeProjectionOnlyAfterObservation",
+  );
   const deferredAttachmentPoints = assertObject(candidate.deferredAttachmentPoints, "deferredAttachmentPoints");
   for (const key of EDGE_LAYER_SEAM_HISTORY_DEFERRED_ATTACHMENT_KEYS) {
     const point = assertObject(deferredAttachmentPoints[key], `deferredAttachmentPoints.${key}`);
@@ -488,6 +574,16 @@ export function assertEdgeLayerSeamHistoryObservationResult(
     );
     assertEqual(proof.replicatedViaHyperswarmTransport, true, "proof.replicatedViaHyperswarmTransport");
     assertEqual(proof.localSuppliedMaterialOnly, false, "proof.localSuppliedMaterialOnly");
+    assertEqual(
+      suppliedMaterialGuardrailMatrix.proofLabel,
+      "dht_hyperswarm_durable_seam_history_material",
+      "suppliedMaterialGuardrailMatrix.proofLabel",
+    );
+    assertEqual(
+      suppliedMaterialGuardrailMatrix.localSuppliedMaterialGuardrailActive,
+      false,
+      "suppliedMaterialGuardrailMatrix.localSuppliedMaterialGuardrailActive",
+    );
   } else {
     assertEqual(
       proof.strongestProofRung,
@@ -497,6 +593,31 @@ export function assertEdgeLayerSeamHistoryObservationResult(
     assertEqual(proof.normalizedProofLabel, "local_supplied_material", "proof.normalizedProofLabel");
     assertEqual(proof.inputMaterialKind, "supplied_seam_history_material", "proof.inputMaterialKind");
     assertEqual(proof.localSuppliedMaterialOnly, true, "proof.localSuppliedMaterialOnly");
+    assertEqual(
+      suppliedMaterialGuardrailMatrix.proofLabel,
+      "local_supplied_material",
+      "suppliedMaterialGuardrailMatrix.proofLabel",
+    );
+    assertEqual(
+      suppliedMaterialGuardrailMatrix.inputMaterialKind,
+      "supplied_seam_history_material",
+      "suppliedMaterialGuardrailMatrix.inputMaterialKind",
+    );
+    assertEqual(
+      suppliedMaterialGuardrailMatrix.localSuppliedMaterialGuardrailActive,
+      true,
+      "suppliedMaterialGuardrailMatrix.localSuppliedMaterialGuardrailActive",
+    );
+    assertEqual(
+      suppliedMaterialGuardrailMatrix.localSuppliedMaterialIsLowerProofRung,
+      true,
+      "suppliedMaterialGuardrailMatrix.localSuppliedMaterialIsLowerProofRung",
+    );
+    assertEqual(
+      suppliedMaterialGuardrailMatrix.dhtHyperswarmProofClaimBlockedForSuppliedMaterial,
+      true,
+      "suppliedMaterialGuardrailMatrix.dhtHyperswarmProofClaimBlockedForSuppliedMaterial",
+    );
   }
   const compatibilityEnvelope = assertObject(candidate.compatibilityEnvelope, "compatibilityEnvelope");
   assertEqual(
@@ -832,6 +953,31 @@ function buildLayerReceiptFit(): EdgeLayerSeamHistoryLayerReceiptFit {
     layerPolicyInterpreted: false,
     rbcEnforced: false,
     admissionDecided: false,
+  };
+}
+
+function buildSuppliedMaterialGuardrailMatrix(
+  proof: EdgeLayerSeamHistoryObservationProof,
+): EdgeLayerSeamHistorySuppliedMaterialGuardrailMatrix {
+  const localSuppliedMaterial = proof.normalizedProofLabel === "local_supplied_material";
+  return {
+    guardrailKind: "supplied_seam_history_material_guardrail_matrix",
+    proofLabel: proof.normalizedProofLabel,
+    inputMaterialKind: proof.inputMaterialKind,
+    localSuppliedMaterialGuardrailActive: localSuppliedMaterial,
+    localSuppliedMaterialIsLowerProofRung: localSuppliedMaterial,
+    dhtHyperswarmProofClaimBlockedForSuppliedMaterial: localSuppliedMaterial,
+    dhtHyperswarmProofRequiresDurableTransport: true,
+    canonicalHistoryBlocked: true,
+    layerAdmissionBlocked: true,
+    layerEvidenceAdmissionBlocked: true,
+    rbcInterpretationBlocked: true,
+    quorumSatisfactionBlocked: true,
+    authorityGrantBlocked: true,
+    meshPublicationBlocked: true,
+    productionContinuityWriteBlocked: true,
+    sourceReferencePreservationRequired: true,
+    edgeProjectionOnlyAfterObservation: true,
   };
 }
 

@@ -203,6 +203,25 @@ test("Edge Layer seam-history observation classifies linked and damaged request 
   assert.equal(result.proof.decentralizedSeamProofClaimed, false);
   assert.equal(result.proof.localSuppliedMaterialOnly, true);
   assert.equal(result.proof.proofLabelHonest, true);
+  assert.deepEqual(result.suppliedMaterialGuardrailMatrix, {
+    guardrailKind: "supplied_seam_history_material_guardrail_matrix",
+    proofLabel: "local_supplied_material",
+    inputMaterialKind: "supplied_seam_history_material",
+    localSuppliedMaterialGuardrailActive: true,
+    localSuppliedMaterialIsLowerProofRung: true,
+    dhtHyperswarmProofClaimBlockedForSuppliedMaterial: true,
+    dhtHyperswarmProofRequiresDurableTransport: true,
+    canonicalHistoryBlocked: true,
+    layerAdmissionBlocked: true,
+    layerEvidenceAdmissionBlocked: true,
+    rbcInterpretationBlocked: true,
+    quorumSatisfactionBlocked: true,
+    authorityGrantBlocked: true,
+    meshPublicationBlocked: true,
+    productionContinuityWriteBlocked: true,
+    sourceReferencePreservationRequired: true,
+    edgeProjectionOnlyAfterObservation: true,
+  });
   assert.equal(
     result.validation.strongestProofRung,
     "local_causal_observation_over_supplied_seam_history_material",
@@ -292,6 +311,83 @@ test("seam-history observation readback guardrails reject claim overclaims", () 
       new RegExp(pathSegments.join("\\.")),
     );
   }
+
+  const weakenedGuardrailPaths = [
+    ["suppliedMaterialGuardrailMatrix", "dhtHyperswarmProofRequiresDurableTransport"],
+    ["suppliedMaterialGuardrailMatrix", "canonicalHistoryBlocked"],
+    ["suppliedMaterialGuardrailMatrix", "layerAdmissionBlocked"],
+    ["suppliedMaterialGuardrailMatrix", "layerEvidenceAdmissionBlocked"],
+    ["suppliedMaterialGuardrailMatrix", "rbcInterpretationBlocked"],
+    ["suppliedMaterialGuardrailMatrix", "quorumSatisfactionBlocked"],
+    ["suppliedMaterialGuardrailMatrix", "authorityGrantBlocked"],
+    ["suppliedMaterialGuardrailMatrix", "meshPublicationBlocked"],
+    ["suppliedMaterialGuardrailMatrix", "productionContinuityWriteBlocked"],
+    ["suppliedMaterialGuardrailMatrix", "sourceReferencePreservationRequired"],
+    ["suppliedMaterialGuardrailMatrix", "edgeProjectionOnlyAfterObservation"],
+  ] as const;
+
+  for (const pathSegments of weakenedGuardrailPaths) {
+    const mutated = JSON.parse(JSON.stringify(result));
+    let target: Record<string, unknown> = mutated;
+    for (const segment of pathSegments.slice(0, -1)) {
+      target = target[segment] as Record<string, unknown>;
+    }
+    const finalSegment = pathSegments.at(-1);
+    assert.ok(finalSegment);
+    target[finalSegment] = false;
+
+    assert.throws(
+      () => assertEdgeLayerSeamHistoryObservationResult(mutated),
+      new RegExp(pathSegments.join("\\.")),
+    );
+  }
+});
+
+test("supplied material guardrail matrix keeps local input from self-claiming higher lanes", () => {
+  const seamHistory = operationShapedSeamHistory();
+  seamHistory.claimedProof = {
+    dhtOrHyperswarmInputObservedByCausalSubstrate: true,
+    decentralizedSeamProofClaimed: true,
+    canonicalHistoryClaimed: true,
+    layerEvidenceAdmitted: true,
+    layerAdmissionDecided: true,
+    rbcInterpreted: true,
+    quorumSatisfied: true,
+    authorityGranted: true,
+    meshPublished: true,
+    productionContinuityWritten: true,
+  };
+
+  const result = buildEdgeLayerSeamHistoryObservationResult({
+    seamHistory,
+    emittedAt: "2026-05-31T12:04:30.000Z",
+    sourcePath: "supplied-json:self-claimed-higher-lanes",
+    inputReadByCausalSubstrate: true,
+  });
+
+  assertEdgeLayerSeamHistoryObservationResult(result);
+  assert.equal(result.proof.normalizedProofLabel, "local_supplied_material");
+  assert.equal(result.proof.decentralizedSeamProofClaimed, false);
+  assert.equal(result.proof.durableCorestoreHistoryRead, false);
+  assert.equal(result.proof.replicatedViaHyperswarmTransport, false);
+  assert.equal(result.suppliedMaterialGuardrailMatrix.localSuppliedMaterialGuardrailActive, true);
+  assert.equal(result.suppliedMaterialGuardrailMatrix.dhtHyperswarmProofClaimBlockedForSuppliedMaterial, true);
+  assert.equal(result.suppliedMaterialGuardrailMatrix.canonicalHistoryBlocked, true);
+  assert.equal(result.suppliedMaterialGuardrailMatrix.layerAdmissionBlocked, true);
+  assert.equal(result.suppliedMaterialGuardrailMatrix.layerEvidenceAdmissionBlocked, true);
+  assert.equal(result.suppliedMaterialGuardrailMatrix.rbcInterpretationBlocked, true);
+  assert.equal(result.suppliedMaterialGuardrailMatrix.quorumSatisfactionBlocked, true);
+  assert.equal(result.suppliedMaterialGuardrailMatrix.authorityGrantBlocked, true);
+  assert.equal(result.suppliedMaterialGuardrailMatrix.meshPublicationBlocked, true);
+  assert.equal(result.suppliedMaterialGuardrailMatrix.productionContinuityWriteBlocked, true);
+  assert.equal(result.boundary.acceptsCanonicalHistory, false);
+  assert.equal(result.boundary.admitsLayerEvidence, false);
+  assert.equal(result.boundary.interpretsRbc, false);
+  assert.equal(result.boundary.grantsAuthority, false);
+  assert.equal(result.nonClaims.canonicalHistoryClaimed, false);
+  assert.equal(result.nonClaims.layerEvidenceAdmitted, false);
+  assert.equal(result.nonClaims.rbcInterpreted, false);
+  assert.equal(result.nonClaims.authorityGranted, false);
 });
 
 test("Layer-owned seam status linkedPairs shape can be observed without claiming swarm proof", () => {
