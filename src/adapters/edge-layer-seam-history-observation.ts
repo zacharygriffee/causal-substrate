@@ -258,6 +258,41 @@ export interface EdgeLayerSeamHistoryOutwardLaneTriggerNote {
   };
 }
 
+export type EdgeLayerSeamHistorySourceReferenceField =
+  | "request.sourceRepo"
+  | "request.id"
+  | "request.hash"
+  | "request.durableRef"
+  | "request.writerRef"
+  | "receipt.sourceRepo"
+  | "receipt.id"
+  | "receipt.hash"
+  | "receipt.durableRef"
+  | "receipt.writerRef";
+
+export interface EdgeLayerSeamHistorySourceReferenceCompletenessFailure {
+  observationId: string;
+  classification: EdgeLayerSeamHappeningClassification;
+  linkageStatus: EdgeLayerSeamLinkageStatus;
+  missingFields: EdgeLayerSeamHistorySourceReferenceField[];
+}
+
+export interface EdgeLayerSeamHistorySourceReferenceCompletenessReport {
+  reportKind: "edge_layer_seam_history_source_reference_completeness_failure_report";
+  complete: boolean;
+  failureCount: number;
+  missingFieldNames: EdgeLayerSeamHistorySourceReferenceField[];
+  failures: EdgeLayerSeamHistorySourceReferenceCompletenessFailure[];
+  boundary: {
+    reportOnly: true;
+    rejectsPromotionWhenIncomplete: true;
+    acceptsCanonicalHistory: false;
+    admitsLayerEvidence: false;
+    interpretsRbc: false;
+    grantsAuthority: false;
+  };
+}
+
 export type EdgeLayerSeamHistoryDeferredAttachmentKey =
   | "referentPromotion"
   | "branchCompatibilityGraph"
@@ -296,6 +331,7 @@ export interface EdgeLayerSeamHistoryObservationResult {
   boundary: EdgeLayerSeamHistoryObservationBoundary;
   nonClaims: EdgeLayerSeamHistoryNonClaims;
   layerReceiptFit: EdgeLayerSeamHistoryLayerReceiptFit;
+  sourceReferenceCompletenessReport: EdgeLayerSeamHistorySourceReferenceCompletenessReport;
   suppliedMaterialGuardrailMatrix: EdgeLayerSeamHistorySuppliedMaterialGuardrailMatrix;
   outwardLaneTriggerNote: EdgeLayerSeamHistoryOutwardLaneTriggerNote;
   deferredAttachmentPoints: EdgeLayerSeamHistoryDeferredAttachmentPoints;
@@ -394,6 +430,15 @@ export function buildEdgeLayerSeamHistoryObservationResult(
   const writerRefsPreserved = observations.every((observation) =>
     Boolean(observation.request.writerRef) && Boolean(observation.receipt.writerRef)
   );
+  if (!sourceReposPreserved && observations.length > 0) {
+    issues.push("source-repos-missing");
+  }
+  if (!durableRefsPreserved && observations.length > 0) {
+    issues.push("source-durable-refs-missing");
+  }
+  if (!writerRefsPreserved && observations.length > 0) {
+    issues.push("source-writer-refs-missing");
+  }
   const linkageStatusPreserved = observations.every((observation) =>
     observation.linkageStatus === "linked" ||
     observation.linkageStatus === "damaged" ||
@@ -453,6 +498,7 @@ export function buildEdgeLayerSeamHistoryObservationResult(
     boundary: buildBoundary(),
     nonClaims: buildNonClaims(),
     layerReceiptFit: buildLayerReceiptFit(observations),
+    sourceReferenceCompletenessReport: buildSourceReferenceCompletenessReport(observations),
     suppliedMaterialGuardrailMatrix: buildSuppliedMaterialGuardrailMatrix(proof),
     outwardLaneTriggerNote: buildOutwardLaneTriggerNote(proof),
     deferredAttachmentPoints: buildDeferredAttachmentPoints(),
@@ -678,6 +724,49 @@ export function assertEdgeLayerSeamHistoryObservationResult(
   assertEqual(layerReceiptFit.admissionDecided, false, "layerReceiptFit.admissionDecided");
   assertEqual(layerReceiptFit.receiptDoesNotPromoteReferents, true, "layerReceiptFit.receiptDoesNotPromoteReferents");
   assertEqual(layerReceiptFit.receiptDoesNotGrantAuthority, true, "layerReceiptFit.receiptDoesNotGrantAuthority");
+  const sourceReferenceCompletenessReport = assertObject(
+    candidate.sourceReferenceCompletenessReport,
+    "sourceReferenceCompletenessReport",
+  );
+  assertEqual(
+    sourceReferenceCompletenessReport.reportKind,
+    "edge_layer_seam_history_source_reference_completeness_failure_report",
+    "sourceReferenceCompletenessReport.reportKind",
+  );
+  const sourceReferenceCompletenessBoundary = assertObject(
+    sourceReferenceCompletenessReport.boundary,
+    "sourceReferenceCompletenessReport.boundary",
+  );
+  assertEqual(
+    sourceReferenceCompletenessBoundary.reportOnly,
+    true,
+    "sourceReferenceCompletenessReport.boundary.reportOnly",
+  );
+  assertEqual(
+    sourceReferenceCompletenessBoundary.rejectsPromotionWhenIncomplete,
+    true,
+    "sourceReferenceCompletenessReport.boundary.rejectsPromotionWhenIncomplete",
+  );
+  assertEqual(
+    sourceReferenceCompletenessBoundary.acceptsCanonicalHistory,
+    false,
+    "sourceReferenceCompletenessReport.boundary.acceptsCanonicalHistory",
+  );
+  assertEqual(
+    sourceReferenceCompletenessBoundary.admitsLayerEvidence,
+    false,
+    "sourceReferenceCompletenessReport.boundary.admitsLayerEvidence",
+  );
+  assertEqual(
+    sourceReferenceCompletenessBoundary.interpretsRbc,
+    false,
+    "sourceReferenceCompletenessReport.boundary.interpretsRbc",
+  );
+  assertEqual(
+    sourceReferenceCompletenessBoundary.grantsAuthority,
+    false,
+    "sourceReferenceCompletenessReport.boundary.grantsAuthority",
+  );
   const suppliedMaterialGuardrailMatrix = assertObject(
     candidate.suppliedMaterialGuardrailMatrix,
     "suppliedMaterialGuardrailMatrix",
@@ -1247,6 +1336,55 @@ function buildLayerReceiptFit(
     receiptDoesNotPromoteReferents: true,
     receiptDoesNotGrantAuthority: true,
   };
+}
+
+function buildSourceReferenceCompletenessReport(
+  observations: EdgeLayerSeamHappeningObservation[],
+): EdgeLayerSeamHistorySourceReferenceCompletenessReport {
+  const failures = observations.flatMap((observation) => {
+    const missingFields = collectMissingSourceReferenceFields(observation);
+    if (missingFields.length === 0) return [];
+    return [{
+      observationId: observation.observationId,
+      classification: observation.classification,
+      linkageStatus: observation.linkageStatus,
+      missingFields,
+    }];
+  });
+
+  return {
+    reportKind: "edge_layer_seam_history_source_reference_completeness_failure_report",
+    complete: failures.length === 0,
+    failureCount: failures.length,
+    missingFieldNames: uniqueStrings(failures.flatMap((failure) => failure.missingFields)) as
+      EdgeLayerSeamHistorySourceReferenceField[],
+    failures,
+    boundary: {
+      reportOnly: true,
+      rejectsPromotionWhenIncomplete: true,
+      acceptsCanonicalHistory: false,
+      admitsLayerEvidence: false,
+      interpretsRbc: false,
+      grantsAuthority: false,
+    },
+  };
+}
+
+function collectMissingSourceReferenceFields(
+  observation: EdgeLayerSeamHappeningObservation,
+): EdgeLayerSeamHistorySourceReferenceField[] {
+  const missingFields: EdgeLayerSeamHistorySourceReferenceField[] = [];
+  if (!observation.request.sourceRepo) missingFields.push("request.sourceRepo");
+  if (!observation.request.id) missingFields.push("request.id");
+  if (!observation.request.hash) missingFields.push("request.hash");
+  if (!observation.request.durableRef) missingFields.push("request.durableRef");
+  if (!observation.request.writerRef) missingFields.push("request.writerRef");
+  if (!observation.receipt.sourceRepo) missingFields.push("receipt.sourceRepo");
+  if (!observation.receipt.id) missingFields.push("receipt.id");
+  if (!observation.receipt.hash) missingFields.push("receipt.hash");
+  if (!observation.receipt.durableRef) missingFields.push("receipt.durableRef");
+  if (!observation.receipt.writerRef) missingFields.push("receipt.writerRef");
+  return missingFields;
 }
 
 function buildSuppliedMaterialGuardrailMatrix(

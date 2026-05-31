@@ -189,6 +189,21 @@ test("Edge Layer seam-history observation classifies linked and damaged request 
     receiptDoesNotPromoteReferents: true,
     receiptDoesNotGrantAuthority: true,
   });
+  assert.deepEqual(result.sourceReferenceCompletenessReport, {
+    reportKind: "edge_layer_seam_history_source_reference_completeness_failure_report",
+    complete: true,
+    failureCount: 0,
+    missingFieldNames: [],
+    failures: [],
+    boundary: {
+      reportOnly: true,
+      rejectsPromotionWhenIncomplete: true,
+      acceptsCanonicalHistory: false,
+      admitsLayerEvidence: false,
+      interpretsRbc: false,
+      grantsAuthority: false,
+    },
+  });
   assert.deepEqual(result.deferredAttachmentPoints, {
     referentPromotion: { status: "deferred", active: false, interpreted: false, writes: false },
     branchCompatibilityGraph: { status: "deferred", active: false, interpreted: false, writes: false },
@@ -554,6 +569,51 @@ test("Layer-owned seam status linkedPairs shape can be observed without claiming
   assert.equal(result.validation.durableRefsPreserved, false);
   assert.equal(result.validation.writerRefsPreserved, false);
   assert.equal(result.validation.linkageStatusPreserved, true);
+  assert.equal(result.sourceReferenceCompletenessReport.complete, false);
+  assert.equal(result.sourceReferenceCompletenessReport.failureCount, 2);
+  assert.deepEqual(result.sourceReferenceCompletenessReport.missingFieldNames, [
+    "request.durableRef",
+    "request.writerRef",
+    "receipt.durableRef",
+    "receipt.writerRef",
+    "receipt.id",
+    "receipt.hash",
+  ]);
+  assert.deepEqual(result.sourceReferenceCompletenessReport.failures, [
+    {
+      observationId: result.observations[0]!.observationId,
+      classification: "compatible_seam_happening",
+      linkageStatus: "linked",
+      missingFields: [
+        "request.durableRef",
+        "request.writerRef",
+        "receipt.durableRef",
+        "receipt.writerRef",
+      ],
+    },
+    {
+      observationId: result.observations[1]!.observationId,
+      classification: "unresolved_or_damaged_seam_happening",
+      linkageStatus: "unlinked",
+      missingFields: [
+        "request.durableRef",
+        "request.writerRef",
+        "receipt.id",
+        "receipt.hash",
+        "receipt.durableRef",
+        "receipt.writerRef",
+      ],
+    },
+  ]);
+  assert.equal(result.sourceReferenceCompletenessReport.boundary.reportOnly, true);
+  assert.equal(result.sourceReferenceCompletenessReport.boundary.rejectsPromotionWhenIncomplete, true);
+  assert.equal(result.sourceReferenceCompletenessReport.boundary.acceptsCanonicalHistory, false);
+  assert.equal(result.sourceReferenceCompletenessReport.boundary.admitsLayerEvidence, false);
+  assert.equal(result.sourceReferenceCompletenessReport.boundary.interpretsRbc, false);
+  assert.equal(result.sourceReferenceCompletenessReport.boundary.grantsAuthority, false);
+  assert.ok(result.validation.issues.includes("source-ids-or-hashes-missing"));
+  assert.ok(result.validation.issues.includes("source-durable-refs-missing"));
+  assert.ok(result.validation.issues.includes("source-writer-refs-missing"));
   assert.equal(result.boundary.opensLayerRuntime, false);
   assert.equal(result.boundary.acceptsCanonicalHistory, false);
   assert.equal(result.proof.dhtOrHyperswarmInputObservedByCausalSubstrate, false);
