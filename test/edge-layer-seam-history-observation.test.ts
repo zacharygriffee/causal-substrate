@@ -579,6 +579,49 @@ test("Edge projection fixture is derived from observation result without writing
   );
   assert.equal(fixture.edgeProjectionMaterial.compatibleRefs.length, 1);
   assert.equal(fixture.edgeProjectionMaterial.unresolvedOrDamagedRefs.length, 1);
+  assert.equal(fixture.handoffEnvelope.envelopeKind, "edge_projection_handoff_envelope");
+  assert.equal(fixture.handoffEnvelope.sourceObservation.artifactId, observationResult.artifactId);
+  assert.equal(fixture.handoffEnvelope.sourceObservation.normalizedProofLabel, "local_supplied_material");
+  assert.deepEqual(fixture.handoffEnvelope.sourceReferences.sourceRepos, [
+    "mesh-ecology-edge",
+    "mesh-ecology-layer",
+  ]);
+  assert.deepEqual(fixture.handoffEnvelope.sourceReferences.requestIds, [
+    "edge-layer-report-only-seam-request:causal-observation:linked",
+    "edge-layer-report-only-seam-request:causal-observation:damaged",
+  ]);
+  assert.deepEqual(fixture.handoffEnvelope.sourceReferences.requestHashes, [
+    `sha256:${"a".repeat(64)}`,
+    `sha256:${"c".repeat(64)}`,
+  ]);
+  assert.deepEqual(fixture.handoffEnvelope.sourceReferences.receiptIds, [
+    "layer-report-only-edge-seam-receipt:causal-observation:linked",
+    "layer-report-only-edge-seam-receipt:causal-observation:damaged",
+  ]);
+  assert.deepEqual(fixture.handoffEnvelope.sourceReferences.receiptHashes, [
+    `sha256:${"b".repeat(64)}`,
+    `sha256:${"d".repeat(64)}`,
+  ]);
+  assert.deepEqual(fixture.handoffEnvelope.classificationSummary.compatibleObservationIds, [
+    observationResult.observations[0]!.observationId,
+  ]);
+  assert.deepEqual(fixture.handoffEnvelope.classificationSummary.unresolvedOrDamagedObservationIds, [
+    observationResult.observations[1]!.observationId,
+  ]);
+  assert.deepEqual(fixture.handoffEnvelope.classificationSummary.linkageStatuses, ["linked", "damaged"]);
+  assert.equal(fixture.handoffEnvelope.consumerBoundary.edgeMayConsume, true);
+  assert.equal(fixture.handoffEnvelope.consumerBoundary.writesEdgeProjection, false);
+  assert.equal(fixture.handoffEnvelope.consumerBoundary.acceptsCanonicalHistory, false);
+  assert.equal(fixture.handoffEnvelope.consumerBoundary.admitsLayerEvidence, false);
+  assert.equal(fixture.handoffEnvelope.consumerBoundary.interpretsRbc, false);
+  assert.equal(fixture.handoffEnvelope.consumerBoundary.grantsAuthority, false);
+  assert.equal(fixture.handoffEnvelope.consumerBoundary.promotesReferents, false);
+  assert.equal(fixture.handoffEnvelope.consumerBoundary.publishesToMesh, false);
+  assert.equal(fixture.handoffEnvelope.consumerBoundary.writesProductionContinuity, false);
+  assert.equal(fixture.handoffEnvelope.nonClaims.canonicalHistoryClaimed, false);
+  assert.equal(fixture.handoffEnvelope.nonClaims.layerEvidenceAdmitted, false);
+  assert.equal(fixture.handoffEnvelope.nonClaims.rbcInterpreted, false);
+  assert.equal(fixture.handoffEnvelope.nonClaims.authorityGranted, false);
 
   const compatibleRef = fixture.edgeProjectionMaterial.compatibleRefs[0]!;
   assert.equal(compatibleRef.sourceObservationArtifactId, observationResult.artifactId);
@@ -601,6 +644,7 @@ test("Edge projection fixture is derived from observation result without writing
   assert.equal(fixture.boundary.edgeProjectionWritten, false);
   assert.equal(fixture.boundary.opensEdgeRuntime, false);
   assert.equal(fixture.boundary.promotesReferents, false);
+  assert.equal(fixture.boundary.writesProductionContinuity, false);
 });
 
 test("Edge projection fixture guardrail matrix rejects projection overclaims", () => {
@@ -621,6 +665,23 @@ test("Edge projection fixture guardrail matrix rejects projection overclaims", (
     { path: ["boundary", "grantsAuthority"], value: true },
     { path: ["boundary", "promotesReferents"], value: true },
     { path: ["boundary", "publishesToMesh"], value: true },
+    { path: ["boundary", "writesProductionContinuity"], value: true },
+    { path: ["handoffEnvelope", "consumerBoundary", "writesEdgeProjection"], value: true },
+    { path: ["handoffEnvelope", "consumerBoundary", "acceptsCanonicalHistory"], value: true },
+    { path: ["handoffEnvelope", "consumerBoundary", "admitsLayerEvidence"], value: true },
+    { path: ["handoffEnvelope", "consumerBoundary", "interpretsRbc"], value: true },
+    { path: ["handoffEnvelope", "consumerBoundary", "grantsAuthority"], value: true },
+    { path: ["handoffEnvelope", "consumerBoundary", "promotesReferents"], value: true },
+    { path: ["handoffEnvelope", "consumerBoundary", "publishesToMesh"], value: true },
+    { path: ["handoffEnvelope", "consumerBoundary", "writesProductionContinuity"], value: true },
+    { path: ["handoffEnvelope", "nonClaims", "canonicalHistoryClaimed"], value: true },
+    { path: ["handoffEnvelope", "nonClaims", "layerEvidenceAdmitted"], value: true },
+    { path: ["handoffEnvelope", "nonClaims", "layerAdmissionDecided"], value: true },
+    { path: ["handoffEnvelope", "nonClaims", "rbcInterpreted"], value: true },
+    { path: ["handoffEnvelope", "nonClaims", "authorityGranted"], value: true },
+    { path: ["handoffEnvelope", "nonClaims", "referentPromoted"], value: true },
+    { path: ["handoffEnvelope", "nonClaims", "meshPublished"], value: true },
+    { path: ["handoffEnvelope", "nonClaims", "productionContinuityWritten"], value: true },
     { path: ["validation", "noCanonicalHistoryClaim"], value: false },
     { path: ["validation", "noLayerAdmissionClaim"], value: false },
     { path: ["validation", "noRbcInterpretationClaim"], value: false },
