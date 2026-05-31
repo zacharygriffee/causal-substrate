@@ -1,0 +1,222 @@
+import assert from "node:assert/strict";
+import { randomUUID } from "node:crypto";
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import test from "node:test";
+
+import {
+  activeManagedCorestoreCount,
+  createHyperswarmReplicationSwarm,
+  parseHyperswarmBootstrap,
+  runEdgeLayerSeamHistoryHyperswarmReader,
+  type HyperswarmReplicationSwarm,
+} from "../src/index.js";
+
+const SHOULD_RUN_REAL_HYPERSWARM = process.env.CAUSAL_SUBSTRATE_REAL_HYPERSWARM === "1";
+const SHOULD_USE_PUBLIC_HYPERSWARM = process.env.CAUSAL_SUBSTRATE_HYPERSWARM_PUBLIC === "1";
+const CONFIGURED_HYPERSWARM_BOOTSTRAP = parseHyperswarmBootstrap(
+  process.env.CAUSAL_SUBSTRATE_HYPERSWARM_BOOTSTRAP,
+);
+
+interface HyperswarmHarness {
+  bootstrap?: string[];
+  close: () => Promise<void>;
+}
+
+async function openHyperswarmHarness(): Promise<HyperswarmHarness> {
+  if (CONFIGURED_HYPERSWARM_BOOTSTRAP.length > 0) {
+    return {
+      bootstrap: CONFIGURED_HYPERSWARM_BOOTSTRAP,
+      close: async () => {},
+    };
+  }
+
+  if (SHOULD_USE_PUBLIC_HYPERSWARM) {
+    return {
+      close: async () => {},
+    };
+  }
+
+  const { default: createTestnet } = await import("hyperdht/testnet.js");
+  const testnet = await createTestnet(3, { host: "127.0.0.1" });
+
+  return {
+    bootstrap: testnet.bootstrap.map((node: { host: string; port: number }) => {
+      return `${node.host}:${node.port}`;
+    }),
+    close: async () => {
+      await testnet.destroy();
+    },
+  };
+}
+
+function createDirectPeerHyperswarmFactory(bootstrap?: string[]) {
+  const swarms: HyperswarmReplicationSwarm[] = [];
+
+  return async (seed?: Buffer, topics?: Map<string, unknown>) => {
+    const swarm = await createHyperswarmReplicationSwarm({
+      seed,
+      bootstrap,
+    });
+    swarms.push(swarm);
+    await swarm.listen();
+
+    return {
+      ...swarm,
+      async flush(timeoutMs?: number) {
+        const deadlineMs = timeoutMs ?? 60_000;
+        const startedAt = Date.now();
+
+        while (Date.now() - startedAt < deadlineMs) {
+          if (swarm.connectionCount() > 0) return;
+          await new Promise((resolve) => setTimeout(resolve, 100));
+        }
+
+        throw new Error(`timed out waiting for direct hyperswarm peer after ${deadlineMs}ms`);
+      },
+      join(topic: Buffer) {
+        const key = Buffer.from(topic).toString("hex");
+        const peers = getTopicPeers(topics, key);
+
+        if (!peers.some((peer) => peer.publicKey.equals(swarm.publicKey))) {
+          peers.push(swarm);
+        }
+
+        for (const peer of peers) {
+          if (peer.publicKey.equals(swarm.publicKey)) continue;
+          swarm.joinPeer(peer.publicKey);
+        }
+
+        return {
+          flushed: async () => {},
+        };
+      },
+    };
+  };
+}
+
+function getTopicPeers(
+  topics: Map<string, unknown> | undefined,
+  key: string,
+): HyperswarmReplicationSwarm[] {
+  if (!topics) return [];
+  const existing = topics.get(key);
+  if (Array.isArray(existing)) return existing as HyperswarmReplicationSwarm[];
+  const peers: HyperswarmReplicationSwarm[] = [];
+  topics.set(key, peers);
+  return peers;
+}
+
+function seamHistoryMaterial(): any {
+  return {
+    artifactKind: "edge_layer_seam_history_material",
+    schemaVersion: "edge-layer-seam-history-material.v0",
+    historyId: "layer-owned-edge-seam-status:hyperswarm-reader-test",
+    historyHash: `sha256:${"8".repeat(64)}`,
+    sourceRepos: ["mesh-ecology-edge", "mesh-ecology-layer"],
+    pairs: [
+      {
+        request: {
+          sourceRepo: "mesh-ecology-edge",
+          requestId: "edge-layer-report-only-seam-request:hyperswarm-reader:linked",
+          requestHash: `sha256:${"a".repeat(64)}`,
+          durableRef: "corestore:edge-layer-seam-history:request:0",
+          writerRef: "autobase-writer:edge-hyperswarm-reader",
+        },
+        receipt: {
+          sourceRepo: "mesh-ecology-layer",
+          receiptId: "layer-report-only-edge-seam-receipt:hyperswarm-reader:linked",
+          receiptHash: `sha256:${"b".repeat(64)}`,
+          sourceRequestId: "edge-layer-report-only-seam-request:hyperswarm-reader:linked",
+          sourceRequestHash: `sha256:${"a".repeat(64)}`,
+          durableRef: "corestore:edge-layer-seam-history:receipt:1",
+          writerRef: "autobase-writer:layer-hyperswarm-reader",
+        },
+        linkage: {
+          linked: true,
+          source: "receipt_source_request_refs",
+        },
+      },
+      {
+        request: {
+          sourceRepo: "mesh-ecology-edge",
+          requestId: "edge-layer-report-only-seam-request:hyperswarm-reader:unlinked",
+          requestHash: `sha256:${"c".repeat(64)}`,
+          durableRef: "corestore:edge-layer-seam-history:request:2",
+          writerRef: "autobase-writer:edge-hyperswarm-reader",
+        },
+        receipt: {
+          sourceRepo: "mesh-ecology-layer",
+          receiptId: "layer-report-only-edge-seam-receipt:hyperswarm-reader:unlinked",
+          receiptHash: `sha256:${"d".repeat(64)}`,
+          sourceRequestId: "edge-layer-report-only-seam-request:hyperswarm-reader:different",
+          sourceRequestHash: `sha256:${"e".repeat(64)}`,
+          durableRef: "corestore:edge-layer-seam-history:receipt:3",
+          writerRef: "autobase-writer:layer-hyperswarm-reader",
+        },
+        linkage: {
+          linked: false,
+          source: "receipt_source_request_refs",
+        },
+      },
+    ],
+  };
+}
+
+test(
+  "Hyperswarm reader consumes replicated durable Edge Layer seam history before observing it",
+  {
+    skip: !SHOULD_RUN_REAL_HYPERSWARM,
+    timeout: 120_000,
+  },
+  async () => {
+    const sourceDir = await mkdtemp(path.join(tmpdir(), "causal-seam-hs-source-"));
+    const replicaDir = await mkdtemp(path.join(tmpdir(), "causal-seam-hs-replica-"));
+    const harness = await openHyperswarmHarness();
+    try {
+      const report = await runEdgeLayerSeamHistoryHyperswarmReader({
+        storageDirA: sourceDir,
+        storageDirB: replicaDir,
+        createSwarm: createDirectPeerHyperswarmFactory(harness.bootstrap),
+        seamHistory: seamHistoryMaterial(),
+        emittedAt: "2026-05-31T13:00:00.000Z",
+        namespaceParts: ["hyperswarm-seam-history-reader", randomUUID()],
+        flushTimeoutMs: 60_000,
+        replicationTimeoutMs: 60_000,
+      });
+
+      assert.equal(report.record.seamHistoryHash, report.replicatedRecord.seamHistoryHash);
+      assert.equal(report.readerProof.inputReadByCausalSubstrate, true);
+      assert.equal(report.readerProof.durableCorestoreHistoryRead, true);
+      assert.equal(report.readerProof.dhtOrHyperswarmInputObservedByCausalSubstrate, true);
+      assert.equal(report.readerProof.replicatedViaHyperswarmTransport, true);
+      assert.equal(report.readerProof.sourceCoreKeyHex, report.readerProof.replicaCoreKeyHex);
+      assert.equal(report.readerProof.sourceRecordCount, 1);
+      assert.equal(report.readerProof.replicaRecordCount, 1);
+
+      assert.equal(report.observationResult.validation.seamHistoryInputConsumed, true);
+      assert.equal(report.observationResult.validation.linkedPairDetected, true);
+      assert.equal(report.observationResult.validation.damagedOrUnlinkedPairDetected, true);
+      assert.equal(report.observationResult.validation.sourceIdsAndHashesPreserved, true);
+      assert.equal(report.observationResult.observations[0]?.classification, "compatible_seam_happening");
+      assert.equal(
+        report.observationResult.observations[1]?.classification,
+        "unresolved_or_damaged_seam_happening",
+      );
+      assert.equal(
+        report.observationResult.observations[0]?.request.id,
+        "edge-layer-report-only-seam-request:hyperswarm-reader:linked",
+      );
+      assert.equal(
+        report.observationResult.observations[0]?.receipt.hash,
+        `sha256:${"b".repeat(64)}`,
+      );
+      assert.equal(activeManagedCorestoreCount(), 0);
+    } finally {
+      await harness.close();
+      await rm(sourceDir, { recursive: true, force: true });
+      await rm(replicaDir, { recursive: true, force: true });
+    }
+  },
+);
