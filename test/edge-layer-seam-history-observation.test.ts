@@ -105,12 +105,17 @@ test("Edge Layer seam-history observation classifies linked and damaged request 
   assert.equal(result.validation.damagedOrUnlinkedPairDetected, true);
   assert.equal(result.validation.compatiblePairCount, 1);
   assert.equal(result.validation.unresolvedOrDamagedPairCount, 1);
+  assert.equal(result.validation.damagedPairCount, 1);
+  assert.equal(result.validation.unresolvedPairCount, 0);
+  assert.equal(result.validation.damagedPairDetected, true);
+  assert.equal(result.validation.unresolvedPairDetected, false);
   assert.equal(result.validation.sourceIdsAndHashesPreserved, true);
   assert.deepEqual(result.source.sourceRepos, ["mesh-ecology-edge", "mesh-ecology-layer"]);
 
   const linked = result.observations[0]!;
   assert.equal(linked.classification, "compatible_seam_happening");
   assert.equal(linked.linkageStatus, "linked");
+  assert.equal(linked.damageOrUnresolvedDetail, "none_compatible_linked_request_receipt");
   assert.equal(linked.request.id, "edge-layer-report-only-seam-request:causal-observation:linked");
   assert.equal(linked.request.hash, `sha256:${"a".repeat(64)}`);
   assert.equal(linked.receipt.id, "layer-report-only-edge-seam-receipt:causal-observation:linked");
@@ -131,6 +136,7 @@ test("Edge Layer seam-history observation classifies linked and damaged request 
   const damaged = result.observations[1]!;
   assert.equal(damaged.classification, "unresolved_or_damaged_seam_happening");
   assert.equal(damaged.linkageStatus, "damaged");
+  assert.equal(damaged.damageOrUnresolvedDetail, "damaged_partial_or_mismatched_request_receipt_refs");
   assert.equal(damaged.request.id, "edge-layer-report-only-seam-request:causal-observation:damaged");
   assert.equal(damaged.request.hash, `sha256:${"c".repeat(64)}`);
   assert.equal(damaged.receipt.id, "layer-report-only-edge-seam-receipt:causal-observation:damaged");
@@ -246,8 +252,12 @@ test("Edge Layer seam-history observation classifies linked and damaged request 
   assert.deepEqual(result.compatibilityEnvelope.classificationSummary, {
     compatibleObservationIds: [linked.observationId],
     unresolvedOrDamagedObservationIds: [damaged.observationId],
+    damagedObservationIds: [damaged.observationId],
+    unresolvedObservationIds: [],
     linkedPairDetected: true,
     damagedOrUnlinkedPairDetected: true,
+    damagedPairDetected: true,
+    unresolvedPairDetected: false,
   });
   assert.deepEqual(result.compatibilityEnvelope.sourceReferenceContract, {
     requestIdsPreserved: true,
@@ -450,6 +460,14 @@ test("Layer-owned seam status linkedPairs shape can be observed without claiming
   assert.equal(result.observations[0]?.classification, "compatible_seam_happening");
   assert.equal(result.observations[1]?.classification, "unresolved_or_damaged_seam_happening");
   assert.equal(result.observations[1]?.linkageStatus, "unlinked");
+  assert.equal(
+    result.observations[1]?.damageOrUnresolvedDetail,
+    "unresolved_unlinked_or_missing_request_receipt_refs",
+  );
+  assert.equal(result.validation.damagedPairCount, 0);
+  assert.equal(result.validation.unresolvedPairCount, 1);
+  assert.equal(result.validation.damagedPairDetected, false);
+  assert.equal(result.validation.unresolvedPairDetected, true);
   assert.equal(result.validation.sourceReposPreserved, true);
   assert.equal(result.validation.durableRefsPreserved, false);
   assert.equal(result.validation.writerRefsPreserved, false);
@@ -624,6 +642,10 @@ test("Edge projection fixture is derived from observation result without writing
     observationResult.observations[1]!.observationId,
   ]);
   assert.deepEqual(fixture.handoffEnvelope.classificationSummary.linkageStatuses, ["linked", "damaged"]);
+  assert.deepEqual(fixture.handoffEnvelope.classificationSummary.damageOrUnresolvedDetails, [
+    "none_compatible_linked_request_receipt",
+    "damaged_partial_or_mismatched_request_receipt_refs",
+  ]);
   assert.equal(fixture.handoffEnvelope.consumerBoundary.edgeMayConsume, true);
   assert.equal(fixture.handoffEnvelope.consumerBoundary.writesEdgeProjection, false);
   assert.equal(fixture.handoffEnvelope.consumerBoundary.acceptsCanonicalHistory, false);
@@ -641,6 +663,7 @@ test("Edge projection fixture is derived from observation result without writing
   const compatibleRef = fixture.edgeProjectionMaterial.compatibleRefs[0]!;
   assert.equal(compatibleRef.sourceObservationArtifactId, observationResult.artifactId);
   assert.equal(compatibleRef.observationId, observationResult.observations[0]!.observationId);
+  assert.equal(compatibleRef.damageOrUnresolvedDetail, "none_compatible_linked_request_receipt");
   assert.equal(compatibleRef.request.id, "edge-layer-report-only-seam-request:causal-observation:linked");
   assert.equal(compatibleRef.request.hash, `sha256:${"a".repeat(64)}`);
   assert.equal(compatibleRef.receipt.id, "layer-report-only-edge-seam-receipt:causal-observation:linked");
@@ -654,6 +677,7 @@ test("Edge projection fixture is derived from observation result without writing
   const unresolvedRef = fixture.edgeProjectionMaterial.unresolvedOrDamagedRefs[0]!;
   assert.equal(unresolvedRef.observationId, observationResult.observations[1]!.observationId);
   assert.equal(unresolvedRef.classification, "unresolved_or_damaged_seam_happening");
+  assert.equal(unresolvedRef.damageOrUnresolvedDetail, "damaged_partial_or_mismatched_request_receipt_refs");
   assert.equal(unresolvedRef.request.hash, `sha256:${"c".repeat(64)}`);
   assert.equal(unresolvedRef.receipt.hash, `sha256:${"d".repeat(64)}`);
   assert.equal(fixture.boundary.edgeProjectionWritten, false);

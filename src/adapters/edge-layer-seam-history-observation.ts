@@ -25,6 +25,11 @@ export type EdgeLayerSeamHappeningClassification =
 
 export type EdgeLayerSeamLinkageStatus = "linked" | "unlinked" | "damaged";
 
+export type EdgeLayerSeamDamageOrUnresolvedDetail =
+  | "none_compatible_linked_request_receipt"
+  | "damaged_partial_or_mismatched_request_receipt_refs"
+  | "unresolved_unlinked_or_missing_request_receipt_refs";
+
 export type EdgeLayerSeamHistoryProofRung =
   | "local_causal_observation_over_supplied_seam_history_material"
   | "dht_hyperswarm_replicated_durable_seam_history_observation";
@@ -45,6 +50,7 @@ export interface EdgeLayerSeamHappeningObservation {
   observationId: string;
   classification: EdgeLayerSeamHappeningClassification;
   linkageStatus: EdgeLayerSeamLinkageStatus;
+  damageOrUnresolvedDetail: EdgeLayerSeamDamageOrUnresolvedDetail;
   request: EdgeLayerSeamHistorySourceRef;
   receipt: EdgeLayerSeamHistorySourceRef;
   receiptSourceRequestId?: string;
@@ -98,8 +104,12 @@ export interface EdgeLayerSeamHistoryObservationValidation {
   pairCount: number;
   compatiblePairCount: number;
   unresolvedOrDamagedPairCount: number;
+  damagedPairCount: number;
+  unresolvedPairCount: number;
   linkedPairDetected: boolean;
   damagedOrUnlinkedPairDetected: boolean;
+  damagedPairDetected: boolean;
+  unresolvedPairDetected: boolean;
   sourceIdsAndHashesPreserved: boolean;
   sourceReposPreserved: boolean;
   durableRefsPreserved: boolean;
@@ -141,8 +151,12 @@ export interface EdgeLayerSeamHistoryCompatibilityEnvelope {
   classificationSummary: {
     compatibleObservationIds: string[];
     unresolvedOrDamagedObservationIds: string[];
+    damagedObservationIds: string[];
+    unresolvedObservationIds: string[];
     linkedPairDetected: boolean;
     damagedOrUnlinkedPairDetected: boolean;
+    damagedPairDetected: boolean;
+    unresolvedPairDetected: boolean;
   };
   sourceReferenceContract: {
     requestIdsPreserved: boolean;
@@ -314,6 +328,8 @@ export function buildEdgeLayerSeamHistoryObservationResult(
   const unresolvedOrDamagedPairCount = observations.filter((observation) =>
     observation.classification === "unresolved_or_damaged_seam_happening"
   ).length;
+  const damagedPairCount = observations.filter((observation) => observation.linkageStatus === "damaged").length;
+  const unresolvedPairCount = observations.filter((observation) => observation.linkageStatus === "unlinked").length;
   const status = determineStatus(seamHistory, observations, issues);
   const historyId = stringValue(seamHistory?.historyId) ??
     stringValue(seamHistory?.statusId) ??
@@ -370,8 +386,12 @@ export function buildEdgeLayerSeamHistoryObservationResult(
       pairCount: observations.length,
       compatiblePairCount,
       unresolvedOrDamagedPairCount,
+      damagedPairCount,
+      unresolvedPairCount,
       linkedPairDetected: compatiblePairCount > 0,
       damagedOrUnlinkedPairDetected: unresolvedOrDamagedPairCount > 0,
+      damagedPairDetected: damagedPairCount > 0,
+      unresolvedPairDetected: unresolvedPairCount > 0,
       sourceIdsAndHashesPreserved,
       sourceReposPreserved,
       durableRefsPreserved,
@@ -777,6 +797,11 @@ function observePair(pair: JsonRecord, index: number): EdgeLayerSeamHappeningObs
     : explicitLinkageAsserted && (receiptReferencesRequestId || receiptReferencesRequestHash)
       ? "damaged"
       : "unlinked";
+  const damageOrUnresolvedDetail: EdgeLayerSeamDamageOrUnresolvedDetail = linkageStatus === "linked"
+    ? "none_compatible_linked_request_receipt"
+    : linkageStatus === "damaged"
+      ? "damaged_partial_or_mismatched_request_receipt_refs"
+      : "unresolved_unlinked_or_missing_request_receipt_refs";
   const sourceRefs = uniqueStrings([
     request.id,
     request.hash,
@@ -796,6 +821,7 @@ function observePair(pair: JsonRecord, index: number): EdgeLayerSeamHappeningObs
       ? "compatible_seam_happening"
       : "unresolved_or_damaged_seam_happening",
     linkageStatus,
+    damageOrUnresolvedDetail,
     request,
     receipt,
     ...(receiptSourceRequestId ? { receiptSourceRequestId } : {}),
@@ -1082,6 +1108,12 @@ function buildCompatibilityEnvelope(input: {
   const unresolvedOrDamagedObservationIds = input.observations
     .filter((observation) => observation.classification === "unresolved_or_damaged_seam_happening")
     .map((observation) => observation.observationId);
+  const damagedObservationIds = input.observations
+    .filter((observation) => observation.linkageStatus === "damaged")
+    .map((observation) => observation.observationId);
+  const unresolvedObservationIds = input.observations
+    .filter((observation) => observation.linkageStatus === "unlinked")
+    .map((observation) => observation.observationId);
 
   return {
     envelopeKind: CAUSAL_EDGE_LAYER_SEAM_HISTORY_COMPATIBILITY_ENVELOPE_KIND,
@@ -1093,8 +1125,12 @@ function buildCompatibilityEnvelope(input: {
     classificationSummary: {
       compatibleObservationIds,
       unresolvedOrDamagedObservationIds,
+      damagedObservationIds,
+      unresolvedObservationIds,
       linkedPairDetected: compatibleObservationIds.length > 0,
       damagedOrUnlinkedPairDetected: unresolvedOrDamagedObservationIds.length > 0,
+      damagedPairDetected: damagedObservationIds.length > 0,
+      unresolvedPairDetected: unresolvedObservationIds.length > 0,
     },
     sourceReferenceContract: {
       requestIdsPreserved: input.observations.length > 0 &&

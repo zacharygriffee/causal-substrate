@@ -4,6 +4,7 @@ import {
   assertEdgeLayerSeamHistoryObservationResult,
   CAUSAL_EDGE_LAYER_SEAM_HISTORY_COMPATIBILITY_ENVELOPE_KIND,
   CAUSAL_EDGE_LAYER_SEAM_HISTORY_OBSERVATION_SCHEMA,
+  type EdgeLayerSeamDamageOrUnresolvedDetail,
   type EdgeLayerSeamHappeningClassification,
   type EdgeLayerSeamHistoryNormalizedProofLabel,
   type EdgeLayerSeamHistoryObservationResult,
@@ -43,6 +44,7 @@ export interface EdgeLayerSeamHistoryEdgeProjectionRef {
   observationId: string;
   classification: EdgeLayerSeamHappeningClassification;
   linkageStatus: EdgeLayerSeamLinkageStatus;
+  damageOrUnresolvedDetail: EdgeLayerSeamDamageOrUnresolvedDetail;
   request: EdgeLayerSeamHistorySourceRef;
   receipt: EdgeLayerSeamHistorySourceRef;
   sourceRefs: string[];
@@ -77,6 +79,7 @@ export interface EdgeLayerSeamHistoryEdgeProjectionHandoffEnvelope {
     compatibleObservationIds: string[];
     unresolvedOrDamagedObservationIds: string[];
     linkageStatuses: EdgeLayerSeamLinkageStatus[];
+    damageOrUnresolvedDetails: EdgeLayerSeamDamageOrUnresolvedDetail[];
   };
   deferredAttachmentPoints: EdgeLayerSeamHistoryObservationResult["deferredAttachmentPoints"] | Record<string, never>;
   nonClaims: {
@@ -573,6 +576,7 @@ function collectProjectionRefs(
       observationId: observation.observationId,
       classification: observation.classification,
       linkageStatus: observation.linkageStatus,
+      damageOrUnresolvedDetail: observation.damageOrUnresolvedDetail,
       request: observation.request,
       receipt: observation.receipt,
       sourceRefs: observation.sourceRefs,
@@ -617,6 +621,9 @@ function buildHandoffEnvelope(
         .map((observation) => observation.observationId),
       linkageStatuses: uniqueStrings(observations.map((observation) => observation.linkageStatus))
         .filter(isLinkageStatus),
+      damageOrUnresolvedDetails: uniqueStrings(
+        observations.map((observation) => observation.damageOrUnresolvedDetail),
+      ).filter(isDamageOrUnresolvedDetail),
     },
     deferredAttachmentPoints: observationResult?.deferredAttachmentPoints ?? {},
     nonClaims: {
@@ -755,6 +762,10 @@ function assertHandoffEnvelope(value: unknown): void {
     "handoffEnvelope.classificationSummary.unresolvedOrDamagedObservationIds",
   );
   assertNonEmptyArray(classificationSummary.linkageStatuses, "handoffEnvelope.classificationSummary.linkageStatuses");
+  assertNonEmptyArray(
+    classificationSummary.damageOrUnresolvedDetails,
+    "handoffEnvelope.classificationSummary.damageOrUnresolvedDetails",
+  );
   const consumerBoundary = assertObject(envelope.consumerBoundary, "handoffEnvelope.consumerBoundary");
   assertEqual(consumerBoundary.edgeMayConsume, true, "handoffEnvelope.consumerBoundary.edgeMayConsume");
   assertEqual(consumerBoundary.projectionCandidateOnly, true, "handoffEnvelope.consumerBoundary.projectionCandidateOnly");
@@ -826,6 +837,12 @@ function uniqueStrings(values: unknown[]): string[] {
 
 function isLinkageStatus(value: string): value is EdgeLayerSeamLinkageStatus {
   return value === "linked" || value === "unlinked" || value === "damaged";
+}
+
+function isDamageOrUnresolvedDetail(value: string): value is EdgeLayerSeamDamageOrUnresolvedDetail {
+  return value === "none_compatible_linked_request_receipt" ||
+    value === "damaged_partial_or_mismatched_request_receipt_refs" ||
+    value === "unresolved_unlinked_or_missing_request_receipt_refs";
 }
 
 function assertNonEmptyArray(value: unknown, label: string): void {
