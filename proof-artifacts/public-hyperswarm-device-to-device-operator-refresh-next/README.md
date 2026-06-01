@@ -14,6 +14,8 @@ Current contents:
 - `edge-projection-handoff-bundle-readback.json`
 - `edge-layer-seam-history-proof-summary.json`
 - `public-artifact-reproducibility-check.json`
+- `observation-to-edge-projection-contract.json`
+- `proof-summary-consumer-readback.json`
 
 The package operation rung is
 `local_refresh_input_package_over_saved_public_hyperswarm_material`.
@@ -39,6 +41,13 @@ handoff material. These derived artifacts preserve the public source proof rung
 but their own operations are local checks/readbacks. They do not open swarm,
 open Corestore, call Edge, admit Layer evidence, interpret RBC, grant
 authority, publish to Mesh, or upgrade proof.
+
+Edge imported the handoff bundle under
+`mesh-ecology-edge/proof-artifacts/causal-substrate-public-device-operator-refresh-next-handoff-2026-06-01/`
+as observation-only projection input. Causal Substrate then derived the saved
+observation-to-Edge contract and proof-summary consumer readback from saved
+artifacts only. These artifacts preserve the public source proof rung but do
+not call Edge, write projection state, or upgrade proof.
 
 The prepared command and readiness gate live in the preceding refreshed run
 directory:

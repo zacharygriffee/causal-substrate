@@ -166,6 +166,11 @@ The local supplied-material lane can now:
   `proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/`,
   preserving the public source proof rung while labeling derived operations as
   lower proof rungs.
+- after Edge imported the next handoff bundle as observation-only projection
+  input, derive the next observation-to-Edge projection contract and
+  proof-summary consumer readback from saved artifacts only, preserving the
+  public source proof rung without writing Edge projection state or upgrading
+  proof.
 
 Strongest routinely proven rung in normal tests:
 `local_causal_observation_over_supplied_seam_history_material`.
@@ -191,16 +196,12 @@ Strongest latest saved-artifact consumer readback rung:
 
 The current refreshed saved-artifact readiness and consumer handoff list is
 complete. The next prepared public-swarm-only objective has run. Build the next
-list around handing the new handoff bundle to Edge for observation-only import,
-deriving the next index material, or handing the current proof index to a
-consumer:
+list around deriving the next index material or handing the current proof index
+to a consumer:
 
-- hand
-  `proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/edge-projection-handoff-bundle.json`
-  to Edge as observation-only projection input, then derive the next
-  observation-to-Edge contract and consumer readback from saved artifacts only;
 - derive the next refresh decision, proof index, consumer handoff, and consumer
-  handoff readback after the Edge import receipt exists;
+  handoff readback from
+  `proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/`;
 - if a consumer asks for the latest saved index, hand
   `public-proof-index-consumer-handoff.json`,
   `public-proof-index-consumer-handoff-readback.json`, and
