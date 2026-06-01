@@ -75,6 +75,9 @@ async function main() {
       emittedAt: args.emittedAt,
     });
     assertEdgeLayerSeamHistoryHyperswarmReaderReportReadback(readback);
+    if (readback.reviewStatus !== "edge-layer-seam-history-hyperswarm-reader-report-readback-valid") {
+      throw new Error("hyperswarm_reader_report_readback_invalid");
+    }
     await writeFile(path.resolve(args.readbackOutput), `${JSON.stringify(readback, null, 2)}\n`, "utf8");
   }
 }
@@ -158,5 +161,6 @@ function printUsage(): void {
     "",
     "Without CAUSAL_SUBSTRATE_REAL_HYPERSWARM=1, emits instructions only and does not open swarm or Corestore.",
     "With CAUSAL_SUBSTRATE_REAL_HYPERSWARM=1, runs the durable Hyperswarm reader and writes a report.",
+    "With --readback-output, checks the report readback and fails unless source refs and proof labels are preserved.",
   ].join("\n") + "\n");
 }

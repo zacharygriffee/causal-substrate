@@ -282,6 +282,10 @@ test("real Hyperswarm proof run instructions artifact stays instructions-only", 
     instructions.commands.publicOrConfiguredBootstrapProofRun,
     /CAUSAL_SUBSTRATE_HYPERSWARM_PUBLIC=1 npx tsx --test test\/edge-layer-seam-history-hyperswarm-reader\.test\.ts/,
   );
+  assert.match(
+    instructions.commands.checkedCliOutputProofRun,
+    /run-edge-layer-seam-history-hyperswarm-reader\.ts --input seam-history\.json --report-output hyperswarm-reader-report\.json --readback-output hyperswarm-reader-report-readback\.json/,
+  );
   assert.equal(instructions.proofGate.instructionsOnly, true);
   assert.equal(instructions.proofGate.dhtHyperswarmProofClaimedNow, false);
   assert.equal(instructions.proofGate.proofOnlyIfCommandRunsAndPasses, true);
@@ -294,6 +298,8 @@ test("real Hyperswarm proof run instructions artifact stays instructions-only", 
   );
   assert.equal(instructions.expectedOutputRefs.observationResult, "observationResult");
   assert.equal(instructions.expectedOutputRefs.readerProof, "readerProof");
+  assert.equal(instructions.expectedOutputRefs.reportOutputArtifact, "report-output");
+  assert.equal(instructions.expectedOutputRefs.readbackOutputArtifact, "readback-output");
   assert.deepEqual(instructions.namespaceParts, ["hyperswarm-seam-history-reader", "real-proof"]);
   assert.equal(instructions.boundary.opensSwarmNow, false);
   assert.equal(instructions.boundary.opensCorestoreNow, false);
@@ -632,6 +638,92 @@ test(
       await harness.close();
       await rm(sourceDir, { recursive: true, force: true });
       await rm(replicaDir, { recursive: true, force: true });
+    }
+  },
+);
+
+test(
+  "real Hyperswarm reader CLI writes checked report and readback outputs",
+  {
+    skip: !SHOULD_RUN_REAL_HYPERSWARM,
+    timeout: 120_000,
+  },
+  async () => {
+    const tempRoot = await mkdtemp(path.join(tmpdir(), "causal-seam-hs-cli-real-"));
+    const sourceDir = path.join(tempRoot, "source");
+    const replicaDir = path.join(tempRoot, "replica");
+    const inputPath = path.join(tempRoot, "seam-history.json");
+    const reportPath = path.join(tempRoot, "hyperswarm-reader-report.json");
+    const readbackPath = path.join(tempRoot, "hyperswarm-reader-report-readback.json");
+    const harness = await openHyperswarmHarness();
+    try {
+      await writeFile(inputPath, JSON.stringify(seamHistoryMaterial(), null, 2), "utf8");
+      const env: NodeJS.ProcessEnv = {
+        ...process.env,
+        CAUSAL_SUBSTRATE_REAL_HYPERSWARM: "1",
+      };
+      if (harness.bootstrap) {
+        env.CAUSAL_SUBSTRATE_HYPERSWARM_BOOTSTRAP = harness.bootstrap.join(",");
+      }
+
+      const { stdout, stderr } = await execFileAsync("npx", [
+        "tsx",
+        "scripts/run-edge-layer-seam-history-hyperswarm-reader.ts",
+        "--input",
+        inputPath,
+        "--report-output",
+        reportPath,
+        "--readback-output",
+        readbackPath,
+        "--storage-dir-a",
+        sourceDir,
+        "--storage-dir-b",
+        replicaDir,
+        "--namespace",
+        `hyperswarm-seam-history-reader,checked-cli-output,${randomUUID()}`,
+        "--emitted-at",
+        "2026-05-31T13:20:00.000Z",
+      ], {
+        cwd: path.resolve("."),
+        env,
+        timeout: 120_000,
+      });
+
+      assert.equal(stdout, "");
+      assert.equal(stderr, "");
+      const report = JSON.parse(await readFile(reportPath, "utf8"));
+      const readback = JSON.parse(await readFile(readbackPath, "utf8"));
+
+      assertEdgeLayerSeamHistoryHyperswarmReaderReportReadback(readback);
+      assert.equal(readback.reviewStatus, "edge-layer-seam-history-hyperswarm-reader-report-readback-valid");
+      assert.equal(readback.validation.reportConsumed, true);
+      assert.equal(readback.validation.seamHistoryHashPreserved, true);
+      assert.equal(readback.validation.durableSourceRefsPreserved, true);
+      assert.equal(readback.validation.readerProofPreserved, true);
+      assert.equal(report.record.seamHistoryHash, report.replicatedRecord.seamHistoryHash);
+      assert.deepEqual(report.record.sourceRefs, report.replicatedRecord.sourceRefs);
+      assert.equal(
+        report.observationResult.proof.strongestProofRung,
+        "dht_hyperswarm_replicated_durable_seam_history_observation",
+      );
+      assert.equal(report.observationResult.proof.normalizedProofLabel, "dht_hyperswarm_durable_seam_history_material");
+      assert.equal(report.observationResult.validation.decentralizedSeamProofClaimed, true);
+      assert.equal(report.observationResult.validation.linkedPairDetected, true);
+      assert.equal(report.observationResult.validation.damagedOrUnlinkedPairDetected, true);
+      assert.equal(readback.source.sourceObservationProofRung, report.observationResult.proof.strongestProofRung);
+      assert.equal(
+        readback.source.sourceObservationNormalizedProofLabel,
+        report.observationResult.proof.normalizedProofLabel,
+      );
+      assert.equal(readback.boundary.reportReadbackOnly, true);
+      assert.equal(readback.boundary.verifiesLiveSwarmRun, false);
+      assert.equal(readback.boundary.acceptsCanonicalHistory, false);
+      assert.equal(readback.boundary.admitsLayerEvidence, false);
+      assert.equal(readback.boundary.interpretsRbc, false);
+      assert.equal(readback.boundary.grantsAuthority, false);
+    } finally {
+      await harness.close();
+      await rm(tempRoot, { recursive: true, force: true });
     }
   },
 );

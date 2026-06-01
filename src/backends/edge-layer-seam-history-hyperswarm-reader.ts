@@ -218,6 +218,7 @@ export interface EdgeLayerSeamHistoryRealHyperswarmProofRunInstructions {
   commands: {
     localTestnetProofRun: string;
     publicOrConfiguredBootstrapProofRun: string;
+    checkedCliOutputProofRun: string;
   };
   proofGate: {
     instructionsOnly: true;
@@ -234,6 +235,8 @@ export interface EdgeLayerSeamHistoryRealHyperswarmProofRunInstructions {
     readerProof: "readerProof";
     sourceRecord: "record";
     replicatedRecord: "replicatedRecord";
+    reportOutputArtifact: "report-output";
+    readbackOutputArtifact: "readback-output";
   };
   namespaceParts: string[];
   boundary: {
@@ -354,6 +357,8 @@ export function buildEdgeLayerSeamHistoryRealHyperswarmProofRunInstructions(
         "CAUSAL_SUBSTRATE_REAL_HYPERSWARM=1 npx tsx --test test/edge-layer-seam-history-hyperswarm-reader.test.ts",
       publicOrConfiguredBootstrapProofRun:
         "CAUSAL_SUBSTRATE_REAL_HYPERSWARM=1 CAUSAL_SUBSTRATE_HYPERSWARM_PUBLIC=1 npx tsx --test test/edge-layer-seam-history-hyperswarm-reader.test.ts",
+      checkedCliOutputProofRun:
+        "CAUSAL_SUBSTRATE_REAL_HYPERSWARM=1 npx tsx scripts/run-edge-layer-seam-history-hyperswarm-reader.ts --input seam-history.json --report-output hyperswarm-reader-report.json --readback-output hyperswarm-reader-report-readback.json --storage-dir-a .tmp/hyperswarm-source --storage-dir-b .tmp/hyperswarm-replica --namespace hyperswarm-seam-history-reader,checked-cli-output",
     },
     proofGate: {
       instructionsOnly: true,
@@ -370,6 +375,8 @@ export function buildEdgeLayerSeamHistoryRealHyperswarmProofRunInstructions(
       readerProof: "readerProof",
       sourceRecord: "record",
       replicatedRecord: "replicatedRecord",
+      reportOutputArtifact: "report-output",
+      readbackOutputArtifact: "readback-output",
     },
     namespaceParts: input.namespaceParts ?? [],
     boundary: {
