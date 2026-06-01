@@ -16,6 +16,10 @@ Current contents:
 - `public-artifact-reproducibility-check.json`
 - `observation-to-edge-projection-contract.json`
 - `proof-summary-consumer-readback.json`
+- `public-swarm-refresh-decision.json`
+- `public-seam-proof-index.json`
+- `public-proof-index-consumer-handoff.json`
+- `public-proof-index-consumer-handoff-readback.json`
 
 The package operation rung is
 `local_refresh_input_package_over_saved_public_hyperswarm_material`.
@@ -48,6 +52,11 @@ as observation-only projection input. Causal Substrate then derived the saved
 observation-to-Edge contract and proof-summary consumer readback from saved
 artifacts only. These artifacts preserve the public source proof rung but do
 not call Edge, write projection state, or upgrade proof.
+
+The completed next-run saved-artifact chain was then indexed and exposed as a
+consumer handoff. The decision, index, handoff, and handoff readback are local
+saved-artifact operations. They preserve the public source proof rung while
+explicitly not claiming a new live swarm run.
 
 The prepared command and readiness gate live in the preceding refreshed run
 directory:

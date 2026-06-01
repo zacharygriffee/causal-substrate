@@ -171,6 +171,10 @@ The local supplied-material lane can now:
   proof-summary consumer readback from saved artifacts only, preserving the
   public source proof rung without writing Edge projection state or upgrading
   proof.
+- derive the next public refresh decision, proof index, consumer handoff, and
+  consumer handoff readback from the completed next-run saved-artifact chain,
+  preserving refs and public source proof labels while keeping all operations
+  lower than the live public swarm source proof.
 
 Strongest routinely proven rung in normal tests:
 `local_causal_observation_over_supplied_seam_history_material`.
@@ -194,18 +198,21 @@ Strongest latest saved-artifact consumer readback rung:
 
 ## Next Outward Moves
 
-The current refreshed saved-artifact readiness and consumer handoff list is
-complete. The next prepared public-swarm-only objective has run. Build the next
-list around deriving the next index material or handing the current proof index
-to a consumer:
+The current refreshed saved-artifact readiness, consumer handoff, next public
+run, next Edge handoff contract, and next proof index list is complete. Build
+the next list around either preparing another explicit public-swarm-only device
+objective from the latest index, handing the current proof index to a consumer,
+or waiting for fresh Edge/Layer public material:
 
-- derive the next refresh decision, proof index, consumer handoff, and consumer
-  handoff readback from
-  `proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/`;
+- prepare another public-swarm-only device objective from
+  `proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/public-seam-proof-index.json`
+  only if the operator chooses another live run;
 - if a consumer asks for the latest saved index, hand
-  `public-proof-index-consumer-handoff.json`,
-  `public-proof-index-consumer-handoff-readback.json`, and
-  `public-seam-proof-index.json` as observation-only material;
+  `proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/public-proof-index-consumer-handoff.json`,
+  `proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/public-proof-index-consumer-handoff-readback.json`,
+  and
+  `proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/public-seam-proof-index.json`
+  as observation-only material;
 - if Edge or Layer provides fresh public endpoint/history material, prefer a
   narrow observation/readback path over another solo saved-artifact expansion;
   no fresh Edge/Layer public proof artifact was present locally during the last
