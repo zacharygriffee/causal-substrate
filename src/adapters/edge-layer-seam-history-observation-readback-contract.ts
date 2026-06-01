@@ -42,6 +42,10 @@ export interface EdgeLayerSeamHistoryObservationReadbackContract {
     writerRefsPreserved: boolean;
     linkageStatusPreserved: boolean;
     boundaryAndNonClaimsPreserved: boolean;
+    schemaVersionNotePreserved: boolean;
+    sourceReferenceCompletenessReportPreserved: boolean;
+    layerReceiptIncompleteCaseMatrixPreserved: boolean;
+    outwardLaneTriggerNotePreserved: boolean;
     proofRungPreserved?: EdgeLayerSeamHistoryProofRung;
     normalizedProofLabelPreserved?: EdgeLayerSeamHistoryNormalizedProofLabel;
     pairCount: number;
@@ -78,6 +82,10 @@ export interface EdgeLayerSeamHistoryObservationReadbackContract {
     writerRefsPreserved: boolean;
     linkageStatusPreserved: boolean;
     boundaryAndNonClaimsPreserved: boolean;
+    schemaVersionNotePreserved: boolean;
+    sourceReferenceCompletenessReportPreserved: boolean;
+    layerReceiptIncompleteCaseMatrixPreserved: boolean;
+    outwardLaneTriggerNotePreserved: boolean;
     proofLabelsPreserved: boolean;
     noCanonicalHistoryClaim: true;
     noLayerAdmissionClaim: true;
@@ -113,6 +121,16 @@ export function buildEdgeLayerSeamHistoryObservationReadbackContract(
     observationResult !== undefined;
   const boundaryAndNonClaimsPreserved = issues.includes("observation-boundary-or-non-claims-not-preserved") === false &&
     observationResult !== undefined;
+  const schemaVersionNotePreserved = issues.includes("schema-version-note-not-preserved") === false &&
+    observationResult !== undefined;
+  const sourceReferenceCompletenessReportPreserved =
+    issues.includes("source-reference-completeness-report-not-preserved") === false &&
+    observationResult !== undefined;
+  const layerReceiptIncompleteCaseMatrixPreserved =
+    issues.includes("layer-receipt-incomplete-case-matrix-not-preserved") === false &&
+    observationResult !== undefined;
+  const outwardLaneTriggerNotePreserved = issues.includes("outward-lane-trigger-note-not-preserved") === false &&
+    observationResult !== undefined;
   const proofLabelsPreserved = issues.includes("proof-labels-not-preserved") === false &&
     observationResult !== undefined;
   const status: EdgeLayerSeamHistoryObservationReadbackContractStatus = issues.length === 0
@@ -145,6 +163,10 @@ export function buildEdgeLayerSeamHistoryObservationReadbackContract(
       writerRefsPreserved,
       linkageStatusPreserved,
       boundaryAndNonClaimsPreserved,
+      schemaVersionNotePreserved,
+      sourceReferenceCompletenessReportPreserved,
+      layerReceiptIncompleteCaseMatrixPreserved,
+      outwardLaneTriggerNotePreserved,
       ...(observationResult ? { proofRungPreserved: observationResult.proof.strongestProofRung } : {}),
       ...(observationResult ? { normalizedProofLabelPreserved: observationResult.proof.normalizedProofLabel } : {}),
       pairCount: observationResult?.validation.pairCount ?? 0,
@@ -162,6 +184,10 @@ export function buildEdgeLayerSeamHistoryObservationReadbackContract(
       writerRefsPreserved,
       linkageStatusPreserved,
       boundaryAndNonClaimsPreserved,
+      schemaVersionNotePreserved,
+      sourceReferenceCompletenessReportPreserved,
+      layerReceiptIncompleteCaseMatrixPreserved,
+      outwardLaneTriggerNotePreserved,
       proofLabelsPreserved,
       noCanonicalHistoryClaim: true,
       noLayerAdmissionClaim: true,
@@ -216,6 +242,18 @@ export function assertEdgeLayerSeamHistoryObservationReadbackContract(
     assertEqual(validation.writerRefsPreserved, true, "validation.writerRefsPreserved");
     assertEqual(validation.linkageStatusPreserved, true, "validation.linkageStatusPreserved");
     assertEqual(validation.boundaryAndNonClaimsPreserved, true, "validation.boundaryAndNonClaimsPreserved");
+    assertEqual(validation.schemaVersionNotePreserved, true, "validation.schemaVersionNotePreserved");
+    assertEqual(
+      validation.sourceReferenceCompletenessReportPreserved,
+      true,
+      "validation.sourceReferenceCompletenessReportPreserved",
+    );
+    assertEqual(
+      validation.layerReceiptIncompleteCaseMatrixPreserved,
+      true,
+      "validation.layerReceiptIncompleteCaseMatrixPreserved",
+    );
+    assertEqual(validation.outwardLaneTriggerNotePreserved, true, "validation.outwardLaneTriggerNotePreserved");
     assertEqual(validation.proofLabelsPreserved, true, "validation.proofLabelsPreserved");
     assertEqual(readback.artifactReadable, true, "readback.artifactReadable");
     assertEqual(readback.observationResultValid, true, "readback.observationResultValid");
@@ -225,6 +263,18 @@ export function assertEdgeLayerSeamHistoryObservationReadbackContract(
     assertEqual(readback.writerRefsPreserved, true, "readback.writerRefsPreserved");
     assertEqual(readback.linkageStatusPreserved, true, "readback.linkageStatusPreserved");
     assertEqual(readback.boundaryAndNonClaimsPreserved, true, "readback.boundaryAndNonClaimsPreserved");
+    assertEqual(readback.schemaVersionNotePreserved, true, "readback.schemaVersionNotePreserved");
+    assertEqual(
+      readback.sourceReferenceCompletenessReportPreserved,
+      true,
+      "readback.sourceReferenceCompletenessReportPreserved",
+    );
+    assertEqual(
+      readback.layerReceiptIncompleteCaseMatrixPreserved,
+      true,
+      "readback.layerReceiptIncompleteCaseMatrixPreserved",
+    );
+    assertEqual(readback.outwardLaneTriggerNotePreserved, true, "readback.outwardLaneTriggerNotePreserved");
   }
 }
 
@@ -277,7 +327,79 @@ function validateObservationResult(observationResult: EdgeLayerSeamHistoryObserv
   ) {
     issues.push("proof-labels-not-preserved");
   }
+  if (!schemaVersionNotePreserved(observationResult)) {
+    issues.push("schema-version-note-not-preserved");
+  }
+  if (!sourceReferenceCompletenessReportPreserved(observationResult)) {
+    issues.push("source-reference-completeness-report-not-preserved");
+  }
+  if (!layerReceiptIncompleteCaseMatrixPreserved(observationResult)) {
+    issues.push("layer-receipt-incomplete-case-matrix-not-preserved");
+  }
+  if (!outwardLaneTriggerNotePreserved(observationResult)) {
+    issues.push("outward-lane-trigger-note-not-preserved");
+  }
   return issues;
+}
+
+function schemaVersionNotePreserved(observationResult: EdgeLayerSeamHistoryObservationResult): boolean {
+  return observationResult.schemaVersionNote.noteKind === "edge_layer_seam_history_observation_schema_version_note" &&
+    observationResult.schemaVersionNote.schema === observationResult.schema &&
+    observationResult.schemaVersionNote.schemaVersion === observationResult.schemaVersion &&
+    observationResult.schemaVersionNote.compatibilityPosture === "v1_additive_observation_fields_only" &&
+    observationResult.schemaVersionNote.consumerExpectation === "preserve_unknown_fields_and_read_declared_schema_version" &&
+    observationResult.schemaVersionNote.boundary.noteOnly === true &&
+    observationResult.schemaVersionNote.boundary.doesNotClaimCanonicalHistory === true &&
+    observationResult.schemaVersionNote.boundary.doesNotAdmitLayerEvidence === true &&
+    observationResult.schemaVersionNote.boundary.doesNotInterpretRbc === true &&
+    observationResult.schemaVersionNote.boundary.doesNotGrantAuthority === true;
+}
+
+function sourceReferenceCompletenessReportPreserved(
+  observationResult: EdgeLayerSeamHistoryObservationResult,
+): boolean {
+  const report = observationResult.sourceReferenceCompletenessReport;
+  return report.reportKind === "edge_layer_seam_history_source_reference_completeness_failure_report" &&
+    report.complete === observationResult.validation.sourceIdsAndHashesPreserved &&
+    report.failureCount === report.failures.length &&
+    report.boundary.reportOnly === true &&
+    report.boundary.rejectsPromotionWhenIncomplete === true &&
+    report.boundary.acceptsCanonicalHistory === false &&
+    report.boundary.admitsLayerEvidence === false &&
+    report.boundary.interpretsRbc === false &&
+    report.boundary.grantsAuthority === false;
+}
+
+function layerReceiptIncompleteCaseMatrixPreserved(
+  observationResult: EdgeLayerSeamHistoryObservationResult,
+): boolean {
+  const matrix = observationResult.layerReceiptIncompleteCaseMatrix;
+  return matrix.matrixKind === "edge_layer_seam_history_layer_receipt_incomplete_case_matrix" &&
+    matrix.complete === observationResult.layerReceiptFit.receiptIdsAndHashesPreserved &&
+    matrix.incompleteCaseCount === matrix.cases.length &&
+    matrix.boundary.matrixOnly === true &&
+    matrix.boundary.receiptRefsAreCausalInputOnly === true &&
+    matrix.boundary.doesNotAdmitLayerEvidence === true &&
+    matrix.boundary.doesNotDecideLayerAdmission === true &&
+    matrix.boundary.doesNotInterpretRbc === true &&
+    matrix.boundary.doesNotGrantAuthority === true;
+}
+
+function outwardLaneTriggerNotePreserved(observationResult: EdgeLayerSeamHistoryObservationResult): boolean {
+  const note = observationResult.outwardLaneTriggerNote;
+  return note.noteKind === "edge_layer_seam_history_outward_lane_trigger" &&
+    note.currentProofLabel === observationResult.proof.normalizedProofLabel &&
+    note.triggerReasons.length > 0 &&
+    note.suggestedNextInputs.includes("edge_durable_request_history") &&
+    note.suggestedNextInputs.includes("layer_durable_receipt_history") &&
+    note.boundary.noteOnly === true &&
+    note.boundary.doesNotOpenEdgeRuntime === true &&
+    note.boundary.doesNotOpenLayerRuntime === true &&
+    note.boundary.doesNotClaimSwarmProof === true &&
+    note.boundary.doesNotAdmitLayerEvidence === true &&
+    note.boundary.doesNotInterpretRbc === true &&
+    note.boundary.doesNotGrantAuthority === true &&
+    note.boundary.doesNotPublishToMesh === true;
 }
 
 function collectPreservedSourceRefs(

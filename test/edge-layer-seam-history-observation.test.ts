@@ -911,6 +911,10 @@ test("seam-history observation command reads supplied material, writes result, a
     assert.equal(contract.validation.writerRefsPreserved, true);
     assert.equal(contract.validation.linkageStatusPreserved, true);
     assert.equal(contract.validation.boundaryAndNonClaimsPreserved, true);
+    assert.equal(contract.validation.schemaVersionNotePreserved, true);
+    assert.equal(contract.validation.sourceReferenceCompletenessReportPreserved, true);
+    assert.equal(contract.validation.layerReceiptIncompleteCaseMatrixPreserved, true);
+    assert.equal(contract.validation.outwardLaneTriggerNotePreserved, true);
     assert.equal(contract.validation.proofLabelsPreserved, true);
     assert.equal(contract.readback.proofRungPreserved, result.proof.strongestProofRung);
     assert.equal(contract.readback.normalizedProofLabelPreserved, result.proof.normalizedProofLabel);
@@ -1458,6 +1462,10 @@ test("observation readback contract validates JSON round-trip and preserves sour
     assert.equal(contract.readback.writerRefsPreserved, true);
     assert.equal(contract.readback.linkageStatusPreserved, true);
     assert.equal(contract.readback.boundaryAndNonClaimsPreserved, true);
+    assert.equal(contract.readback.schemaVersionNotePreserved, true);
+    assert.equal(contract.readback.sourceReferenceCompletenessReportPreserved, true);
+    assert.equal(contract.readback.layerReceiptIncompleteCaseMatrixPreserved, true);
+    assert.equal(contract.readback.outwardLaneTriggerNotePreserved, true);
     assert.equal(contract.readback.pairCount, 2);
     assert.equal(contract.readback.compatiblePairCount, 1);
     assert.equal(contract.readback.unresolvedOrDamagedPairCount, 1);
@@ -1531,6 +1539,39 @@ test("observation readback contract rejects readback artifacts with weakened sou
   assert.equal(contract.readback.durableRefsPreserved, false);
   assert.equal(contract.validation.durableRefsPreserved, false);
   assert.ok(contract.validation.issues.includes("durable-refs-not-preserved"));
+});
+
+test("observation readback contract rejects weakened additive observation fields", () => {
+  const observationResult = buildEdgeLayerSeamHistoryObservationResult({
+    seamHistory: operationShapedSeamHistory(),
+    emittedAt: "2026-05-31T12:20:40.000Z",
+    sourcePath: "layer-owned-edge-seam-status:readback-additive-field-audit",
+  });
+  const weakened = JSON.parse(JSON.stringify(observationResult));
+  weakened.schemaVersionNote.consumerExpectation = "ignore-declared-schema-version";
+  weakened.sourceReferenceCompletenessReport.complete = false;
+  weakened.layerReceiptIncompleteCaseMatrix.incompleteCaseCount = 1;
+  weakened.outwardLaneTriggerNote.suggestedNextInputs = [];
+
+  const contract = buildEdgeLayerSeamHistoryObservationReadbackContract({
+    observationResult: weakened,
+    emittedAt: "2026-05-31T12:20:41.000Z",
+  });
+
+  assertEdgeLayerSeamHistoryObservationReadbackContract(contract);
+  assert.equal(contract.reviewStatus, "edge-layer-seam-history-observation-readback-contract-invalid");
+  assert.equal(contract.readback.schemaVersionNotePreserved, false);
+  assert.equal(contract.readback.sourceReferenceCompletenessReportPreserved, false);
+  assert.equal(contract.readback.layerReceiptIncompleteCaseMatrixPreserved, false);
+  assert.equal(contract.readback.outwardLaneTriggerNotePreserved, false);
+  assert.equal(contract.validation.schemaVersionNotePreserved, false);
+  assert.equal(contract.validation.sourceReferenceCompletenessReportPreserved, false);
+  assert.equal(contract.validation.layerReceiptIncompleteCaseMatrixPreserved, false);
+  assert.equal(contract.validation.outwardLaneTriggerNotePreserved, false);
+  assert.ok(contract.validation.issues.includes("schema-version-note-not-preserved"));
+  assert.ok(contract.validation.issues.includes("source-reference-completeness-report-not-preserved"));
+  assert.ok(contract.validation.issues.includes("layer-receipt-incomplete-case-matrix-not-preserved"));
+  assert.ok(contract.validation.issues.includes("outward-lane-trigger-note-not-preserved"));
 });
 
 test("deferred attachment point map is inspectable but inactive", () => {
