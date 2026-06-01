@@ -132,3 +132,54 @@ test("Edge consumer contract reads handoff bundle as observation-only projection
   ]);
   assert.deepEqual(consumerMaterial.classificationSummary.linkageStatuses, ["linked", "unlinked"]);
 });
+
+test("Edge consumer contract rejects incomplete handoff bundle before projection consumption", () => {
+  const incompleteMaterial = seamHistoryMaterial();
+  delete (incompleteMaterial.pairs[0]!.receipt as Record<string, unknown>).receiptHash;
+  delete (incompleteMaterial.pairs[1]!.request as Record<string, unknown>).requestHash;
+  const observationResult = buildEdgeLayerSeamHistoryObservationResult({
+    seamHistory: incompleteMaterial,
+    emittedAt: "2026-05-31T14:21:00.000Z",
+    sourcePath: "layer-owned-edge-seam-status:edge-consumer-contract-incomplete",
+    inputReadByCausalSubstrate: true,
+  });
+  const bundle = buildEdgeLayerSeamHistoryEdgeProjectionHandoffBundle({
+    observationResult,
+    emittedAt: "2026-05-31T14:21:01.000Z",
+  });
+
+  assertEdgeLayerSeamHistoryEdgeProjectionHandoffBundle(bundle);
+  assert.equal(bundle.reviewStatus, "edge-layer-seam-history-edge-projection-handoff-bundle-incomplete");
+  assert.equal(bundle.validation.observationResultConsumed, true);
+  assert.equal(bundle.validation.handoffFixtureIncluded, true);
+  assert.equal(bundle.validation.consumerFixtureIncluded, true);
+  assert.equal(bundle.validation.completionGateIncluded, true);
+  assert.equal(bundle.validation.completionGateComplete, false);
+  assert.ok(bundle.validation.issues.includes("handoff-fixture-not-ready"));
+  assert.ok(bundle.validation.issues.includes("consumer-fixture-not-ready"));
+  assert.ok(bundle.validation.issues.includes("completion-gate-not-complete"));
+  assert.throws(
+    () => consumeEdgeHandoffBundle(bundle),
+    /edge_consumer_contract_requires_ready_handoff_bundle/,
+  );
+  assert.equal(bundle.sourceReferences.requestIds.includes(
+    "edge-layer-report-only-seam-request:edge-consumer-contract:linked",
+  ), true);
+  assert.equal(bundle.sourceReferences.receiptIds.includes(
+    "layer-report-only-edge-seam-receipt:edge-consumer-contract:linked",
+  ), true);
+  assert.equal(bundle.validation.noCanonicalHistoryClaim, true);
+  assert.equal(bundle.validation.noLayerAdmissionClaim, true);
+  assert.equal(bundle.validation.noRbcInterpretationClaim, true);
+  assert.equal(bundle.validation.noAuthorityClaim, true);
+  assert.equal(bundle.validation.noReferentPromotion, true);
+  assert.equal(bundle.boundary.bundleOnly, true);
+  assert.equal(bundle.boundary.edgeMayConsume, true);
+  assert.equal(bundle.boundary.writesEdgeProjection, false);
+  assert.equal(bundle.boundary.acceptsCanonicalHistory, false);
+  assert.equal(bundle.boundary.admitsLayerEvidence, false);
+  assert.equal(bundle.boundary.interpretsRbc, false);
+  assert.equal(bundle.boundary.grantsAuthority, false);
+  assert.equal(bundle.boundary.promotesReferents, false);
+  assert.equal(bundle.boundary.publishesToMesh, false);
+});
