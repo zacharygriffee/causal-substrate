@@ -831,6 +831,47 @@ test("local observer cannot claim higher proof without all DHT Hyperswarm gates"
   assert.equal(result.validation.decentralizedSeamProofClaimed, false);
 });
 
+test("public Hyperswarm proof requires explicit public swarm input gate", () => {
+  const nonPublic = buildEdgeLayerSeamHistoryObservationResult({
+    seamHistory: operationShapedSeamHistory(),
+    emittedAt: "2026-05-31T12:07:10.000Z",
+    inputReadByCausalSubstrate: true,
+    durableCorestoreHistoryRead: true,
+    dhtOrHyperswarmInputObservedByCausalSubstrate: true,
+    replicatedViaHyperswarmTransport: true,
+  });
+
+  assertEdgeLayerSeamHistoryObservationResult(nonPublic);
+  assert.equal(
+    nonPublic.proof.strongestProofRung,
+    "local_causal_observation_over_supplied_seam_history_material",
+  );
+  assert.equal(nonPublic.proof.publicHyperswarmInputObservedByCausalSubstrate, false);
+  assert.equal(nonPublic.proof.decentralizedSeamProofClaimed, false);
+  assert.equal(nonPublic.proof.normalizedProofLabel, "local_supplied_material");
+
+  const publicProof = buildEdgeLayerSeamHistoryObservationResult({
+    seamHistory: operationShapedSeamHistory(),
+    emittedAt: "2026-05-31T12:07:20.000Z",
+    inputReadByCausalSubstrate: true,
+    durableCorestoreHistoryRead: true,
+    dhtOrHyperswarmInputObservedByCausalSubstrate: true,
+    replicatedViaHyperswarmTransport: true,
+    publicHyperswarmInputObservedByCausalSubstrate: true,
+  });
+
+  assertEdgeLayerSeamHistoryObservationResult(publicProof);
+  assert.equal(
+    publicProof.proof.strongestProofRung,
+    "public_hyperswarm_replicated_durable_seam_history_observation",
+  );
+  assert.equal(publicProof.proof.normalizedProofLabel, "public_hyperswarm_durable_seam_history_material");
+  assert.equal(publicProof.proof.inputMaterialKind, "public_hyperswarm_replicated_durable_seam_history_material");
+  assert.equal(publicProof.proof.publicHyperswarmInputObservedByCausalSubstrate, true);
+  assert.equal(publicProof.proof.decentralizedSeamProofClaimed, true);
+  assert.equal(publicProof.validation.decentralizedSeamProofClaimed, true);
+});
+
 test("seam-history observation command reads supplied material, writes result, and readbacks lower proof rung", async () => {
   const tempRoot = await mkdtemp(path.join(tmpdir(), "causal-seam-history-observation-"));
   const inputPath = path.join(tempRoot, "seam-history.json");

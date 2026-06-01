@@ -28,6 +28,9 @@ const SHOULD_USE_PUBLIC_HYPERSWARM = process.env.CAUSAL_SUBSTRATE_HYPERSWARM_PUB
 const CONFIGURED_HYPERSWARM_BOOTSTRAP = parseHyperswarmBootstrap(
   process.env.CAUSAL_SUBSTRATE_HYPERSWARM_BOOTSTRAP,
 );
+const SHOULD_RUN_PUBLIC_HYPERSWARM = SHOULD_RUN_REAL_HYPERSWARM &&
+  SHOULD_USE_PUBLIC_HYPERSWARM &&
+  CONFIGURED_HYPERSWARM_BOOTSTRAP.length === 0;
 
 interface HyperswarmHarness {
   bootstrap?: string[];
@@ -35,29 +38,11 @@ interface HyperswarmHarness {
 }
 
 async function openHyperswarmHarness(): Promise<HyperswarmHarness> {
-  if (CONFIGURED_HYPERSWARM_BOOTSTRAP.length > 0) {
-    return {
-      bootstrap: CONFIGURED_HYPERSWARM_BOOTSTRAP,
-      close: async () => {},
-    };
+  if (!SHOULD_RUN_PUBLIC_HYPERSWARM) {
+    throw new Error("public_hyperswarm_required_for_public_seam_proof");
   }
-
-  if (SHOULD_USE_PUBLIC_HYPERSWARM) {
-    return {
-      close: async () => {},
-    };
-  }
-
-  const { default: createTestnet } = await import("hyperdht/testnet.js");
-  const testnet = await createTestnet(3, { host: "127.0.0.1" });
-
   return {
-    bootstrap: testnet.bootstrap.map((node: { host: string; port: number }) => {
-      return `${node.host}:${node.port}`;
-    }),
-    close: async () => {
-      await testnet.destroy();
-    },
+    close: async () => {},
   };
 }
 
@@ -305,7 +290,7 @@ test("real Hyperswarm proof run instructions artifact stays instructions-only", 
   assert.equal(instructions.proofGate.requiresReplicatedRecordReadback, true);
   assert.equal(
     instructions.proofGate.expectedStrongestProofRungAfterPassingRun,
-    "dht_hyperswarm_replicated_durable_seam_history_observation",
+    "public_hyperswarm_replicated_durable_seam_history_observation",
   );
   assert.equal(instructions.expectedOutputRefs.observationResult, "observationResult");
   assert.equal(instructions.expectedOutputRefs.readerProof, "readerProof");
@@ -383,6 +368,64 @@ test("real Hyperswarm reader CLI emits instructions only until explicitly enable
   }
 });
 
+test("real Hyperswarm reader CLI requires public swarm and rejects configured bootstrap for proof", async () => {
+  const tempRoot = await mkdtemp(path.join(tmpdir(), "causal-seam-hs-public-gate-"));
+  const inputPath = path.join(tempRoot, "seam-history.json");
+  const reportPath = path.join(tempRoot, "hyperswarm-reader-report.json");
+  try {
+    await writeFile(inputPath, JSON.stringify(seamHistoryMaterial(), null, 2), "utf8");
+
+    await assert.rejects(
+      execFileAsync("npx", [
+        "tsx",
+        "scripts/run-edge-layer-seam-history-hyperswarm-reader.ts",
+        "--input",
+        inputPath,
+        "--report-output",
+        reportPath,
+        "--storage-dir-a",
+        path.join(tempRoot, "source-no-public"),
+        "--storage-dir-b",
+        path.join(tempRoot, "replica-no-public"),
+      ], {
+        cwd: path.resolve("."),
+        env: {
+          ...process.env,
+          CAUSAL_SUBSTRATE_REAL_HYPERSWARM: "1",
+          CAUSAL_SUBSTRATE_HYPERSWARM_PUBLIC: "0",
+        },
+      }),
+      /public_hyperswarm_required_for_public_seam_proof/,
+    );
+
+    await assert.rejects(
+      execFileAsync("npx", [
+        "tsx",
+        "scripts/run-edge-layer-seam-history-hyperswarm-reader.ts",
+        "--input",
+        inputPath,
+        "--report-output",
+        reportPath,
+        "--storage-dir-a",
+        path.join(tempRoot, "source-bootstrap"),
+        "--storage-dir-b",
+        path.join(tempRoot, "replica-bootstrap"),
+      ], {
+        cwd: path.resolve("."),
+        env: {
+          ...process.env,
+          CAUSAL_SUBSTRATE_REAL_HYPERSWARM: "1",
+          CAUSAL_SUBSTRATE_HYPERSWARM_PUBLIC: "1",
+          CAUSAL_SUBSTRATE_HYPERSWARM_BOOTSTRAP: "127.0.0.1:12345",
+        },
+      }),
+      /configured_bootstrap_deferred_for_public_hyperswarm_proof_lane/,
+    );
+  } finally {
+    await rm(tempRoot, { recursive: true, force: true });
+  }
+});
+
 test("Hyperswarm reader report readback preserves durable refs without verifying a live swarm run", () => {
   const seamHistory = seamHistoryMaterial();
   const seamHistoryHash = `sha256:${"7".repeat(64)}`;
@@ -415,6 +458,10 @@ test("Hyperswarm reader report readback preserves durable refs without verifying
     emittedAt: "2026-05-31T13:10:01.000Z",
     sourcePath: replicatedRecord.recordId,
     inputReadByCausalSubstrate: true,
+    durableCorestoreHistoryRead: true,
+    dhtOrHyperswarmInputObservedByCausalSubstrate: true,
+    replicatedViaHyperswarmTransport: true,
+    publicHyperswarmInputObservedByCausalSubstrate: true,
   });
 
   const readback = buildEdgeLayerSeamHistoryHyperswarmReaderReportReadback({
@@ -428,6 +475,7 @@ test("Hyperswarm reader report readback preserves durable refs without verifying
         durableCorestoreHistoryRead: true,
         dhtOrHyperswarmInputObservedByCausalSubstrate: true,
         replicatedViaHyperswarmTransport: true,
+        publicHyperswarmInputObservedByCausalSubstrate: true,
         sourceCoreKeyHex: "11".repeat(32),
         replicaCoreKeyHex: "11".repeat(32),
         topicHex: "22".repeat(32),
@@ -449,7 +497,7 @@ test("Hyperswarm reader report readback preserves durable refs without verifying
   assert.equal(readback.source.sourceRecordId, record.recordId);
   assert.equal(readback.source.replicatedRecordId, replicatedRecord.recordId);
   assert.equal(readback.source.sourceObservationArtifactId, observationResult.artifactId);
-  assert.equal(readback.source.sourceObservationNormalizedProofLabel, "local_supplied_material");
+  assert.equal(readback.source.sourceObservationNormalizedProofLabel, "public_hyperswarm_durable_seam_history_material");
   assert.equal(readback.durableRecordRefs.seamHistoryHash, seamHistoryHash);
   assert.equal(readback.durableRecordRefs.replicatedSeamHistoryHash, seamHistoryHash);
   assert.deepEqual(readback.durableRecordRefs.sourceRefs, sourceRefs);
@@ -458,6 +506,7 @@ test("Hyperswarm reader report readback preserves durable refs without verifying
   assert.equal(readback.readerProof.durableCorestoreHistoryRead, true);
   assert.equal(readback.readerProof.dhtOrHyperswarmInputObservedByCausalSubstrate, true);
   assert.equal(readback.readerProof.replicatedViaHyperswarmTransport, true);
+  assert.equal(readback.readerProof.publicHyperswarmInputObservedByCausalSubstrate, true);
   assert.equal(readback.boundary.reportReadbackOnly, true);
   assert.equal(readback.boundary.verifiesLiveSwarmRun, false);
   assert.equal(readback.boundary.opensSwarm, false);
@@ -504,6 +553,10 @@ test("Hyperswarm reader report import CLI emits readback without running a live 
       emittedAt: "2026-05-31T13:12:01.000Z",
       sourcePath: replicatedRecord.recordId,
       inputReadByCausalSubstrate: true,
+      durableCorestoreHistoryRead: true,
+      dhtOrHyperswarmInputObservedByCausalSubstrate: true,
+      replicatedViaHyperswarmTransport: true,
+      publicHyperswarmInputObservedByCausalSubstrate: true,
     });
     const report = {
       namespaceParts: ["hyperswarm-seam-history-reader", "report-import-readback"],
@@ -515,6 +568,7 @@ test("Hyperswarm reader report import CLI emits readback without running a live 
         durableCorestoreHistoryRead: true,
         dhtOrHyperswarmInputObservedByCausalSubstrate: true,
         replicatedViaHyperswarmTransport: true,
+        publicHyperswarmInputObservedByCausalSubstrate: true,
         sourceCoreKeyHex: "11".repeat(32),
         replicaCoreKeyHex: "11".repeat(32),
         topicHex: "22".repeat(32),
@@ -561,6 +615,7 @@ test("Hyperswarm reader report import CLI emits readback without running a live 
     assert.equal(readback.readerProof.durableCorestoreHistoryRead, true);
     assert.equal(readback.readerProof.dhtOrHyperswarmInputObservedByCausalSubstrate, true);
     assert.equal(readback.readerProof.replicatedViaHyperswarmTransport, true);
+    assert.equal(readback.readerProof.publicHyperswarmInputObservedByCausalSubstrate, true);
     assert.equal(readback.boundary.reportReadbackOnly, true);
     assert.equal(readback.boundary.verifiesLiveSwarmRun, false);
     assert.equal(readback.boundary.opensSwarm, false);
@@ -623,6 +678,7 @@ test("Hyperswarm reader report readback rejects weakened durable refs and proof 
         durableCorestoreHistoryRead: true,
         dhtOrHyperswarmInputObservedByCausalSubstrate: true,
         replicatedViaHyperswarmTransport: true,
+        publicHyperswarmInputObservedByCausalSubstrate: false,
         sourceCoreKeyHex: "11".repeat(32),
         replicaCoreKeyHex: "11".repeat(32),
         topicHex: "22".repeat(32),
@@ -673,7 +729,7 @@ test("Hyperswarm reader report readback rejects weakened durable refs and proof 
 test(
   "Hyperswarm reader consumes replicated durable Edge Layer seam history before observing it",
   {
-    skip: !SHOULD_RUN_REAL_HYPERSWARM,
+    skip: !SHOULD_RUN_PUBLIC_HYPERSWARM,
     timeout: 120_000,
   },
   async () => {
@@ -705,19 +761,20 @@ test(
       assert.equal(report.observationResult.validation.seamHistoryInputConsumed, true);
       assert.equal(
         report.observationResult.proof.strongestProofRung,
-        "dht_hyperswarm_replicated_durable_seam_history_observation",
+        "public_hyperswarm_replicated_durable_seam_history_observation",
       );
       assert.equal(
         report.observationResult.proof.normalizedProofLabel,
-        "dht_hyperswarm_durable_seam_history_material",
+        "public_hyperswarm_durable_seam_history_material",
       );
       assert.equal(report.observationResult.proof.durableCorestoreHistoryRead, true);
       assert.equal(report.observationResult.proof.dhtOrHyperswarmInputObservedByCausalSubstrate, true);
       assert.equal(report.observationResult.proof.replicatedViaHyperswarmTransport, true);
+      assert.equal(report.observationResult.proof.publicHyperswarmInputObservedByCausalSubstrate, true);
       assert.equal(report.observationResult.proof.decentralizedSeamProofClaimed, true);
       assert.equal(
         report.observationResult.outwardLaneTriggerNote.currentProofLabel,
-        "dht_hyperswarm_durable_seam_history_material",
+        "public_hyperswarm_durable_seam_history_material",
       );
       assert.equal(report.observationResult.outwardLaneTriggerNote.shouldLookOutwardForDurableSeamHistory, false);
       assert.equal(report.observationResult.validation.decentralizedSeamProofClaimed, true);
@@ -747,9 +804,9 @@ test(
       assertEdgeLayerSeamHistoryObservationResult(readback);
       assert.equal(
         readback.proof.strongestProofRung,
-        "dht_hyperswarm_replicated_durable_seam_history_observation",
+        "public_hyperswarm_replicated_durable_seam_history_observation",
       );
-      assert.equal(readback.proof.normalizedProofLabel, "dht_hyperswarm_durable_seam_history_material");
+      assert.equal(readback.proof.normalizedProofLabel, "public_hyperswarm_durable_seam_history_material");
       assert.equal(
         readback.observations[0]?.request.id,
         "edge-layer-report-only-seam-request:hyperswarm-reader:linked",
@@ -782,7 +839,7 @@ test(
 test(
   "real Hyperswarm reader CLI writes checked report and readback outputs",
   {
-    skip: !SHOULD_RUN_REAL_HYPERSWARM,
+    skip: !SHOULD_RUN_PUBLIC_HYPERSWARM,
     timeout: 120_000,
   },
   async () => {
@@ -798,10 +855,9 @@ test(
       const env: NodeJS.ProcessEnv = {
         ...process.env,
         CAUSAL_SUBSTRATE_REAL_HYPERSWARM: "1",
+        CAUSAL_SUBSTRATE_HYPERSWARM_PUBLIC: "1",
       };
-      if (harness.bootstrap) {
-        env.CAUSAL_SUBSTRATE_HYPERSWARM_BOOTSTRAP = harness.bootstrap.join(",");
-      }
+      delete env.CAUSAL_SUBSTRATE_HYPERSWARM_BOOTSTRAP;
 
       const { stdout, stderr } = await execFileAsync("npx", [
         "tsx",
@@ -841,9 +897,9 @@ test(
       assert.deepEqual(report.record.sourceRefs, report.replicatedRecord.sourceRefs);
       assert.equal(
         report.observationResult.proof.strongestProofRung,
-        "dht_hyperswarm_replicated_durable_seam_history_observation",
+        "public_hyperswarm_replicated_durable_seam_history_observation",
       );
-      assert.equal(report.observationResult.proof.normalizedProofLabel, "dht_hyperswarm_durable_seam_history_material");
+      assert.equal(report.observationResult.proof.normalizedProofLabel, "public_hyperswarm_durable_seam_history_material");
       assert.equal(report.observationResult.validation.decentralizedSeamProofClaimed, true);
       assert.equal(report.observationResult.validation.linkedPairDetected, true);
       assert.equal(report.observationResult.validation.damagedOrUnlinkedPairDetected, true);

@@ -94,6 +94,7 @@ export interface EdgeLayerSeamHistoryHyperswarmReaderProof {
   durableCorestoreHistoryRead: true;
   dhtOrHyperswarmInputObservedByCausalSubstrate: true;
   replicatedViaHyperswarmTransport: true;
+  publicHyperswarmInputObservedByCausalSubstrate: boolean;
   sourceCoreKeyHex: string;
   replicaCoreKeyHex: string;
   topicHex: string;
@@ -233,7 +234,7 @@ export interface EdgeLayerSeamHistoryRealHyperswarmProofRunInstructions {
     requiresHyperswarmTransport: true;
     requiresReplicatedRecordReadback: true;
     expectedStrongestProofRungAfterPassingRun:
-      "dht_hyperswarm_replicated_durable_seam_history_observation";
+      "public_hyperswarm_replicated_durable_seam_history_observation";
   };
   expectedOutputRefs: {
     observationResult: "observationResult";
@@ -273,6 +274,7 @@ export interface EdgeLayerSeamHistoryHyperswarmReaderOptions {
   topics?: Map<string, unknown> | undefined;
   flushTimeoutMs?: number | undefined;
   replicationTimeoutMs?: number | undefined;
+  publicHyperswarmInputObservedByCausalSubstrate?: boolean | undefined;
 }
 
 export interface BuildEdgeLayerSeamHistoryHyperswarmInputLaneReadinessInput {
@@ -365,7 +367,7 @@ export function buildEdgeLayerSeamHistoryRealHyperswarmProofRunInstructions(
       publicOrConfiguredBootstrapProofRun:
         "CAUSAL_SUBSTRATE_REAL_HYPERSWARM=1 CAUSAL_SUBSTRATE_HYPERSWARM_PUBLIC=1 npx tsx --test test/edge-layer-seam-history-hyperswarm-reader.test.ts",
       checkedCliOutputProofRun:
-        "CAUSAL_SUBSTRATE_REAL_HYPERSWARM=1 npx tsx scripts/run-edge-layer-seam-history-hyperswarm-reader.ts --input seam-history.json --report-output hyperswarm-reader-report.json --readback-output hyperswarm-reader-report-readback.json --storage-dir-a .tmp/hyperswarm-source --storage-dir-b .tmp/hyperswarm-replica --namespace hyperswarm-seam-history-reader,checked-cli-output",
+        "CAUSAL_SUBSTRATE_REAL_HYPERSWARM=1 CAUSAL_SUBSTRATE_HYPERSWARM_PUBLIC=1 npx tsx scripts/run-edge-layer-seam-history-hyperswarm-reader.ts --input seam-history.json --report-output hyperswarm-reader-report.json --readback-output hyperswarm-reader-report-readback.json --storage-dir-a .tmp/hyperswarm-source --storage-dir-b .tmp/hyperswarm-replica --namespace hyperswarm-seam-history-reader,checked-cli-output",
       savedReportImportReadback:
         "npx tsx scripts/readback-edge-layer-seam-history-hyperswarm-report.ts --input-report hyperswarm-reader-report.json --readback-output hyperswarm-reader-report-import-readback.json",
       savedHandoffBundleReadback:
@@ -382,7 +384,7 @@ export function buildEdgeLayerSeamHistoryRealHyperswarmProofRunInstructions(
       requiresHyperswarmTransport: true,
       requiresReplicatedRecordReadback: true,
       expectedStrongestProofRungAfterPassingRun:
-        "dht_hyperswarm_replicated_durable_seam_history_observation",
+        "public_hyperswarm_replicated_durable_seam_history_observation",
     },
     expectedOutputRefs: {
       observationResult: "observationResult",
@@ -616,6 +618,8 @@ export async function runEdgeLayerSeamHistoryHyperswarmReader(
       durableCorestoreHistoryRead: true,
       dhtOrHyperswarmInputObservedByCausalSubstrate: true,
       replicatedViaHyperswarmTransport: true,
+      publicHyperswarmInputObservedByCausalSubstrate:
+        options.publicHyperswarmInputObservedByCausalSubstrate === true,
     });
 
     return {
@@ -628,6 +632,8 @@ export async function runEdgeLayerSeamHistoryHyperswarmReader(
         durableCorestoreHistoryRead: true,
         dhtOrHyperswarmInputObservedByCausalSubstrate: true,
         replicatedViaHyperswarmTransport: true,
+        publicHyperswarmInputObservedByCausalSubstrate:
+          options.publicHyperswarmInputObservedByCausalSubstrate === true,
         sourceCoreKeyHex: Buffer.from(source.lease.store.primaryKey).toString("hex"),
         replicaCoreKeyHex: Buffer.from(replica.lease.store.primaryKey).toString("hex"),
         topicHex: topic.toString("hex"),
@@ -716,6 +722,7 @@ function validateHyperswarmReaderReport(
     report.readerProof.durableCorestoreHistoryRead !== true ||
     report.readerProof.dhtOrHyperswarmInputObservedByCausalSubstrate !== true ||
     report.readerProof.replicatedViaHyperswarmTransport !== true ||
+    report.readerProof.publicHyperswarmInputObservedByCausalSubstrate !== true ||
     report.readerProof.sourceCoreKeyHex.trim() === "" ||
     report.readerProof.replicaCoreKeyHex.trim() === "" ||
     report.readerProof.topicHex.trim() === "" ||
@@ -729,6 +736,18 @@ function validateHyperswarmReaderReport(
     report.observationResult.validation.normalizedProofLabel !== report.observationResult.proof.normalizedProofLabel
   ) {
     issues.push("observation-proof-labels-not-preserved");
+  }
+  if (
+    report.readerProof.publicHyperswarmInputObservedByCausalSubstrate === true &&
+    (
+      report.observationResult.proof.strongestProofRung !==
+        "public_hyperswarm_replicated_durable_seam_history_observation" ||
+      report.observationResult.proof.normalizedProofLabel !==
+        "public_hyperswarm_durable_seam_history_material" ||
+      report.observationResult.proof.publicHyperswarmInputObservedByCausalSubstrate !== true
+    )
+  ) {
+    issues.push("public-swarm-proof-labels-not-preserved");
   }
   return issues;
 }
@@ -782,6 +801,7 @@ function isReaderProof(value: unknown): value is EdgeLayerSeamHistoryHyperswarmR
     value.durableCorestoreHistoryRead === true &&
     value.dhtOrHyperswarmInputObservedByCausalSubstrate === true &&
     value.replicatedViaHyperswarmTransport === true &&
+    typeof value.publicHyperswarmInputObservedByCausalSubstrate === "boolean" &&
     typeof value.sourceCoreKeyHex === "string" &&
     typeof value.replicaCoreKeyHex === "string" &&
     typeof value.topicHex === "string" &&

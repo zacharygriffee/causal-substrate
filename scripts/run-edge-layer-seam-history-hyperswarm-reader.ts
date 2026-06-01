@@ -47,16 +47,21 @@ async function main() {
   if (!args.reportOutput) throw new Error("report_output_required_for_real_hyperswarm_reader");
   if (!args.storageDirA) throw new Error("storage_dir_a_required_for_real_hyperswarm_reader");
   if (!args.storageDirB) throw new Error("storage_dir_b_required_for_real_hyperswarm_reader");
+  if (process.env.CAUSAL_SUBSTRATE_HYPERSWARM_PUBLIC !== "1") {
+    throw new Error("public_hyperswarm_required_for_public_seam_proof");
+  }
 
   const seamHistory = JSON.parse(await readFile(path.resolve(args.input), "utf8")) as unknown;
   const bootstrap = parseHyperswarmBootstrap(process.env.CAUSAL_SUBSTRATE_HYPERSWARM_BOOTSTRAP);
+  if (bootstrap.length > 0) {
+    throw new Error("configured_bootstrap_deferred_for_public_hyperswarm_proof_lane");
+  }
   const report = await runEdgeLayerSeamHistoryHyperswarmReader({
     storageDirA: path.resolve(args.storageDirA),
     storageDirB: path.resolve(args.storageDirB),
     createSwarm: async (seed) => {
       const swarm = await createHyperswarmReplicationSwarm({
         seed,
-        ...(bootstrap.length > 0 ? { bootstrap } : {}),
       });
       await swarm.listen();
       return swarm;
@@ -65,6 +70,7 @@ async function main() {
     emittedAt: args.emittedAt,
     recordedAt: args.recordedAt,
     namespaceParts: args.namespaceParts,
+    publicHyperswarmInputObservedByCausalSubstrate: true,
   });
 
   await writeFile(path.resolve(args.reportOutput), `${JSON.stringify(report, null, 2)}\n`, "utf8");
@@ -160,7 +166,8 @@ function printUsage(): void {
     "Usage: tsx scripts/run-edge-layer-seam-history-hyperswarm-reader.ts --input path --report-output path --storage-dir-a path --storage-dir-b path [--readback-output path] [--instructions-output path] [--namespace comma,list] [--emitted-at iso] [--recorded-at iso]",
     "",
     "Without CAUSAL_SUBSTRATE_REAL_HYPERSWARM=1, emits instructions only and does not open swarm or Corestore.",
-    "With CAUSAL_SUBSTRATE_REAL_HYPERSWARM=1, runs the durable Hyperswarm reader and writes a report.",
+    "With CAUSAL_SUBSTRATE_REAL_HYPERSWARM=1 and CAUSAL_SUBSTRATE_HYPERSWARM_PUBLIC=1, runs the public durable Hyperswarm reader and writes a report.",
+    "Configured bootstrap is deferred for this public proof lane and is rejected for now.",
     "With --readback-output, checks the report readback and fails unless source refs and proof labels are preserved.",
   ].join("\n") + "\n");
 }
