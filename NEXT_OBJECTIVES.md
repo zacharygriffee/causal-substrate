@@ -156,6 +156,10 @@ The local supplied-material lane can now:
   `public-proof-index-consumer-handoff-readback.json`, proving through code that
   the saved handoff remains readable, preserves source refs, and keeps
   consumer suitability/non-claim boundaries without upgrading proof.
+- run the prepared next public-swarm-only device objective on `platform-lab`
+  and `mesh-lab` with `CAUSAL_SUBSTRATE_HYPERSWARM_BOOTSTRAP` unset, producing
+  `public-source-manifest.json` and `public-replica-reader-report.json` under
+  `proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/`.
 
 Strongest routinely proven rung in normal tests:
 `local_causal_observation_over_supplied_seam_history_material`.
@@ -180,13 +184,14 @@ Strongest latest saved-artifact consumer readback rung:
 ## Next Outward Moves
 
 The current refreshed saved-artifact readiness and consumer handoff list is
-complete. The next prepared public-swarm-only objective exists but has not been
-run. Build the next list around one of these outward moves:
+complete. The next prepared public-swarm-only objective has run. Build the next
+list around deriving the saved-artifact chain from that new public report or
+handing the current proof index to a consumer:
 
-- run the prepared next public device objective from
-  `proof-artifacts/public-hyperswarm-device-to-device-operator-refresh/operator-selected-public-refresh-command.json`
-  on real public Hyperswarm only, with `CAUSAL_SUBSTRATE_HYPERSWARM_BOOTSTRAP`
-  unset and no testnet or configured bootstrap;
+- derive the next public report readback, Edge handoff bundle, handoff
+  readback, proof summary, reproducibility check, refresh decision, proof
+  index, consumer handoff, and consumer handoff readback from
+  `proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/public-replica-reader-report.json`;
 - if a consumer asks for the latest saved index, hand
   `public-proof-index-consumer-handoff.json`,
   `public-proof-index-consumer-handoff-readback.json`, and

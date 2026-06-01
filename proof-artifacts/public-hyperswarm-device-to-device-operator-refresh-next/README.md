@@ -7,6 +7,8 @@ Current contents:
 
 - `seam-history-input.json`
 - `public-refresh-input-package.json`
+- `public-source-manifest.json`
+- `public-replica-reader-report.json`
 
 The package operation rung is
 `local_refresh_input_package_over_saved_public_hyperswarm_material`.
@@ -14,6 +16,18 @@ The package operation rung is
 This is not a new public swarm proof. It is local supplied seam-history input
 until a source device writes it to durable Corestore material and a replica
 device consumes it through public Hyperswarm.
+
+The prepared public device objective was run on the standby devices:
+
+- source device: `platform-lab` (`ztouch`)
+- replica device: `mesh-lab` (`surface`)
+- namespace: `public,device,seam-history,operator-refresh,next`
+
+The source and replica commands were run with
+`CAUSAL_SUBSTRATE_HYPERSWARM_BOOTSTRAP` unset and
+`CAUSAL_SUBSTRATE_HYPERSWARM_PUBLIC=1`. The replica report is the first
+artifact in this directory carrying the live proof rung
+`public_hyperswarm_replicated_durable_seam_history_observation`.
 
 The prepared command and readiness gate live in the preceding refreshed run
 directory:
