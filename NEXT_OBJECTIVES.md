@@ -84,6 +84,11 @@ The local supplied-material lane can now:
   `proof-artifacts/public-hyperswarm-device-to-device-2026-06-01/`, including
   source manifest, replica report, checked replica report readback, Edge
   handoff bundle, handoff readback, and proof summary.
+- hand the device-to-device public Edge handoff bundle to Edge as
+  observation-only projection input; Edge preserved the proof rung and source
+  refs in
+  `mesh-ecology-edge/proof-artifacts/causal-substrate-public-device-handoff-2026-06-01/`
+  without writing Edge projection state.
 
 Strongest routinely proven rung in normal tests:
 `local_causal_observation_over_supplied_seam_history_material`.
@@ -101,11 +106,8 @@ run:
 
 ## Next Outward Moves
 
-These are not complete until a command actually runs against public
-Hyperswarm-derived durable seam history:
-
-- Feed the resulting Edge handoff bundle to Edge as observation-only projection
-  input, without Causal Substrate writing Edge projection state.
+The current outward list is complete. Construct the next list from the preserved
+public-run artifacts before adding new ontology or promotion lanes.
 
 ## Handoff Expectations
 
