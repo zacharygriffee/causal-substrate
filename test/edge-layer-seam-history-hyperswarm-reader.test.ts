@@ -432,6 +432,101 @@ test("Hyperswarm reader report readback preserves durable refs without verifying
   assert.equal(readback.boundary.grantsAuthority, false);
 });
 
+test("Hyperswarm reader report readback rejects weakened durable refs and proof labels", () => {
+  const seamHistory = seamHistoryMaterial();
+  const seamHistoryHash = `sha256:${"7".repeat(64)}`;
+  const sourceRefs = [
+    "layer-owned-edge-seam-status:hyperswarm-reader-test",
+    `sha256:${"8".repeat(64)}`,
+    "edge-layer-report-only-seam-request:hyperswarm-reader:linked",
+    `sha256:${"a".repeat(64)}`,
+    "layer-report-only-edge-seam-receipt:hyperswarm-reader:linked",
+    `sha256:${"b".repeat(64)}`,
+  ];
+  const record = {
+    artifactKind: "edge_layer_seam_history_durable_record",
+    schema: "causal-substrate/edge-layer-seam-history-durable-record/v1",
+    schemaVersion: 1,
+    recordId: "edge-layer-seam-history-durable-record:source-readback-negative",
+    recordedAt: "2026-05-31T13:11:00.000Z",
+    seamHistory,
+    seamHistoryHash,
+    seamHistoryHashAlgorithm: "sha256-stable-json",
+    sourceRefs,
+    durableHistoryMaterial: true,
+  };
+  const replicatedRecord = {
+    ...record,
+    recordId: "edge-layer-seam-history-durable-record:replica-readback-negative",
+    seamHistoryHash: `sha256:${"6".repeat(64)}`,
+    sourceRefs: ["edge-layer-seam-history-durable-record:weakened-source-ref"],
+  };
+  const observationResult = buildEdgeLayerSeamHistoryObservationResult({
+    seamHistory,
+    emittedAt: "2026-05-31T13:11:01.000Z",
+    sourcePath: replicatedRecord.recordId,
+    inputReadByCausalSubstrate: true,
+  });
+  observationResult.validation.normalizedProofLabel = "dht_hyperswarm_durable_seam_history_material";
+
+  const readback = buildEdgeLayerSeamHistoryHyperswarmReaderReportReadback({
+    report: {
+      namespaceParts: ["hyperswarm-seam-history-reader", "report-readback-negative"],
+      record,
+      replicatedRecord,
+      observationResult,
+      readerProof: {
+        inputReadByCausalSubstrate: true,
+        durableCorestoreHistoryRead: true,
+        dhtOrHyperswarmInputObservedByCausalSubstrate: true,
+        replicatedViaHyperswarmTransport: true,
+        sourceCoreKeyHex: "11".repeat(32),
+        replicaCoreKeyHex: "11".repeat(32),
+        topicHex: "22".repeat(32),
+        sourceRecordCount: 0,
+        replicaRecordCount: 0,
+      },
+    },
+    emittedAt: "2026-05-31T13:11:02.000Z",
+  });
+
+  assertEdgeLayerSeamHistoryHyperswarmReaderReportReadback(readback);
+  assert.equal(readback.reviewStatus, "edge-layer-seam-history-hyperswarm-reader-report-readback-invalid");
+  assert.equal(readback.validation.reportConsumed, true);
+  assert.equal(readback.validation.seamHistoryHashPreserved, false);
+  assert.equal(readback.validation.durableSourceRefsPreserved, false);
+  assert.equal(readback.validation.readerProofPreserved, false);
+  assert.equal(readback.readback.seamHistoryHashPreserved, false);
+  assert.equal(readback.readback.durableSourceRefsPreserved, false);
+  assert.equal(readback.readback.readerProofPreserved, false);
+  assert.equal(readback.readback.observationProofLabelsPreserved, false);
+  assert.ok(readback.validation.issues.includes("seam-history-hash-not-preserved"));
+  assert.ok(readback.validation.issues.includes("durable-source-refs-not-preserved"));
+  assert.ok(readback.validation.issues.includes("reader-proof-not-preserved"));
+  assert.ok(readback.validation.issues.includes("observation-proof-labels-not-preserved"));
+  assert.equal(readback.durableRecordRefs.seamHistoryHash, seamHistoryHash);
+  assert.equal(readback.durableRecordRefs.replicatedSeamHistoryHash, `sha256:${"6".repeat(64)}`);
+  assert.deepEqual(readback.durableRecordRefs.sourceRefs, sourceRefs);
+  assert.deepEqual(readback.durableRecordRefs.replicatedSourceRefs, [
+    "edge-layer-seam-history-durable-record:weakened-source-ref",
+  ]);
+  assert.equal(readback.readerProof.sourceRecordCount, 0);
+  assert.equal(readback.readerProof.replicaRecordCount, 0);
+  assert.equal(readback.validation.noCanonicalHistoryClaim, true);
+  assert.equal(readback.validation.noLayerAdmissionClaim, true);
+  assert.equal(readback.validation.noRbcInterpretationClaim, true);
+  assert.equal(readback.validation.noAuthorityClaim, true);
+  assert.equal(readback.boundary.reportReadbackOnly, true);
+  assert.equal(readback.boundary.verifiesLiveSwarmRun, false);
+  assert.equal(readback.boundary.opensSwarm, false);
+  assert.equal(readback.boundary.opensCorestore, false);
+  assert.equal(readback.boundary.writesRecords, false);
+  assert.equal(readback.boundary.acceptsCanonicalHistory, false);
+  assert.equal(readback.boundary.admitsLayerEvidence, false);
+  assert.equal(readback.boundary.interpretsRbc, false);
+  assert.equal(readback.boundary.grantsAuthority, false);
+});
+
 test(
   "Hyperswarm reader consumes replicated durable Edge Layer seam history before observing it",
   {
