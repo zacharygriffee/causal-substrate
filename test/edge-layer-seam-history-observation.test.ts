@@ -1346,6 +1346,74 @@ test("Edge projection handoff bundle packages observation artifacts without writ
   assert.equal(bundle.boundary.writesProductionContinuity, false);
 });
 
+test("Edge projection handoff bundle stays incomplete for incomplete seam material", () => {
+  const seamHistory = {
+    ...operationShapedSeamHistory(),
+    historyId: "layer-owned-edge-seam-status:handoff-bundle-negative",
+    historyHash: `sha256:${"7".repeat(64)}`,
+    pairs: [
+      {
+        request: {
+          sourceRepo: "mesh-ecology-edge",
+          requestId: "edge-layer-report-only-seam-request:handoff-bundle-negative:damaged",
+        },
+        receipt: {
+          sourceRepo: "mesh-ecology-layer",
+          sourceRequestId: "edge-layer-report-only-seam-request:handoff-bundle-negative:other",
+        },
+        linkage: {
+          linked: false,
+          source: "receipt_source_request_refs",
+        },
+      },
+    ],
+  };
+  const observationResult = buildEdgeLayerSeamHistoryObservationResult({
+    seamHistory,
+    emittedAt: "2026-05-31T12:16:35.000Z",
+    sourcePath: "layer-owned-edge-seam-status:handoff-bundle-negative",
+    inputReadByCausalSubstrate: true,
+  });
+
+  const bundle = buildEdgeLayerSeamHistoryEdgeProjectionHandoffBundle({
+    observationResult,
+    emittedAt: "2026-05-31T12:16:36.000Z",
+  });
+
+  assertEdgeLayerSeamHistoryEdgeProjectionHandoffBundle(bundle);
+  assert.equal(bundle.reviewStatus, "edge-layer-seam-history-edge-projection-handoff-bundle-incomplete");
+  assert.equal(bundle.validation.observationResultConsumed, true);
+  assert.equal(bundle.validation.contractSnapshotIncluded, true);
+  assert.equal(bundle.validation.handoffFixtureIncluded, true);
+  assert.equal(bundle.validation.consumerFixtureIncluded, true);
+  assert.equal(bundle.validation.completionGateIncluded, true);
+  assert.equal(bundle.validation.completionGateComplete, false);
+  assert.equal(bundle.validation.sourceRefsPreserved, false);
+  assert.ok(bundle.validation.issues.includes("handoff-fixture-not-ready"));
+  assert.ok(bundle.validation.issues.includes("consumer-fixture-not-ready"));
+  assert.ok(bundle.validation.issues.includes("completion-gate-not-complete"));
+  assert.ok(bundle.validation.issues.includes("bundle-source-refs-not-preserved"));
+  assert.equal(bundle.artifacts.handoffFixture.reviewStatus, "edge-layer-seam-history-edge-projection-fixture-incomplete");
+  assert.equal(
+    bundle.artifacts.consumerFixture.reviewStatus,
+    "edge-layer-seam-history-edge-projection-consumer-fixture-incomplete",
+  );
+  assert.equal(bundle.artifacts.completionGate.completion.currentLaneComplete, false);
+  assert.equal(bundle.artifacts.completionGate.completion.suitableForEdgeProjectionHandoff, false);
+  assert.equal(bundle.sourceReferences.requestIds.length, 1);
+  assert.deepEqual(bundle.sourceReferences.requestHashes, []);
+  assert.deepEqual(bundle.sourceReferences.receiptIds, []);
+  assert.deepEqual(bundle.sourceReferences.receiptHashes, []);
+  assert.equal(bundle.boundary.writesEdgeProjection, false);
+  assert.equal(bundle.boundary.acceptsCanonicalHistory, false);
+  assert.equal(bundle.boundary.admitsLayerEvidence, false);
+  assert.equal(bundle.boundary.interpretsRbc, false);
+  assert.equal(bundle.boundary.grantsAuthority, false);
+  assert.equal(bundle.boundary.promotesReferents, false);
+  assert.equal(bundle.boundary.publishesToMesh, false);
+  assert.equal(bundle.boundary.writesProductionContinuity, false);
+});
+
 test("Edge projection fixture guardrail matrix rejects projection overclaims", () => {
   const observationResult = buildEdgeLayerSeamHistoryObservationResult({
     seamHistory: operationShapedSeamHistory(),

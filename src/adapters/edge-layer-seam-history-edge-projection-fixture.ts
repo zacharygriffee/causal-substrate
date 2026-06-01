@@ -2,7 +2,6 @@ import { createHash } from "node:crypto";
 
 import {
   assertEdgeLayerSeamHistoryObservationResult,
-  assertEdgeLayerSeamHistoryObservationContractSnapshot,
   assertEdgeLayerSeamHistoryOutwardLaneCompletionGate,
   buildEdgeLayerSeamHistoryObservationContractSnapshot,
   buildEdgeLayerSeamHistoryOutwardLaneCompletionGate,
@@ -590,12 +589,10 @@ export function buildEdgeLayerSeamHistoryEdgeProjectionHandoffBundle(
   assertEdgeLayerSeamHistoryObservationResult(input.observationResult);
   const observationResult = input.observationResult;
   const contractSnapshot = buildEdgeLayerSeamHistoryObservationContractSnapshot(observationResult);
-  assertEdgeLayerSeamHistoryObservationContractSnapshot(contractSnapshot);
   const handoffFixture = buildEdgeLayerSeamHistoryEdgeProjectionFixture({
     observationResult,
     emittedAt: input.emittedAt,
   });
-  assertEdgeLayerSeamHistoryEdgeProjectionFixture(handoffFixture);
   const consumerFixture = buildEdgeLayerSeamHistoryEdgeProjectionConsumerFixture({
     fixture: handoffFixture,
     emittedAt: input.emittedAt,
