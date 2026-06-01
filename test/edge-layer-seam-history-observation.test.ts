@@ -776,6 +776,7 @@ test("seam-history observation command reads supplied material, writes result, a
   const inputPath = path.join(tempRoot, "seam-history.json");
   const outputPath = path.join(tempRoot, "observation-result.json");
   const contractPath = path.join(tempRoot, "observation-readback-contract.json");
+  const snapshotPath = path.join(tempRoot, "observation-contract-snapshot.json");
   const handoffPath = path.join(tempRoot, "edge-projection-handoff.json");
   const handoffReadbackPath = path.join(tempRoot, "edge-projection-handoff-readback.json");
   const hyperswarmReadinessPath = path.join(tempRoot, "hyperswarm-input-lane-readiness.json");
@@ -792,6 +793,8 @@ test("seam-history observation command reads supplied material, writes result, a
       outputPath,
       "--contract-output",
       contractPath,
+      "--snapshot-output",
+      snapshotPath,
       "--handoff-output",
       handoffPath,
       "--handoff-readback-output",
@@ -852,6 +855,27 @@ test("seam-history observation command reads supplied material, writes result, a
     assert.equal(contract.readback.normalizedProofLabelPreserved, result.proof.normalizedProofLabel);
     assert.equal(contract.boundary.writesObservationArtifact, false);
     assert.equal(contract.boundary.acceptsCanonicalHistory, false);
+    const snapshot = JSON.parse(await readFile(snapshotPath, "utf8"));
+    assertEdgeLayerSeamHistoryObservationContractSnapshot(snapshot);
+    assert.equal(snapshot.sourceObservation.artifactId, result.artifactId);
+    assert.equal(snapshot.proof.normalizedProofLabel, "local_supplied_material");
+    assert.equal(snapshot.proof.decentralizedSeamProofClaimed, false);
+    assert.deepEqual(snapshot.sourceRefs.requestIds, [
+      "edge-layer-report-only-seam-request:causal-observation:linked",
+      "edge-layer-report-only-seam-request:causal-observation:damaged",
+    ]);
+    assert.deepEqual(snapshot.sourceRefs.receiptHashes, [
+      `sha256:${"b".repeat(64)}`,
+      `sha256:${"d".repeat(64)}`,
+    ]);
+    assert.deepEqual(snapshot.observationRefs.map((ref: { classification: string }) => ref.classification), [
+      "compatible_seam_happening",
+      "unresolved_or_damaged_seam_happening",
+    ]);
+    assert.equal(snapshot.boundary.acceptsCanonicalHistory, false);
+    assert.equal(snapshot.boundary.admitsLayerEvidence, false);
+    assert.equal(snapshot.boundary.interpretsRbc, false);
+    assert.equal(snapshot.boundary.grantsAuthority, false);
     const handoff = JSON.parse(await readFile(handoffPath, "utf8"));
     assertEdgeLayerSeamHistoryEdgeProjectionFixture(handoff);
     assert.equal(handoff.validation.observationResultConsumed, true);

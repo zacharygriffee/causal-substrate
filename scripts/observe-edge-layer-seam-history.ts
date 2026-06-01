@@ -4,12 +4,14 @@ import path from "node:path";
 import {
   assertEdgeLayerSeamHistoryEdgeProjectionFixture,
   assertEdgeLayerSeamHistoryEdgeProjectionHandoffReadback,
+  assertEdgeLayerSeamHistoryObservationContractSnapshot,
   assertEdgeLayerSeamHistoryObservationResult,
   assertEdgeLayerSeamHistoryObservationReadbackContract,
   assertEdgeLayerSeamHistoryOutwardLaneCompletionGate,
   buildEdgeLayerSeamHistoryEdgeProjectionFixture,
   buildEdgeLayerSeamHistoryEdgeProjectionHandoffReadback,
   buildEdgeLayerSeamHistoryHyperswarmInputLaneReadiness,
+  buildEdgeLayerSeamHistoryObservationContractSnapshot,
   buildEdgeLayerSeamHistoryObservationResult,
   buildEdgeLayerSeamHistoryObservationReadbackContract,
   buildEdgeLayerSeamHistoryOutwardLaneCompletionGate,
@@ -19,6 +21,7 @@ interface CliArgs {
   input?: string;
   output?: string;
   contractOutput?: string;
+  snapshotOutput?: string;
   handoffOutput?: string;
   handoffReadbackOutput?: string;
   hyperswarmReadinessOutput?: string;
@@ -84,6 +87,12 @@ async function main() {
       assertEdgeLayerSeamHistoryEdgeProjectionHandoffReadback(handoffReadback);
       await writeFile(path.resolve(args.handoffReadbackOutput), `${JSON.stringify(handoffReadback, null, 2)}\n`, "utf8");
     }
+  }
+
+  if (args.snapshotOutput) {
+    const snapshot = buildEdgeLayerSeamHistoryObservationContractSnapshot(observationForDerivedOutputs);
+    assertEdgeLayerSeamHistoryObservationContractSnapshot(snapshot);
+    await writeFile(path.resolve(args.snapshotOutput), `${JSON.stringify(snapshot, null, 2)}\n`, "utf8");
   }
 
   if (args.completionGateOutput) {
@@ -171,6 +180,11 @@ function parseArgs(argv: string[]): CliArgs {
       index += 1;
       continue;
     }
+    if (arg === "--snapshot-output") {
+      args.snapshotOutput = requireNext(argv, index, arg);
+      index += 1;
+      continue;
+    }
     if (arg === "--handoff-output") {
       args.handoffOutput = requireNext(argv, index, arg);
       index += 1;
@@ -240,10 +254,11 @@ async function readStdin(): Promise<string> {
 
 function printUsage(): void {
   process.stdout.write([
-    "Usage: tsx scripts/observe-edge-layer-seam-history.ts [--input path] [--output path] [--contract-output path] [--handoff-output path] [--handoff-readback-output path] [--hyperswarm-readiness-output path] [--completion-gate-output path] [--hyperswarm-namespace comma,list] [--emitted-at iso] [--readback]",
+    "Usage: tsx scripts/observe-edge-layer-seam-history.ts [--input path] [--output path] [--contract-output path] [--snapshot-output path] [--handoff-output path] [--handoff-readback-output path] [--hyperswarm-readiness-output path] [--completion-gate-output path] [--hyperswarm-namespace comma,list] [--emitted-at iso] [--readback]",
     "",
     "Reads supplied Edge/Layer seam-history JSON and emits a bounded local causal observation.",
     "With --contract-output, writes a readback contract over the emitted observation file.",
+    "With --snapshot-output, writes a stable observation contract snapshot.",
     "With --handoff-output, writes an Edge projection handoff fixture derived from the observation result.",
     "With --handoff-readback-output, writes a readback artifact over the emitted handoff fixture.",
     "With --hyperswarm-readiness-output, writes a readiness-only Hyperswarm input lane report.",
