@@ -119,6 +119,11 @@ The local supplied-material lane can now:
   whether the prepared commands are public-swarm-only, bootstrap-unset,
   source-ref-preserving, and instructions-only before any live public refresh
   is run.
+- prepare a refresh-run input package under
+  `proof-artifacts/public-hyperswarm-device-to-device-operator-refresh/`,
+  preserving the current seam-history input and labeling it as
+  `local_refresh_input_package_over_saved_public_hyperswarm_material` until a
+  public Hyperswarm reader consumes refreshed durable material.
 
 Strongest routinely proven rung in normal tests:
 `local_causal_observation_over_supplied_seam_history_material`.
@@ -140,9 +145,6 @@ The current saved-artifact readiness list is complete. Build the next list
 around an explicit operator-run public swarm refresh, if the operator chooses
 to run one:
 
-- prepare a refresh-run input package under the command artifact's expected
-  output directory, preserving the current seam-history material and labeling
-  the package as local supplied input until a public swarm reader consumes it;
 - run the prepared source and replica commands on the standby devices only
   after an explicit operator request, with public Hyperswarm enabled and
   `CAUSAL_SUBSTRATE_HYPERSWARM_BOOTSTRAP` unset on both devices;
