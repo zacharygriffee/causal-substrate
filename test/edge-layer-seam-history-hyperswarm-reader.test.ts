@@ -15,9 +15,13 @@ import {
   buildEdgeLayerSeamHistoryDurableRecordSourceRefCompleteness,
   buildEdgeLayerSeamHistoryHyperswarmInputLaneReadiness,
   buildEdgeLayerSeamHistoryHyperswarmReaderReportReadback,
+  buildEdgeLayerSeamHistoryPublicDeviceRunInstructions,
+  buildEdgeLayerSeamHistoryPublicDeviceSourceManifest,
   buildEdgeLayerSeamHistoryRealHyperswarmProofRunInstructions,
   createHyperswarmReplicationSwarm,
+  openEdgeLayerSeamHistoryPublicDeviceSourcePublisher,
   parseHyperswarmBootstrap,
+  runEdgeLayerSeamHistoryPublicDeviceReplicaReader,
   runEdgeLayerSeamHistoryHyperswarmReader,
   type HyperswarmReplicationSwarm,
 } from "../src/index.js";
@@ -315,6 +319,99 @@ test("real Hyperswarm proof run instructions artifact stays instructions-only", 
   assert.equal(instructions.boundary.interpretsRbc, false);
 });
 
+test("public device-to-device run instructions stay instructions-only", () => {
+  const instructions = buildEdgeLayerSeamHistoryPublicDeviceRunInstructions({
+    emittedAt: "2026-06-01T09:00:00.000Z",
+    namespaceParts: ["public-device", "seam-history"],
+  });
+
+  assert.equal(instructions.artifactKind, "edge-layer-seam-history-public-device-run-instructions");
+  assert.equal(
+    instructions.schema,
+    "causal-substrate/edge-layer-seam-history-public-device-run-instructions/v1",
+  );
+  assert.equal(instructions.lane, "public_hyperswarm_device_to_device_seam_history_observation");
+  assert.equal(instructions.requiredEnvironment.realHyperswarmEnv, "CAUSAL_SUBSTRATE_REAL_HYPERSWARM=1");
+  assert.equal(instructions.requiredEnvironment.publicHyperswarmEnv, "CAUSAL_SUBSTRATE_HYPERSWARM_PUBLIC=1");
+  assert.match(instructions.commands.sourceDevicePublisher, /run-edge-layer-seam-history-public-source-device\.ts/);
+  assert.match(instructions.commands.replicaDeviceReader, /run-edge-layer-seam-history-public-replica-device\.ts/);
+  assert.equal(instructions.proofGate.instructionsOnly, true);
+  assert.equal(instructions.proofGate.publicSwarmProofClaimedNow, false);
+  assert.equal(instructions.proofGate.sourceManifestAloneIsNotObservationProof, true);
+  assert.equal(instructions.proofGate.proofOnlyAfterReplicaReadsPublicSwarmDurableMaterial, true);
+  assert.equal(instructions.proofGate.requiresTwoDeviceOrDeviceShapedPublicRun, true);
+  assert.equal(instructions.proofGate.requiresDurableCorestoreRead, true);
+  assert.equal(instructions.proofGate.requiresPublicHyperswarmTransport, true);
+  assert.equal(instructions.proofGate.requiresReplicatedRecordReadback, true);
+  assert.equal(
+    instructions.proofGate.expectedStrongestProofRungAfterPassingReplicaRun,
+    "public_hyperswarm_replicated_durable_seam_history_observation",
+  );
+  assert.deepEqual(instructions.namespaceParts, ["public-device", "seam-history"]);
+  assert.equal(instructions.boundary.opensSwarmNow, false);
+  assert.equal(instructions.boundary.opensCorestoreNow, false);
+  assert.equal(instructions.boundary.readsDurableHistoryNow, false);
+  assert.equal(instructions.boundary.writesRecordsNow, false);
+  assert.equal(instructions.boundary.publishesToMesh, false);
+  assert.equal(instructions.boundary.grantsAuthority, false);
+  assert.equal(instructions.boundary.admitsLayerEvidence, false);
+  assert.equal(instructions.boundary.interpretsRbc, false);
+});
+
+test("public source manifest preserves durable refs without claiming observation proof", () => {
+  const seamHistory = seamHistoryMaterial();
+  const sourceRefCompleteness = buildEdgeLayerSeamHistoryDurableRecordSourceRefCompleteness(seamHistory);
+  const sourceRefs = [
+    "layer-owned-edge-seam-status:hyperswarm-reader-test",
+    `sha256:${"8".repeat(64)}`,
+    "edge-layer-report-only-seam-request:hyperswarm-reader:linked",
+    `sha256:${"a".repeat(64)}`,
+    "layer-report-only-edge-seam-receipt:hyperswarm-reader:linked",
+    `sha256:${"b".repeat(64)}`,
+  ];
+  const manifest = buildEdgeLayerSeamHistoryPublicDeviceSourceManifest({
+    emittedAt: "2026-06-01T09:02:00.000Z",
+    namespaceParts: ["public-device", "manifest"],
+    sourceCoreKeyHex: "11".repeat(32),
+    topicHex: "22".repeat(32),
+    record: {
+      artifactKind: "edge_layer_seam_history_durable_record",
+      schema: "causal-substrate/edge-layer-seam-history-durable-record/v1",
+      schemaVersion: 1,
+      recordId: "edge-layer-seam-history-durable-record:public-source-manifest",
+      recordedAt: "2026-06-01T09:01:00.000Z",
+      seamHistory,
+      seamHistoryHash: `sha256:${"9".repeat(64)}`,
+      seamHistoryHashAlgorithm: "sha256-stable-json",
+      sourceRefs,
+      sourceRefCompleteness,
+      durableHistoryMaterial: true,
+    },
+  });
+
+  assert.equal(manifest.artifactKind, "edge-layer-seam-history-public-device-source-manifest");
+  assert.equal(
+    manifest.schema,
+    "causal-substrate/edge-layer-seam-history-public-device-source-manifest/v1",
+  );
+  assert.equal(manifest.source.sourceCoreKeyHex, "11".repeat(32));
+  assert.equal(manifest.source.topicHex, "22".repeat(32));
+  assert.equal(manifest.source.sourceRecordId, "edge-layer-seam-history-durable-record:public-source-manifest");
+  assert.equal(manifest.source.seamHistoryHash, `sha256:${"9".repeat(64)}`);
+  assert.deepEqual(manifest.source.sourceRefs, sourceRefs);
+  assert.equal(manifest.source.sourceRefCompleteness.complete, true);
+  assert.equal(manifest.proofPosture.sourceManifestOnly, true);
+  assert.equal(manifest.proofPosture.publicSwarmObservationProofClaimedNow, false);
+  assert.equal(manifest.proofPosture.replicaDeviceMustReadDurableMaterial, true);
+  assert.equal(manifest.proofPosture.replicaDeviceMustEmitObservation, true);
+  assert.equal(manifest.boundary.replicaReadProvenByThisArtifact, false);
+  assert.equal(manifest.boundary.acceptsCanonicalHistory, false);
+  assert.equal(manifest.boundary.admitsLayerEvidence, false);
+  assert.equal(manifest.boundary.interpretsRbc, false);
+  assert.equal(manifest.boundary.grantsAuthority, false);
+  assert.equal(manifest.boundary.publishesToMesh, false);
+});
+
 test("real Hyperswarm reader CLI emits instructions only until explicitly enabled", async () => {
   const tempRoot = await mkdtemp(path.join(tmpdir(), "causal-seam-hs-cli-"));
   const instructionsPath = path.join(tempRoot, "real-hyperswarm-instructions.json");
@@ -363,6 +460,158 @@ test("real Hyperswarm reader CLI emits instructions only until explicitly enable
     assert.equal(instructions.boundary.readsDurableHistoryNow, false);
     assert.equal(instructions.boundary.publishesToMesh, false);
     assert.equal(instructions.boundary.grantsAuthority, false);
+  } finally {
+    await rm(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test("public device CLIs emit instructions only until explicitly enabled", async () => {
+  const tempRoot = await mkdtemp(path.join(tmpdir(), "causal-seam-hs-public-device-cli-"));
+  const sourceInstructionsPath = path.join(tempRoot, "source-instructions.json");
+  const replicaInstructionsPath = path.join(tempRoot, "replica-instructions.json");
+  try {
+    const source = await execFileAsync("npx", [
+      "tsx",
+      "scripts/run-edge-layer-seam-history-public-source-device.ts",
+      "--instructions-output",
+      sourceInstructionsPath,
+      "--namespace",
+      "public-device,cli-surface",
+      "--emitted-at",
+      "2026-06-01T09:05:00.000Z",
+    ], {
+      cwd: path.resolve("."),
+      env: {
+        ...process.env,
+        CAUSAL_SUBSTRATE_REAL_HYPERSWARM: "0",
+      },
+    });
+    const replica = await execFileAsync("npx", [
+      "tsx",
+      "scripts/run-edge-layer-seam-history-public-replica-device.ts",
+      "--instructions-output",
+      replicaInstructionsPath,
+      "--namespace",
+      "public-device,cli-surface",
+      "--emitted-at",
+      "2026-06-01T09:05:00.000Z",
+    ], {
+      cwd: path.resolve("."),
+      env: {
+        ...process.env,
+        CAUSAL_SUBSTRATE_REAL_HYPERSWARM: "0",
+      },
+    });
+
+    assert.equal(source.stdout, "");
+    assert.equal(source.stderr, "");
+    assert.equal(replica.stdout, "");
+    assert.equal(replica.stderr, "");
+    const sourceInstructions = JSON.parse(await readFile(sourceInstructionsPath, "utf8"));
+    const replicaInstructions = JSON.parse(await readFile(replicaInstructionsPath, "utf8"));
+    assert.equal(
+      sourceInstructions.schema,
+      "causal-substrate/edge-layer-seam-history-public-device-run-instructions/v1",
+    );
+    assert.equal(sourceInstructions.proofGate.instructionsOnly, true);
+    assert.equal(sourceInstructions.proofGate.publicSwarmProofClaimedNow, false);
+    assert.equal(sourceInstructions.proofGate.sourceManifestAloneIsNotObservationProof, true);
+    assert.deepEqual(sourceInstructions.namespaceParts, ["public-device", "cli-surface"]);
+    assert.equal(replicaInstructions.schema, sourceInstructions.schema);
+    assert.equal(replicaInstructions.proofGate.instructionsOnly, true);
+    assert.equal(replicaInstructions.boundary.opensSwarmNow, false);
+    assert.equal(replicaInstructions.boundary.opensCorestoreNow, false);
+  } finally {
+    await rm(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test("public device CLIs require public swarm and reject configured bootstrap for proof", async () => {
+  const tempRoot = await mkdtemp(path.join(tmpdir(), "causal-seam-hs-public-device-gate-"));
+  const inputPath = path.join(tempRoot, "seam-history.json");
+  const manifestPath = path.join(tempRoot, "public-source-manifest.json");
+  const reportPath = path.join(tempRoot, "public-replica-report.json");
+  try {
+    await writeFile(inputPath, JSON.stringify(seamHistoryMaterial(), null, 2), "utf8");
+    await writeFile(manifestPath, JSON.stringify({
+      artifactKind: "edge-layer-seam-history-public-device-source-manifest",
+      schema: "causal-substrate/edge-layer-seam-history-public-device-source-manifest/v1",
+      schemaVersion: 1,
+      emittedAt: "2026-06-01T09:10:00.000Z",
+      lane: "public_hyperswarm_device_to_device_seam_history_observation",
+      namespaceParts: ["public-device", "gate"],
+      source: {
+        sourceCoreKeyHex: "11".repeat(32),
+        topicHex: "22".repeat(32),
+        sourceRecordId: "edge-layer-seam-history-durable-record:gate",
+        seamHistoryHash: `sha256:${"9".repeat(64)}`,
+        sourceRefs: ["edge-layer-seam-history-durable-record:gate"],
+        sourceRefCompleteness: buildEdgeLayerSeamHistoryDurableRecordSourceRefCompleteness(seamHistoryMaterial()),
+      },
+      proofPosture: {
+        sourceManifestOnly: true,
+        publicSwarmObservationProofClaimedNow: false,
+        replicaDeviceMustReadDurableMaterial: true,
+        replicaDeviceMustEmitObservation: true,
+        lowerProofRungsRemainLowerUntilReplicaReport: true,
+      },
+      boundary: {
+        opensSwarmBySourceCommand: true,
+        opensCorestoreBySourceCommand: true,
+        writesDurableHistoryBySourceCommand: true,
+        replicaReadProvenByThisArtifact: false,
+        acceptsCanonicalHistory: false,
+        admitsLayerEvidence: false,
+        interpretsRbc: false,
+        grantsAuthority: false,
+        publishesToMesh: false,
+      },
+    }, null, 2), "utf8");
+
+    await assert.rejects(
+      execFileAsync("npx", [
+        "tsx",
+        "scripts/run-edge-layer-seam-history-public-source-device.ts",
+        "--input",
+        inputPath,
+        "--manifest-output",
+        manifestPath,
+        "--storage-dir",
+        path.join(tempRoot, "source-no-public"),
+        "--keep-alive-ms",
+        "0",
+      ], {
+        cwd: path.resolve("."),
+        env: {
+          ...process.env,
+          CAUSAL_SUBSTRATE_REAL_HYPERSWARM: "1",
+          CAUSAL_SUBSTRATE_HYPERSWARM_PUBLIC: "0",
+        },
+      }),
+      /public_hyperswarm_required_for_public_device_seam_proof/,
+    );
+
+    await assert.rejects(
+      execFileAsync("npx", [
+        "tsx",
+        "scripts/run-edge-layer-seam-history-public-replica-device.ts",
+        "--manifest",
+        manifestPath,
+        "--report-output",
+        reportPath,
+        "--storage-dir",
+        path.join(tempRoot, "replica-bootstrap"),
+      ], {
+        cwd: path.resolve("."),
+        env: {
+          ...process.env,
+          CAUSAL_SUBSTRATE_REAL_HYPERSWARM: "1",
+          CAUSAL_SUBSTRATE_HYPERSWARM_PUBLIC: "1",
+          CAUSAL_SUBSTRATE_HYPERSWARM_BOOTSTRAP: "127.0.0.1:12345",
+        },
+      }),
+      /configured_bootstrap_deferred_for_public_hyperswarm_proof_lane/,
+    );
   } finally {
     await rm(tempRoot, { recursive: true, force: true });
   }
@@ -917,6 +1166,86 @@ test(
     } finally {
       await harness.close();
       await rm(tempRoot, { recursive: true, force: true });
+    }
+  },
+);
+
+test(
+  "public device-shaped source manifest can be consumed by a public replica reader",
+  {
+    skip: !SHOULD_RUN_PUBLIC_HYPERSWARM,
+    timeout: 120_000,
+  },
+  async () => {
+    const sourceDir = await mkdtemp(path.join(tmpdir(), "causal-seam-hs-public-device-source-"));
+    const replicaDir = await mkdtemp(path.join(tmpdir(), "causal-seam-hs-public-device-replica-"));
+    const namespaceParts = ["public-device", "device-shaped", randomUUID()];
+    const harness = await openHyperswarmHarness();
+    let source: Awaited<ReturnType<typeof openEdgeLayerSeamHistoryPublicDeviceSourcePublisher>> | undefined;
+    try {
+      source = await openEdgeLayerSeamHistoryPublicDeviceSourcePublisher({
+        storageDir: sourceDir,
+        createSwarm: async (seed) => {
+          const swarm = await createHyperswarmReplicationSwarm({ seed });
+          await swarm.listen();
+          return swarm;
+        },
+        seamHistory: seamHistoryMaterial(),
+        emittedAt: "2026-06-01T09:20:00.000Z",
+        namespaceParts,
+        flushTimeoutMs: 60_000,
+      });
+
+      assert.equal(source.manifest.proofPosture.sourceManifestOnly, true);
+      assert.equal(source.manifest.proofPosture.publicSwarmObservationProofClaimedNow, false);
+      assert.equal(source.manifest.boundary.replicaReadProvenByThisArtifact, false);
+      assert.equal(source.manifest.source.sourceRecordId, source.record.recordId);
+      assert.equal(source.manifest.source.seamHistoryHash, source.record.seamHistoryHash);
+      assert.deepEqual(source.manifest.source.sourceRefs, source.record.sourceRefs);
+
+      const report = await runEdgeLayerSeamHistoryPublicDeviceReplicaReader({
+        storageDir: replicaDir,
+        createSwarm: async (seed) => {
+          const swarm = await createHyperswarmReplicationSwarm({ seed });
+          await swarm.listen();
+          return swarm;
+        },
+        sourceManifest: source.manifest,
+        emittedAt: "2026-06-01T09:21:00.000Z",
+        namespaceParts,
+        flushTimeoutMs: 60_000,
+        replicationTimeoutMs: 60_000,
+      });
+
+      assert.equal(report.artifactKind, "edge-layer-seam-history-public-device-replica-report");
+      assert.equal(
+        report.schema,
+        "causal-substrate/edge-layer-seam-history-public-device-replica-report/v1",
+      );
+      assert.equal(report.replicatedRecord.recordId, source.record.recordId);
+      assert.equal(report.replicatedRecord.seamHistoryHash, source.record.seamHistoryHash);
+      assert.deepEqual(report.replicatedRecord.sourceRefs, source.record.sourceRefs);
+      assert.equal(report.readerProof.inputReadByCausalSubstrate, true);
+      assert.equal(report.readerProof.durableCorestoreHistoryRead, true);
+      assert.equal(report.readerProof.dhtOrHyperswarmInputObservedByCausalSubstrate, true);
+      assert.equal(report.readerProof.replicatedViaHyperswarmTransport, true);
+      assert.equal(report.readerProof.publicHyperswarmInputObservedByCausalSubstrate, true);
+      assert.equal(report.readerProof.sourceManifestConsumed, true);
+      assert.equal(report.observationResult.proof.strongestProofRung, "public_hyperswarm_replicated_durable_seam_history_observation");
+      assert.equal(report.observationResult.proof.normalizedProofLabel, "public_hyperswarm_durable_seam_history_material");
+      assert.equal(report.observationResult.validation.linkedPairDetected, true);
+      assert.equal(report.observationResult.validation.damagedOrUnlinkedPairDetected, true);
+      assert.equal(report.boundary.observationOnly, true);
+      assert.equal(report.boundary.acceptsCanonicalHistory, false);
+      assert.equal(report.boundary.admitsLayerEvidence, false);
+      assert.equal(report.boundary.interpretsRbc, false);
+      assert.equal(report.boundary.grantsAuthority, false);
+      assert.equal(report.boundary.publishesToMesh, false);
+    } finally {
+      await source?.close();
+      await harness.close();
+      await rm(sourceDir, { recursive: true, force: true });
+      await rm(replicaDir, { recursive: true, force: true });
     }
   },
 );

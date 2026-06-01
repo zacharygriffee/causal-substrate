@@ -39,6 +39,24 @@ export const EDGE_LAYER_SEAM_HISTORY_HYPERSWARM_READER_REPORT_READBACK_SCHEMA =
 export const EDGE_LAYER_SEAM_HISTORY_HYPERSWARM_READER_REPORT_READBACK_ARTIFACT_KIND =
   "edge-layer-seam-history-hyperswarm-reader-report-readback" as const;
 
+export const EDGE_LAYER_SEAM_HISTORY_PUBLIC_DEVICE_RUN_INSTRUCTIONS_SCHEMA =
+  "causal-substrate/edge-layer-seam-history-public-device-run-instructions/v1" as const;
+
+export const EDGE_LAYER_SEAM_HISTORY_PUBLIC_DEVICE_RUN_INSTRUCTIONS_ARTIFACT_KIND =
+  "edge-layer-seam-history-public-device-run-instructions" as const;
+
+export const EDGE_LAYER_SEAM_HISTORY_PUBLIC_DEVICE_SOURCE_MANIFEST_SCHEMA =
+  "causal-substrate/edge-layer-seam-history-public-device-source-manifest/v1" as const;
+
+export const EDGE_LAYER_SEAM_HISTORY_PUBLIC_DEVICE_SOURCE_MANIFEST_ARTIFACT_KIND =
+  "edge-layer-seam-history-public-device-source-manifest" as const;
+
+export const EDGE_LAYER_SEAM_HISTORY_PUBLIC_DEVICE_REPLICA_REPORT_SCHEMA =
+  "causal-substrate/edge-layer-seam-history-public-device-replica-report/v1" as const;
+
+export const EDGE_LAYER_SEAM_HISTORY_PUBLIC_DEVICE_REPLICA_REPORT_ARTIFACT_KIND =
+  "edge-layer-seam-history-public-device-replica-report" as const;
+
 export type EdgeLayerSeamHistoryHyperswarmInputLaneReadinessStatus =
   | "edge-layer-seam-history-hyperswarm-input-lane-ready-to-run"
   | "edge-layer-seam-history-hyperswarm-input-lane-incomplete";
@@ -108,6 +126,120 @@ export interface EdgeLayerSeamHistoryHyperswarmReaderReport {
   replicatedRecord: EdgeLayerSeamHistoryDurableRecord;
   observationResult: EdgeLayerSeamHistoryObservationResult;
   readerProof: EdgeLayerSeamHistoryHyperswarmReaderProof;
+}
+
+export interface EdgeLayerSeamHistoryPublicDeviceRunInstructions {
+  artifactKind: typeof EDGE_LAYER_SEAM_HISTORY_PUBLIC_DEVICE_RUN_INSTRUCTIONS_ARTIFACT_KIND;
+  schema: typeof EDGE_LAYER_SEAM_HISTORY_PUBLIC_DEVICE_RUN_INSTRUCTIONS_SCHEMA;
+  schemaVersion: 1;
+  emittedAt: string;
+  lane: "public_hyperswarm_device_to_device_seam_history_observation";
+  requiredEnvironment: {
+    realHyperswarmEnv: "CAUSAL_SUBSTRATE_REAL_HYPERSWARM=1";
+    publicHyperswarmEnv: "CAUSAL_SUBSTRATE_HYPERSWARM_PUBLIC=1";
+    configuredBootstrapDeferred: "CAUSAL_SUBSTRATE_HYPERSWARM_BOOTSTRAP must be unset for this lane";
+  };
+  commands: {
+    sourceDevicePublisher: string;
+    replicaDeviceReader: string;
+  };
+  proofGate: {
+    instructionsOnly: true;
+    publicSwarmProofClaimedNow: false;
+    sourceManifestAloneIsNotObservationProof: true;
+    proofOnlyAfterReplicaReadsPublicSwarmDurableMaterial: true;
+    requiresTwoDeviceOrDeviceShapedPublicRun: true;
+    requiresDurableCorestoreRead: true;
+    requiresPublicHyperswarmTransport: true;
+    requiresReplicatedRecordReadback: true;
+    expectedStrongestProofRungAfterPassingReplicaRun:
+      "public_hyperswarm_replicated_durable_seam_history_observation";
+  };
+  namespaceParts: string[];
+  boundary: {
+    opensSwarmNow: false;
+    opensCorestoreNow: false;
+    readsDurableHistoryNow: false;
+    writesRecordsNow: false;
+    publishesToMesh: false;
+    grantsAuthority: false;
+    admitsLayerEvidence: false;
+    interpretsRbc: false;
+  };
+}
+
+export interface EdgeLayerSeamHistoryPublicDeviceSourceManifest {
+  artifactKind: typeof EDGE_LAYER_SEAM_HISTORY_PUBLIC_DEVICE_SOURCE_MANIFEST_ARTIFACT_KIND;
+  schema: typeof EDGE_LAYER_SEAM_HISTORY_PUBLIC_DEVICE_SOURCE_MANIFEST_SCHEMA;
+  schemaVersion: 1;
+  emittedAt: string;
+  lane: "public_hyperswarm_device_to_device_seam_history_observation";
+  namespaceParts: string[];
+  source: {
+    sourceCoreKeyHex: string;
+    topicHex: string;
+    sourceRecordId: string;
+    seamHistoryHash: string;
+    sourceRefs: string[];
+    sourceRefCompleteness: EdgeLayerSeamHistoryDurableRecordSourceRefCompleteness;
+  };
+  proofPosture: {
+    sourceManifestOnly: true;
+    publicSwarmObservationProofClaimedNow: false;
+    replicaDeviceMustReadDurableMaterial: true;
+    replicaDeviceMustEmitObservation: true;
+    lowerProofRungsRemainLowerUntilReplicaReport: true;
+  };
+  boundary: {
+    opensSwarmBySourceCommand: true;
+    opensCorestoreBySourceCommand: true;
+    writesDurableHistoryBySourceCommand: true;
+    replicaReadProvenByThisArtifact: false;
+    acceptsCanonicalHistory: false;
+    admitsLayerEvidence: false;
+    interpretsRbc: false;
+    grantsAuthority: false;
+    publishesToMesh: false;
+  };
+}
+
+export interface EdgeLayerSeamHistoryPublicDeviceReplicaReaderProof {
+  inputReadByCausalSubstrate: true;
+  durableCorestoreHistoryRead: true;
+  dhtOrHyperswarmInputObservedByCausalSubstrate: true;
+  replicatedViaHyperswarmTransport: true;
+  publicHyperswarmInputObservedByCausalSubstrate: true;
+  sourceManifestConsumed: true;
+  sourceCoreKeyHex: string;
+  replicaCoreKeyHex: string;
+  topicHex: string;
+  replicatedRecordCount: number;
+}
+
+export interface EdgeLayerSeamHistoryPublicDeviceReplicaReport {
+  artifactKind: typeof EDGE_LAYER_SEAM_HISTORY_PUBLIC_DEVICE_REPLICA_REPORT_ARTIFACT_KIND;
+  schema: typeof EDGE_LAYER_SEAM_HISTORY_PUBLIC_DEVICE_REPLICA_REPORT_SCHEMA;
+  schemaVersion: 1;
+  emittedAt: string;
+  namespaceParts: string[];
+  sourceManifest: EdgeLayerSeamHistoryPublicDeviceSourceManifest;
+  replicatedRecord: EdgeLayerSeamHistoryDurableRecord;
+  observationResult: EdgeLayerSeamHistoryObservationResult;
+  readerProof: EdgeLayerSeamHistoryPublicDeviceReplicaReaderProof;
+  boundary: {
+    observationOnly: true;
+    acceptsCanonicalHistory: false;
+    admitsLayerEvidence: false;
+    interpretsRbc: false;
+    grantsAuthority: false;
+    publishesToMesh: false;
+  };
+}
+
+export interface EdgeLayerSeamHistoryPublicDeviceSourcePublisherHandle {
+  manifest: EdgeLayerSeamHistoryPublicDeviceSourceManifest;
+  record: EdgeLayerSeamHistoryDurableRecord;
+  close: () => Promise<void>;
 }
 
 export interface EdgeLayerSeamHistoryHyperswarmReaderReportReadback {
@@ -289,6 +421,40 @@ export interface BuildEdgeLayerSeamHistoryRealHyperswarmProofRunInstructionsInpu
   namespaceParts?: string[] | undefined;
 }
 
+export interface BuildEdgeLayerSeamHistoryPublicDeviceRunInstructionsInput {
+  emittedAt: string;
+  namespaceParts?: string[] | undefined;
+}
+
+export interface BuildEdgeLayerSeamHistoryPublicDeviceSourceManifestInput {
+  emittedAt: string;
+  namespaceParts?: string[] | undefined;
+  sourceCoreKeyHex: string;
+  topicHex: string;
+  record: EdgeLayerSeamHistoryDurableRecord;
+}
+
+export interface OpenEdgeLayerSeamHistoryPublicDeviceSourcePublisherOptions {
+  storageDir: string;
+  createSwarm: (seed?: Buffer) => ReplicationSwarmLike | Promise<ReplicationSwarmLike>;
+  seamHistory: unknown;
+  emittedAt: string;
+  namespaceParts?: string[] | undefined;
+  recordId?: string | undefined;
+  recordedAt?: string | undefined;
+  flushTimeoutMs?: number | undefined;
+}
+
+export interface RunEdgeLayerSeamHistoryPublicDeviceReplicaReaderOptions {
+  storageDir: string;
+  createSwarm: (seed?: Buffer) => ReplicationSwarmLike | Promise<ReplicationSwarmLike>;
+  sourceManifest: EdgeLayerSeamHistoryPublicDeviceSourceManifest;
+  emittedAt: string;
+  namespaceParts?: string[] | undefined;
+  flushTimeoutMs?: number | undefined;
+  replicationTimeoutMs?: number | undefined;
+}
+
 export interface BuildEdgeLayerSeamHistoryHyperswarmReaderReportReadbackInput {
   report: unknown;
   emittedAt: string;
@@ -406,6 +572,91 @@ export function buildEdgeLayerSeamHistoryRealHyperswarmProofRunInstructions(
       grantsAuthority: false,
       admitsLayerEvidence: false,
       interpretsRbc: false,
+    },
+  };
+}
+
+export function buildEdgeLayerSeamHistoryPublicDeviceRunInstructions(
+  input: BuildEdgeLayerSeamHistoryPublicDeviceRunInstructionsInput,
+): EdgeLayerSeamHistoryPublicDeviceRunInstructions {
+  return {
+    artifactKind: EDGE_LAYER_SEAM_HISTORY_PUBLIC_DEVICE_RUN_INSTRUCTIONS_ARTIFACT_KIND,
+    schema: EDGE_LAYER_SEAM_HISTORY_PUBLIC_DEVICE_RUN_INSTRUCTIONS_SCHEMA,
+    schemaVersion: 1,
+    emittedAt: input.emittedAt,
+    lane: "public_hyperswarm_device_to_device_seam_history_observation",
+    requiredEnvironment: {
+      realHyperswarmEnv: "CAUSAL_SUBSTRATE_REAL_HYPERSWARM=1",
+      publicHyperswarmEnv: "CAUSAL_SUBSTRATE_HYPERSWARM_PUBLIC=1",
+      configuredBootstrapDeferred: "CAUSAL_SUBSTRATE_HYPERSWARM_BOOTSTRAP must be unset for this lane",
+    },
+    commands: {
+      sourceDevicePublisher:
+        "CAUSAL_SUBSTRATE_REAL_HYPERSWARM=1 CAUSAL_SUBSTRATE_HYPERSWARM_PUBLIC=1 npx tsx scripts/run-edge-layer-seam-history-public-source-device.ts --input seam-history.json --manifest-output public-source-manifest.json --storage-dir .tmp/public-source --namespace public-device,seam-history --keep-alive-ms 600000",
+      replicaDeviceReader:
+        "CAUSAL_SUBSTRATE_REAL_HYPERSWARM=1 CAUSAL_SUBSTRATE_HYPERSWARM_PUBLIC=1 npx tsx scripts/run-edge-layer-seam-history-public-replica-device.ts --manifest public-source-manifest.json --report-output public-replica-report.json --storage-dir .tmp/public-replica --namespace public-device,seam-history",
+    },
+    proofGate: {
+      instructionsOnly: true,
+      publicSwarmProofClaimedNow: false,
+      sourceManifestAloneIsNotObservationProof: true,
+      proofOnlyAfterReplicaReadsPublicSwarmDurableMaterial: true,
+      requiresTwoDeviceOrDeviceShapedPublicRun: true,
+      requiresDurableCorestoreRead: true,
+      requiresPublicHyperswarmTransport: true,
+      requiresReplicatedRecordReadback: true,
+      expectedStrongestProofRungAfterPassingReplicaRun:
+        "public_hyperswarm_replicated_durable_seam_history_observation",
+    },
+    namespaceParts: input.namespaceParts ?? [],
+    boundary: {
+      opensSwarmNow: false,
+      opensCorestoreNow: false,
+      readsDurableHistoryNow: false,
+      writesRecordsNow: false,
+      publishesToMesh: false,
+      grantsAuthority: false,
+      admitsLayerEvidence: false,
+      interpretsRbc: false,
+    },
+  };
+}
+
+export function buildEdgeLayerSeamHistoryPublicDeviceSourceManifest(
+  input: BuildEdgeLayerSeamHistoryPublicDeviceSourceManifestInput,
+): EdgeLayerSeamHistoryPublicDeviceSourceManifest {
+  return {
+    artifactKind: EDGE_LAYER_SEAM_HISTORY_PUBLIC_DEVICE_SOURCE_MANIFEST_ARTIFACT_KIND,
+    schema: EDGE_LAYER_SEAM_HISTORY_PUBLIC_DEVICE_SOURCE_MANIFEST_SCHEMA,
+    schemaVersion: 1,
+    emittedAt: input.emittedAt,
+    lane: "public_hyperswarm_device_to_device_seam_history_observation",
+    namespaceParts: input.namespaceParts ?? [],
+    source: {
+      sourceCoreKeyHex: input.sourceCoreKeyHex,
+      topicHex: input.topicHex,
+      sourceRecordId: input.record.recordId,
+      seamHistoryHash: input.record.seamHistoryHash,
+      sourceRefs: input.record.sourceRefs,
+      sourceRefCompleteness: input.record.sourceRefCompleteness,
+    },
+    proofPosture: {
+      sourceManifestOnly: true,
+      publicSwarmObservationProofClaimedNow: false,
+      replicaDeviceMustReadDurableMaterial: true,
+      replicaDeviceMustEmitObservation: true,
+      lowerProofRungsRemainLowerUntilReplicaReport: true,
+    },
+    boundary: {
+      opensSwarmBySourceCommand: true,
+      opensCorestoreBySourceCommand: true,
+      writesDurableHistoryBySourceCommand: true,
+      replicaReadProvenByThisArtifact: false,
+      acceptsCanonicalHistory: false,
+      admitsLayerEvidence: false,
+      interpretsRbc: false,
+      grantsAuthority: false,
+      publishesToMesh: false,
     },
   };
 }
@@ -646,6 +897,188 @@ export async function runEdgeLayerSeamHistoryHyperswarmReader(
     await closeSwarmQuietly(swarmB);
     await closeConcernQuietly(replica);
     await closeConcernQuietly(source);
+  }
+}
+
+export async function openEdgeLayerSeamHistoryPublicDeviceSourcePublisher(
+  options: OpenEdgeLayerSeamHistoryPublicDeviceSourcePublisherOptions,
+): Promise<EdgeLayerSeamHistoryPublicDeviceSourcePublisherHandle> {
+  const source = await openConcernCores({
+    storageDir: options.storageDir,
+    concern: EDGE_LAYER_SEAM_HISTORY_HYPERSWARM_READER_CONCERN,
+    namespaceParts: options.namespaceParts,
+  });
+  const primaryKey = source.lease.store.primaryKey as Buffer | undefined;
+  if (!primaryKey) {
+    await source.close();
+    throw new Error("missing_primary_key_for_edge_layer_seam_history_public_source_device");
+  }
+
+  let swarm: ReplicationSwarmLike | undefined;
+  let discovery: ReturnType<ReplicationSwarmLike["join"]> | undefined;
+  let closed = false;
+
+  try {
+    const record = buildDurableRecord({
+      recordId: options.recordId,
+      recordedAt: options.recordedAt ?? options.emittedAt,
+      seamHistory: options.seamHistory,
+    });
+    await appendConcernRecord(source, "exchange-artifacts", record);
+
+    swarm = await options.createSwarm(Buffer.alloc(32, 0x41));
+    swarm.on("connection", (socket) => {
+      source.lease.store.replicate(socket);
+    });
+
+    const topic = createReaderTopic(options.namespaceParts ?? []);
+    const done = typeof source.lease.store.findingPeers === "function"
+      ? source.lease.store.findingPeers()
+      : undefined;
+    try {
+      discovery = swarm.join(topic, DEFAULT_JOIN_OPTIONS);
+      await waitForSwarmFlush(
+        swarm,
+        options.flushTimeoutMs ?? DEFAULT_SWARM_FLUSH_TIMEOUT_MS,
+        "edge-layer-seam-history-public-source-device-swarm",
+      );
+      await discovery?.flushed?.();
+    } finally {
+      done?.();
+    }
+
+    const manifest = buildEdgeLayerSeamHistoryPublicDeviceSourceManifest({
+      emittedAt: options.emittedAt,
+      namespaceParts: source.namespaceParts,
+      sourceCoreKeyHex: Buffer.from(primaryKey).toString("hex"),
+      topicHex: topic.toString("hex"),
+      record,
+    });
+
+    return {
+      manifest,
+      record,
+      close: async () => {
+        if (closed) return;
+        closed = true;
+        await Promise.resolve(discovery?.destroy?.()).catch(() => {});
+        await closeSwarmQuietly(swarm);
+        await closeConcernQuietly(source);
+      },
+    };
+  } catch (error) {
+    await Promise.resolve(discovery?.destroy?.()).catch(() => {});
+    await closeSwarmQuietly(swarm);
+    await closeConcernQuietly(source);
+    throw error;
+  }
+}
+
+export async function runEdgeLayerSeamHistoryPublicDeviceReplicaReader(
+  options: RunEdgeLayerSeamHistoryPublicDeviceReplicaReaderOptions,
+): Promise<EdgeLayerSeamHistoryPublicDeviceReplicaReport> {
+  const sourceCoreKey = Buffer.from(options.sourceManifest.source.sourceCoreKeyHex, "hex");
+  const topic = Buffer.from(options.sourceManifest.source.topicHex, "hex");
+  const replica = await openConcernCores({
+    storageDir: options.storageDir,
+    concern: EDGE_LAYER_SEAM_HISTORY_HYPERSWARM_READER_CONCERN,
+    namespaceParts: options.namespaceParts,
+    rootOptions: {
+      primaryKey: sourceCoreKey,
+      unsafe: true,
+      writable: false,
+    },
+  });
+
+  let swarm: ReplicationSwarmLike | undefined;
+  let discovery: ReturnType<ReplicationSwarmLike["join"]> | undefined;
+
+  try {
+    swarm = await options.createSwarm(Buffer.alloc(32, 0x42));
+    swarm.on("connection", (socket) => {
+      replica.lease.store.replicate(socket);
+    });
+
+    const done = typeof replica.lease.store.findingPeers === "function"
+      ? replica.lease.store.findingPeers()
+      : undefined;
+    try {
+      discovery = swarm.join(topic, DEFAULT_JOIN_OPTIONS);
+      await waitForSwarmFlush(
+        swarm,
+        options.flushTimeoutMs ?? DEFAULT_SWARM_FLUSH_TIMEOUT_MS,
+        "edge-layer-seam-history-public-replica-device-swarm",
+      );
+      await discovery?.flushed?.();
+    } finally {
+      done?.();
+    }
+
+    await waitFor(async () => {
+      await discovery?.refresh?.(DEFAULT_JOIN_OPTIONS);
+      await discovery?.flushed?.();
+      await refreshReplica(replica);
+      const records = await readDurableRecords(replica);
+      return records.some((candidate) =>
+        candidate.recordId === options.sourceManifest.source.sourceRecordId &&
+        candidate.seamHistoryHash === options.sourceManifest.source.seamHistoryHash
+      );
+    }, options.replicationTimeoutMs ?? DEFAULT_REPLICATION_TIMEOUT_MS, 250);
+
+    const replicaRecords = await readDurableRecords(replica);
+    const replicatedRecord = replicaRecords.find((candidate) =>
+      candidate.recordId === options.sourceManifest.source.sourceRecordId &&
+      candidate.seamHistoryHash === options.sourceManifest.source.seamHistoryHash
+    );
+    if (!replicatedRecord) {
+      throw new Error("public_device_replicated_edge_layer_seam_history_record_not_found");
+    }
+
+    const observationResult = buildEdgeLayerSeamHistoryObservationResult({
+      seamHistory: replicatedRecord.seamHistory,
+      emittedAt: options.emittedAt,
+      sourcePath: replicatedRecord.recordId,
+      inputReadByCausalSubstrate: true,
+      durableCorestoreHistoryRead: true,
+      dhtOrHyperswarmInputObservedByCausalSubstrate: true,
+      replicatedViaHyperswarmTransport: true,
+      publicHyperswarmInputObservedByCausalSubstrate: true,
+    });
+
+    return {
+      artifactKind: EDGE_LAYER_SEAM_HISTORY_PUBLIC_DEVICE_REPLICA_REPORT_ARTIFACT_KIND,
+      schema: EDGE_LAYER_SEAM_HISTORY_PUBLIC_DEVICE_REPLICA_REPORT_SCHEMA,
+      schemaVersion: 1,
+      emittedAt: options.emittedAt,
+      namespaceParts: replica.namespaceParts,
+      sourceManifest: options.sourceManifest,
+      replicatedRecord,
+      observationResult,
+      readerProof: {
+        inputReadByCausalSubstrate: true,
+        durableCorestoreHistoryRead: true,
+        dhtOrHyperswarmInputObservedByCausalSubstrate: true,
+        replicatedViaHyperswarmTransport: true,
+        publicHyperswarmInputObservedByCausalSubstrate: true,
+        sourceManifestConsumed: true,
+        sourceCoreKeyHex: options.sourceManifest.source.sourceCoreKeyHex,
+        replicaCoreKeyHex: Buffer.from(replica.lease.store.primaryKey).toString("hex"),
+        topicHex: options.sourceManifest.source.topicHex,
+        replicatedRecordCount: replicaRecords.length,
+      },
+      boundary: {
+        observationOnly: true,
+        acceptsCanonicalHistory: false,
+        admitsLayerEvidence: false,
+        interpretsRbc: false,
+        grantsAuthority: false,
+        publishesToMesh: false,
+      },
+    };
+  } finally {
+    await Promise.resolve(discovery?.destroy?.()).catch(() => {});
+    await closeSwarmQuietly(swarm);
+    await closeConcernQuietly(replica);
   }
 }
 
