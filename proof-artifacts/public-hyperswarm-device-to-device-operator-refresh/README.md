@@ -59,6 +59,17 @@ at refreshed public-run material, preserve request/receipt refs and public
 source proof labels, reject configured-bootstrap evidence, and do not claim a
 new live swarm run.
 
+The refreshed proof index was then used to prepare the next public-swarm-only
+device objective:
+
+- `operator-selected-public-refresh-command.json`
+- `public-refresh-readiness-gate.json`
+
+Those artifacts are instructions/readiness only. They name
+`proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/` as
+the next run output directory, require public Hyperswarm, and require
+`CAUSAL_SUBSTRATE_HYPERSWARM_BOOTSTRAP` to be unset.
+
 ## Prepared Public Commands
 
 Run the source command on `platform-lab`:

@@ -1,0 +1,145 @@
+{
+  "artifactKind": "causal-edge-layer-seam-history-operator-public-refresh-command",
+  "schema": "causal-substrate/edge-layer-seam-history-operator-public-refresh-command/v1",
+  "schemaVersion": 1,
+  "artifactId": "causal-edge-layer-seam-history-operator-public-refresh-command:a16f40000d0b99be",
+  "emittedAt": "2026-06-01T08:30:00.000Z",
+  "sourcePaths": {
+    "publicSeamProofIndex": "/home/zevilz/work/mesh-ecology/causal-substrate/proof-artifacts/public-hyperswarm-device-to-device-operator-refresh/public-seam-proof-index.json",
+    "publicSwarmRefreshDecision": "/home/zevilz/work/mesh-ecology/causal-substrate/proof-artifacts/public-hyperswarm-device-to-device-operator-refresh/public-swarm-refresh-decision.json"
+  },
+  "operatorSelection": {
+    "operatorSelectedRefresh": true,
+    "refreshCommandPrepared": true,
+    "publicRefreshExecutedByThisCommand": false
+  },
+  "commandPlan": {
+    "refreshRunId": "public-hyperswarm-device-to-device-operator-refresh-next",
+    "outputDir": "proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next",
+    "namespace": "public,device,seam-history,operator-refresh,next",
+    "sourceDevice": "platform-lab",
+    "replicaDevice": "mesh-lab",
+    "sourceKeepsAliveUntilReplicaCompletes": true
+  },
+  "prerequisites": {
+    "publicHyperswarmOnly": true,
+    "noBootstrapOverride": true,
+    "bootstrapOverrideAllowed": false,
+    "requiredEnvironment": [
+      "CAUSAL_SUBSTRATE_REAL_HYPERSWARM=1",
+      "CAUSAL_SUBSTRATE_HYPERSWARM_PUBLIC=1"
+    ],
+    "forbiddenEnvironment": [
+      "CAUSAL_SUBSTRATE_HYPERSWARM_BOOTSTRAP"
+    ],
+    "sourceDevice": "platform-lab",
+    "replicaDevice": "mesh-lab"
+  },
+  "commands": {
+    "sourceDeviceCommand": "env -u CAUSAL_SUBSTRATE_HYPERSWARM_BOOTSTRAP CAUSAL_SUBSTRATE_REAL_HYPERSWARM=1 CAUSAL_SUBSTRATE_HYPERSWARM_PUBLIC=1 npx tsx scripts/run-edge-layer-seam-history-public-source-device.ts --input proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/seam-history-input.json --manifest-output proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/public-source-manifest.json --storage-dir .tmp/public-hyperswarm-device-to-device-operator-refresh-next-source --namespace public,device,seam-history,operator-refresh,next --keep-alive-ms 600000",
+    "replicaDeviceCommand": "env -u CAUSAL_SUBSTRATE_HYPERSWARM_BOOTSTRAP CAUSAL_SUBSTRATE_REAL_HYPERSWARM=1 CAUSAL_SUBSTRATE_HYPERSWARM_PUBLIC=1 npx tsx scripts/run-edge-layer-seam-history-public-replica-device.ts --manifest proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/public-source-manifest.json --report-output proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/public-replica-reader-report.json --storage-dir .tmp/public-hyperswarm-device-to-device-operator-refresh-next-replica --namespace public,device,seam-history,operator-refresh,next",
+    "downstreamCommands": [
+      "npx tsx scripts/derive-edge-layer-seam-history-handoff-bundle-from-hyperswarm-report.ts --input-report proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/public-replica-reader-report.json --report-readback-output proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/public-replica-reader-report-readback.json --handoff-bundle-output proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/edge-projection-handoff-bundle.json",
+      "npx tsx scripts/readback-edge-layer-seam-history-handoff-bundle.ts --input-bundle proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/edge-projection-handoff-bundle.json --readback-output proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/edge-projection-handoff-bundle-readback.json",
+      "npx tsx scripts/summarize-edge-layer-seam-history-proof.ts --input proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/public-source-manifest.json --input proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/public-replica-reader-report.json --input proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/public-replica-reader-report-readback.json --input proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/edge-projection-handoff-bundle.json --input proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/edge-projection-handoff-bundle-readback.json --output proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/edge-layer-seam-history-proof-summary.json",
+      "npx tsx scripts/check-edge-layer-seam-history-public-artifacts.ts --run-dir proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next --output proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/public-artifact-reproducibility-check.json"
+    ]
+  },
+  "expectedOutputs": [
+    "proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/seam-history-input.json",
+    "proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/public-source-manifest.json",
+    "proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/public-replica-reader-report.json",
+    "proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/public-replica-reader-report-readback.json",
+    "proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/edge-projection-handoff-bundle.json",
+    "proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/edge-projection-handoff-bundle-readback.json",
+    "proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/edge-layer-seam-history-proof-summary.json",
+    "proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/public-artifact-reproducibility-check.json"
+  ],
+  "sourceRefs": {
+    "requestIds": [
+      "edge-layer-report-only-seam-request:public-hyperswarm-single-machine-2026-06-01:linked",
+      "edge-layer-report-only-seam-request:public-hyperswarm-single-machine-2026-06-01:unlinked"
+    ],
+    "requestHashes": [
+      "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+    ],
+    "receiptIds": [
+      "layer-report-only-edge-seam-receipt:public-hyperswarm-single-machine-2026-06-01:linked",
+      "layer-report-only-edge-seam-receipt:public-hyperswarm-single-machine-2026-06-01:unlinked"
+    ],
+    "receiptHashes": [
+      "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+    ],
+    "sourceRepos": [
+      "mesh-ecology-edge",
+      "mesh-ecology-layer"
+    ],
+    "durableRefs": [
+      "corestore:edge-layer-seam-history:public-single-machine:request:0",
+      "corestore:edge-layer-seam-history:public-single-machine:request:2",
+      "corestore:edge-layer-seam-history:public-single-machine:receipt:1",
+      "corestore:edge-layer-seam-history:public-single-machine:receipt:3"
+    ],
+    "writerRefs": [
+      "autobase-writer:edge-public-hyperswarm-single-machine",
+      "autobase-writer:layer-public-hyperswarm-single-machine"
+    ]
+  },
+  "proof": {
+    "strongestSourceProofRungObserved": "public_hyperswarm_replicated_durable_seam_history_observation",
+    "strongestSourceProofLabelObserved": "public_hyperswarm_durable_seam_history_material",
+    "commandOperationProofRung": "local_operator_refresh_command_preparation_over_saved_public_hyperswarm_artifacts",
+    "instructionsOnly": true,
+    "liveSwarmRunClaimedByThisCommand": false,
+    "publicRefreshExecutedByThisCommand": false,
+    "proofRungUpgradeClaimed": false
+  },
+  "validation": {
+    "status": "edge-layer-seam-history-operator-public-refresh-command-ready",
+    "operatorSelectedRefresh": true,
+    "publicSeamProofIndexReady": true,
+    "publicSwarmRefreshDecisionReady": true,
+    "sourceRefsPreserved": true,
+    "publicSourceProofRungPreserved": true,
+    "commandsNamePublicSwarm": true,
+    "commandsUnsetBootstrapOverride": true,
+    "expectedOutputsNamed": true,
+    "noCanonicalHistoryClaim": true,
+    "noLayerAdmissionClaim": true,
+    "noLayerEvidenceAdmissionClaim": true,
+    "noRbcInterpretationClaim": true,
+    "noAuthorityClaim": true,
+    "noMeshPublicationClaim": true,
+    "noEdgeProjectionWriteClaim": true,
+    "noProductionContinuityWriteClaim": true,
+    "noLiveSwarmClaimByThisCommand": true,
+    "issues": []
+  },
+  "boundary": {
+    "refreshCommandArtifactOnly": true,
+    "readsSavedArtifactsOnly": true,
+    "opensSwarm": false,
+    "opensCorestore": false,
+    "runsPublicRefresh": false,
+    "callsEdge": false,
+    "callsLayer": false,
+    "writesEdgeProjection": false,
+    "writesLayerEvidence": false,
+    "acceptsCanonicalHistory": false,
+    "admitsLayerEvidence": false,
+    "decidesLayerAdmission": false,
+    "interpretsRbc": false,
+    "grantsAuthority": false,
+    "publishesToMesh": false,
+    "writesProductionContinuity": false
+  },
+  "reviewStatus": "edge-layer-seam-history-operator-public-refresh-command-ready",
+  "warnings": [
+    "operator-public-refresh-command-is-instructions-only",
+    "operator-public-refresh-command-does-not-run-public-swarm",
+    "operator-public-refresh-command-does-not-upgrade-saved-public-proof"
+  ],
+  "rejections": []
+}

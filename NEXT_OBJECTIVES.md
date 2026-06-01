@@ -141,6 +141,12 @@ The local supplied-material lane can now:
   decision and proof index, preserving source refs and public source proof
   labels while rejecting configured-bootstrap evidence and projection or
   authority overclaims.
+- use the refreshed proof index to prepare the next public-swarm-only device
+  objective, including an instructions-only operator command, readiness gate,
+  and local input package under
+  `proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/`;
+  this preparation keeps `CAUSAL_SUBSTRATE_HYPERSWARM_BOOTSTRAP` unset and
+  remains below live swarm proof until the device commands actually run.
 
 Strongest routinely proven rung in normal tests:
 `local_causal_observation_over_supplied_seam_history_material`.
@@ -158,13 +164,15 @@ run:
 
 ## Next Outward Moves
 
-The current refreshed saved-artifact readiness list is complete. Build the next
-list around a new explicit public swarm objective only if the operator chooses
-to run one:
+The current refreshed saved-artifact readiness list is complete. The next
+prepared public-swarm-only objective exists but has not been run. Build the
+next list around either running that public device objective or handing the
+current proof index to a consumer:
 
-- prepare the next public-swarm-only device objective from the refreshed proof
-  index, with `CAUSAL_SUBSTRATE_HYPERSWARM_BOOTSTRAP` unset and no testnet or
-  configured bootstrap;
+- run the prepared next public device objective from
+  `proof-artifacts/public-hyperswarm-device-to-device-operator-refresh/operator-selected-public-refresh-command.json`
+  on real public Hyperswarm only, with `CAUSAL_SUBSTRATE_HYPERSWARM_BOOTSTRAP`
+  unset and no testnet or configured bootstrap;
 - optionally hand `public-seam-proof-index.json` to Edge, Layer, or Spine as an
   observation-only consumer index;
 - if Edge or Layer provides fresh public endpoint/history material, prefer a
