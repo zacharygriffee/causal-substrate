@@ -122,6 +122,12 @@ npx tsx scripts/prepare-edge-layer-seam-history-operator-public-refresh-command.
   --refresh-output-dir proof-artifacts/public-hyperswarm-device-to-device-operator-refresh
 ```
 
+```bash
+npx tsx scripts/gate-edge-layer-seam-history-public-refresh-readiness.ts \
+  --run-dir proof-artifacts/public-hyperswarm-device-to-device-2026-06-01 \
+  --output proof-artifacts/public-hyperswarm-device-to-device-2026-06-01/public-refresh-readiness-gate.json
+```
+
 ## Result
 
 The replica report preserves:
@@ -180,6 +186,14 @@ is
 `local_operator_refresh_command_preparation_over_saved_public_hyperswarm_artifacts`;
 it is instructions-only and does not run public swarm, open Corestore, call
 Edge or Layer, write projection state, or upgrade proof.
+
+The public refresh readiness gate reads the prepared command artifact and
+marks the prepared public commands as operator-runnable only when the command
+artifact remains public-swarm-only, bootstrap-unset, source-ref-preserving, and
+instructions-only. Its operation rung is
+`local_readiness_gate_over_operator_public_refresh_command_artifact`; it does
+not run public swarm, open Corestore, call Edge or Layer, write projection
+state, or upgrade proof.
 
 ## Boundary
 

@@ -62,4 +62,5 @@ export * from "./adapters/edge-layer-seam-history-proof-summary-consumer-readbac
 export * from "./adapters/edge-layer-seam-history-public-swarm-refresh-decision.js";
 export * from "./adapters/edge-layer-seam-history-public-seam-proof-index.js";
 export * from "./adapters/edge-layer-seam-history-operator-public-refresh-command.js";
+export * from "./adapters/edge-layer-seam-history-public-refresh-readiness-gate.js";
 export * from "./prototypes/continuity-workstation.js";

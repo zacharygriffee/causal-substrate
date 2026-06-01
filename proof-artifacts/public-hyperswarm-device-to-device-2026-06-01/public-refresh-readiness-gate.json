@@ -1,0 +1,114 @@
+{
+  "artifactKind": "causal-edge-layer-seam-history-public-refresh-readiness-gate",
+  "schema": "causal-substrate/edge-layer-seam-history-public-refresh-readiness-gate/v1",
+  "schemaVersion": 1,
+  "artifactId": "causal-edge-layer-seam-history-public-refresh-readiness-gate:7fbe1665899f5454",
+  "emittedAt": "2026-06-01T19:43:00.000Z",
+  "sourcePaths": {
+    "operatorPublicRefreshCommand": "/home/zevilz/work/mesh-ecology/causal-substrate/proof-artifacts/public-hyperswarm-device-to-device-2026-06-01/operator-selected-public-refresh-command.json"
+  },
+  "readiness": {
+    "status": "edge-layer-seam-history-public-refresh-readiness-gate-ready",
+    "operatorMayRunPreparedPublicRefreshCommands": true,
+    "preparedCommandArtifactReady": true,
+    "publicRefreshRunByThisGate": false,
+    "rationale": [
+      "operator-selected public refresh command artifact is ready for an operator-run public swarm refresh"
+    ]
+  },
+  "commandSummary": {
+    "refreshRunId": "public-hyperswarm-device-to-device-operator-refresh",
+    "outputDir": "proof-artifacts/public-hyperswarm-device-to-device-operator-refresh",
+    "namespace": "public,device,seam-history,operator-refresh",
+    "sourceDevice": "platform-lab",
+    "replicaDevice": "mesh-lab",
+    "expectedOutputCount": 8
+  },
+  "sourceRefs": {
+    "requestIds": [
+      "edge-layer-report-only-seam-request:public-hyperswarm-single-machine-2026-06-01:linked",
+      "edge-layer-report-only-seam-request:public-hyperswarm-single-machine-2026-06-01:unlinked"
+    ],
+    "requestHashes": [
+      "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+    ],
+    "receiptIds": [
+      "layer-report-only-edge-seam-receipt:public-hyperswarm-single-machine-2026-06-01:linked",
+      "layer-report-only-edge-seam-receipt:public-hyperswarm-single-machine-2026-06-01:unlinked"
+    ],
+    "receiptHashes": [
+      "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+    ],
+    "sourceRepos": [
+      "mesh-ecology-edge",
+      "mesh-ecology-layer"
+    ],
+    "durableRefs": [
+      "corestore:edge-layer-seam-history:public-single-machine:request:0",
+      "corestore:edge-layer-seam-history:public-single-machine:request:2",
+      "corestore:edge-layer-seam-history:public-single-machine:receipt:1",
+      "corestore:edge-layer-seam-history:public-single-machine:receipt:3"
+    ],
+    "writerRefs": [
+      "autobase-writer:edge-public-hyperswarm-single-machine",
+      "autobase-writer:layer-public-hyperswarm-single-machine"
+    ]
+  },
+  "proof": {
+    "strongestSourceProofRungObserved": "public_hyperswarm_replicated_durable_seam_history_observation",
+    "strongestSourceProofLabelObserved": "public_hyperswarm_durable_seam_history_material",
+    "gateOperationProofRung": "local_readiness_gate_over_operator_public_refresh_command_artifact",
+    "readsPreparedCommandOnly": true,
+    "liveSwarmRunClaimedByThisGate": false,
+    "publicRefreshExecutedByThisGate": false,
+    "proofRungUpgradeClaimed": false
+  },
+  "validation": {
+    "status": "edge-layer-seam-history-public-refresh-readiness-gate-ready",
+    "operatorSelectedRefresh": true,
+    "commandArtifactReady": true,
+    "commandArtifactInstructionsOnly": true,
+    "sourceRefsPreserved": true,
+    "publicSourceProofRungPreserved": true,
+    "publicSwarmCommandsPresent": true,
+    "bootstrapOverrideRejected": true,
+    "expectedOutputsNamed": true,
+    "noCanonicalHistoryClaim": true,
+    "noLayerAdmissionClaim": true,
+    "noLayerEvidenceAdmissionClaim": true,
+    "noRbcInterpretationClaim": true,
+    "noAuthorityClaim": true,
+    "noMeshPublicationClaim": true,
+    "noEdgeProjectionWriteClaim": true,
+    "noProductionContinuityWriteClaim": true,
+    "noLiveSwarmClaimByThisGate": true,
+    "issues": []
+  },
+  "boundary": {
+    "readinessGateOnly": true,
+    "readsSavedCommandArtifactOnly": true,
+    "opensSwarm": false,
+    "opensCorestore": false,
+    "runsPublicRefresh": false,
+    "callsEdge": false,
+    "callsLayer": false,
+    "writesEdgeProjection": false,
+    "writesLayerEvidence": false,
+    "acceptsCanonicalHistory": false,
+    "admitsLayerEvidence": false,
+    "decidesLayerAdmission": false,
+    "interpretsRbc": false,
+    "grantsAuthority": false,
+    "publishesToMesh": false,
+    "writesProductionContinuity": false
+  },
+  "reviewStatus": "edge-layer-seam-history-public-refresh-readiness-gate-ready",
+  "warnings": [
+    "public-refresh-readiness-gate-reads-prepared-command-only",
+    "public-refresh-readiness-gate-does-not-run-public-swarm",
+    "public-refresh-readiness-gate-does-not-upgrade-saved-public-proof"
+  ],
+  "rejections": []
+}
