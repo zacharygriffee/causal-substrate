@@ -558,6 +558,64 @@ test("outward lane completion gate marks observation lane complete without overc
   assert.deepEqual(gate.issues, []);
 });
 
+test("outward lane completion gate rejects incomplete seam material without projection suitability", () => {
+  const seamHistory = {
+    ...operationShapedSeamHistory(),
+    historyId: "layer-owned-edge-seam-status:completion-negative",
+    historyHash: `sha256:${"8".repeat(64)}`,
+    pairs: [
+      {
+        request: {
+          sourceRepo: "mesh-ecology-edge",
+          requestId: "edge-layer-report-only-seam-request:completion-negative:damaged",
+        },
+        receipt: {
+          sourceRepo: "mesh-ecology-layer",
+          sourceRequestId: "edge-layer-report-only-seam-request:completion-negative:other",
+        },
+        linkage: {
+          linked: false,
+          source: "receipt_source_request_refs",
+        },
+      },
+    ],
+  };
+  const result = buildEdgeLayerSeamHistoryObservationResult({
+    seamHistory,
+    emittedAt: "2026-05-31T12:04:05.000Z",
+    sourcePath: "layer-owned-edge-seam-status:completion-negative",
+    inputReadByCausalSubstrate: true,
+  });
+
+  const gate = buildEdgeLayerSeamHistoryOutwardLaneCompletionGate(result);
+
+  assertEdgeLayerSeamHistoryOutwardLaneCompletionGate(gate);
+  assert.equal(gate.completion.currentLaneComplete, false);
+  assert.equal(gate.completion.suitableForEdgeProjectionHandoff, false);
+  assert.equal(gate.completion.suitableForLayerReceiptRuntimeEvidenceReview, false);
+  assert.equal(gate.checks.seamHistoryInputConsumed, true);
+  assert.equal(gate.checks.linkedPairClassified, false);
+  assert.equal(gate.checks.damagedOrUnlinkedPairClassified, true);
+  assert.equal(gate.checks.sourceIdsAndHashesPreserved, false);
+  assert.equal(gate.checks.durableRefsPreserved, false);
+  assert.equal(gate.checks.writerRefsPreserved, false);
+  assert.deepEqual(gate.sourceRefs.requestIds, [
+    "edge-layer-report-only-seam-request:completion-negative:damaged",
+  ]);
+  assert.deepEqual(gate.sourceRefs.requestHashes, []);
+  assert.deepEqual(gate.sourceRefs.receiptIds, []);
+  assert.deepEqual(gate.sourceRefs.receiptHashes, []);
+  assert.equal(gate.nextConsumers.edgeMayProjectObservationCandidate, false);
+  assert.equal(gate.nextConsumers.layerMayReviewReceiptRuntimeEvidenceLater, false);
+  assert.equal(gate.boundary.acceptsCanonicalHistory, false);
+  assert.equal(gate.boundary.admitsLayerEvidence, false);
+  assert.equal(gate.boundary.interpretsRbc, false);
+  assert.equal(gate.boundary.grantsAuthority, false);
+  assert.ok(gate.issues.includes("source-ids-or-hashes-missing"));
+  assert.ok(gate.issues.includes("source-durable-refs-missing"));
+  assert.ok(gate.issues.includes("source-writer-refs-missing"));
+});
+
 test("supplied material guardrail matrix keeps local input from self-claiming higher lanes", () => {
   const seamHistory = operationShapedSeamHistory();
   seamHistory.claimedProof = {
