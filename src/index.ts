@@ -60,4 +60,5 @@ export * from "./adapters/edge-layer-seam-history-public-artifact-reproducibilit
 export * from "./adapters/edge-layer-seam-history-observation-to-edge-projection-contract.js";
 export * from "./adapters/edge-layer-seam-history-proof-summary-consumer-readback.js";
 export * from "./adapters/edge-layer-seam-history-public-swarm-refresh-decision.js";
+export * from "./adapters/edge-layer-seam-history-public-seam-proof-index.js";
 export * from "./prototypes/continuity-workstation.js";

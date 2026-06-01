@@ -1,0 +1,182 @@
+{
+  "artifactKind": "causal-edge-layer-seam-history-public-seam-proof-index",
+  "schema": "causal-substrate/edge-layer-seam-history-public-seam-proof-index/v1",
+  "schemaVersion": 1,
+  "artifactId": "causal-edge-layer-seam-history-public-seam-proof-index:504174a6cacbb2f9",
+  "emittedAt": "2026-06-01T19:22:00.000Z",
+  "runId": "public-hyperswarm-device-to-device-2026-06-01",
+  "runKind": "device_to_device_public_hyperswarm",
+  "indexOperation": {
+    "indexOnly": true,
+    "duplicatesArtifactBodies": false,
+    "artifactPointersOnly": true,
+    "savedArtifactIndexOnly": true
+  },
+  "artifactPointers": {
+    "publicRunDir": "/home/zevilz/work/mesh-ecology/causal-substrate/proof-artifacts/public-hyperswarm-device-to-device-2026-06-01",
+    "sourceManifest": "/home/zevilz/work/mesh-ecology/causal-substrate/proof-artifacts/public-hyperswarm-device-to-device-2026-06-01/public-source-manifest.json",
+    "replicaReaderReport": "/home/zevilz/work/mesh-ecology/causal-substrate/proof-artifacts/public-hyperswarm-device-to-device-2026-06-01/public-replica-reader-report.json",
+    "reproducibilityCheck": "/home/zevilz/work/mesh-ecology/causal-substrate/proof-artifacts/public-hyperswarm-device-to-device-2026-06-01/public-artifact-reproducibility-check.json",
+    "edgeHandoffBundle": "/home/zevilz/work/mesh-ecology/causal-substrate/proof-artifacts/public-hyperswarm-device-to-device-2026-06-01/edge-projection-handoff-bundle.json",
+    "observationToEdgeContract": "/home/zevilz/work/mesh-ecology/causal-substrate/proof-artifacts/public-hyperswarm-device-to-device-2026-06-01/observation-to-edge-projection-contract.json",
+    "proofSummaryConsumerReadback": "/home/zevilz/work/mesh-ecology/causal-substrate/proof-artifacts/public-hyperswarm-device-to-device-2026-06-01/proof-summary-consumer-readback.json",
+    "publicSwarmRefreshDecision": "/home/zevilz/work/mesh-ecology/causal-substrate/proof-artifacts/public-hyperswarm-device-to-device-2026-06-01/public-swarm-refresh-decision.json"
+  },
+  "indexedArtifacts": [
+    {
+      "role": "public_source_manifest",
+      "path": "/home/zevilz/work/mesh-ecology/causal-substrate/proof-artifacts/public-hyperswarm-device-to-device-2026-06-01/public-source-manifest.json",
+      "artifactKind": "edge-layer-seam-history-public-device-source-manifest",
+      "schema": "causal-substrate/edge-layer-seam-history-public-device-source-manifest/v1"
+    },
+    {
+      "role": "public_replica_reader_report",
+      "path": "/home/zevilz/work/mesh-ecology/causal-substrate/proof-artifacts/public-hyperswarm-device-to-device-2026-06-01/public-replica-reader-report.json",
+      "artifactKind": "edge-layer-seam-history-public-device-replica-report",
+      "schema": "causal-substrate/edge-layer-seam-history-public-device-replica-report/v1",
+      "proofRung": "public_hyperswarm_replicated_durable_seam_history_observation",
+      "proofLabel": "public_hyperswarm_durable_seam_history_material"
+    },
+    {
+      "role": "public_artifact_reproducibility_check",
+      "path": "/home/zevilz/work/mesh-ecology/causal-substrate/proof-artifacts/public-hyperswarm-device-to-device-2026-06-01/public-artifact-reproducibility-check.json",
+      "artifactKind": "causal-edge-layer-seam-history-public-artifact-reproducibility",
+      "schema": "causal-substrate/edge-layer-seam-history-public-artifact-reproducibility/v1",
+      "artifactId": "causal-edge-layer-seam-history-public-artifact-reproducibility:344973fa7707a348",
+      "reviewStatus": "edge-layer-seam-history-public-artifacts-reproducible",
+      "proofRung": "public_hyperswarm_replicated_durable_seam_history_observation",
+      "proofLabel": "public_hyperswarm_durable_seam_history_material"
+    },
+    {
+      "role": "edge_handoff_bundle",
+      "path": "/home/zevilz/work/mesh-ecology/causal-substrate/proof-artifacts/public-hyperswarm-device-to-device-2026-06-01/edge-projection-handoff-bundle.json",
+      "artifactKind": "causal-edge-layer-seam-history-edge-projection-handoff-bundle",
+      "schema": "causal-substrate/edge-layer-seam-history-edge-projection-handoff-bundle/v1",
+      "artifactId": "causal-edge-layer-seam-history-edge-projection-handoff-bundle:ac42e1ced1a7b7b5",
+      "reviewStatus": "edge-layer-seam-history-edge-projection-handoff-bundle-ready"
+    },
+    {
+      "role": "observation_to_edge_projection_contract",
+      "path": "/home/zevilz/work/mesh-ecology/causal-substrate/proof-artifacts/public-hyperswarm-device-to-device-2026-06-01/observation-to-edge-projection-contract.json",
+      "artifactKind": "causal-edge-layer-seam-history-observation-to-edge-projection-contract",
+      "schema": "causal-substrate/edge-layer-seam-history-observation-to-edge-projection-contract/v1",
+      "artifactId": "causal-edge-layer-seam-history-observation-to-edge-projection-contract:6e4a054e16ff8250",
+      "reviewStatus": "edge-layer-seam-history-observation-to-edge-projection-contract-ready",
+      "proofRung": "public_hyperswarm_replicated_durable_seam_history_observation",
+      "proofLabel": "public_hyperswarm_durable_seam_history_material"
+    },
+    {
+      "role": "proof_summary_consumer_readback",
+      "path": "/home/zevilz/work/mesh-ecology/causal-substrate/proof-artifacts/public-hyperswarm-device-to-device-2026-06-01/proof-summary-consumer-readback.json",
+      "artifactKind": "causal-edge-layer-seam-history-proof-summary-consumer-readback",
+      "schema": "causal-substrate/edge-layer-seam-history-proof-summary-consumer-readback/v1",
+      "artifactId": "causal-edge-layer-seam-history-proof-summary-consumer-readback:292c7797e3d81a50",
+      "reviewStatus": "edge-layer-seam-history-proof-summary-consumer-readback-ready",
+      "proofRung": "public_hyperswarm_replicated_durable_seam_history_observation",
+      "proofLabel": "public_hyperswarm_durable_seam_history_material"
+    },
+    {
+      "role": "public_swarm_refresh_decision",
+      "path": "/home/zevilz/work/mesh-ecology/causal-substrate/proof-artifacts/public-hyperswarm-device-to-device-2026-06-01/public-swarm-refresh-decision.json",
+      "artifactKind": "causal-edge-layer-seam-history-public-swarm-refresh-decision",
+      "schema": "causal-substrate/edge-layer-seam-history-public-swarm-refresh-decision/v1",
+      "artifactId": "causal-edge-layer-seam-history-public-swarm-refresh-decision:b15d948708b939ec",
+      "reviewStatus": "edge-layer-seam-history-public-swarm-refresh-decision-ready",
+      "proofRung": "public_hyperswarm_replicated_durable_seam_history_observation",
+      "proofLabel": "public_hyperswarm_durable_seam_history_material"
+    }
+  ],
+  "preservedRefs": {
+    "requestIds": [
+      "edge-layer-report-only-seam-request:public-hyperswarm-single-machine-2026-06-01:linked",
+      "edge-layer-report-only-seam-request:public-hyperswarm-single-machine-2026-06-01:unlinked"
+    ],
+    "requestHashes": [
+      "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+    ],
+    "receiptIds": [
+      "layer-report-only-edge-seam-receipt:public-hyperswarm-single-machine-2026-06-01:linked",
+      "layer-report-only-edge-seam-receipt:public-hyperswarm-single-machine-2026-06-01:unlinked"
+    ],
+    "receiptHashes": [
+      "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+    ],
+    "sourceRepos": [
+      "mesh-ecology-edge",
+      "mesh-ecology-layer"
+    ],
+    "durableRefs": [
+      "corestore:edge-layer-seam-history:public-single-machine:request:0",
+      "corestore:edge-layer-seam-history:public-single-machine:request:2",
+      "corestore:edge-layer-seam-history:public-single-machine:receipt:1",
+      "corestore:edge-layer-seam-history:public-single-machine:receipt:3"
+    ],
+    "writerRefs": [
+      "autobase-writer:edge-public-hyperswarm-single-machine",
+      "autobase-writer:layer-public-hyperswarm-single-machine"
+    ]
+  },
+  "proof": {
+    "strongestSourceProofRungObserved": "public_hyperswarm_replicated_durable_seam_history_observation",
+    "strongestSourceProofLabelObserved": "public_hyperswarm_durable_seam_history_material",
+    "indexOperationProofRung": "local_index_over_saved_public_hyperswarm_seam_proof_artifacts",
+    "savedArtifactIndexOnly": true,
+    "liveSwarmRunClaimedByThisIndex": false,
+    "proofRungUpgradeClaimed": false
+  },
+  "consumerSuitability": {
+    "edgeMayConsumeAsObservationOnlyIndex": true,
+    "layerMayConsumeAsObservationOnlyFeedbackIndex": true,
+    "spineMayConsumeAsFamilyPressureIndex": true,
+    "projectionStateWritten": false,
+    "layerEvidenceAdmitted": false,
+    "canonicalHistoryClaimed": false
+  },
+  "validation": {
+    "status": "edge-layer-seam-history-public-seam-proof-index-ready",
+    "requiredArtifactsPresent": true,
+    "reproducibilityCheckReady": true,
+    "observationToEdgeContractReady": true,
+    "consumerReadbackReady": true,
+    "refreshDecisionReady": true,
+    "sourceRefsPreserved": true,
+    "proofLabelsPreserved": true,
+    "publicSourceProofRungPreserved": true,
+    "noCanonicalHistoryClaim": true,
+    "noLayerAdmissionClaim": true,
+    "noLayerEvidenceAdmissionClaim": true,
+    "noRbcInterpretationClaim": true,
+    "noAuthorityClaim": true,
+    "noMeshPublicationClaim": true,
+    "noEdgeProjectionWriteClaim": true,
+    "noProductionContinuityWriteClaim": true,
+    "noLiveSwarmClaimByThisIndex": true,
+    "issues": []
+  },
+  "boundary": {
+    "proofIndexOnly": true,
+    "readsSavedArtifactsOnly": true,
+    "opensSwarm": false,
+    "opensCorestore": false,
+    "callsEdge": false,
+    "callsLayer": false,
+    "writesEdgeProjection": false,
+    "writesLayerEvidence": false,
+    "acceptsCanonicalHistory": false,
+    "admitsLayerEvidence": false,
+    "decidesLayerAdmission": false,
+    "interpretsRbc": false,
+    "grantsAuthority": false,
+    "publishesToMesh": false,
+    "writesProductionContinuity": false
+  },
+  "reviewStatus": "edge-layer-seam-history-public-seam-proof-index-ready",
+  "warnings": [
+    "public-seam-proof-index-points-at-saved-artifacts-only",
+    "public-seam-proof-index-does-not-duplicate-artifact-bodies",
+    "public-seam-proof-index-does-not-upgrade-public-swarm-proof"
+  ],
+  "rejections": []
+}

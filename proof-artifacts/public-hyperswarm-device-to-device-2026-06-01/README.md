@@ -107,6 +107,12 @@ npx tsx scripts/decide-edge-layer-seam-history-public-swarm-refresh.ts \
   --output proof-artifacts/public-hyperswarm-device-to-device-2026-06-01/public-swarm-refresh-decision.json
 ```
 
+```bash
+npx tsx scripts/index-edge-layer-seam-history-public-proof.ts \
+  --run-dir proof-artifacts/public-hyperswarm-device-to-device-2026-06-01 \
+  --output proof-artifacts/public-hyperswarm-device-to-device-2026-06-01/public-seam-proof-index.json
+```
+
 ## Result
 
 The replica report preserves:
@@ -150,6 +156,12 @@ observation-to-Edge contract, and consumer readback, then recommends
 `local_refresh_decision_over_saved_public_hyperswarm_artifacts`; it does not run
 public swarm or prepare a refresh command unless an operator explicitly selects
 that later.
+
+The public seam proof index points Edge, Layer, and Spine at the saved public
+run, reproducibility check, Edge contract, consumer readback, and refresh
+decision without duplicating artifact bodies. Its operation rung is
+`local_index_over_saved_public_hyperswarm_seam_proof_artifacts`; it does not
+open swarm, open Corestore, or upgrade saved artifacts into a new live proof.
 
 ## Boundary
 
