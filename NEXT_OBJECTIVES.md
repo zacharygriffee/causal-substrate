@@ -13,19 +13,44 @@ Causal Substrate does not claim canonical truth, Layer admission, RBC
 interpretation, quorum satisfaction, Mesh publication, authority, or production
 continuity.
 
+## Completed Local Seam-History Observation Surface
+
+The local supplied-material lane can now:
+
+- consume supplied Edge/Layer seam-history material and emit bounded causal
+  observations;
+- classify linked request/receipt material as
+  `compatible_seam_happening`;
+- classify damaged or unlinked request/receipt material as
+  `unresolved_or_damaged_seam_happening`;
+- emit readback contracts, contract snapshots, completion gates, Edge
+  projection fixtures, Edge consumer fixtures, and Edge handoff bundles;
+- preserve request ids/hashes, receipt ids/hashes, source repos, durable refs,
+  writer refs, linkage status, proof labels, and non-claim boundaries;
+- expose Hyperswarm-readiness, real-run instructions, report readback, and
+  durable-record source-ref completeness surfaces without treating instructions
+  or supplied reports as live swarm proof.
+
+Strongest routinely proven rung in normal tests:
+`local_causal_observation_over_supplied_seam_history_material`.
+
+The real Hyperswarm reader remains a higher proof lane only when the
+environment-gated command actually runs against durable replicated material.
+
 ## Good Next Moves
 
 Choose work that improves bounded causal observation:
 
-- Keep local supplied JSON/file/stdin observation labeled
-  `local_supplied_material`.
-- Preserve request ids/hashes, receipt ids/hashes, source repos, durable refs,
-  writer refs, and linkage status in every result.
-- Improve readback contracts and guardrails for overclaim detection.
-- Prepare or run a separate DHT/Hyperswarm-derived seam-history input lane only
-  when it actually reads durable Edge/Layer seam history.
-- Make observation output easy for Edge to project as compatible, damaged, or
-  unresolved without granting Edge authority.
+- Add a JSON CLI output for the Edge handoff bundle if Edge wants a single file
+  rather than separate observation, snapshot, fixture, and gate artifacts.
+- Add negative cases for incomplete handoff bundles and report readbacks.
+- Add a checked command path for `CAUSAL_SUBSTRATE_REAL_HYPERSWARM=1` that
+  writes both the reader report and report readback artifact, then document the
+  exact resulting proof rung.
+- Accept a Layer-side receipt runtime/evidence report as adjacent causal input
+  only when Layer owns and labels that report; do not decide admission.
+- Add a narrow Edge-consumer contract test once Edge chooses the handoff bundle
+  shape it wants to project.
 
 ## Handoff Expectations
 
@@ -40,6 +65,9 @@ When handing material back to Edge, Layer, or Spine, include:
 - strongest proof rung;
 - non-claims and deferred attachment points.
 
+Edge may consume the handoff bundle or the consumer fixture as observation-only
+projection input. Causal Substrate still does not write Edge projection state.
+
 ## Look Outward When
 
 - Causal work is refining local fixtures while Edge/Layer have durable seam
@@ -53,3 +81,7 @@ When handing material back to Edge, Layer, or Spine, include:
 
 No swarm-carried communication, no seam proof. A Causal observation over
 supplied material is useful, but it is not DHT/Hyperswarm-derived seam proof.
+
+Instructions artifacts, readiness reports, static fixtures, JSON files, and
+operation-shaped report readbacks are lower proof rungs unless the reader
+actually consumed durable DHT/Hyperswarm-derived seam history.
