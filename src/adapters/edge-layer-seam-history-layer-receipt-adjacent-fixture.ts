@@ -15,10 +15,20 @@ export const CAUSAL_EDGE_LAYER_SEAM_HISTORY_LAYER_RECEIPT_ADJACENT_FIXTURE_SCHEM
 export const CAUSAL_EDGE_LAYER_SEAM_HISTORY_LAYER_RECEIPT_ADJACENT_FIXTURE_ARTIFACT_KIND =
   "causal-edge-layer-seam-history-layer-receipt-adjacent-fixture" as const;
 
+export const CAUSAL_EDGE_LAYER_SEAM_HISTORY_LAYER_RECEIPT_ADJACENT_FIXTURE_READBACK_SCHEMA =
+  "causal-substrate/edge-layer-seam-history-layer-receipt-adjacent-fixture-readback/v1" as const;
+
+export const CAUSAL_EDGE_LAYER_SEAM_HISTORY_LAYER_RECEIPT_ADJACENT_FIXTURE_READBACK_ARTIFACT_KIND =
+  "causal-edge-layer-seam-history-layer-receipt-adjacent-fixture-readback" as const;
+
 export type EdgeLayerSeamHistoryLayerReceiptAdjacentFixtureStatus =
   | "edge-layer-seam-history-layer-receipt-adjacent-fixture-ready"
   | "edge-layer-seam-history-layer-receipt-adjacent-fixture-incomplete"
   | "edge-layer-seam-history-layer-receipt-adjacent-fixture-invalid";
+
+export type EdgeLayerSeamHistoryLayerReceiptAdjacentFixtureReadbackStatus =
+  | "edge-layer-seam-history-layer-receipt-adjacent-fixture-readback-valid"
+  | "edge-layer-seam-history-layer-receipt-adjacent-fixture-readback-invalid";
 
 export interface EdgeLayerSeamHistoryLayerReceiptAdjacentFixture {
   artifactKind: typeof CAUSAL_EDGE_LAYER_SEAM_HISTORY_LAYER_RECEIPT_ADJACENT_FIXTURE_ARTIFACT_KIND;
@@ -102,6 +112,84 @@ export interface EdgeLayerSeamHistoryLayerReceiptAdjacentFixture {
     issues: string[];
   };
   reviewStatus: EdgeLayerSeamHistoryLayerReceiptAdjacentFixtureStatus;
+  warnings: string[];
+  rejections: string[];
+}
+
+export interface EdgeLayerSeamHistoryLayerReceiptAdjacentFixtureReadback {
+  artifactKind: typeof CAUSAL_EDGE_LAYER_SEAM_HISTORY_LAYER_RECEIPT_ADJACENT_FIXTURE_READBACK_ARTIFACT_KIND;
+  schema: typeof CAUSAL_EDGE_LAYER_SEAM_HISTORY_LAYER_RECEIPT_ADJACENT_FIXTURE_READBACK_SCHEMA;
+  schemaVersion: 1;
+  artifactId: string;
+  emittedAt: string;
+  source: {
+    sourceFixtureArtifactId?: string | undefined;
+    sourceFixtureStatus?: EdgeLayerSeamHistoryLayerReceiptAdjacentFixtureStatus | undefined;
+    seamHistoryObservationArtifactId?: string | undefined;
+    layerReceiptObservationArtifactId?: string | undefined;
+    fixtureProofRung?: "local_causal_observation_over_supplied_adjacent_observation_artifacts" | undefined;
+    fixtureProofLabel?: "local_supplied_seam_history_layer_receipt_adjacent_fixture" | undefined;
+  };
+  readback: {
+    fixtureReadable: boolean;
+    fixtureValid: boolean;
+    sourceObservationRefsPreserved: boolean;
+    matchedReceiptRefsPreserved: boolean;
+    matchedRequestRefsPreserved: boolean;
+    sourceReposPreserved: boolean;
+    sourceRefsPreserved: boolean;
+    proofLabelsPreserved: boolean;
+    nonClaimsPreserved: boolean;
+  };
+  preservedRefs: {
+    matchingSeamObservationIds: string[];
+    matchedReceiptIds: string[];
+    matchedReceiptHashes: string[];
+    matchedRequestIds: string[];
+    matchedRequestHashes: string[];
+    preservedSourceRepos: string[];
+    preservedSourceRefs: string[];
+  };
+  boundary: {
+    readbackOnly: true;
+    writesAdjacentFixture: false;
+    opensEdgeRuntime: false;
+    opensLayerRuntime: false;
+    callsEdge: false;
+    callsLayer: false;
+    writesEdgeProjection: false;
+    writesLayerEvidence: false;
+    acceptsCanonicalHistory: false;
+    admitsLayerEvidence: false;
+    decidesLayerAdmission: false;
+    interpretsRbc: false;
+    claimsQuorumSatisfaction: false;
+    grantsAuthority: false;
+    promotesReferents: false;
+    publishesToMesh: false;
+    writesProductionContinuity: false;
+  };
+  validation: {
+    status: EdgeLayerSeamHistoryLayerReceiptAdjacentFixtureReadbackStatus;
+    fixtureArtifactConsumed: boolean;
+    sourceObservationRefsPreserved: boolean;
+    matchedReceiptRefsPreserved: boolean;
+    matchedRequestRefsPreserved: boolean;
+    sourceReposPreserved: boolean;
+    sourceRefsPreserved: boolean;
+    proofLabelsPreserved: boolean;
+    nonClaimsPreserved: boolean;
+    noCanonicalHistoryClaim: true;
+    noLayerAdmissionClaim: true;
+    noLayerEvidenceAdmissionClaim: true;
+    noRbcInterpretationClaim: true;
+    noQuorumSatisfactionClaim: true;
+    noAuthorityClaim: true;
+    noMeshPublicationClaim: true;
+    noProductionContinuityWriteClaim: true;
+    issues: string[];
+  };
+  reviewStatus: EdgeLayerSeamHistoryLayerReceiptAdjacentFixtureReadbackStatus;
   warnings: string[];
   rejections: string[];
 }
@@ -221,6 +309,100 @@ export function buildEdgeLayerSeamHistoryLayerReceiptAdjacentFixture(input: {
   };
 }
 
+export function buildEdgeLayerSeamHistoryLayerReceiptAdjacentFixtureReadback(input: {
+  fixture: unknown;
+  emittedAt: string;
+  artifactId?: string | undefined;
+}): EdgeLayerSeamHistoryLayerReceiptAdjacentFixtureReadback {
+  const fixture = parseAdjacentFixture(input.fixture);
+  const issues = validateAdjacentFixtureReadback(fixture);
+  const status: EdgeLayerSeamHistoryLayerReceiptAdjacentFixtureReadbackStatus = issues.length === 0
+    ? "edge-layer-seam-history-layer-receipt-adjacent-fixture-readback-valid"
+    : "edge-layer-seam-history-layer-receipt-adjacent-fixture-readback-invalid";
+  const artifactId = input.artifactId ??
+    `causal-edge-layer-seam-history-layer-receipt-adjacent-fixture-readback:${hash(stableJson({
+      emittedAt: input.emittedAt,
+      sourceFixtureArtifactId: fixture?.artifactId,
+    })).slice(0, 16)}`;
+
+  return {
+    artifactKind: CAUSAL_EDGE_LAYER_SEAM_HISTORY_LAYER_RECEIPT_ADJACENT_FIXTURE_READBACK_ARTIFACT_KIND,
+    schema: CAUSAL_EDGE_LAYER_SEAM_HISTORY_LAYER_RECEIPT_ADJACENT_FIXTURE_READBACK_SCHEMA,
+    schemaVersion: 1,
+    artifactId,
+    emittedAt: input.emittedAt,
+    source: {
+      ...(fixture ? { sourceFixtureArtifactId: fixture.artifactId } : {}),
+      ...(fixture ? { sourceFixtureStatus: fixture.reviewStatus } : {}),
+      ...(fixture?.source.seamHistoryObservationArtifactId
+        ? { seamHistoryObservationArtifactId: fixture.source.seamHistoryObservationArtifactId }
+        : {}),
+      ...(fixture?.source.layerReceiptObservationArtifactId
+        ? { layerReceiptObservationArtifactId: fixture.source.layerReceiptObservationArtifactId }
+        : {}),
+      ...(fixture ? { fixtureProofRung: fixture.proof.strongestProofRung } : {}),
+      ...(fixture ? { fixtureProofLabel: fixture.proof.normalizedProofLabel } : {}),
+    },
+    readback: {
+      fixtureReadable: fixture !== undefined,
+      fixtureValid: fixture !== undefined,
+      sourceObservationRefsPreserved:
+        issues.includes("source-observation-refs-not-preserved") === false && fixture !== undefined,
+      matchedReceiptRefsPreserved:
+        issues.includes("matched-receipt-refs-not-preserved") === false && fixture !== undefined,
+      matchedRequestRefsPreserved:
+        issues.includes("matched-request-refs-not-preserved") === false && fixture !== undefined,
+      sourceReposPreserved: issues.includes("source-repos-not-preserved") === false && fixture !== undefined,
+      sourceRefsPreserved: issues.includes("source-refs-not-preserved") === false && fixture !== undefined,
+      proofLabelsPreserved: issues.includes("proof-labels-not-preserved") === false && fixture !== undefined,
+      nonClaimsPreserved: issues.includes("non-claims-not-preserved") === false && fixture !== undefined,
+    },
+    preservedRefs: {
+      matchingSeamObservationIds: fixture?.correlation.matchingSeamObservationIds ?? [],
+      matchedReceiptIds: fixture?.correlation.matchedReceiptIds ?? [],
+      matchedReceiptHashes: fixture?.correlation.matchedReceiptHashes ?? [],
+      matchedRequestIds: fixture?.correlation.matchedRequestIds ?? [],
+      matchedRequestHashes: fixture?.correlation.matchedRequestHashes ?? [],
+      preservedSourceRepos: fixture?.correlation.preservedSourceRepos ?? [],
+      preservedSourceRefs: fixture?.correlation.preservedSourceRefs ?? [],
+    },
+    boundary: buildReadbackBoundary(),
+    validation: {
+      status,
+      fixtureArtifactConsumed: fixture !== undefined,
+      sourceObservationRefsPreserved:
+        issues.includes("source-observation-refs-not-preserved") === false && fixture !== undefined,
+      matchedReceiptRefsPreserved:
+        issues.includes("matched-receipt-refs-not-preserved") === false && fixture !== undefined,
+      matchedRequestRefsPreserved:
+        issues.includes("matched-request-refs-not-preserved") === false && fixture !== undefined,
+      sourceReposPreserved: issues.includes("source-repos-not-preserved") === false && fixture !== undefined,
+      sourceRefsPreserved: issues.includes("source-refs-not-preserved") === false && fixture !== undefined,
+      proofLabelsPreserved: issues.includes("proof-labels-not-preserved") === false && fixture !== undefined,
+      nonClaimsPreserved: issues.includes("non-claims-not-preserved") === false && fixture !== undefined,
+      noCanonicalHistoryClaim: true,
+      noLayerAdmissionClaim: true,
+      noLayerEvidenceAdmissionClaim: true,
+      noRbcInterpretationClaim: true,
+      noQuorumSatisfactionClaim: true,
+      noAuthorityClaim: true,
+      noMeshPublicationClaim: true,
+      noProductionContinuityWriteClaim: true,
+      issues,
+    },
+    reviewStatus: status,
+    warnings: status === "edge-layer-seam-history-layer-receipt-adjacent-fixture-readback-valid"
+      ? [
+          "adjacent-fixture-readback-preserves-supplied-fixture-only",
+          "adjacent-fixture-readback-does-not-admit-layer-evidence",
+          "adjacent-fixture-readback-does-not-interpret-rbc",
+          "adjacent-fixture-readback-does-not-grant-authority",
+        ]
+      : ["adjacent-fixture-readback-invalid"],
+    rejections: status === "edge-layer-seam-history-layer-receipt-adjacent-fixture-readback-valid" ? [] : issues,
+  };
+}
+
 export function assertEdgeLayerSeamHistoryLayerReceiptAdjacentFixture(
   value: unknown,
 ): asserts value is EdgeLayerSeamHistoryLayerReceiptAdjacentFixture {
@@ -297,6 +479,63 @@ export function assertEdgeLayerSeamHistoryLayerReceiptAdjacentFixture(
   assertStatus(candidate.reviewStatus, "reviewStatus");
 }
 
+export function assertEdgeLayerSeamHistoryLayerReceiptAdjacentFixtureReadback(
+  value: unknown,
+): asserts value is EdgeLayerSeamHistoryLayerReceiptAdjacentFixtureReadback {
+  const candidate = assertObject(value, "edge layer seam history layer receipt adjacent fixture readback");
+  assertEqual(
+    candidate.artifactKind,
+    CAUSAL_EDGE_LAYER_SEAM_HISTORY_LAYER_RECEIPT_ADJACENT_FIXTURE_READBACK_ARTIFACT_KIND,
+    "artifactKind",
+  );
+  assertEqual(candidate.schema, CAUSAL_EDGE_LAYER_SEAM_HISTORY_LAYER_RECEIPT_ADJACENT_FIXTURE_READBACK_SCHEMA, "schema");
+  assertEqual(candidate.schemaVersion, 1, "schemaVersion");
+  assertString(candidate.artifactId, "artifactId");
+  assertString(candidate.emittedAt, "emittedAt");
+  const boundary = assertObject(candidate.boundary, "boundary");
+  assertEqual(boundary.readbackOnly, true, "boundary.readbackOnly");
+  assertEqual(boundary.writesAdjacentFixture, false, "boundary.writesAdjacentFixture");
+  assertEqual(boundary.opensEdgeRuntime, false, "boundary.opensEdgeRuntime");
+  assertEqual(boundary.opensLayerRuntime, false, "boundary.opensLayerRuntime");
+  assertEqual(boundary.callsEdge, false, "boundary.callsEdge");
+  assertEqual(boundary.callsLayer, false, "boundary.callsLayer");
+  assertEqual(boundary.writesEdgeProjection, false, "boundary.writesEdgeProjection");
+  assertEqual(boundary.writesLayerEvidence, false, "boundary.writesLayerEvidence");
+  assertEqual(boundary.acceptsCanonicalHistory, false, "boundary.acceptsCanonicalHistory");
+  assertEqual(boundary.admitsLayerEvidence, false, "boundary.admitsLayerEvidence");
+  assertEqual(boundary.decidesLayerAdmission, false, "boundary.decidesLayerAdmission");
+  assertEqual(boundary.interpretsRbc, false, "boundary.interpretsRbc");
+  assertEqual(boundary.claimsQuorumSatisfaction, false, "boundary.claimsQuorumSatisfaction");
+  assertEqual(boundary.grantsAuthority, false, "boundary.grantsAuthority");
+  assertEqual(boundary.promotesReferents, false, "boundary.promotesReferents");
+  assertEqual(boundary.publishesToMesh, false, "boundary.publishesToMesh");
+  assertEqual(boundary.writesProductionContinuity, false, "boundary.writesProductionContinuity");
+  const validation = assertObject(candidate.validation, "validation");
+  assertReadbackStatus(validation.status, "validation.status");
+  assertEqual(validation.noCanonicalHistoryClaim, true, "validation.noCanonicalHistoryClaim");
+  assertEqual(validation.noLayerAdmissionClaim, true, "validation.noLayerAdmissionClaim");
+  assertEqual(validation.noLayerEvidenceAdmissionClaim, true, "validation.noLayerEvidenceAdmissionClaim");
+  assertEqual(validation.noRbcInterpretationClaim, true, "validation.noRbcInterpretationClaim");
+  assertEqual(validation.noQuorumSatisfactionClaim, true, "validation.noQuorumSatisfactionClaim");
+  assertEqual(validation.noAuthorityClaim, true, "validation.noAuthorityClaim");
+  assertEqual(validation.noMeshPublicationClaim, true, "validation.noMeshPublicationClaim");
+  assertEqual(
+    validation.noProductionContinuityWriteClaim,
+    true,
+    "validation.noProductionContinuityWriteClaim",
+  );
+  assertReadbackStatus(candidate.reviewStatus, "reviewStatus");
+}
+
+function parseAdjacentFixture(value: unknown): EdgeLayerSeamHistoryLayerReceiptAdjacentFixture | undefined {
+  try {
+    assertEdgeLayerSeamHistoryLayerReceiptAdjacentFixture(value);
+    return value;
+  } catch {
+    return undefined;
+  }
+}
+
 function parseSeamHistoryObservation(value: unknown): EdgeLayerSeamHistoryObservationResult | undefined {
   try {
     assertEdgeLayerSeamHistoryObservationResult(value);
@@ -315,6 +554,59 @@ function parseLayerReceiptObservation(value: unknown): LayerReceiptRuntimeEviden
   }
 }
 
+function validateAdjacentFixtureReadback(
+  fixture: EdgeLayerSeamHistoryLayerReceiptAdjacentFixture | undefined,
+): string[] {
+  const issues: string[] = [];
+  if (!fixture) return ["adjacent-fixture-invalid"];
+  if (!fixture.source.seamHistoryObservationArtifactId || !fixture.source.layerReceiptObservationArtifactId) {
+    issues.push("source-observation-refs-not-preserved");
+  }
+  if (fixture.correlation.matchedReceiptIds.length === 0 || fixture.correlation.matchedReceiptHashes.length === 0) {
+    issues.push("matched-receipt-refs-not-preserved");
+  }
+  if (fixture.correlation.matchedRequestIds.length === 0 || fixture.correlation.matchedRequestHashes.length === 0) {
+    issues.push("matched-request-refs-not-preserved");
+  }
+  if (fixture.correlation.preservedSourceRepos.length === 0) {
+    issues.push("source-repos-not-preserved");
+  }
+  if (fixture.correlation.preservedSourceRefs.length === 0) {
+    issues.push("source-refs-not-preserved");
+  }
+  if (
+    fixture.proof.strongestProofRung !== "local_causal_observation_over_supplied_adjacent_observation_artifacts" ||
+    fixture.proof.normalizedProofLabel !== "local_supplied_seam_history_layer_receipt_adjacent_fixture" ||
+    fixture.proof.dhtOrHyperswarmInputObservedByThisOperation !== false ||
+    fixture.proof.doesNotUpgradeSourceProof !== true
+  ) {
+    issues.push("proof-labels-not-preserved");
+  }
+  if (
+    fixture.nonClaims.canonicalHistoryAccepted ||
+    fixture.nonClaims.layerEvidenceAdmitted ||
+    fixture.nonClaims.layerAdmissionDecided ||
+    fixture.nonClaims.rbcInterpreted ||
+    fixture.nonClaims.quorumSatisfied ||
+    fixture.nonClaims.authorityGranted ||
+    fixture.nonClaims.referentPromoted ||
+    fixture.nonClaims.meshPublished ||
+    fixture.nonClaims.productionContinuityWritten ||
+    fixture.boundary.acceptsCanonicalHistory ||
+    fixture.boundary.admitsLayerEvidence ||
+    fixture.boundary.decidesLayerAdmission ||
+    fixture.boundary.interpretsRbc ||
+    fixture.boundary.claimsQuorumSatisfaction ||
+    fixture.boundary.grantsAuthority ||
+    fixture.boundary.promotesReferents ||
+    fixture.boundary.publishesToMesh ||
+    fixture.boundary.writesProductionContinuity
+  ) {
+    issues.push("non-claims-not-preserved");
+  }
+  return [...new Set(issues)];
+}
+
 function buildNonClaims(): EdgeLayerSeamHistoryLayerReceiptAdjacentFixture["nonClaims"] {
   return {
     canonicalHistoryAccepted: false,
@@ -326,6 +618,28 @@ function buildNonClaims(): EdgeLayerSeamHistoryLayerReceiptAdjacentFixture["nonC
     referentPromoted: false,
     meshPublished: false,
     productionContinuityWritten: false,
+  };
+}
+
+function buildReadbackBoundary(): EdgeLayerSeamHistoryLayerReceiptAdjacentFixtureReadback["boundary"] {
+  return {
+    readbackOnly: true,
+    writesAdjacentFixture: false,
+    opensEdgeRuntime: false,
+    opensLayerRuntime: false,
+    callsEdge: false,
+    callsLayer: false,
+    writesEdgeProjection: false,
+    writesLayerEvidence: false,
+    acceptsCanonicalHistory: false,
+    admitsLayerEvidence: false,
+    decidesLayerAdmission: false,
+    interpretsRbc: false,
+    claimsQuorumSatisfaction: false,
+    grantsAuthority: false,
+    promotesReferents: false,
+    publishesToMesh: false,
+    writesProductionContinuity: false,
   };
 }
 
@@ -394,5 +708,17 @@ function assertStatus(
     value !== "edge-layer-seam-history-layer-receipt-adjacent-fixture-invalid"
   ) {
     throw new Error(`${label} must be an edge layer seam history layer receipt adjacent fixture status`);
+  }
+}
+
+function assertReadbackStatus(
+  value: unknown,
+  label: string,
+): asserts value is EdgeLayerSeamHistoryLayerReceiptAdjacentFixtureReadbackStatus {
+  if (
+    value !== "edge-layer-seam-history-layer-receipt-adjacent-fixture-readback-valid" &&
+    value !== "edge-layer-seam-history-layer-receipt-adjacent-fixture-readback-invalid"
+  ) {
+    throw new Error(`${label} must be an edge layer seam history layer receipt adjacent fixture readback status`);
   }
 }

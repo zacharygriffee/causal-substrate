@@ -3,10 +3,14 @@ import test from "node:test";
 
 import {
   assertEdgeLayerSeamHistoryLayerReceiptAdjacentFixture,
+  assertEdgeLayerSeamHistoryLayerReceiptAdjacentFixtureReadback,
   buildEdgeLayerSeamHistoryLayerReceiptAdjacentFixture,
+  buildEdgeLayerSeamHistoryLayerReceiptAdjacentFixtureReadback,
   buildEdgeLayerSeamHistoryObservationResult,
   buildLayerReceiptRuntimeEvidenceObservation,
   CAUSAL_EDGE_LAYER_SEAM_HISTORY_LAYER_RECEIPT_ADJACENT_FIXTURE_ARTIFACT_KIND,
+  CAUSAL_EDGE_LAYER_SEAM_HISTORY_LAYER_RECEIPT_ADJACENT_FIXTURE_READBACK_ARTIFACT_KIND,
+  CAUSAL_EDGE_LAYER_SEAM_HISTORY_LAYER_RECEIPT_ADJACENT_FIXTURE_READBACK_SCHEMA,
   CAUSAL_EDGE_LAYER_SEAM_HISTORY_LAYER_RECEIPT_ADJACENT_FIXTURE_SCHEMA,
 } from "../src/index.js";
 
@@ -224,4 +228,115 @@ test("combined seam-history and Layer receipt adjacent fixture stays incomplete 
   assert.equal(fixture.boundary.admitsLayerEvidence, false);
   assert.equal(fixture.boundary.interpretsRbc, false);
   assert.equal(fixture.boundary.grantsAuthority, false);
+});
+
+test("adjacent fixture readback preserves matched refs and non-claims across JSON round trip", () => {
+  const seamObservation = buildEdgeLayerSeamHistoryObservationResult({
+    seamHistory: seamHistoryMaterial(),
+    emittedAt: EMITTED_AT,
+    sourcePath: "layer-owned-edge-seam-status:adjacent-fixture-readback",
+  });
+  const layerReceiptObservation = buildLayerReceiptRuntimeEvidenceObservation({
+    layerReceiptRuntimeEvidence: layerReceiptRuntimeEvidenceReport(),
+    emittedAt: "2026-05-31T15:02:01.000Z",
+  });
+  const fixture = buildEdgeLayerSeamHistoryLayerReceiptAdjacentFixture({
+    seamHistoryObservation: seamObservation,
+    layerReceiptObservation,
+    emittedAt: "2026-05-31T15:02:02.000Z",
+  });
+  const roundTripped = JSON.parse(JSON.stringify(fixture)) as unknown;
+
+  const readback = buildEdgeLayerSeamHistoryLayerReceiptAdjacentFixtureReadback({
+    fixture: roundTripped,
+    emittedAt: "2026-05-31T15:02:03.000Z",
+  });
+
+  assertEdgeLayerSeamHistoryLayerReceiptAdjacentFixtureReadback(readback);
+  assert.equal(readback.artifactKind, CAUSAL_EDGE_LAYER_SEAM_HISTORY_LAYER_RECEIPT_ADJACENT_FIXTURE_READBACK_ARTIFACT_KIND);
+  assert.equal(readback.schema, CAUSAL_EDGE_LAYER_SEAM_HISTORY_LAYER_RECEIPT_ADJACENT_FIXTURE_READBACK_SCHEMA);
+  assert.equal(readback.reviewStatus, "edge-layer-seam-history-layer-receipt-adjacent-fixture-readback-valid");
+  assert.equal(readback.source.sourceFixtureArtifactId, fixture.artifactId);
+  assert.equal(readback.source.sourceFixtureStatus, "edge-layer-seam-history-layer-receipt-adjacent-fixture-ready");
+  assert.equal(readback.source.seamHistoryObservationArtifactId, seamObservation.artifactId);
+  assert.equal(readback.source.layerReceiptObservationArtifactId, layerReceiptObservation.artifactId);
+  assert.equal(readback.source.fixtureProofLabel, "local_supplied_seam_history_layer_receipt_adjacent_fixture");
+  assert.equal(readback.readback.fixtureReadable, true);
+  assert.equal(readback.readback.fixtureValid, true);
+  assert.equal(readback.readback.sourceObservationRefsPreserved, true);
+  assert.equal(readback.readback.matchedReceiptRefsPreserved, true);
+  assert.equal(readback.readback.matchedRequestRefsPreserved, true);
+  assert.equal(readback.readback.sourceReposPreserved, true);
+  assert.equal(readback.readback.sourceRefsPreserved, true);
+  assert.equal(readback.readback.proofLabelsPreserved, true);
+  assert.equal(readback.readback.nonClaimsPreserved, true);
+  assert.deepEqual(readback.preservedRefs.matchedReceiptIds, [
+    "layer-report-only-edge-seam-receipt:runtime-evidence:linked",
+  ]);
+  assert.deepEqual(readback.preservedRefs.matchedReceiptHashes, [`sha256:${"2".repeat(64)}`]);
+  assert.deepEqual(readback.preservedRefs.matchedRequestIds, [
+    "edge-layer-report-only-seam-request:runtime-evidence:linked",
+  ]);
+  assert.deepEqual(readback.preservedRefs.matchedRequestHashes, [`sha256:${"3".repeat(64)}`]);
+  assert.ok(readback.preservedRefs.preservedSourceRepos.includes("mesh-ecology-edge"));
+  assert.ok(readback.preservedRefs.preservedSourceRepos.includes("mesh-ecology-layer"));
+  assert.ok(readback.preservedRefs.preservedSourceRefs.includes("corestore:layer-runtime-receipts:receipt:linked"));
+  assert.equal(readback.validation.fixtureArtifactConsumed, true);
+  assert.equal(readback.validation.noCanonicalHistoryClaim, true);
+  assert.equal(readback.validation.noLayerAdmissionClaim, true);
+  assert.equal(readback.validation.noRbcInterpretationClaim, true);
+  assert.equal(readback.validation.noAuthorityClaim, true);
+  assert.deepEqual(readback.validation.issues, []);
+  assert.equal(readback.boundary.readbackOnly, true);
+  assert.equal(readback.boundary.writesAdjacentFixture, false);
+  assert.equal(readback.boundary.admitsLayerEvidence, false);
+  assert.equal(readback.boundary.decidesLayerAdmission, false);
+  assert.equal(readback.boundary.interpretsRbc, false);
+  assert.equal(readback.boundary.grantsAuthority, false);
+  assert.equal(readback.boundary.publishesToMesh, false);
+});
+
+test("adjacent fixture readback rejects weakened refs proof labels and non-claims", () => {
+  const seamObservation = buildEdgeLayerSeamHistoryObservationResult({
+    seamHistory: seamHistoryMaterial(),
+    emittedAt: EMITTED_AT,
+    sourcePath: "layer-owned-edge-seam-status:adjacent-fixture-readback-negative",
+  });
+  const layerReceiptObservation = buildLayerReceiptRuntimeEvidenceObservation({
+    layerReceiptRuntimeEvidence: layerReceiptRuntimeEvidenceReport(),
+    emittedAt: "2026-05-31T15:03:01.000Z",
+  });
+  const fixture = buildEdgeLayerSeamHistoryLayerReceiptAdjacentFixture({
+    seamHistoryObservation: seamObservation,
+    layerReceiptObservation,
+    emittedAt: "2026-05-31T15:03:02.000Z",
+  });
+  const weakened = JSON.parse(JSON.stringify(fixture)) as any;
+  delete weakened.source.layerReceiptObservationArtifactId;
+  weakened.correlation.matchedReceiptHashes = [];
+  weakened.correlation.matchedRequestHashes = [];
+  weakened.correlation.preservedSourceRefs = [];
+  weakened.proof.normalizedProofLabel = "dht_hyperswarm_durable_seam_history_material";
+  weakened.nonClaims.rbcInterpreted = true;
+
+  const readback = buildEdgeLayerSeamHistoryLayerReceiptAdjacentFixtureReadback({
+    fixture: weakened,
+    emittedAt: "2026-05-31T15:03:03.000Z",
+  });
+
+  assertEdgeLayerSeamHistoryLayerReceiptAdjacentFixtureReadback(readback);
+  assert.equal(readback.reviewStatus, "edge-layer-seam-history-layer-receipt-adjacent-fixture-readback-invalid");
+  assert.equal(readback.validation.fixtureArtifactConsumed, false);
+  assert.equal(readback.validation.sourceObservationRefsPreserved, false);
+  assert.equal(readback.validation.matchedReceiptRefsPreserved, false);
+  assert.equal(readback.validation.matchedRequestRefsPreserved, false);
+  assert.equal(readback.validation.sourceRefsPreserved, false);
+  assert.equal(readback.validation.proofLabelsPreserved, false);
+  assert.equal(readback.validation.nonClaimsPreserved, false);
+  assert.ok(readback.validation.issues.includes("adjacent-fixture-invalid"));
+  assert.deepEqual(readback.preservedRefs.matchedReceiptIds, []);
+  assert.equal(readback.boundary.readbackOnly, true);
+  assert.equal(readback.boundary.admitsLayerEvidence, false);
+  assert.equal(readback.boundary.interpretsRbc, false);
+  assert.equal(readback.boundary.grantsAuthority, false);
 });
