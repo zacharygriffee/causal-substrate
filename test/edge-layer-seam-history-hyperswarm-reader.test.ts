@@ -1,9 +1,11 @@
 import assert from "node:assert/strict";
+import { execFile } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { promisify } from "node:util";
 
 import {
   activeManagedCorestoreCount,
@@ -19,6 +21,7 @@ import {
   type HyperswarmReplicationSwarm,
 } from "../src/index.js";
 
+const execFileAsync = promisify(execFile);
 const SHOULD_RUN_REAL_HYPERSWARM = process.env.CAUSAL_SUBSTRATE_REAL_HYPERSWARM === "1";
 const SHOULD_USE_PUBLIC_HYPERSWARM = process.env.CAUSAL_SUBSTRATE_HYPERSWARM_PUBLIC === "1";
 const CONFIGURED_HYPERSWARM_BOOTSTRAP = parseHyperswarmBootstrap(
@@ -252,6 +255,48 @@ test("real Hyperswarm proof run instructions artifact stays instructions-only", 
   assert.equal(instructions.boundary.grantsAuthority, false);
   assert.equal(instructions.boundary.admitsLayerEvidence, false);
   assert.equal(instructions.boundary.interpretsRbc, false);
+});
+
+test("real Hyperswarm reader CLI emits instructions only until explicitly enabled", async () => {
+  const tempRoot = await mkdtemp(path.join(tmpdir(), "causal-seam-hs-cli-"));
+  const instructionsPath = path.join(tempRoot, "real-hyperswarm-instructions.json");
+  try {
+    const { stdout, stderr } = await execFileAsync("npx", [
+      "tsx",
+      "scripts/run-edge-layer-seam-history-hyperswarm-reader.ts",
+      "--instructions-output",
+      instructionsPath,
+      "--namespace",
+      "hyperswarm-seam-history-reader,cli-surface",
+      "--emitted-at",
+      "2026-05-31T13:05:00.000Z",
+    ], {
+      cwd: path.resolve("."),
+      env: {
+        ...process.env,
+        CAUSAL_SUBSTRATE_REAL_HYPERSWARM: "0",
+      },
+    });
+
+    assert.equal(stdout, "");
+    assert.equal(stderr, "");
+    const instructions = JSON.parse(await readFile(instructionsPath, "utf8"));
+    assert.equal(
+      instructions.schema,
+      "causal-substrate/edge-layer-seam-history-real-hyperswarm-proof-run-instructions/v1",
+    );
+    assert.equal(instructions.proofGate.instructionsOnly, true);
+    assert.equal(instructions.proofGate.dhtHyperswarmProofClaimedNow, false);
+    assert.equal(instructions.proofGate.proofOnlyIfCommandRunsAndPasses, true);
+    assert.deepEqual(instructions.namespaceParts, ["hyperswarm-seam-history-reader", "cli-surface"]);
+    assert.equal(instructions.boundary.opensSwarmNow, false);
+    assert.equal(instructions.boundary.opensCorestoreNow, false);
+    assert.equal(instructions.boundary.readsDurableHistoryNow, false);
+    assert.equal(instructions.boundary.publishesToMesh, false);
+    assert.equal(instructions.boundary.grantsAuthority, false);
+  } finally {
+    await rm(tempRoot, { recursive: true, force: true });
+  }
 });
 
 test("Hyperswarm reader report readback preserves durable refs without verifying a live swarm run", () => {
