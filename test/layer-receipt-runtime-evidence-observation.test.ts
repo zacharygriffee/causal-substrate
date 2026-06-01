@@ -724,6 +724,100 @@ test("Layer-origin operational fixture hook CLI writes local supplied hook artif
   }
 });
 
+test("Layer-origin operational fixture hook CLI writes blocked local artifacts for unsafe supplied material", async () => {
+  const tempRoot = await mkdtemp(path.join(tmpdir(), "causal-layer-origin-hook-cli-negative-"));
+  try {
+    const nonLayer = layerReceiptRuntimeEvidenceReport();
+    nonLayer.sourceRepo = "mesh-ecology-edge";
+    nonLayer.sourceRepos = ["mesh-ecology-edge"];
+
+    const overclaim = layerReceiptRuntimeEvidenceReport();
+    overclaim.posture.layerEvidenceAdmitted = true;
+    overclaim.posture.rbcInterpreted = true;
+    overclaim.boundary.decidesLayerAdmission = true;
+    overclaim.boundary.grantsAuthority = true;
+
+    const cases = [
+      {
+        name: "non-layer",
+        input: nonLayer,
+        expectedSourceRepo: "mesh-ecology-edge",
+        expectedIssues: ["layer-origin-observation-not-emitted", "layer-origin-source-repo-not-preserved"],
+        expectedLayerOwnedInputObserved: false,
+      },
+      {
+        name: "overclaim",
+        input: overclaim,
+        expectedSourceRepo: "mesh-ecology-layer",
+        expectedIssues: ["layer-origin-observation-not-emitted"],
+        expectedLayerOwnedInputObserved: true,
+      },
+    ] as const;
+
+    for (const testCase of cases) {
+      const inputPath = path.join(tempRoot, `${testCase.name}-input.json`);
+      const outputPath = path.join(tempRoot, `${testCase.name}-hook.json`);
+      await writeFile(inputPath, JSON.stringify(testCase.input, null, 2), "utf8");
+
+      const { stdout, stderr } = await execFileAsync("npx", [
+        "tsx",
+        "scripts/observe-layer-origin-receipt-runtime-evidence-hook.ts",
+        "--input",
+        inputPath,
+        "--output",
+        outputPath,
+        "--source-path",
+        `local-supplied-layer-origin-hook-negative:${testCase.name}`,
+        "--emitted-at",
+        "2026-05-31T14:05:30.000Z",
+      ], {
+        cwd: path.resolve("."),
+      });
+
+      assert.equal(stdout, "");
+      assert.equal(stderr, "");
+      const hook = JSON.parse(await readFile(outputPath, "utf8"));
+
+      assertLayerReceiptRuntimeEvidenceOperationalFixtureHook(hook);
+      assert.equal(hook.reviewStatus, "layer-receipt-runtime-evidence-operational-fixture-hook-blocked");
+      assert.equal(hook.source.sourcePath, `local-supplied-layer-origin-hook-negative:${testCase.name}`);
+      assert.equal(hook.source.sourceRepo, testCase.expectedSourceRepo);
+      assert.equal(hook.source.sourceReportId, "layer-receipt-runtime-evidence-report:edge-layer-seam:linked");
+      assert.equal(hook.hook.observation.receiptRefs.receiptId, "layer-report-only-edge-seam-receipt:runtime-evidence:linked");
+      assert.equal(hook.hook.observation.receiptRefs.receiptHash, `sha256:${"2".repeat(64)}`);
+      assert.equal(hook.hook.observation.receiptRefs.sourceRequestId, "edge-layer-report-only-seam-request:runtime-evidence:linked");
+      assert.equal(hook.hook.observation.runtimeRefs.runtimeEvidenceId, "layer-receipt-runtime-evidence:linked");
+      assert.equal(hook.proof.strongestProofRung, "local_causal_observation_over_supplied_layer_origin_fixture_material");
+      assert.equal(hook.proof.normalizedProofLabel, "local_supplied_layer_origin_operational_fixture");
+      assert.equal(hook.proof.layerOwnedInputObserved, testCase.expectedLayerOwnedInputObserved);
+      assert.equal(hook.proof.dhtOrHyperswarmInputObservedByCausalSubstrate, false);
+      assert.equal(hook.proof.doesNotUpgradeToSwarmProof, true);
+      assert.equal(hook.validation.suppliedMaterialConsumed, true);
+      assert.equal(hook.validation.observationEmitted, false);
+      assert.equal(hook.validation.receiptRefsPreserved, true);
+      assert.equal(hook.validation.runtimeRefsPreserved, true);
+      for (const issue of testCase.expectedIssues) {
+        assert.ok(hook.validation.issues.includes(issue));
+        assert.ok(hook.rejections.includes(issue));
+      }
+      assert.equal(hook.nonClaims.canonicalHistoryAccepted, false);
+      assert.equal(hook.nonClaims.layerEvidenceAdmitted, false);
+      assert.equal(hook.nonClaims.layerAdmissionDecided, false);
+      assert.equal(hook.nonClaims.rbcInterpreted, false);
+      assert.equal(hook.nonClaims.authorityGranted, false);
+      assert.equal(hook.boundary.callsLayer, false);
+      assert.equal(hook.boundary.opensLayerRuntime, false);
+      assert.equal(hook.boundary.admitsLayerEvidence, false);
+      assert.equal(hook.boundary.decidesLayerAdmission, false);
+      assert.equal(hook.boundary.interpretsRbc, false);
+      assert.equal(hook.boundary.grantsAuthority, false);
+      assert.equal(hook.boundary.publishesToMesh, false);
+    }
+  } finally {
+    await rm(tempRoot, { recursive: true, force: true });
+  }
+});
+
 test("Layer-origin operational fixture hook blocks non-Layer supplied material", () => {
   const report = layerReceiptRuntimeEvidenceReport();
   report.sourceRepo = "mesh-ecology-edge";
