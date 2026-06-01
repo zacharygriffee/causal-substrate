@@ -29,7 +29,7 @@ The local supplied-material lane can now:
   writer refs, linkage status, proof labels, and non-claim boundaries;
 - expose Hyperswarm-readiness, real-run instructions, report readback, and
   durable-record source-ref completeness surfaces without treating instructions
-  or supplied reports as live swarm proof.
+  or supplied reports as live swarm proof;
 - write a single Edge handoff bundle from the observation CLI;
 - keep incomplete Edge handoff bundles inspectable as incomplete rather than
   throwing them away;
@@ -44,8 +44,19 @@ The local supplied-material lane can now:
 - reject Layer receipt runtime evidence when refs are incomplete, ownership is
   not Layer-labeled, or the material overclaims Layer admission, RBC
   interpretation, canonical history, or authority;
+- emit Layer receipt runtime evidence readback contracts, a Layer receipt
+  observation CLI, source-ref completeness reports, and negative CLI guardrail
+  cases;
+- correlate seam-history observations with Layer receipt runtime observations
+  as an adjacent local fixture without deciding Layer admission, RBC,
+  canonical history, or authority;
 - prove the Edge consumer-facing handoff bundle shape can be consumed as
-  observation-only projection input without writing Edge projection state.
+  observation-only projection input, and prove incomplete handoff bundles are
+  rejected before projection consumption;
+- import a previously written Hyperswarm reader report from disk and emit only
+  a readback/verifier artifact without opening swarm or Corestore;
+- wrap supplied Layer-origin receipt runtime material as a local operational
+  fixture hook without calling Layer or upgrading proof.
 
 Strongest routinely proven rung in normal tests:
 `local_causal_observation_over_supplied_seam_history_material`.
@@ -57,26 +68,22 @@ environment-gated command actually runs against durable replicated material.
 
 Choose work that improves bounded causal observation:
 
-- Add a readback contract for Layer receipt runtime evidence observations that
-  proves JSON round-trip preservation of receipt ids/hashes, request refs,
-  runtime refs, non-claims, and lower proof labels.
-- Add a narrow CLI for Layer receipt runtime evidence observation so Layer can
-  hand Causal Substrate a supplied report and receive a bounded observation
-  artifact without implying Layer admission.
-- Add a combined seam-history plus Layer-receipt-adjacent observation fixture
-  that correlates matching receipt refs while still refusing to decide
-  admission, RBC interpretation, canonical history, or authority.
-- Add an Edge consumer negative contract test that rejects incomplete handoff
-  bundles before projection while preserving all incomplete source refs for
-  Edge review.
-- Add a durable-input import check that reads a previously written real
-  Hyperswarm reader report from disk and produces only a readback/verifier
-  artifact unless the reader itself actually ran in that command.
-- Add source-ref completeness reporting for Layer receipt runtime evidence,
-  mirroring the seam-history durable-record completeness style.
-- Add an operational fixture for Layer-owned receipt runtime material derived
-  from Layer repo output when Layer exposes one; label it as local supplied
-  material unless it came from the durable DHT/Hyperswarm reader path.
+- Add a malformed/non-object negative CLI case for Layer receipt runtime
+  evidence observation and assert the emitted/rejected result remains bounded.
+- Add a readback contract for the seam-history plus Layer-receipt adjacent
+  fixture that proves JSON round-trip preservation of matched refs,
+  source repos, proof labels, and non-claims.
+- Add a CLI for the Layer-origin receipt runtime operational fixture hook so
+  Layer-origin material can be handed in as supplied local material.
+- Add a negative CLI case for the Layer-origin fixture hook with non-Layer or
+  overclaiming supplied material.
+- Add a handoff bundle import/readback command that verifies a saved Edge
+  handoff bundle without writing Edge projection state.
+- Add a combined Edge/Layer consumer contract snapshot that carries seam
+  classifications plus Layer receipt runtime refs as observation-only material.
+- Refresh the real Hyperswarm proof-run instructions artifact so it references
+  the current report import/readback commands while remaining instructions-only
+  unless the gated reader actually runs.
 
 ## Handoff Expectations
 
