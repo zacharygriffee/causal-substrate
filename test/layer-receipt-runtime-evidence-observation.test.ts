@@ -3,7 +3,9 @@ import test from "node:test";
 
 import {
   assertLayerReceiptRuntimeEvidenceObservation,
+  assertLayerReceiptRuntimeEvidenceReadbackContract,
   buildLayerReceiptRuntimeEvidenceObservation,
+  buildLayerReceiptRuntimeEvidenceReadbackContract,
   CAUSAL_LAYER_RECEIPT_RUNTIME_EVIDENCE_OBSERVATION_ARTIFACT_KIND,
   CAUSAL_LAYER_RECEIPT_RUNTIME_EVIDENCE_OBSERVATION_SCHEMA,
 } from "../src/index.js";
@@ -234,4 +236,90 @@ test("Layer receipt runtime evidence blocks admission RBC and authority overclai
   assert.equal(observation.boundary.interpretsRbc, false);
   assert.equal(observation.boundary.grantsAuthority, false);
   assert.equal(observation.boundary.writesContinuityRecords, false);
+});
+
+test("Layer receipt runtime evidence readback contract preserves JSON round-trip refs and non-claims", () => {
+  const observation = buildLayerReceiptRuntimeEvidenceObservation({
+    layerReceiptRuntimeEvidence: layerReceiptRuntimeEvidenceReport(),
+    emittedAt: EMITTED_AT,
+  });
+  const roundTripped = JSON.parse(JSON.stringify(observation)) as unknown;
+
+  const readback = buildLayerReceiptRuntimeEvidenceReadbackContract({
+    observation: roundTripped,
+    emittedAt: "2026-05-31T14:01:00.000Z",
+  });
+
+  assertLayerReceiptRuntimeEvidenceReadbackContract(readback);
+  assert.equal(readback.reviewStatus, "layer-receipt-runtime-evidence-readback-contract-valid");
+  assert.equal(readback.validation.observationArtifactConsumed, true);
+  assert.equal(readback.validation.sourceReportRefsPreserved, true);
+  assert.equal(readback.validation.receiptRefsPreserved, true);
+  assert.equal(readback.validation.requestRefsPreserved, true);
+  assert.equal(readback.validation.runtimeRefsPreserved, true);
+  assert.equal(readback.validation.durableAndWriterRefsPreserved, true);
+  assert.equal(readback.validation.sourceRefsPreserved, true);
+  assert.equal(readback.validation.proofLabelsPreserved, true);
+  assert.equal(readback.validation.nonClaimsPreserved, true);
+  assert.equal(readback.validation.deferredAttachmentPointsPreserved, true);
+  assert.equal(readback.source.sourceObservationArtifactId, observation.artifactId);
+  assert.equal(readback.source.sourceObservationStatus, "layer-receipt-runtime-evidence-observation-emitted");
+  assert.equal(
+    readback.source.sourceObservationProofRung,
+    "local_causal_observation_over_supplied_layer_receipt_runtime_evidence",
+  );
+  assert.equal(readback.source.sourceObservationNormalizedProofLabel, "local_supplied_layer_receipt_runtime_evidence");
+  assert.equal(readback.source.sourceReportId, "layer-receipt-runtime-evidence-report:edge-layer-seam:linked");
+  assert.equal(readback.source.sourceReportHash, `sha256:${"1".repeat(64)}`);
+  assert.equal(readback.preservedRefs.receiptId, "layer-report-only-edge-seam-receipt:runtime-evidence:linked");
+  assert.equal(readback.preservedRefs.receiptHash, `sha256:${"2".repeat(64)}`);
+  assert.equal(readback.preservedRefs.sourceRequestId, "edge-layer-report-only-seam-request:runtime-evidence:linked");
+  assert.equal(readback.preservedRefs.sourceRequestHash, `sha256:${"3".repeat(64)}`);
+  assert.equal(readback.preservedRefs.runtimeEvidenceId, "layer-receipt-runtime-evidence:linked");
+  assert.equal(readback.preservedRefs.runtimeEvidenceHash, `sha256:${"4".repeat(64)}`);
+  assert.equal(readback.preservedRefs.runtimeTraceRef, "layer-receipt-runtime-trace:linked");
+  assert.equal(readback.boundary.readbackOnly, true);
+  assert.equal(readback.boundary.writesObservationArtifact, false);
+  assert.equal(readback.boundary.callsLayer, false);
+  assert.equal(readback.boundary.admitsLayerEvidence, false);
+  assert.equal(readback.boundary.decidesLayerAdmission, false);
+  assert.equal(readback.boundary.interpretsRbc, false);
+  assert.equal(readback.boundary.acceptsCanonicalHistory, false);
+  assert.equal(readback.boundary.grantsAuthority, false);
+  assert.deepEqual(readback.rejections, []);
+});
+
+test("Layer receipt runtime evidence readback contract rejects weakened observation artifacts", () => {
+  const observation = buildLayerReceiptRuntimeEvidenceObservation({
+    layerReceiptRuntimeEvidence: layerReceiptRuntimeEvidenceReport(),
+    emittedAt: EMITTED_AT,
+  });
+  const weakened = JSON.parse(JSON.stringify(observation)) as any;
+  delete weakened.receiptRefs.receiptHash;
+  delete weakened.runtimeRefs.runtimeEvidenceHash;
+  weakened.proof.normalizedProofLabel = "dht_hyperswarm_durable_seam_history_material";
+  weakened.nonClaims.rbcInterpreted = true;
+  weakened.deferredAttachmentPoints.layerAdmission.active = true;
+
+  const readback = buildLayerReceiptRuntimeEvidenceReadbackContract({
+    observation: weakened,
+    emittedAt: "2026-05-31T14:01:30.000Z",
+  });
+
+  assertLayerReceiptRuntimeEvidenceReadbackContract(readback);
+  assert.equal(readback.reviewStatus, "layer-receipt-runtime-evidence-readback-contract-invalid");
+  assert.equal(readback.validation.observationArtifactConsumed, false);
+  assert.equal(readback.validation.receiptRefsPreserved, false);
+  assert.equal(readback.validation.runtimeRefsPreserved, false);
+  assert.equal(readback.validation.proofLabelsPreserved, false);
+  assert.equal(readback.validation.nonClaimsPreserved, false);
+  assert.equal(readback.validation.deferredAttachmentPointsPreserved, false);
+  assert.ok(readback.validation.issues.includes("layer-receipt-runtime-observation-invalid"));
+  assert.equal(readback.validation.noLayerAdmissionClaim, true);
+  assert.equal(readback.validation.noRbcInterpretationClaim, true);
+  assert.equal(readback.validation.noAuthorityClaim, true);
+  assert.equal(readback.boundary.admitsLayerEvidence, false);
+  assert.equal(readback.boundary.decidesLayerAdmission, false);
+  assert.equal(readback.boundary.interpretsRbc, false);
+  assert.equal(readback.boundary.grantsAuthority, false);
 });

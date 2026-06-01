@@ -6,11 +6,21 @@ export const CAUSAL_LAYER_RECEIPT_RUNTIME_EVIDENCE_OBSERVATION_SCHEMA =
 export const CAUSAL_LAYER_RECEIPT_RUNTIME_EVIDENCE_OBSERVATION_ARTIFACT_KIND =
   "causal-layer-receipt-runtime-evidence-observation" as const;
 
+export const CAUSAL_LAYER_RECEIPT_RUNTIME_EVIDENCE_READBACK_CONTRACT_SCHEMA =
+  "causal-substrate/layer-receipt-runtime-evidence-readback-contract/v1" as const;
+
+export const CAUSAL_LAYER_RECEIPT_RUNTIME_EVIDENCE_READBACK_CONTRACT_ARTIFACT_KIND =
+  "causal-layer-receipt-runtime-evidence-readback-contract" as const;
+
 export type LayerReceiptRuntimeEvidenceObservationStatus =
   | "layer-receipt-runtime-evidence-observation-emitted"
   | "layer-receipt-runtime-evidence-observation-incomplete"
   | "layer-receipt-runtime-evidence-observation-guardrail-blocked"
   | "layer-receipt-runtime-evidence-observation-malformed";
+
+export type LayerReceiptRuntimeEvidenceReadbackContractStatus =
+  | "layer-receipt-runtime-evidence-readback-contract-valid"
+  | "layer-receipt-runtime-evidence-readback-contract-invalid";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -101,6 +111,84 @@ export interface LayerReceiptRuntimeEvidenceObservation {
     meshPublication: DeferredAttachmentPoint;
   };
   reviewStatus: LayerReceiptRuntimeEvidenceObservationStatus;
+}
+
+export interface LayerReceiptRuntimeEvidenceReadbackContract {
+  artifactKind: typeof CAUSAL_LAYER_RECEIPT_RUNTIME_EVIDENCE_READBACK_CONTRACT_ARTIFACT_KIND;
+  schema: typeof CAUSAL_LAYER_RECEIPT_RUNTIME_EVIDENCE_READBACK_CONTRACT_SCHEMA;
+  schemaVersion: 1;
+  artifactId: string;
+  emittedAt: string;
+  source: {
+    sourceObservationArtifactId?: string | undefined;
+    sourceObservationStatus?: LayerReceiptRuntimeEvidenceObservationStatus | undefined;
+    sourceObservationProofRung?: "local_causal_observation_over_supplied_layer_receipt_runtime_evidence" | undefined;
+    sourceObservationNormalizedProofLabel?: "local_supplied_layer_receipt_runtime_evidence" | undefined;
+    sourceReportId?: string | undefined;
+    sourceReportHash?: string | undefined;
+  };
+  readback: {
+    artifactReadable: boolean;
+    observationValid: boolean;
+    sourceReportRefsPreserved: boolean;
+    receiptRefsPreserved: boolean;
+    requestRefsPreserved: boolean;
+    runtimeRefsPreserved: boolean;
+    durableAndWriterRefsPreserved: boolean;
+    sourceRefsPreserved: boolean;
+    proofLabelsPreserved: boolean;
+    nonClaimsPreserved: boolean;
+    deferredAttachmentPointsPreserved: boolean;
+  };
+  preservedRefs: {
+    sourceRepos: string[];
+    sourceRefs: string[];
+    receiptId?: string | undefined;
+    receiptHash?: string | undefined;
+    sourceRequestId?: string | undefined;
+    sourceRequestHash?: string | undefined;
+    durableRef?: string | undefined;
+    writerRef?: string | undefined;
+    runtimeEvidenceId?: string | undefined;
+    runtimeEvidenceHash?: string | undefined;
+    runtimeTraceRef?: string | undefined;
+    durableReceiptRef?: string | undefined;
+  };
+  boundary: {
+    readbackOnly: true;
+    writesObservationArtifact: false;
+    callsLayer: false;
+    admitsLayerEvidence: false;
+    decidesLayerAdmission: false;
+    interpretsRbc: false;
+    acceptsCanonicalHistory: false;
+    grantsAuthority: false;
+    promotesReferents: false;
+    publishesToMesh: false;
+    writesContinuityRecords: false;
+  };
+  validation: {
+    status: LayerReceiptRuntimeEvidenceReadbackContractStatus;
+    observationArtifactConsumed: boolean;
+    sourceReportRefsPreserved: boolean;
+    receiptRefsPreserved: boolean;
+    requestRefsPreserved: boolean;
+    runtimeRefsPreserved: boolean;
+    durableAndWriterRefsPreserved: boolean;
+    sourceRefsPreserved: boolean;
+    proofLabelsPreserved: boolean;
+    nonClaimsPreserved: boolean;
+    deferredAttachmentPointsPreserved: boolean;
+    noCanonicalHistoryClaim: true;
+    noLayerAdmissionClaim: true;
+    noLayerEvidenceAdmissionClaim: true;
+    noRbcInterpretationClaim: true;
+    noAuthorityClaim: true;
+    issues: string[];
+  };
+  reviewStatus: LayerReceiptRuntimeEvidenceReadbackContractStatus;
+  warnings: string[];
+  rejections: string[];
 }
 
 interface DeferredAttachmentPoint {
@@ -279,6 +367,167 @@ export function assertLayerReceiptRuntimeEvidenceObservation(
   assertObservationStatus(candidate.reviewStatus, "reviewStatus");
 }
 
+export function buildLayerReceiptRuntimeEvidenceReadbackContract(input: {
+  observation: unknown;
+  emittedAt: string;
+  artifactId?: string | undefined;
+}): LayerReceiptRuntimeEvidenceReadbackContract {
+  const observation = parseLayerReceiptRuntimeEvidenceObservation(input.observation);
+  const issues = observation ? validateLayerReceiptRuntimeEvidenceObservationReadback(observation) : [
+    "layer-receipt-runtime-observation-invalid",
+  ];
+  const status: LayerReceiptRuntimeEvidenceReadbackContractStatus = issues.length === 0
+    ? "layer-receipt-runtime-evidence-readback-contract-valid"
+    : "layer-receipt-runtime-evidence-readback-contract-invalid";
+  const artifactId = input.artifactId ??
+    `causal-layer-receipt-runtime-evidence-readback-contract:${hash(stableJson({
+      emittedAt: input.emittedAt,
+      observationArtifactId: observation?.artifactId,
+      receiptId: observation?.receiptRefs.receiptId,
+      runtimeEvidenceId: observation?.runtimeRefs.runtimeEvidenceId,
+    })).slice(0, 16)}`;
+
+  return {
+    artifactKind: CAUSAL_LAYER_RECEIPT_RUNTIME_EVIDENCE_READBACK_CONTRACT_ARTIFACT_KIND,
+    schema: CAUSAL_LAYER_RECEIPT_RUNTIME_EVIDENCE_READBACK_CONTRACT_SCHEMA,
+    schemaVersion: 1,
+    artifactId,
+    emittedAt: input.emittedAt,
+    source: {
+      ...(observation ? { sourceObservationArtifactId: observation.artifactId } : {}),
+      ...(observation ? { sourceObservationStatus: observation.reviewStatus } : {}),
+      ...(observation ? { sourceObservationProofRung: observation.proof.strongestProofRung } : {}),
+      ...(observation ? { sourceObservationNormalizedProofLabel: observation.proof.normalizedProofLabel } : {}),
+      ...(observation?.source.sourceReportId ? { sourceReportId: observation.source.sourceReportId } : {}),
+      ...(observation?.source.sourceReportHash ? { sourceReportHash: observation.source.sourceReportHash } : {}),
+    },
+    readback: {
+      artifactReadable: observation !== undefined,
+      observationValid: observation !== undefined,
+      sourceReportRefsPreserved:
+        issues.includes("source-report-refs-not-preserved") === false && observation !== undefined,
+      receiptRefsPreserved: issues.includes("receipt-refs-not-preserved") === false && observation !== undefined,
+      requestRefsPreserved: issues.includes("request-refs-not-preserved") === false && observation !== undefined,
+      runtimeRefsPreserved: issues.includes("runtime-refs-not-preserved") === false && observation !== undefined,
+      durableAndWriterRefsPreserved:
+        issues.includes("durable-or-writer-refs-not-preserved") === false && observation !== undefined,
+      sourceRefsPreserved: issues.includes("source-refs-not-preserved") === false && observation !== undefined,
+      proofLabelsPreserved: issues.includes("proof-labels-not-preserved") === false && observation !== undefined,
+      nonClaimsPreserved: issues.includes("non-claims-not-preserved") === false && observation !== undefined,
+      deferredAttachmentPointsPreserved:
+        issues.includes("deferred-attachment-points-not-preserved") === false && observation !== undefined,
+    },
+    preservedRefs: {
+      sourceRepos: observation?.receiptRefs.sourceRepos ?? [],
+      sourceRefs: observation?.receiptRefs.sourceRefs ?? [],
+      ...(observation?.receiptRefs.receiptId ? { receiptId: observation.receiptRefs.receiptId } : {}),
+      ...(observation?.receiptRefs.receiptHash ? { receiptHash: observation.receiptRefs.receiptHash } : {}),
+      ...(observation?.receiptRefs.sourceRequestId ? { sourceRequestId: observation.receiptRefs.sourceRequestId } : {}),
+      ...(observation?.receiptRefs.sourceRequestHash
+        ? { sourceRequestHash: observation.receiptRefs.sourceRequestHash }
+        : {}),
+      ...(observation?.receiptRefs.durableRef ? { durableRef: observation.receiptRefs.durableRef } : {}),
+      ...(observation?.receiptRefs.writerRef ? { writerRef: observation.receiptRefs.writerRef } : {}),
+      ...(observation?.runtimeRefs.runtimeEvidenceId
+        ? { runtimeEvidenceId: observation.runtimeRefs.runtimeEvidenceId }
+        : {}),
+      ...(observation?.runtimeRefs.runtimeEvidenceHash
+        ? { runtimeEvidenceHash: observation.runtimeRefs.runtimeEvidenceHash }
+        : {}),
+      ...(observation?.runtimeRefs.runtimeTraceRef
+        ? { runtimeTraceRef: observation.runtimeRefs.runtimeTraceRef }
+        : {}),
+      ...(observation?.runtimeRefs.durableReceiptRef
+        ? { durableReceiptRef: observation.runtimeRefs.durableReceiptRef }
+        : {}),
+    },
+    boundary: buildReadbackBoundary(),
+    validation: {
+      status,
+      observationArtifactConsumed: observation !== undefined,
+      sourceReportRefsPreserved:
+        issues.includes("source-report-refs-not-preserved") === false && observation !== undefined,
+      receiptRefsPreserved: issues.includes("receipt-refs-not-preserved") === false && observation !== undefined,
+      requestRefsPreserved: issues.includes("request-refs-not-preserved") === false && observation !== undefined,
+      runtimeRefsPreserved: issues.includes("runtime-refs-not-preserved") === false && observation !== undefined,
+      durableAndWriterRefsPreserved:
+        issues.includes("durable-or-writer-refs-not-preserved") === false && observation !== undefined,
+      sourceRefsPreserved: issues.includes("source-refs-not-preserved") === false && observation !== undefined,
+      proofLabelsPreserved: issues.includes("proof-labels-not-preserved") === false && observation !== undefined,
+      nonClaimsPreserved: issues.includes("non-claims-not-preserved") === false && observation !== undefined,
+      deferredAttachmentPointsPreserved:
+        issues.includes("deferred-attachment-points-not-preserved") === false && observation !== undefined,
+      noCanonicalHistoryClaim: true,
+      noLayerAdmissionClaim: true,
+      noLayerEvidenceAdmissionClaim: true,
+      noRbcInterpretationClaim: true,
+      noAuthorityClaim: true,
+      issues,
+    },
+    reviewStatus: status,
+    warnings: status === "layer-receipt-runtime-evidence-readback-contract-valid"
+      ? [
+          "layer-receipt-runtime-evidence-readback-preserves-supplied-observation-only",
+          "layer-receipt-runtime-evidence-readback-does-not-admit-layer-evidence",
+          "layer-receipt-runtime-evidence-readback-does-not-interpret-rbc",
+          "layer-receipt-runtime-evidence-readback-does-not-grant-authority",
+        ]
+      : ["layer-receipt-runtime-evidence-readback-contract-invalid"],
+    rejections: status === "layer-receipt-runtime-evidence-readback-contract-valid" ? [] : issues,
+  };
+}
+
+export function assertLayerReceiptRuntimeEvidenceReadbackContract(
+  value: unknown,
+): asserts value is LayerReceiptRuntimeEvidenceReadbackContract {
+  const candidate = assertObject(value, "layer receipt runtime evidence readback contract");
+  assertEqual(
+    candidate.artifactKind,
+    CAUSAL_LAYER_RECEIPT_RUNTIME_EVIDENCE_READBACK_CONTRACT_ARTIFACT_KIND,
+    "artifactKind",
+  );
+  assertEqual(candidate.schema, CAUSAL_LAYER_RECEIPT_RUNTIME_EVIDENCE_READBACK_CONTRACT_SCHEMA, "schema");
+  assertEqual(candidate.schemaVersion, 1, "schemaVersion");
+  assertString(candidate.artifactId, "artifactId");
+  assertString(candidate.emittedAt, "emittedAt");
+  const boundary = assertObject(candidate.boundary, "boundary");
+  assertEqual(boundary.readbackOnly, true, "boundary.readbackOnly");
+  assertEqual(boundary.writesObservationArtifact, false, "boundary.writesObservationArtifact");
+  assertEqual(boundary.callsLayer, false, "boundary.callsLayer");
+  assertEqual(boundary.admitsLayerEvidence, false, "boundary.admitsLayerEvidence");
+  assertEqual(boundary.decidesLayerAdmission, false, "boundary.decidesLayerAdmission");
+  assertEqual(boundary.interpretsRbc, false, "boundary.interpretsRbc");
+  assertEqual(boundary.acceptsCanonicalHistory, false, "boundary.acceptsCanonicalHistory");
+  assertEqual(boundary.grantsAuthority, false, "boundary.grantsAuthority");
+  assertEqual(boundary.promotesReferents, false, "boundary.promotesReferents");
+  assertEqual(boundary.publishesToMesh, false, "boundary.publishesToMesh");
+  assertEqual(boundary.writesContinuityRecords, false, "boundary.writesContinuityRecords");
+  const validation = assertObject(candidate.validation, "validation");
+  assertReadbackStatus(validation.status, "validation.status");
+  assertEqual(validation.noCanonicalHistoryClaim, true, "validation.noCanonicalHistoryClaim");
+  assertEqual(validation.noLayerAdmissionClaim, true, "validation.noLayerAdmissionClaim");
+  assertEqual(validation.noLayerEvidenceAdmissionClaim, true, "validation.noLayerEvidenceAdmissionClaim");
+  assertEqual(validation.noRbcInterpretationClaim, true, "validation.noRbcInterpretationClaim");
+  assertEqual(validation.noAuthorityClaim, true, "validation.noAuthorityClaim");
+  assertReadbackStatus(candidate.reviewStatus, "reviewStatus");
+  if (candidate.reviewStatus === "layer-receipt-runtime-evidence-readback-contract-valid") {
+    assertEqual(validation.observationArtifactConsumed, true, "validation.observationArtifactConsumed");
+    assertEqual(validation.sourceReportRefsPreserved, true, "validation.sourceReportRefsPreserved");
+    assertEqual(validation.receiptRefsPreserved, true, "validation.receiptRefsPreserved");
+    assertEqual(validation.requestRefsPreserved, true, "validation.requestRefsPreserved");
+    assertEqual(validation.runtimeRefsPreserved, true, "validation.runtimeRefsPreserved");
+    assertEqual(validation.durableAndWriterRefsPreserved, true, "validation.durableAndWriterRefsPreserved");
+    assertEqual(validation.sourceRefsPreserved, true, "validation.sourceRefsPreserved");
+    assertEqual(validation.proofLabelsPreserved, true, "validation.proofLabelsPreserved");
+    assertEqual(validation.nonClaimsPreserved, true, "validation.nonClaimsPreserved");
+    assertEqual(
+      validation.deferredAttachmentPointsPreserved,
+      true,
+      "validation.deferredAttachmentPointsPreserved",
+    );
+  }
+}
+
 function collectRefs(report: JsonRecord | undefined) {
   const receipt = isRecord(report?.receipt) ? report.receipt : {};
   const runtime = isRecord(report?.runtimeEvidence) ? report.runtimeEvidence : {};
@@ -317,6 +566,102 @@ function collectRefs(report: JsonRecord | undefined) {
     durableReceiptRef: stringValue(runtime.durableReceiptRef),
     sourceRepos: sourceRepos.length > 0 ? sourceRepos : [sourceRepo].filter(Boolean),
     sourceRefs: [...new Set(sourceRefs)],
+  };
+}
+
+function parseLayerReceiptRuntimeEvidenceObservation(
+  value: unknown,
+): LayerReceiptRuntimeEvidenceObservation | undefined {
+  try {
+    assertLayerReceiptRuntimeEvidenceObservation(value);
+    return value;
+  } catch {
+    return undefined;
+  }
+}
+
+function validateLayerReceiptRuntimeEvidenceObservationReadback(
+  observation: LayerReceiptRuntimeEvidenceObservation,
+): string[] {
+  const issues: string[] = [];
+  if (!observation.source.sourceReportId || !observation.source.sourceReportHash) {
+    issues.push("source-report-refs-not-preserved");
+  }
+  if (!observation.receiptRefs.receiptId || !observation.receiptRefs.receiptHash) {
+    issues.push("receipt-refs-not-preserved");
+  }
+  if (!observation.receiptRefs.sourceRequestId || !observation.receiptRefs.sourceRequestHash) {
+    issues.push("request-refs-not-preserved");
+  }
+  if (
+    !observation.runtimeRefs.runtimeEvidenceId ||
+    !observation.runtimeRefs.runtimeEvidenceHash ||
+    !observation.runtimeRefs.runtimeTraceRef
+  ) {
+    issues.push("runtime-refs-not-preserved");
+  }
+  if (!observation.receiptRefs.durableRef || !observation.receiptRefs.writerRef) {
+    issues.push("durable-or-writer-refs-not-preserved");
+  }
+  if (observation.receiptRefs.sourceRepos.length === 0 || observation.receiptRefs.sourceRefs.length < 8) {
+    issues.push("source-refs-not-preserved");
+  }
+  if (
+    observation.proof.strongestProofRung !==
+      "local_causal_observation_over_supplied_layer_receipt_runtime_evidence" ||
+    observation.proof.normalizedProofLabel !== "local_supplied_layer_receipt_runtime_evidence" ||
+    observation.proof.dhtOrHyperswarmInputObservedByCausalSubstrate !== false
+  ) {
+    issues.push("proof-labels-not-preserved");
+  }
+  if (
+    observation.nonClaims.canonicalHistoryAccepted ||
+    observation.nonClaims.layerEvidenceAdmitted ||
+    observation.nonClaims.layerAdmissionDecided ||
+    observation.nonClaims.rbcInterpreted ||
+    observation.nonClaims.authorityGranted ||
+    observation.nonClaims.referentPromoted ||
+    observation.nonClaims.meshPublished ||
+    observation.boundary.admitsLayerEvidence ||
+    observation.boundary.decidesLayerAdmission ||
+    observation.boundary.interpretsRbc ||
+    observation.boundary.acceptsCanonicalHistory ||
+    observation.boundary.grantsAuthority ||
+    observation.boundary.promotesReferents ||
+    observation.boundary.publishesToMesh ||
+    observation.boundary.writesContinuityRecords
+  ) {
+    issues.push("non-claims-not-preserved");
+  }
+  if (
+    !deferredAttachmentPointPreserved(observation.deferredAttachmentPoints.layerAdmission) ||
+    !deferredAttachmentPointPreserved(observation.deferredAttachmentPoints.rbcInterpretation) ||
+    !deferredAttachmentPointPreserved(observation.deferredAttachmentPoints.authorityDecision) ||
+    !deferredAttachmentPointPreserved(observation.deferredAttachmentPoints.referentPromotion) ||
+    !deferredAttachmentPointPreserved(observation.deferredAttachmentPoints.meshPublication)
+  ) {
+    issues.push("deferred-attachment-points-not-preserved");
+  }
+  return issues;
+}
+
+function deferredAttachmentPointPreserved(value: DeferredAttachmentPoint): boolean {
+  return value.status === "deferred" && value.active === false && value.interpreted === false && value.writes === false;
+}
+
+function buildReadbackBoundary(): LayerReceiptRuntimeEvidenceReadbackContract["boundary"] {
+  return {
+    readbackOnly: true,
+    writesObservationArtifact: false,
+    callsLayer: false,
+    admitsLayerEvidence: false,
+    decidesLayerAdmission: false,
+    interpretsRbc: false,
+    acceptsCanonicalHistory: false,
+    grantsAuthority: false,
+    promotesReferents: false,
+    publishesToMesh: false,
+    writesContinuityRecords: false,
   };
 }
 
@@ -437,6 +782,15 @@ function assertObservationStatus(value: unknown, label: string): asserts value i
     value !== "layer-receipt-runtime-evidence-observation-malformed"
   ) {
     throw new Error(`${label} must be a layer receipt runtime evidence observation status`);
+  }
+}
+
+function assertReadbackStatus(value: unknown, label: string): asserts value is LayerReceiptRuntimeEvidenceReadbackContractStatus {
+  if (
+    value !== "layer-receipt-runtime-evidence-readback-contract-valid" &&
+    value !== "layer-receipt-runtime-evidence-readback-contract-invalid"
+  ) {
+    throw new Error(`${label} must be a layer receipt runtime evidence readback contract status`);
   }
 }
 
