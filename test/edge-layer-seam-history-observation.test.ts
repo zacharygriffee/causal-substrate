@@ -10,6 +10,7 @@ import {
   assertEdgeLayerSeamHistoryObservationContractSnapshot,
   assertEdgeLayerSeamHistoryOutwardLaneCompletionGate,
   assertEdgeLayerSeamHistoryObservationResult,
+  assertEdgeLayerSeamHistoryProofSummary,
   assertEdgeLayerSeamHistoryEdgeProjectionConsumerFixture,
   assertEdgeLayerSeamHistoryEdgeProjectionFixture,
   assertEdgeLayerSeamHistoryEdgeProjectionHandoffBundle,
@@ -18,6 +19,7 @@ import {
   buildEdgeLayerSeamHistoryObservationContractSnapshot,
   buildEdgeLayerSeamHistoryOutwardLaneCompletionGate,
   buildEdgeLayerSeamHistoryObservationResult,
+  buildEdgeLayerSeamHistoryProofSummary,
   buildEdgeLayerSeamHistoryEdgeProjectionConsumerFixture,
   buildEdgeLayerSeamHistoryEdgeProjectionFixture,
   buildEdgeLayerSeamHistoryEdgeProjectionHandoffBundle,
@@ -870,6 +872,123 @@ test("public Hyperswarm proof requires explicit public swarm input gate", () => 
   assert.equal(publicProof.proof.publicHyperswarmInputObservedByCausalSubstrate, true);
   assert.equal(publicProof.proof.decentralizedSeamProofClaimed, true);
   assert.equal(publicProof.validation.decentralizedSeamProofClaimed, true);
+});
+
+test("proof summary preserves strongest source proof without upgrading supplied artifacts", () => {
+  const localObservation = buildEdgeLayerSeamHistoryObservationResult({
+    seamHistory: operationShapedSeamHistory(),
+    emittedAt: "2026-06-01T10:30:00.000Z",
+    sourcePath: "layer-owned-edge-seam-status:proof-summary-local",
+    inputReadByCausalSubstrate: true,
+  });
+  const publicObservation = buildEdgeLayerSeamHistoryObservationResult({
+    seamHistory: operationShapedSeamHistory(),
+    emittedAt: "2026-06-01T10:30:01.000Z",
+    sourcePath: "edge-layer-seam-history-durable-record:proof-summary-public",
+    inputReadByCausalSubstrate: true,
+    durableCorestoreHistoryRead: true,
+    dhtOrHyperswarmInputObservedByCausalSubstrate: true,
+    replicatedViaHyperswarmTransport: true,
+    publicHyperswarmInputObservedByCausalSubstrate: true,
+  });
+  const handoffBundle = buildEdgeLayerSeamHistoryEdgeProjectionHandoffBundle({
+    observationResult: publicObservation,
+    emittedAt: "2026-06-01T10:30:02.000Z",
+  });
+
+  const summary = buildEdgeLayerSeamHistoryProofSummary({
+    artifacts: [localObservation, handoffBundle],
+    emittedAt: "2026-06-01T10:30:03.000Z",
+  });
+
+  assertEdgeLayerSeamHistoryProofSummary(summary);
+  assert.equal(summary.reviewStatus, "edge-layer-seam-history-proof-summary-ready");
+  assert.equal(summary.inputs.artifactCount, 2);
+  assert.equal(
+    summary.summary.strongestSourceProofRungObserved,
+    "public_hyperswarm_replicated_durable_seam_history_observation",
+  );
+  assert.equal(summary.summary.strongestSourceProofLabelObserved, "public_hyperswarm_durable_seam_history_material");
+  assert.equal(summary.summary.publicHyperswarmProofObservedInSourceArtifacts, true);
+  assert.equal(
+    summary.summary.strongestProofRungProvenByThisOperation,
+    "local_causal_summary_over_supplied_edge_layer_seam_history_artifacts",
+  );
+  assert.equal(summary.summary.proofRungUpgradeClaimed, false);
+  assert.equal(summary.validation.noProofUpgradeClaim, true);
+  assert.equal(summary.validation.noLayerAdmissionClaim, true);
+  assert.equal(summary.validation.noRbcInterpretationClaim, true);
+  assert.equal(summary.validation.noAuthorityClaim, true);
+  assert.equal(summary.boundary.summaryOnly, true);
+  assert.equal(summary.boundary.readsSuppliedArtifactsOnly, true);
+  assert.equal(summary.boundary.opensSwarm, false);
+  assert.equal(summary.boundary.opensCorestore, false);
+  assert.equal(summary.boundary.writesEdgeProjection, false);
+  assert.equal(summary.boundary.admitsLayerEvidence, false);
+  assert.equal(summary.boundary.interpretsRbc, false);
+  assert.equal(summary.boundary.grantsAuthority, false);
+});
+
+test("proof summary CLI writes local import summary without upgrading source proof", async () => {
+  const tempRoot = await mkdtemp(path.join(tmpdir(), "causal-seam-history-proof-summary-"));
+  const observationPath = path.join(tempRoot, "observation.json");
+  const bundlePath = path.join(tempRoot, "handoff-bundle.json");
+  const summaryPath = path.join(tempRoot, "proof-summary.json");
+  try {
+    const publicObservation = buildEdgeLayerSeamHistoryObservationResult({
+      seamHistory: operationShapedSeamHistory(),
+      emittedAt: "2026-06-01T10:31:00.000Z",
+      sourcePath: "edge-layer-seam-history-durable-record:proof-summary-cli-public",
+      inputReadByCausalSubstrate: true,
+      durableCorestoreHistoryRead: true,
+      dhtOrHyperswarmInputObservedByCausalSubstrate: true,
+      replicatedViaHyperswarmTransport: true,
+      publicHyperswarmInputObservedByCausalSubstrate: true,
+    });
+    const handoffBundle = buildEdgeLayerSeamHistoryEdgeProjectionHandoffBundle({
+      observationResult: publicObservation,
+      emittedAt: "2026-06-01T10:31:01.000Z",
+    });
+    await writeFile(observationPath, JSON.stringify(publicObservation, null, 2), "utf8");
+    await writeFile(bundlePath, JSON.stringify(handoffBundle, null, 2), "utf8");
+
+    const { stdout, stderr } = await execFileAsync("npx", [
+      "tsx",
+      "scripts/summarize-edge-layer-seam-history-proof.ts",
+      "--input",
+      observationPath,
+      "--input",
+      bundlePath,
+      "--output",
+      summaryPath,
+      "--emitted-at",
+      "2026-06-01T10:31:02.000Z",
+    ], {
+      cwd: path.resolve("."),
+    });
+
+    assert.equal(stdout, "");
+    assert.equal(stderr, "");
+    const summary = JSON.parse(await readFile(summaryPath, "utf8"));
+    assertEdgeLayerSeamHistoryProofSummary(summary);
+    assert.equal(summary.reviewStatus, "edge-layer-seam-history-proof-summary-ready");
+    assert.equal(
+      summary.summary.strongestSourceProofRungObserved,
+      "public_hyperswarm_replicated_durable_seam_history_observation",
+    );
+    assert.equal(
+      summary.summary.strongestProofRungProvenByThisOperation,
+      "local_causal_summary_over_supplied_edge_layer_seam_history_artifacts",
+    );
+    assert.equal(summary.summary.proofRungUpgradeClaimed, false);
+    assert.equal(summary.boundary.opensSwarm, false);
+    assert.equal(summary.boundary.opensCorestore, false);
+    assert.equal(summary.boundary.admitsLayerEvidence, false);
+    assert.equal(summary.boundary.interpretsRbc, false);
+    assert.equal(summary.boundary.grantsAuthority, false);
+  } finally {
+    await rm(tempRoot, { recursive: true, force: true });
+  }
 });
 
 test("seam-history observation command reads supplied material, writes result, and readbacks lower proof rung", async () => {
