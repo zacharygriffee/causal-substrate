@@ -2,12 +2,18 @@ import { createHash } from "node:crypto";
 
 import {
   assertEdgeLayerSeamHistoryObservationResult,
+  assertEdgeLayerSeamHistoryObservationContractSnapshot,
+  assertEdgeLayerSeamHistoryOutwardLaneCompletionGate,
+  buildEdgeLayerSeamHistoryObservationContractSnapshot,
+  buildEdgeLayerSeamHistoryOutwardLaneCompletionGate,
   CAUSAL_EDGE_LAYER_SEAM_HISTORY_COMPATIBILITY_ENVELOPE_KIND,
   CAUSAL_EDGE_LAYER_SEAM_HISTORY_OBSERVATION_SCHEMA,
+  type EdgeLayerSeamHistoryObservationContractSnapshot,
   type EdgeLayerSeamDamageOrUnresolvedDetail,
   type EdgeLayerSeamHappeningClassification,
   type EdgeLayerSeamHistoryNormalizedProofLabel,
   type EdgeLayerSeamHistoryObservationResult,
+  type EdgeLayerSeamHistoryOutwardLaneCompletionGate,
   type EdgeLayerSeamHistoryProofRung,
   type EdgeLayerSeamHistorySourceRef,
   type EdgeLayerSeamLinkageStatus,
@@ -37,6 +43,14 @@ export const CAUSAL_EDGE_LAYER_SEAM_HISTORY_EDGE_PROJECTION_CONSUMER_FIXTURE_SCH
 export const CAUSAL_EDGE_LAYER_SEAM_HISTORY_EDGE_PROJECTION_CONSUMER_FIXTURE_ARTIFACT_KIND =
   "causal-edge-layer-seam-history-edge-projection-consumer-fixture" as const;
 
+export const CAUSAL_EDGE_LAYER_SEAM_HISTORY_EDGE_PROJECTION_HANDOFF_BUNDLE_SCHEMA =
+  "causal-substrate/edge-layer-seam-history-edge-projection-handoff-bundle/v1" as const;
+
+export const CAUSAL_EDGE_LAYER_SEAM_HISTORY_EDGE_PROJECTION_HANDOFF_BUNDLE_SCHEMA_VERSION = 1 as const;
+
+export const CAUSAL_EDGE_LAYER_SEAM_HISTORY_EDGE_PROJECTION_HANDOFF_BUNDLE_ARTIFACT_KIND =
+  "causal-edge-layer-seam-history-edge-projection-handoff-bundle" as const;
+
 export type EdgeLayerSeamHistoryEdgeProjectionFixtureStatus =
   | "edge-layer-seam-history-edge-projection-fixture-ready"
   | "edge-layer-seam-history-edge-projection-fixture-incomplete"
@@ -49,6 +63,10 @@ export type EdgeLayerSeamHistoryEdgeProjectionHandoffReadbackStatus =
 export type EdgeLayerSeamHistoryEdgeProjectionConsumerFixtureStatus =
   | "edge-layer-seam-history-edge-projection-consumer-fixture-ready"
   | "edge-layer-seam-history-edge-projection-consumer-fixture-incomplete";
+
+export type EdgeLayerSeamHistoryEdgeProjectionHandoffBundleStatus =
+  | "edge-layer-seam-history-edge-projection-handoff-bundle-ready"
+  | "edge-layer-seam-history-edge-projection-handoff-bundle-incomplete";
 
 export interface EdgeLayerSeamHistoryEdgeProjectionRef {
   sourceObservationArtifactId: string;
@@ -279,6 +297,56 @@ export interface EdgeLayerSeamHistoryEdgeProjectionConsumerFixture {
   rejections: string[];
 }
 
+export interface EdgeLayerSeamHistoryEdgeProjectionHandoffBundle {
+  artifactKind: typeof CAUSAL_EDGE_LAYER_SEAM_HISTORY_EDGE_PROJECTION_HANDOFF_BUNDLE_ARTIFACT_KIND;
+  schema: typeof CAUSAL_EDGE_LAYER_SEAM_HISTORY_EDGE_PROJECTION_HANDOFF_BUNDLE_SCHEMA;
+  schemaVersion: typeof CAUSAL_EDGE_LAYER_SEAM_HISTORY_EDGE_PROJECTION_HANDOFF_BUNDLE_SCHEMA_VERSION;
+  artifactId: string;
+  emittedAt: string;
+  source: {
+    sourceObservationArtifactId: string;
+    sourceObservationProofRung: EdgeLayerSeamHistoryProofRung;
+    sourceObservationNormalizedProofLabel: EdgeLayerSeamHistoryNormalizedProofLabel;
+  };
+  artifacts: {
+    observationResult: EdgeLayerSeamHistoryObservationResult;
+    contractSnapshot: EdgeLayerSeamHistoryObservationContractSnapshot;
+    handoffFixture: EdgeLayerSeamHistoryEdgeProjectionFixture;
+    consumerFixture: EdgeLayerSeamHistoryEdgeProjectionConsumerFixture;
+    completionGate: EdgeLayerSeamHistoryOutwardLaneCompletionGate;
+  };
+  sourceReferences: EdgeLayerSeamHistoryEdgeProjectionHandoffEnvelope["sourceReferences"];
+  boundary: {
+    bundleOnly: true;
+    edgeMayConsume: true;
+    writesEdgeProjection: false;
+    acceptsCanonicalHistory: false;
+    admitsLayerEvidence: false;
+    interpretsRbc: false;
+    grantsAuthority: false;
+    promotesReferents: false;
+    publishesToMesh: false;
+    writesProductionContinuity: false;
+  };
+  validation: {
+    status: EdgeLayerSeamHistoryEdgeProjectionHandoffBundleStatus;
+    observationResultConsumed: boolean;
+    contractSnapshotIncluded: boolean;
+    handoffFixtureIncluded: boolean;
+    consumerFixtureIncluded: boolean;
+    completionGateIncluded: boolean;
+    completionGateComplete: boolean;
+    sourceRefsPreserved: boolean;
+    noCanonicalHistoryClaim: true;
+    noLayerAdmissionClaim: true;
+    noRbcInterpretationClaim: true;
+    noAuthorityClaim: true;
+    noReferentPromotion: true;
+    issues: string[];
+  };
+  reviewStatus: EdgeLayerSeamHistoryEdgeProjectionHandoffBundleStatus;
+}
+
 export interface BuildEdgeLayerSeamHistoryEdgeProjectionHandoffReadbackInput {
   fixture: unknown;
   emittedAt: string;
@@ -292,6 +360,12 @@ export interface BuildEdgeLayerSeamHistoryEdgeProjectionConsumerFixtureInput {
 }
 
 export interface BuildEdgeLayerSeamHistoryEdgeProjectionFixtureInput {
+  observationResult: unknown;
+  emittedAt: string;
+  artifactId?: string;
+}
+
+export interface BuildEdgeLayerSeamHistoryEdgeProjectionHandoffBundleInput {
   observationResult: unknown;
   emittedAt: string;
   artifactId?: string;
@@ -510,6 +584,90 @@ export function buildEdgeLayerSeamHistoryEdgeProjectionConsumerFixture(
   };
 }
 
+export function buildEdgeLayerSeamHistoryEdgeProjectionHandoffBundle(
+  input: BuildEdgeLayerSeamHistoryEdgeProjectionHandoffBundleInput,
+): EdgeLayerSeamHistoryEdgeProjectionHandoffBundle {
+  assertEdgeLayerSeamHistoryObservationResult(input.observationResult);
+  const observationResult = input.observationResult;
+  const contractSnapshot = buildEdgeLayerSeamHistoryObservationContractSnapshot(observationResult);
+  assertEdgeLayerSeamHistoryObservationContractSnapshot(contractSnapshot);
+  const handoffFixture = buildEdgeLayerSeamHistoryEdgeProjectionFixture({
+    observationResult,
+    emittedAt: input.emittedAt,
+  });
+  assertEdgeLayerSeamHistoryEdgeProjectionFixture(handoffFixture);
+  const consumerFixture = buildEdgeLayerSeamHistoryEdgeProjectionConsumerFixture({
+    fixture: handoffFixture,
+    emittedAt: input.emittedAt,
+  });
+  assertEdgeLayerSeamHistoryEdgeProjectionConsumerFixture(consumerFixture);
+  const completionGate = buildEdgeLayerSeamHistoryOutwardLaneCompletionGate(observationResult);
+  assertEdgeLayerSeamHistoryOutwardLaneCompletionGate(completionGate);
+  const issues = collectHandoffBundleIssues({
+    handoffFixture,
+    consumerFixture,
+    completionGate,
+  });
+  const status: EdgeLayerSeamHistoryEdgeProjectionHandoffBundleStatus = issues.length === 0
+    ? "edge-layer-seam-history-edge-projection-handoff-bundle-ready"
+    : "edge-layer-seam-history-edge-projection-handoff-bundle-incomplete";
+  const artifactId = input.artifactId ?? createHandoffBundleArtifactId({
+    emittedAt: input.emittedAt,
+    sourceObservationArtifactId: observationResult.artifactId,
+  });
+
+  return {
+    artifactKind: CAUSAL_EDGE_LAYER_SEAM_HISTORY_EDGE_PROJECTION_HANDOFF_BUNDLE_ARTIFACT_KIND,
+    schema: CAUSAL_EDGE_LAYER_SEAM_HISTORY_EDGE_PROJECTION_HANDOFF_BUNDLE_SCHEMA,
+    schemaVersion: CAUSAL_EDGE_LAYER_SEAM_HISTORY_EDGE_PROJECTION_HANDOFF_BUNDLE_SCHEMA_VERSION,
+    artifactId,
+    emittedAt: input.emittedAt,
+    source: {
+      sourceObservationArtifactId: observationResult.artifactId,
+      sourceObservationProofRung: observationResult.proof.strongestProofRung,
+      sourceObservationNormalizedProofLabel: observationResult.proof.normalizedProofLabel,
+    },
+    artifacts: {
+      observationResult,
+      contractSnapshot,
+      handoffFixture,
+      consumerFixture,
+      completionGate,
+    },
+    sourceReferences: handoffFixture.handoffEnvelope.sourceReferences,
+    boundary: {
+      bundleOnly: true,
+      edgeMayConsume: true,
+      writesEdgeProjection: false,
+      acceptsCanonicalHistory: false,
+      admitsLayerEvidence: false,
+      interpretsRbc: false,
+      grantsAuthority: false,
+      promotesReferents: false,
+      publishesToMesh: false,
+      writesProductionContinuity: false,
+    },
+    validation: {
+      status,
+      observationResultConsumed: true,
+      contractSnapshotIncluded: true,
+      handoffFixtureIncluded: true,
+      consumerFixtureIncluded: true,
+      completionGateIncluded: true,
+      completionGateComplete: completionGate.completion.currentLaneComplete,
+      sourceRefsPreserved:
+        handoffFixture.validation.sourceRefsPreserved && consumerFixture.validation.sourceRefsPreserved,
+      noCanonicalHistoryClaim: true,
+      noLayerAdmissionClaim: true,
+      noRbcInterpretationClaim: true,
+      noAuthorityClaim: true,
+      noReferentPromotion: true,
+      issues,
+    },
+    reviewStatus: status,
+  };
+}
+
 export function assertEdgeLayerSeamHistoryEdgeProjectionFixture(
   value: unknown,
 ): asserts value is EdgeLayerSeamHistoryEdgeProjectionFixture {
@@ -670,6 +828,44 @@ export function assertEdgeLayerSeamHistoryEdgeProjectionConsumerFixture(
   assertConsumerFixtureStatus(candidate.reviewStatus, "reviewStatus");
 }
 
+export function assertEdgeLayerSeamHistoryEdgeProjectionHandoffBundle(
+  value: unknown,
+): asserts value is EdgeLayerSeamHistoryEdgeProjectionHandoffBundle {
+  const candidate = assertObject(value, "edge layer seam history edge projection handoff bundle");
+  assertEqual(
+    candidate.artifactKind,
+    CAUSAL_EDGE_LAYER_SEAM_HISTORY_EDGE_PROJECTION_HANDOFF_BUNDLE_ARTIFACT_KIND,
+    "artifactKind",
+  );
+  assertEqual(candidate.schema, CAUSAL_EDGE_LAYER_SEAM_HISTORY_EDGE_PROJECTION_HANDOFF_BUNDLE_SCHEMA, "schema");
+  assertEqual(
+    candidate.schemaVersion,
+    CAUSAL_EDGE_LAYER_SEAM_HISTORY_EDGE_PROJECTION_HANDOFF_BUNDLE_SCHEMA_VERSION,
+    "schemaVersion",
+  );
+  assertString(candidate.artifactId, "artifactId");
+  assertString(candidate.emittedAt, "emittedAt");
+  const boundary = assertObject(candidate.boundary, "boundary");
+  assertEqual(boundary.bundleOnly, true, "boundary.bundleOnly");
+  assertEqual(boundary.edgeMayConsume, true, "boundary.edgeMayConsume");
+  assertEqual(boundary.writesEdgeProjection, false, "boundary.writesEdgeProjection");
+  assertEqual(boundary.acceptsCanonicalHistory, false, "boundary.acceptsCanonicalHistory");
+  assertEqual(boundary.admitsLayerEvidence, false, "boundary.admitsLayerEvidence");
+  assertEqual(boundary.interpretsRbc, false, "boundary.interpretsRbc");
+  assertEqual(boundary.grantsAuthority, false, "boundary.grantsAuthority");
+  assertEqual(boundary.promotesReferents, false, "boundary.promotesReferents");
+  assertEqual(boundary.publishesToMesh, false, "boundary.publishesToMesh");
+  assertEqual(boundary.writesProductionContinuity, false, "boundary.writesProductionContinuity");
+  const validation = assertObject(candidate.validation, "validation");
+  assertHandoffBundleStatus(validation.status, "validation.status");
+  assertEqual(validation.noCanonicalHistoryClaim, true, "validation.noCanonicalHistoryClaim");
+  assertEqual(validation.noLayerAdmissionClaim, true, "validation.noLayerAdmissionClaim");
+  assertEqual(validation.noRbcInterpretationClaim, true, "validation.noRbcInterpretationClaim");
+  assertEqual(validation.noAuthorityClaim, true, "validation.noAuthorityClaim");
+  assertEqual(validation.noReferentPromotion, true, "validation.noReferentPromotion");
+  assertHandoffBundleStatus(candidate.reviewStatus, "reviewStatus");
+}
+
 function parseObservationResult(value: unknown): EdgeLayerSeamHistoryObservationResult | undefined {
   try {
     assertEdgeLayerSeamHistoryObservationResult(value);
@@ -773,6 +969,27 @@ function validateConsumerFixture(fixture: EdgeLayerSeamHistoryEdgeProjectionFixt
     fixture.boundary.writesProductionContinuity
   ) {
     issues.push("consumer-boundary-overclaim");
+  }
+  return [...new Set(issues)];
+}
+
+function collectHandoffBundleIssues(input: {
+  handoffFixture: EdgeLayerSeamHistoryEdgeProjectionFixture;
+  consumerFixture: EdgeLayerSeamHistoryEdgeProjectionConsumerFixture;
+  completionGate: EdgeLayerSeamHistoryOutwardLaneCompletionGate;
+}): string[] {
+  const issues: string[] = [];
+  if (input.handoffFixture.reviewStatus !== "edge-layer-seam-history-edge-projection-fixture-ready") {
+    issues.push("handoff-fixture-not-ready");
+  }
+  if (input.consumerFixture.reviewStatus !== "edge-layer-seam-history-edge-projection-consumer-fixture-ready") {
+    issues.push("consumer-fixture-not-ready");
+  }
+  if (!input.completionGate.completion.currentLaneComplete) {
+    issues.push("completion-gate-not-complete");
+  }
+  if (!input.handoffFixture.validation.sourceRefsPreserved || !input.consumerFixture.validation.sourceRefsPreserved) {
+    issues.push("bundle-source-refs-not-preserved");
   }
   return [...new Set(issues)];
 }
@@ -1057,6 +1274,10 @@ function createConsumerFixtureArtifactId(input: { emittedAt: string; sourceFixtu
   return `causal-edge-layer-seam-history-edge-projection-consumer-fixture:${hash(stableJson(input)).slice(0, 16)}`;
 }
 
+function createHandoffBundleArtifactId(input: { emittedAt: string; sourceObservationArtifactId?: string }): string {
+  return `causal-edge-layer-seam-history-edge-projection-handoff-bundle:${hash(stableJson(input)).slice(0, 16)}`;
+}
+
 type JsonRecord = Record<string, unknown>;
 
 function stableJson(value: unknown): string {
@@ -1127,6 +1348,18 @@ function assertConsumerFixtureStatus(
     value !== "edge-layer-seam-history-edge-projection-consumer-fixture-incomplete"
   ) {
     throw new Error(`${label} must be a consumer fixture status`);
+  }
+}
+
+function assertHandoffBundleStatus(
+  value: unknown,
+  label: string,
+): asserts value is EdgeLayerSeamHistoryEdgeProjectionHandoffBundleStatus {
+  if (
+    value !== "edge-layer-seam-history-edge-projection-handoff-bundle-ready" &&
+    value !== "edge-layer-seam-history-edge-projection-handoff-bundle-incomplete"
+  ) {
+    throw new Error(`${label} must be a handoff bundle status`);
   }
 }
 

@@ -12,6 +12,7 @@ import {
   assertEdgeLayerSeamHistoryObservationResult,
   assertEdgeLayerSeamHistoryEdgeProjectionConsumerFixture,
   assertEdgeLayerSeamHistoryEdgeProjectionFixture,
+  assertEdgeLayerSeamHistoryEdgeProjectionHandoffBundle,
   assertEdgeLayerSeamHistoryEdgeProjectionHandoffReadback,
   assertEdgeLayerSeamHistoryObservationReadbackContract,
   buildEdgeLayerSeamHistoryObservationContractSnapshot,
@@ -19,6 +20,7 @@ import {
   buildEdgeLayerSeamHistoryObservationResult,
   buildEdgeLayerSeamHistoryEdgeProjectionConsumerFixture,
   buildEdgeLayerSeamHistoryEdgeProjectionFixture,
+  buildEdgeLayerSeamHistoryEdgeProjectionHandoffBundle,
   buildEdgeLayerSeamHistoryEdgeProjectionHandoffReadback,
   buildEdgeLayerSeamHistoryObservationReadbackContract,
   buildEdgeLayerSeamHistoryObservationResultFromJson,
@@ -1255,6 +1257,58 @@ test("Edge projection consumer fixture variant exposes observation-only material
   assert.equal(consumerFixture.boundary.promotesReferents, false);
   assert.equal(consumerFixture.boundary.publishesToMesh, false);
   assert.equal(consumerFixture.boundary.writesProductionContinuity, false);
+});
+
+test("Edge projection handoff bundle packages observation artifacts without writing Edge state", () => {
+  const observationResult = buildEdgeLayerSeamHistoryObservationResult({
+    seamHistory: operationShapedSeamHistory(),
+    emittedAt: "2026-05-31T12:16:30.000Z",
+    sourcePath: "layer-owned-edge-seam-status:edge-projection-handoff-bundle",
+    inputReadByCausalSubstrate: true,
+  });
+
+  const bundle = buildEdgeLayerSeamHistoryEdgeProjectionHandoffBundle({
+    observationResult,
+    emittedAt: "2026-05-31T12:16:31.000Z",
+  });
+
+  assertEdgeLayerSeamHistoryEdgeProjectionHandoffBundle(bundle);
+  assert.equal(bundle.reviewStatus, "edge-layer-seam-history-edge-projection-handoff-bundle-ready");
+  assert.equal(bundle.source.sourceObservationArtifactId, observationResult.artifactId);
+  assert.equal(
+    bundle.source.sourceObservationProofRung,
+    "local_causal_observation_over_supplied_seam_history_material",
+  );
+  assert.equal(bundle.source.sourceObservationNormalizedProofLabel, "local_supplied_material");
+  assert.equal(bundle.validation.observationResultConsumed, true);
+  assert.equal(bundle.validation.contractSnapshotIncluded, true);
+  assert.equal(bundle.validation.handoffFixtureIncluded, true);
+  assert.equal(bundle.validation.consumerFixtureIncluded, true);
+  assert.equal(bundle.validation.completionGateIncluded, true);
+  assert.equal(bundle.validation.completionGateComplete, true);
+  assert.equal(bundle.validation.sourceRefsPreserved, true);
+  assert.equal(bundle.artifacts.observationResult.artifactId, observationResult.artifactId);
+  assert.equal(bundle.artifacts.contractSnapshot.sourceObservation.artifactId, observationResult.artifactId);
+  assert.equal(bundle.artifacts.handoffFixture.source.sourceObservationArtifactId, observationResult.artifactId);
+  assert.equal(bundle.artifacts.consumerFixture.source.sourceObservationArtifactId, observationResult.artifactId);
+  assert.equal(bundle.artifacts.completionGate.sourceObservation.artifactId, observationResult.artifactId);
+  assert.deepEqual(bundle.sourceReferences.requestIds, [
+    "edge-layer-report-only-seam-request:causal-observation:linked",
+    "edge-layer-report-only-seam-request:causal-observation:damaged",
+  ]);
+  assert.deepEqual(bundle.sourceReferences.receiptHashes, [
+    `sha256:${"b".repeat(64)}`,
+    `sha256:${"d".repeat(64)}`,
+  ]);
+  assert.equal(bundle.boundary.edgeMayConsume, true);
+  assert.equal(bundle.boundary.writesEdgeProjection, false);
+  assert.equal(bundle.boundary.acceptsCanonicalHistory, false);
+  assert.equal(bundle.boundary.admitsLayerEvidence, false);
+  assert.equal(bundle.boundary.interpretsRbc, false);
+  assert.equal(bundle.boundary.grantsAuthority, false);
+  assert.equal(bundle.boundary.promotesReferents, false);
+  assert.equal(bundle.boundary.publishesToMesh, false);
+  assert.equal(bundle.boundary.writesProductionContinuity, false);
 });
 
 test("Edge projection fixture guardrail matrix rejects projection overclaims", () => {
