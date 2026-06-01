@@ -38,6 +38,17 @@ Those derived artifacts preserve the public source proof rung while their own
 operations are local saved-artifact checks/readbacks. They do not open swarm or
 Corestore and do not upgrade proof.
 
+Edge imported the refreshed handoff bundle under
+`mesh-ecology-edge/proof-artifacts/causal-substrate-public-device-operator-refresh-handoff-2026-06-01/`
+as observation-only projection input. Causal Substrate then derived:
+
+- `observation-to-edge-projection-contract.json`
+- `proof-summary-consumer-readback.json`
+
+These artifacts read saved Causal and Edge artifacts only. They preserve the
+public source proof rung for consumers but do not call Edge, write Edge
+projection state, or upgrade proof.
+
 ## Prepared Public Commands
 
 Run the source command on `platform-lab`:

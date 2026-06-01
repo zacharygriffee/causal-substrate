@@ -133,6 +133,10 @@ The local supplied-material lane can now:
   readback, proof summary, and reproducibility check from the refreshed public
   material while preserving non-claim boundaries and labeling derived
   saved-artifact operations as lower proof rungs.
+- after Edge imported the refreshed handoff bundle as observation-only
+  projection input, derive a refreshed observation-to-Edge projection contract
+  and consumer readback from saved artifacts only, preserving the public source
+  proof rung without upgrading the contract/readback operations.
 
 Strongest routinely proven rung in normal tests:
 `local_causal_observation_over_supplied_seam_history_material`.
@@ -154,10 +158,6 @@ The current saved-artifact readiness list is complete. Build the next list
 around an explicit operator-run public swarm refresh, if the operator chooses
 to run one:
 
-- after Edge imports any refreshed handoff bundle, derive a refreshed
-  observation-to-Edge projection contract and consumer readback from saved
-  artifacts only, preserving the public source proof rung without upgrading
-  the contract/readback operations;
 - index the refreshed public run and add a negative refreshed-index case that
   rejects missing refs, weakened proof labels, configured bootstrap evidence,
   or projection/authority overclaims;
