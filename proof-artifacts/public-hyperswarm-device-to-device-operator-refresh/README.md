@@ -2,7 +2,7 @@
 
 This directory is prepared for an operator-selected public Hyperswarm refresh.
 
-Current contents are a local refresh input package only:
+Initial package contents were local refresh input material:
 
 - `seam-history-input.json`
 - `public-refresh-input-package.json`
@@ -13,6 +13,17 @@ The package operation rung is
 This is not a public swarm proof. It remains local supplied seam-history input
 until the source device writes it to durable Corestore material and the replica
 device consumes it through public Hyperswarm.
+
+The operator-selected public refresh was then run device-to-device:
+
+- source device: `platform-lab` (`ztouch`)
+- replica device: `mesh-lab` (`surface`)
+- source manifest: `public-source-manifest.json`
+- replica report: `public-replica-reader-report.json`
+
+The replica report is the first refreshed artifact in this directory that
+carries the live public proof rung
+`public_hyperswarm_replicated_durable_seam_history_observation`.
 
 ## Prepared Public Commands
 
@@ -46,7 +57,6 @@ env -u CAUSAL_SUBSTRATE_HYPERSWARM_BOOTSTRAP \
 
 ## Boundary
 
-This prepared package does not claim canonical history, Layer admission, RBC
+These artifacts do not claim canonical history, Layer admission, RBC
 interpretation, quorum satisfaction, Mesh publication, authority, referent
-promotion, Edge projection writes, production continuity, or live public swarm
-proof.
+promotion, Edge projection writes, or production continuity.

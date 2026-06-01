@@ -1,0 +1,89 @@
+{
+  "artifactKind": "edge-layer-seam-history-public-device-source-manifest",
+  "schema": "causal-substrate/edge-layer-seam-history-public-device-source-manifest/v1",
+  "schemaVersion": 1,
+  "emittedAt": "2026-06-01T07:32:37.626Z",
+  "lane": "public_hyperswarm_device_to_device_seam_history_observation",
+  "namespaceParts": [
+    "causal-substrate",
+    "v1",
+    "edge-layer-seam-history-reader",
+    "public",
+    "device",
+    "seam-history",
+    "operator-refresh"
+  ],
+  "source": {
+    "sourceCoreKeyHex": "253bec989096c59b8fade86081a6105c7e9e05357403bbc7030730aca0e2627b",
+    "topicHex": "4d3936e84ab87b7a90220167ef5807adacc77fa0bf209d28656aef697a769163",
+    "sourceRecordId": "edge-layer-seam-history-durable-record:2198f74a2cd5d965",
+    "seamHistoryHash": "sha256:2198f74a2cd5d9653463c862f739acdc2ca7a66d82159892828bad1c875881ef",
+    "sourceRefs": [
+      "layer-owned-edge-seam-status:public-hyperswarm-single-machine-2026-06-01",
+      "sha256:8888888888888888888888888888888888888888888888888888888888888888",
+      "mesh-ecology-edge",
+      "mesh-ecology-layer",
+      "edge-layer-report-only-seam-request:public-hyperswarm-single-machine-2026-06-01:linked",
+      "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "corestore:edge-layer-seam-history:public-single-machine:request:0",
+      "autobase-writer:edge-public-hyperswarm-single-machine",
+      "layer-report-only-edge-seam-receipt:public-hyperswarm-single-machine-2026-06-01:linked",
+      "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "corestore:edge-layer-seam-history:public-single-machine:receipt:1",
+      "autobase-writer:layer-public-hyperswarm-single-machine",
+      "edge-layer-report-only-seam-request:public-hyperswarm-single-machine-2026-06-01:unlinked",
+      "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "corestore:edge-layer-seam-history:public-single-machine:request:2",
+      "layer-report-only-edge-seam-receipt:public-hyperswarm-single-machine-2026-06-01:unlinked",
+      "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "edge-layer-report-only-seam-request:public-hyperswarm-single-machine-2026-06-01:different",
+      "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "corestore:edge-layer-seam-history:public-single-machine:receipt:3"
+    ],
+    "sourceRefCompleteness": {
+      "reportKind": "edge_layer_seam_history_durable_record_source_ref_completeness",
+      "complete": true,
+      "sourceRefsPresent": true,
+      "requiredRefs": {
+        "historyId": true,
+        "historyHash": true,
+        "sourceRepos": true,
+        "requestIds": true,
+        "requestHashes": true,
+        "requestDurableRefs": true,
+        "requestWriterRefs": true,
+        "receiptIds": true,
+        "receiptHashes": true,
+        "receiptDurableRefs": true,
+        "receiptWriterRefs": true
+      },
+      "missingRefKinds": [],
+      "boundary": {
+        "reportOnly": true,
+        "durableRecordMetadataOnly": true,
+        "acceptsCanonicalHistory": false,
+        "admitsLayerEvidence": false,
+        "interpretsRbc": false,
+        "grantsAuthority": false
+      }
+    }
+  },
+  "proofPosture": {
+    "sourceManifestOnly": true,
+    "publicSwarmObservationProofClaimedNow": false,
+    "replicaDeviceMustReadDurableMaterial": true,
+    "replicaDeviceMustEmitObservation": true,
+    "lowerProofRungsRemainLowerUntilReplicaReport": true
+  },
+  "boundary": {
+    "opensSwarmBySourceCommand": true,
+    "opensCorestoreBySourceCommand": true,
+    "writesDurableHistoryBySourceCommand": true,
+    "replicaReadProvenByThisArtifact": false,
+    "acceptsCanonicalHistory": false,
+    "admitsLayerEvidence": false,
+    "interpretsRbc": false,
+    "grantsAuthority": false,
+    "publishesToMesh": false
+  }
+}

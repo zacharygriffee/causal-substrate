@@ -124,6 +124,11 @@ The local supplied-material lane can now:
   preserving the current seam-history input and labeling it as
   `local_refresh_input_package_over_saved_public_hyperswarm_material` until a
   public Hyperswarm reader consumes refreshed durable material.
+- run the prepared source and replica commands on the standby devices
+  `platform-lab` and `mesh-lab` with public Hyperswarm enabled and
+  `CAUSAL_SUBSTRATE_HYPERSWARM_BOOTSTRAP` unset, producing a refreshed source
+  manifest and replica report under
+  `proof-artifacts/public-hyperswarm-device-to-device-operator-refresh/`.
 
 Strongest routinely proven rung in normal tests:
 `local_causal_observation_over_supplied_seam_history_material`.
@@ -145,9 +150,6 @@ The current saved-artifact readiness list is complete. Build the next list
 around an explicit operator-run public swarm refresh, if the operator chooses
 to run one:
 
-- run the prepared source and replica commands on the standby devices only
-  after an explicit operator request, with public Hyperswarm enabled and
-  `CAUSAL_SUBSTRATE_HYPERSWARM_BOOTSTRAP` unset on both devices;
 - after a real public refresh run, derive the replica report readback, Edge
   handoff bundle, handoff readback, proof summary, and reproducibility check
   from the refreshed durable public material without claiming canonical
