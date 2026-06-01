@@ -87,6 +87,13 @@ npx tsx scripts/check-edge-layer-seam-history-public-artifacts.ts \
   --output proof-artifacts/public-hyperswarm-device-to-device-2026-06-01/public-artifact-reproducibility-check.json
 ```
 
+```bash
+npx tsx scripts/derive-edge-layer-seam-history-observation-to-edge-projection-contract.ts \
+  --run-dir proof-artifacts/public-hyperswarm-device-to-device-2026-06-01 \
+  --edge-receipt ../mesh-ecology-edge/proof-artifacts/causal-substrate-public-device-handoff-2026-06-01/edge-causal-seam-handoff-projection-input-receipt.json \
+  --output proof-artifacts/public-hyperswarm-device-to-device-2026-06-01/observation-to-edge-projection-contract.json
+```
+
 ## Result
 
 The replica report preserves:
@@ -109,6 +116,13 @@ The reproducibility check proves the saved artifact chain remains mutually
 consistent and labels its own operation as
 `local_reproducibility_check_over_saved_public_hyperswarm_artifacts`. It does
 not open Hyperswarm or Corestore and does not claim a new live public run.
+
+The observation-to-Edge projection contract proves the saved Causal handoff
+bundle matches Edge's saved observation-only import receipt, preserving request
+ids/hashes, receipt ids/hashes, source repos, durable refs, writer refs, and the
+public source proof label. The contract operation itself is
+`local_contract_check_over_saved_causal_handoff_and_edge_receipt`; it does not
+call Edge, write Edge projection state, or claim a new live swarm run.
 
 ## Boundary
 
