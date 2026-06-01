@@ -171,20 +171,26 @@ Strongest preserved artifact rung from the 2026-06-01 device-to-device public
 run:
 `public_hyperswarm_replicated_durable_seam_history_observation`.
 
+Strongest latest saved-artifact consumer handoff rung:
+`local_consumer_handoff_over_saved_public_seam_proof_index`.
+
+Strongest latest saved-artifact consumer readback rung:
+`local_readback_over_saved_public_proof_index_consumer_handoff`.
+
 ## Next Outward Moves
 
-The current refreshed saved-artifact readiness list is complete. The next
-prepared public-swarm-only objective exists but has not been run. Build the
-next list around either running that public device objective or handing the
-current proof index to a consumer:
+The current refreshed saved-artifact readiness and consumer handoff list is
+complete. The next prepared public-swarm-only objective exists but has not been
+run. Build the next list around one of these outward moves:
 
 - run the prepared next public device objective from
   `proof-artifacts/public-hyperswarm-device-to-device-operator-refresh/operator-selected-public-refresh-command.json`
   on real public Hyperswarm only, with `CAUSAL_SUBSTRATE_HYPERSWARM_BOOTSTRAP`
   unset and no testnet or configured bootstrap;
 - if a consumer asks for the latest saved index, hand
-  `public-proof-index-consumer-handoff.json` and `public-seam-proof-index.json`
-  as observation-only material;
+  `public-proof-index-consumer-handoff.json`,
+  `public-proof-index-consumer-handoff-readback.json`, and
+  `public-seam-proof-index.json` as observation-only material;
 - if Edge or Layer provides fresh public endpoint/history material, prefer a
   narrow observation/readback path over another solo saved-artifact expansion;
   no fresh Edge/Layer public proof artifact was present locally during the last
@@ -192,6 +198,8 @@ current proof index to a consumer:
 - keep any new saved-artifact consumer checks explicitly lower than the source
   public swarm proof unless Causal itself reopens and reads durable replicated
   seam history over public Hyperswarm;
+- do not add another saved-artifact expansion unless it removes a real
+  consumer ambiguity or guards a real overclaim risk;
 - defer ontology, referent promotion, canonical continuity, RBC, Mesh,
   authority, Layer admission, and production continuity.
 
