@@ -283,6 +283,57 @@ test("handoff bundle readback command preserves source refs from disk without pr
   }
 });
 
+test("handoff bundle readback command writes invalid readbacks for malformed and non-object input", async () => {
+  const tempRoot = await mkdtemp(path.join(tmpdir(), "causal-handoff-bundle-readback-invalid-cli-"));
+  try {
+    const cases = [
+      { name: "malformed", contents: "{not-json" },
+      { name: "non-object", contents: "[]" },
+    ];
+
+    for (const inputCase of cases) {
+      const inputPath = path.join(tempRoot, `${inputCase.name}.json`);
+      const outputPath = path.join(tempRoot, `${inputCase.name}-readback.json`);
+      await writeFile(inputPath, inputCase.contents, "utf8");
+
+      const { stdout, stderr } = await execFileAsync("npx", [
+        "tsx",
+        "scripts/readback-edge-layer-seam-history-handoff-bundle.ts",
+        "--input-bundle",
+        inputPath,
+        "--readback-output",
+        outputPath,
+        "--emitted-at",
+        "2026-06-01T10:00:00.000Z",
+      ], {
+        cwd: path.resolve("."),
+      });
+
+      assert.equal(stdout, "");
+      assert.equal(stderr, "");
+      const readback = JSON.parse(await readFile(outputPath, "utf8"));
+      assertEdgeLayerSeamHistoryEdgeProjectionHandoffBundleReadback(readback);
+      assert.equal(
+        readback.reviewStatus,
+        "edge-layer-seam-history-edge-projection-handoff-bundle-readback-invalid",
+      );
+      assert.equal(readback.validation.handoffBundleConsumed, false);
+      assert.equal(readback.readback.bundleReadable, false);
+      assert.equal(readback.readback.bundleValid, false);
+      assert.deepEqual(readback.validation.issues, ["handoff-bundle-invalid"]);
+      assert.deepEqual(readback.rejections, ["handoff-bundle-invalid"]);
+      assert.equal(readback.boundary.readbackOnly, true);
+      assert.equal(readback.boundary.writesEdgeProjection, false);
+      assert.equal(readback.boundary.acceptsCanonicalHistory, false);
+      assert.equal(readback.boundary.admitsLayerEvidence, false);
+      assert.equal(readback.boundary.interpretsRbc, false);
+      assert.equal(readback.boundary.grantsAuthority, false);
+    }
+  } finally {
+    await rm(tempRoot, { recursive: true, force: true });
+  }
+});
+
 test("handoff bundle readback rejects weakened source refs and proof labels", () => {
   const observationResult = buildEdgeLayerSeamHistoryObservationResult({
     seamHistory: seamHistoryMaterial(),

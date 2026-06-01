@@ -22,7 +22,7 @@ async function main(): Promise<void> {
   if (!args.input) throw new Error("input_required_for_edge_layer_seam_history_handoff_bundle_readback");
   if (!args.output) throw new Error("output_required_for_edge_layer_seam_history_handoff_bundle_readback");
 
-  const bundle = JSON.parse(await readFile(path.resolve(args.input), "utf8")) as unknown;
+  const bundle = parseJsonForReadback(await readFile(path.resolve(args.input), "utf8"));
   const readback = buildEdgeLayerSeamHistoryEdgeProjectionHandoffBundleReadback({
     bundle,
     emittedAt: args.emittedAt,
@@ -67,6 +67,14 @@ function requireNext(argv: string[], index: number, flag: string): string {
   const value = argv[index + 1];
   if (!value || value.startsWith("--")) throw new Error(`missing_value_for:${flag}`);
   return value;
+}
+
+function parseJsonForReadback(raw: string): unknown {
+  try {
+    return JSON.parse(raw) as unknown;
+  } catch {
+    return undefined;
+  }
 }
 
 function printUsage(): void {

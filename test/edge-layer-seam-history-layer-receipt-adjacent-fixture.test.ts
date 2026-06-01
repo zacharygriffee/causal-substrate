@@ -575,6 +575,58 @@ test("combined Edge Layer consumer contract snapshot readback CLI writes readbac
   }
 });
 
+test("combined Edge Layer consumer contract snapshot readback CLI writes invalid readbacks for malformed and non-object input", async () => {
+  const tempRoot = await mkdtemp(path.join(tmpdir(), "causal-edge-layer-snapshot-readback-invalid-cli-"));
+  try {
+    const cases = [
+      { name: "malformed", contents: "{not-json" },
+      { name: "non-object", contents: "[]" },
+    ];
+
+    for (const inputCase of cases) {
+      const inputPath = path.join(tempRoot, `${inputCase.name}.json`);
+      const readbackPath = path.join(tempRoot, `${inputCase.name}-readback.json`);
+      await writeFile(inputPath, inputCase.contents, "utf8");
+
+      const { stdout, stderr } = await execFileAsync("npx", [
+        "tsx",
+        "scripts/readback-edge-layer-consumer-contract-snapshot.ts",
+        "--input-snapshot",
+        inputPath,
+        "--readback-output",
+        readbackPath,
+        "--emitted-at",
+        "2026-06-01T10:05:00.000Z",
+      ], {
+        cwd: path.resolve("."),
+      });
+
+      assert.equal(stdout, "");
+      assert.equal(stderr, "");
+      const readback = JSON.parse(await readFile(readbackPath, "utf8"));
+      assertEdgeLayerSeamHistoryEdgeLayerConsumerContractSnapshotReadback(readback);
+      assert.equal(
+        readback.reviewStatus,
+        "edge-layer-seam-history-edge-layer-consumer-contract-snapshot-readback-invalid",
+      );
+      assert.equal(readback.validation.snapshotArtifactConsumed, false);
+      assert.equal(readback.readback.snapshotReadable, false);
+      assert.equal(readback.readback.snapshotValid, false);
+      assert.deepEqual(readback.validation.issues, ["edge-layer-consumer-contract-snapshot-invalid"]);
+      assert.deepEqual(readback.rejections, ["edge-layer-consumer-contract-snapshot-invalid"]);
+      assert.equal(readback.boundary.readbackOnly, true);
+      assert.equal(readback.boundary.writesSnapshot, false);
+      assert.equal(readback.boundary.writesEdgeProjection, false);
+      assert.equal(readback.boundary.writesLayerEvidence, false);
+      assert.equal(readback.boundary.admitsLayerEvidence, false);
+      assert.equal(readback.boundary.interpretsRbc, false);
+      assert.equal(readback.boundary.grantsAuthority, false);
+    }
+  } finally {
+    await rm(tempRoot, { recursive: true, force: true });
+  }
+});
+
 test("combined seam-history and Layer receipt adjacent fixture stays incomplete when refs do not match", () => {
   const seamObservation = buildEdgeLayerSeamHistoryObservationResult({
     seamHistory: seamHistoryMaterial(),
