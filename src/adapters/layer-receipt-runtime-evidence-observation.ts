@@ -12,6 +12,12 @@ export const CAUSAL_LAYER_RECEIPT_RUNTIME_EVIDENCE_READBACK_CONTRACT_SCHEMA =
 export const CAUSAL_LAYER_RECEIPT_RUNTIME_EVIDENCE_READBACK_CONTRACT_ARTIFACT_KIND =
   "causal-layer-receipt-runtime-evidence-readback-contract" as const;
 
+export const CAUSAL_LAYER_RECEIPT_RUNTIME_EVIDENCE_OPERATIONAL_FIXTURE_HOOK_SCHEMA =
+  "causal-substrate/layer-receipt-runtime-evidence-operational-fixture-hook/v1" as const;
+
+export const CAUSAL_LAYER_RECEIPT_RUNTIME_EVIDENCE_OPERATIONAL_FIXTURE_HOOK_ARTIFACT_KIND =
+  "causal-layer-receipt-runtime-evidence-operational-fixture-hook" as const;
+
 export type LayerReceiptRuntimeEvidenceObservationStatus =
   | "layer-receipt-runtime-evidence-observation-emitted"
   | "layer-receipt-runtime-evidence-observation-incomplete"
@@ -21,6 +27,11 @@ export type LayerReceiptRuntimeEvidenceObservationStatus =
 export type LayerReceiptRuntimeEvidenceReadbackContractStatus =
   | "layer-receipt-runtime-evidence-readback-contract-valid"
   | "layer-receipt-runtime-evidence-readback-contract-invalid";
+
+export type LayerReceiptRuntimeEvidenceOperationalFixtureHookStatus =
+  | "layer-receipt-runtime-evidence-operational-fixture-hook-ready"
+  | "layer-receipt-runtime-evidence-operational-fixture-hook-incomplete"
+  | "layer-receipt-runtime-evidence-operational-fixture-hook-blocked";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -191,6 +202,79 @@ export interface LayerReceiptRuntimeEvidenceReadbackContract {
   rejections: string[];
 }
 
+export interface LayerReceiptRuntimeEvidenceOperationalFixtureHook {
+  artifactKind: typeof CAUSAL_LAYER_RECEIPT_RUNTIME_EVIDENCE_OPERATIONAL_FIXTURE_HOOK_ARTIFACT_KIND;
+  schema: typeof CAUSAL_LAYER_RECEIPT_RUNTIME_EVIDENCE_OPERATIONAL_FIXTURE_HOOK_SCHEMA;
+  schemaVersion: 1;
+  artifactId: string;
+  emittedAt: string;
+  source: {
+    sourcePath?: string | undefined;
+    sourceRepo?: string | undefined;
+    sourceReportId?: string | undefined;
+    sourceReportHash?: string | undefined;
+    observationArtifactId: string;
+    observationStatus: LayerReceiptRuntimeEvidenceObservationStatus;
+  };
+  hook: {
+    hookKind: "layer_origin_receipt_runtime_evidence_operational_fixture_hook";
+    consumesSuppliedLayerOriginMaterial: true;
+    operationShapeOnly: true;
+    observation: LayerReceiptRuntimeEvidenceObservation;
+  };
+  proof: {
+    strongestProofRung: "local_causal_observation_over_supplied_layer_origin_fixture_material";
+    normalizedProofLabel: "local_supplied_layer_origin_operational_fixture";
+    suppliedMaterialOnly: true;
+    layerOwnedInputObserved: boolean;
+    dhtOrHyperswarmInputObservedByCausalSubstrate: false;
+    doesNotUpgradeToSwarmProof: true;
+  };
+  nonClaims: {
+    canonicalHistoryAccepted: false;
+    layerEvidenceAdmitted: false;
+    layerAdmissionDecided: false;
+    rbcInterpreted: false;
+    authorityGranted: false;
+    referentPromoted: false;
+    meshPublished: false;
+  };
+  boundary: {
+    hookOnly: true;
+    fixtureOnly: true;
+    readsSuppliedLayerOriginMaterial: true;
+    callsLayer: false;
+    opensLayerRuntime: false;
+    writesLayerEvidence: false;
+    admitsLayerEvidence: false;
+    decidesLayerAdmission: false;
+    interpretsRbc: false;
+    acceptsCanonicalHistory: false;
+    grantsAuthority: false;
+    promotesReferents: false;
+    publishesToMesh: false;
+    writesContinuityRecords: false;
+  };
+  validation: {
+    status: LayerReceiptRuntimeEvidenceOperationalFixtureHookStatus;
+    suppliedMaterialConsumed: boolean;
+    observationEmitted: boolean;
+    layerOwnedInputObserved: boolean;
+    sourceRefsPreserved: boolean;
+    receiptRefsPreserved: boolean;
+    runtimeRefsPreserved: boolean;
+    noCanonicalHistoryClaim: true;
+    noLayerAdmissionClaim: true;
+    noLayerEvidenceAdmissionClaim: true;
+    noRbcInterpretationClaim: true;
+    noAuthorityClaim: true;
+    issues: string[];
+  };
+  reviewStatus: LayerReceiptRuntimeEvidenceOperationalFixtureHookStatus;
+  warnings: string[];
+  rejections: string[];
+}
+
 export interface LayerReceiptRuntimeEvidenceSourceRefCompleteness {
   reportKind: "layer_receipt_runtime_evidence_source_ref_completeness";
   complete: boolean;
@@ -239,6 +323,164 @@ interface DeferredAttachmentPoint {
   active: false;
   interpreted: false;
   writes: false;
+}
+
+export function buildLayerReceiptRuntimeEvidenceOperationalFixtureHook(input: {
+  layerOriginReceiptRuntimeEvidence: unknown;
+  emittedAt: string;
+  sourcePath?: string | undefined;
+  artifactId?: string | undefined;
+}): LayerReceiptRuntimeEvidenceOperationalFixtureHook {
+  const observation = buildLayerReceiptRuntimeEvidenceObservation({
+    layerReceiptRuntimeEvidence: input.layerOriginReceiptRuntimeEvidence,
+    emittedAt: input.emittedAt,
+  });
+  const issues = validateOperationalFixtureHook(observation);
+  const status: LayerReceiptRuntimeEvidenceOperationalFixtureHookStatus =
+    observation.reviewStatus === "layer-receipt-runtime-evidence-observation-guardrail-blocked" ||
+      observation.reviewStatus === "layer-receipt-runtime-evidence-observation-malformed"
+      ? "layer-receipt-runtime-evidence-operational-fixture-hook-blocked"
+      : issues.length === 0
+        ? "layer-receipt-runtime-evidence-operational-fixture-hook-ready"
+        : "layer-receipt-runtime-evidence-operational-fixture-hook-incomplete";
+  const artifactId = input.artifactId ??
+    `causal-layer-receipt-runtime-evidence-operational-fixture-hook:${hash(stableJson({
+      emittedAt: input.emittedAt,
+      observationArtifactId: observation.artifactId,
+      sourcePath: input.sourcePath,
+    })).slice(0, 16)}`;
+
+  return {
+    artifactKind: CAUSAL_LAYER_RECEIPT_RUNTIME_EVIDENCE_OPERATIONAL_FIXTURE_HOOK_ARTIFACT_KIND,
+    schema: CAUSAL_LAYER_RECEIPT_RUNTIME_EVIDENCE_OPERATIONAL_FIXTURE_HOOK_SCHEMA,
+    schemaVersion: 1,
+    artifactId,
+    emittedAt: input.emittedAt,
+    source: {
+      ...(input.sourcePath ? { sourcePath: input.sourcePath } : {}),
+      ...(observation.source.sourceRepo ? { sourceRepo: observation.source.sourceRepo } : {}),
+      ...(observation.source.sourceReportId ? { sourceReportId: observation.source.sourceReportId } : {}),
+      ...(observation.source.sourceReportHash ? { sourceReportHash: observation.source.sourceReportHash } : {}),
+      observationArtifactId: observation.artifactId,
+      observationStatus: observation.reviewStatus,
+    },
+    hook: {
+      hookKind: "layer_origin_receipt_runtime_evidence_operational_fixture_hook",
+      consumesSuppliedLayerOriginMaterial: true,
+      operationShapeOnly: true,
+      observation,
+    },
+    proof: {
+      strongestProofRung: "local_causal_observation_over_supplied_layer_origin_fixture_material",
+      normalizedProofLabel: "local_supplied_layer_origin_operational_fixture",
+      suppliedMaterialOnly: true,
+      layerOwnedInputObserved: observation.proof.layerOwnedInputObserved,
+      dhtOrHyperswarmInputObservedByCausalSubstrate: false,
+      doesNotUpgradeToSwarmProof: true,
+    },
+    nonClaims: {
+      canonicalHistoryAccepted: false,
+      layerEvidenceAdmitted: false,
+      layerAdmissionDecided: false,
+      rbcInterpreted: false,
+      authorityGranted: false,
+      referentPromoted: false,
+      meshPublished: false,
+    },
+    boundary: buildOperationalFixtureHookBoundary(),
+    validation: {
+      status,
+      suppliedMaterialConsumed: observation.validation.reportConsumed,
+      observationEmitted: observation.reviewStatus === "layer-receipt-runtime-evidence-observation-emitted",
+      layerOwnedInputObserved: observation.proof.layerOwnedInputObserved,
+      sourceRefsPreserved: observation.validation.sourceRefsPreserved,
+      receiptRefsPreserved: observation.validation.receiptRefsPreserved,
+      runtimeRefsPreserved: observation.validation.runtimeRefsPreserved,
+      noCanonicalHistoryClaim: true,
+      noLayerAdmissionClaim: true,
+      noLayerEvidenceAdmissionClaim: true,
+      noRbcInterpretationClaim: true,
+      noAuthorityClaim: true,
+      issues,
+    },
+    reviewStatus: status,
+    warnings: [
+      "layer-origin-operational-fixture-hook-is-local-supplied-material-only",
+      "layer-origin-operational-fixture-hook-does-not-admit-layer-evidence",
+      "layer-origin-operational-fixture-hook-does-not-interpret-rbc",
+      "layer-origin-operational-fixture-hook-does-not-grant-authority",
+    ],
+    rejections: status === "layer-receipt-runtime-evidence-operational-fixture-hook-ready" ? [] : issues,
+  };
+}
+
+export function assertLayerReceiptRuntimeEvidenceOperationalFixtureHook(
+  value: unknown,
+): asserts value is LayerReceiptRuntimeEvidenceOperationalFixtureHook {
+  const candidate = assertObject(value, "layer receipt runtime evidence operational fixture hook");
+  assertEqual(
+    candidate.artifactKind,
+    CAUSAL_LAYER_RECEIPT_RUNTIME_EVIDENCE_OPERATIONAL_FIXTURE_HOOK_ARTIFACT_KIND,
+    "artifactKind",
+  );
+  assertEqual(candidate.schema, CAUSAL_LAYER_RECEIPT_RUNTIME_EVIDENCE_OPERATIONAL_FIXTURE_HOOK_SCHEMA, "schema");
+  assertEqual(candidate.schemaVersion, 1, "schemaVersion");
+  assertString(candidate.artifactId, "artifactId");
+  assertString(candidate.emittedAt, "emittedAt");
+  const hook = assertObject(candidate.hook, "hook");
+  assertEqual(
+    hook.hookKind,
+    "layer_origin_receipt_runtime_evidence_operational_fixture_hook",
+    "hook.hookKind",
+  );
+  assertEqual(hook.consumesSuppliedLayerOriginMaterial, true, "hook.consumesSuppliedLayerOriginMaterial");
+  assertEqual(hook.operationShapeOnly, true, "hook.operationShapeOnly");
+  assertLayerReceiptRuntimeEvidenceObservation(hook.observation);
+  const proof = assertObject(candidate.proof, "proof");
+  assertEqual(
+    proof.strongestProofRung,
+    "local_causal_observation_over_supplied_layer_origin_fixture_material",
+    "proof.strongestProofRung",
+  );
+  assertEqual(
+    proof.normalizedProofLabel,
+    "local_supplied_layer_origin_operational_fixture",
+    "proof.normalizedProofLabel",
+  );
+  assertEqual(proof.suppliedMaterialOnly, true, "proof.suppliedMaterialOnly");
+  assertEqual(proof.dhtOrHyperswarmInputObservedByCausalSubstrate, false, "proof.dhtOrHyperswarmInputObservedByCausalSubstrate");
+  assertEqual(proof.doesNotUpgradeToSwarmProof, true, "proof.doesNotUpgradeToSwarmProof");
+  const boundary = assertObject(candidate.boundary, "boundary");
+  assertEqual(boundary.hookOnly, true, "boundary.hookOnly");
+  assertEqual(boundary.fixtureOnly, true, "boundary.fixtureOnly");
+  assertEqual(boundary.readsSuppliedLayerOriginMaterial, true, "boundary.readsSuppliedLayerOriginMaterial");
+  assertEqual(boundary.callsLayer, false, "boundary.callsLayer");
+  assertEqual(boundary.opensLayerRuntime, false, "boundary.opensLayerRuntime");
+  assertEqual(boundary.writesLayerEvidence, false, "boundary.writesLayerEvidence");
+  assertEqual(boundary.admitsLayerEvidence, false, "boundary.admitsLayerEvidence");
+  assertEqual(boundary.decidesLayerAdmission, false, "boundary.decidesLayerAdmission");
+  assertEqual(boundary.interpretsRbc, false, "boundary.interpretsRbc");
+  assertEqual(boundary.acceptsCanonicalHistory, false, "boundary.acceptsCanonicalHistory");
+  assertEqual(boundary.grantsAuthority, false, "boundary.grantsAuthority");
+  assertEqual(boundary.promotesReferents, false, "boundary.promotesReferents");
+  assertEqual(boundary.publishesToMesh, false, "boundary.publishesToMesh");
+  assertEqual(boundary.writesContinuityRecords, false, "boundary.writesContinuityRecords");
+  const validation = assertObject(candidate.validation, "validation");
+  assertOperationalFixtureHookStatus(validation.status, "validation.status");
+  assertEqual(validation.noCanonicalHistoryClaim, true, "validation.noCanonicalHistoryClaim");
+  assertEqual(validation.noLayerAdmissionClaim, true, "validation.noLayerAdmissionClaim");
+  assertEqual(validation.noLayerEvidenceAdmissionClaim, true, "validation.noLayerEvidenceAdmissionClaim");
+  assertEqual(validation.noRbcInterpretationClaim, true, "validation.noRbcInterpretationClaim");
+  assertEqual(validation.noAuthorityClaim, true, "validation.noAuthorityClaim");
+  const nonClaims = assertObject(candidate.nonClaims, "nonClaims");
+  assertEqual(nonClaims.canonicalHistoryAccepted, false, "nonClaims.canonicalHistoryAccepted");
+  assertEqual(nonClaims.layerEvidenceAdmitted, false, "nonClaims.layerEvidenceAdmitted");
+  assertEqual(nonClaims.layerAdmissionDecided, false, "nonClaims.layerAdmissionDecided");
+  assertEqual(nonClaims.rbcInterpreted, false, "nonClaims.rbcInterpreted");
+  assertEqual(nonClaims.authorityGranted, false, "nonClaims.authorityGranted");
+  assertEqual(nonClaims.referentPromoted, false, "nonClaims.referentPromoted");
+  assertEqual(nonClaims.meshPublished, false, "nonClaims.meshPublished");
+  assertOperationalFixtureHookStatus(candidate.reviewStatus, "reviewStatus");
 }
 
 export function buildLayerReceiptRuntimeEvidenceSourceRefCompleteness(
@@ -768,6 +1010,57 @@ function buildReadbackBoundary(): LayerReceiptRuntimeEvidenceReadbackContract["b
   };
 }
 
+function buildOperationalFixtureHookBoundary(): LayerReceiptRuntimeEvidenceOperationalFixtureHook["boundary"] {
+  return {
+    hookOnly: true,
+    fixtureOnly: true,
+    readsSuppliedLayerOriginMaterial: true,
+    callsLayer: false,
+    opensLayerRuntime: false,
+    writesLayerEvidence: false,
+    admitsLayerEvidence: false,
+    decidesLayerAdmission: false,
+    interpretsRbc: false,
+    acceptsCanonicalHistory: false,
+    grantsAuthority: false,
+    promotesReferents: false,
+    publishesToMesh: false,
+    writesContinuityRecords: false,
+  };
+}
+
+function validateOperationalFixtureHook(observation: LayerReceiptRuntimeEvidenceObservation): string[] {
+  const issues: string[] = [];
+  if (observation.reviewStatus !== "layer-receipt-runtime-evidence-observation-emitted") {
+    issues.push("layer-origin-observation-not-emitted");
+  }
+  if (!observation.proof.layerOwnedInputObserved) {
+    issues.push("layer-origin-source-repo-not-preserved");
+  }
+  if (!observation.validation.sourceRefsPreserved) {
+    issues.push("layer-origin-source-refs-not-preserved");
+  }
+  if (!observation.validation.receiptRefsPreserved) {
+    issues.push("layer-origin-receipt-refs-not-preserved");
+  }
+  if (!observation.validation.runtimeRefsPreserved) {
+    issues.push("layer-origin-runtime-refs-not-preserved");
+  }
+  if (
+    observation.nonClaims.layerEvidenceAdmitted ||
+    observation.nonClaims.layerAdmissionDecided ||
+    observation.nonClaims.rbcInterpreted ||
+    observation.nonClaims.authorityGranted ||
+    observation.boundary.admitsLayerEvidence ||
+    observation.boundary.decidesLayerAdmission ||
+    observation.boundary.interpretsRbc ||
+    observation.boundary.grantsAuthority
+  ) {
+    issues.push("layer-origin-hook-overclaim");
+  }
+  return [...new Set(issues)];
+}
+
 function validateReport(
   report: JsonRecord | undefined,
   original: unknown,
@@ -894,6 +1187,19 @@ function assertReadbackStatus(value: unknown, label: string): asserts value is L
     value !== "layer-receipt-runtime-evidence-readback-contract-invalid"
   ) {
     throw new Error(`${label} must be a layer receipt runtime evidence readback contract status`);
+  }
+}
+
+function assertOperationalFixtureHookStatus(
+  value: unknown,
+  label: string,
+): asserts value is LayerReceiptRuntimeEvidenceOperationalFixtureHookStatus {
+  if (
+    value !== "layer-receipt-runtime-evidence-operational-fixture-hook-ready" &&
+    value !== "layer-receipt-runtime-evidence-operational-fixture-hook-incomplete" &&
+    value !== "layer-receipt-runtime-evidence-operational-fixture-hook-blocked"
+  ) {
+    throw new Error(`${label} must be a layer receipt runtime evidence operational fixture hook status`);
   }
 }
 

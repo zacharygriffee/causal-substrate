@@ -8,12 +8,16 @@ import { promisify } from "node:util";
 
 import {
   assertLayerReceiptRuntimeEvidenceObservation,
+  assertLayerReceiptRuntimeEvidenceOperationalFixtureHook,
   assertLayerReceiptRuntimeEvidenceReadbackContract,
   buildLayerReceiptRuntimeEvidenceObservation,
+  buildLayerReceiptRuntimeEvidenceOperationalFixtureHook,
   buildLayerReceiptRuntimeEvidenceReadbackContract,
   buildLayerReceiptRuntimeEvidenceSourceRefCompleteness,
   CAUSAL_LAYER_RECEIPT_RUNTIME_EVIDENCE_OBSERVATION_ARTIFACT_KIND,
   CAUSAL_LAYER_RECEIPT_RUNTIME_EVIDENCE_OBSERVATION_SCHEMA,
+  CAUSAL_LAYER_RECEIPT_RUNTIME_EVIDENCE_OPERATIONAL_FIXTURE_HOOK_ARTIFACT_KIND,
+  CAUSAL_LAYER_RECEIPT_RUNTIME_EVIDENCE_OPERATIONAL_FIXTURE_HOOK_SCHEMA,
 } from "../src/index.js";
 
 const execFileAsync = promisify(execFile);
@@ -541,4 +545,92 @@ test("Layer receipt runtime evidence source-ref completeness reports complete an
   assert.equal(incomplete.boundary.admitsLayerEvidence, false);
   assert.equal(incomplete.boundary.interpretsRbc, false);
   assert.equal(incomplete.boundary.grantsAuthority, false);
+});
+
+test("Layer-origin operational fixture hook emits local observation hook without Layer admission", () => {
+  const hook = buildLayerReceiptRuntimeEvidenceOperationalFixtureHook({
+    layerOriginReceiptRuntimeEvidence: layerReceiptRuntimeEvidenceReport(),
+    emittedAt: "2026-05-31T14:04:00.000Z",
+    sourcePath: "mesh-ecology-layer:runtime-evidence-report:linked",
+  });
+
+  assertLayerReceiptRuntimeEvidenceOperationalFixtureHook(hook);
+  assert.equal(hook.artifactKind, CAUSAL_LAYER_RECEIPT_RUNTIME_EVIDENCE_OPERATIONAL_FIXTURE_HOOK_ARTIFACT_KIND);
+  assert.equal(hook.schema, CAUSAL_LAYER_RECEIPT_RUNTIME_EVIDENCE_OPERATIONAL_FIXTURE_HOOK_SCHEMA);
+  assert.equal(hook.reviewStatus, "layer-receipt-runtime-evidence-operational-fixture-hook-ready");
+  assert.equal(hook.source.sourcePath, "mesh-ecology-layer:runtime-evidence-report:linked");
+  assert.equal(hook.source.sourceRepo, "mesh-ecology-layer");
+  assert.equal(hook.source.sourceReportId, "layer-receipt-runtime-evidence-report:edge-layer-seam:linked");
+  assert.equal(hook.source.sourceReportHash, `sha256:${"1".repeat(64)}`);
+  assert.equal(hook.source.observationArtifactId, hook.hook.observation.artifactId);
+  assert.equal(hook.source.observationStatus, "layer-receipt-runtime-evidence-observation-emitted");
+  assert.equal(hook.hook.consumesSuppliedLayerOriginMaterial, true);
+  assert.equal(hook.hook.operationShapeOnly, true);
+  assert.equal(hook.hook.observation.receiptRefs.receiptId, "layer-report-only-edge-seam-receipt:runtime-evidence:linked");
+  assert.equal(hook.hook.observation.receiptRefs.sourceRequestId, "edge-layer-report-only-seam-request:runtime-evidence:linked");
+  assert.equal(hook.hook.observation.runtimeRefs.runtimeEvidenceId, "layer-receipt-runtime-evidence:linked");
+  assert.equal(
+    hook.proof.strongestProofRung,
+    "local_causal_observation_over_supplied_layer_origin_fixture_material",
+  );
+  assert.equal(hook.proof.normalizedProofLabel, "local_supplied_layer_origin_operational_fixture");
+  assert.equal(hook.proof.suppliedMaterialOnly, true);
+  assert.equal(hook.proof.layerOwnedInputObserved, true);
+  assert.equal(hook.proof.dhtOrHyperswarmInputObservedByCausalSubstrate, false);
+  assert.equal(hook.proof.doesNotUpgradeToSwarmProof, true);
+  assert.equal(hook.validation.suppliedMaterialConsumed, true);
+  assert.equal(hook.validation.observationEmitted, true);
+  assert.equal(hook.validation.layerOwnedInputObserved, true);
+  assert.equal(hook.validation.sourceRefsPreserved, true);
+  assert.equal(hook.validation.receiptRefsPreserved, true);
+  assert.equal(hook.validation.runtimeRefsPreserved, true);
+  assert.deepEqual(hook.validation.issues, []);
+  assert.equal(hook.nonClaims.canonicalHistoryAccepted, false);
+  assert.equal(hook.nonClaims.layerEvidenceAdmitted, false);
+  assert.equal(hook.nonClaims.layerAdmissionDecided, false);
+  assert.equal(hook.nonClaims.rbcInterpreted, false);
+  assert.equal(hook.nonClaims.authorityGranted, false);
+  assert.equal(hook.boundary.hookOnly, true);
+  assert.equal(hook.boundary.fixtureOnly, true);
+  assert.equal(hook.boundary.readsSuppliedLayerOriginMaterial, true);
+  assert.equal(hook.boundary.callsLayer, false);
+  assert.equal(hook.boundary.opensLayerRuntime, false);
+  assert.equal(hook.boundary.writesLayerEvidence, false);
+  assert.equal(hook.boundary.admitsLayerEvidence, false);
+  assert.equal(hook.boundary.decidesLayerAdmission, false);
+  assert.equal(hook.boundary.interpretsRbc, false);
+  assert.equal(hook.boundary.acceptsCanonicalHistory, false);
+  assert.equal(hook.boundary.grantsAuthority, false);
+  assert.equal(hook.boundary.publishesToMesh, false);
+  assert.deepEqual(hook.rejections, []);
+});
+
+test("Layer-origin operational fixture hook blocks non-Layer supplied material", () => {
+  const report = layerReceiptRuntimeEvidenceReport();
+  report.sourceRepo = "mesh-ecology-edge";
+  report.sourceRepos = ["mesh-ecology-edge"];
+
+  const hook = buildLayerReceiptRuntimeEvidenceOperationalFixtureHook({
+    layerOriginReceiptRuntimeEvidence: report,
+    emittedAt: "2026-05-31T14:04:30.000Z",
+    sourcePath: "mesh-ecology-edge:runtime-evidence-report:wrong-origin",
+  });
+
+  assertLayerReceiptRuntimeEvidenceOperationalFixtureHook(hook);
+  assert.equal(hook.reviewStatus, "layer-receipt-runtime-evidence-operational-fixture-hook-blocked");
+  assert.equal(hook.source.sourceRepo, "mesh-ecology-edge");
+  assert.equal(hook.proof.layerOwnedInputObserved, false);
+  assert.equal(hook.proof.dhtOrHyperswarmInputObservedByCausalSubstrate, false);
+  assert.equal(hook.validation.suppliedMaterialConsumed, true);
+  assert.equal(hook.validation.observationEmitted, false);
+  assert.equal(hook.validation.layerOwnedInputObserved, false);
+  assert.ok(hook.validation.issues.includes("layer-origin-observation-not-emitted"));
+  assert.ok(hook.validation.issues.includes("layer-origin-source-repo-not-preserved"));
+  assert.equal(hook.nonClaims.layerEvidenceAdmitted, false);
+  assert.equal(hook.nonClaims.rbcInterpreted, false);
+  assert.equal(hook.nonClaims.authorityGranted, false);
+  assert.equal(hook.boundary.admitsLayerEvidence, false);
+  assert.equal(hook.boundary.decidesLayerAdmission, false);
+  assert.equal(hook.boundary.interpretsRbc, false);
+  assert.equal(hook.boundary.grantsAuthority, false);
 });
