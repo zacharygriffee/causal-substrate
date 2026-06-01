@@ -1,5 +1,10 @@
 import assert from "node:assert/strict";
+import { execFile } from "node:child_process";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
 import test from "node:test";
+import { promisify } from "node:util";
 
 import {
   assertLayerReceiptRuntimeEvidenceObservation,
@@ -10,6 +15,7 @@ import {
   CAUSAL_LAYER_RECEIPT_RUNTIME_EVIDENCE_OBSERVATION_SCHEMA,
 } from "../src/index.js";
 
+const execFileAsync = promisify(execFile);
 const EMITTED_AT = "2026-05-31T14:00:00.000Z";
 
 function layerReceiptRuntimeEvidenceReport() {
@@ -322,4 +328,56 @@ test("Layer receipt runtime evidence readback contract rejects weakened observat
   assert.equal(readback.boundary.decidesLayerAdmission, false);
   assert.equal(readback.boundary.interpretsRbc, false);
   assert.equal(readback.boundary.grantsAuthority, false);
+});
+
+test("Layer receipt runtime evidence CLI writes local observation and readback artifacts", async () => {
+  const tempRoot = await mkdtemp(path.join(tmpdir(), "causal-layer-receipt-runtime-cli-"));
+  const inputPath = path.join(tempRoot, "layer-receipt-runtime-evidence.json");
+  const outputPath = path.join(tempRoot, "layer-receipt-runtime-observation.json");
+  const readbackPath = path.join(tempRoot, "layer-receipt-runtime-readback.json");
+  try {
+    await writeFile(inputPath, JSON.stringify(layerReceiptRuntimeEvidenceReport(), null, 2), "utf8");
+    const { stdout, stderr } = await execFileAsync("npx", [
+      "tsx",
+      "scripts/observe-layer-receipt-runtime-evidence.ts",
+      "--input",
+      inputPath,
+      "--output",
+      outputPath,
+      "--readback-output",
+      readbackPath,
+      "--emitted-at",
+      "2026-05-31T14:02:00.000Z",
+      "--readback-emitted-at",
+      "2026-05-31T14:02:01.000Z",
+    ], {
+      cwd: path.resolve("."),
+    });
+
+    assert.equal(stdout, "");
+    assert.equal(stderr, "");
+    const observation = JSON.parse(await readFile(outputPath, "utf8"));
+    const readback = JSON.parse(await readFile(readbackPath, "utf8"));
+
+    assertLayerReceiptRuntimeEvidenceObservation(observation);
+    assertLayerReceiptRuntimeEvidenceReadbackContract(readback);
+    assert.equal(observation.reviewStatus, "layer-receipt-runtime-evidence-observation-emitted");
+    assert.equal(observation.proof.strongestProofRung, "local_causal_observation_over_supplied_layer_receipt_runtime_evidence");
+    assert.equal(observation.proof.normalizedProofLabel, "local_supplied_layer_receipt_runtime_evidence");
+    assert.equal(observation.proof.dhtOrHyperswarmInputObservedByCausalSubstrate, false);
+    assert.equal(observation.boundary.callsLayer, false);
+    assert.equal(observation.boundary.admitsLayerEvidence, false);
+    assert.equal(observation.boundary.decidesLayerAdmission, false);
+    assert.equal(observation.boundary.interpretsRbc, false);
+    assert.equal(observation.boundary.grantsAuthority, false);
+    assert.equal(readback.reviewStatus, "layer-receipt-runtime-evidence-readback-contract-valid");
+    assert.equal(readback.source.sourceObservationArtifactId, observation.artifactId);
+    assert.equal(readback.validation.proofLabelsPreserved, true);
+    assert.equal(readback.boundary.readbackOnly, true);
+    assert.equal(readback.boundary.admitsLayerEvidence, false);
+    assert.equal(readback.boundary.interpretsRbc, false);
+    assert.equal(readback.boundary.grantsAuthority, false);
+  } finally {
+    await rm(tempRoot, { recursive: true, force: true });
+  }
 });
