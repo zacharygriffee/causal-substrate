@@ -191,11 +191,114 @@ export interface LayerReceiptRuntimeEvidenceReadbackContract {
   rejections: string[];
 }
 
+export interface LayerReceiptRuntimeEvidenceSourceRefCompleteness {
+  reportKind: "layer_receipt_runtime_evidence_source_ref_completeness";
+  complete: boolean;
+  sourceRefsPresent: boolean;
+  layerOwnedSourceRepoPresent: boolean;
+  requiredRefs: {
+    reportId: boolean;
+    reportHash: boolean;
+    sourceRepos: boolean;
+    receiptId: boolean;
+    receiptHash: boolean;
+    sourceRequestId: boolean;
+    sourceRequestHash: boolean;
+    receiptDurableRef: boolean;
+    receiptWriterRef: boolean;
+    runtimeEvidenceId: boolean;
+    runtimeEvidenceHash: boolean;
+    runtimeTraceRef: boolean;
+    durableReceiptRef: boolean;
+  };
+  missingRefKinds: string[];
+  preservedRefs: {
+    sourceRepos: string[];
+    sourceRefs: string[];
+    receiptId?: string | undefined;
+    receiptHash?: string | undefined;
+    sourceRequestId?: string | undefined;
+    sourceRequestHash?: string | undefined;
+    runtimeEvidenceId?: string | undefined;
+    runtimeEvidenceHash?: string | undefined;
+  };
+  boundary: {
+    reportOnly: true;
+    metadataOnly: true;
+    admitsLayerEvidence: false;
+    decidesLayerAdmission: false;
+    interpretsRbc: false;
+    acceptsCanonicalHistory: false;
+    grantsAuthority: false;
+    publishesToMesh: false;
+  };
+}
+
 interface DeferredAttachmentPoint {
   status: "deferred";
   active: false;
   interpreted: false;
   writes: false;
+}
+
+export function buildLayerReceiptRuntimeEvidenceSourceRefCompleteness(
+  layerReceiptRuntimeEvidence: unknown,
+): LayerReceiptRuntimeEvidenceSourceRefCompleteness {
+  const report = isRecord(layerReceiptRuntimeEvidence) ? layerReceiptRuntimeEvidence : undefined;
+  const refs = collectRefs(report);
+  const requiredRefs = {
+    reportId: refs.reportId.length > 0,
+    reportHash: refs.reportHash.length > 0,
+    sourceRepos: refs.sourceRepos.length > 0,
+    receiptId: refs.receiptId.length > 0,
+    receiptHash: refs.receiptHash.length > 0,
+    sourceRequestId: refs.sourceRequestId.length > 0,
+    sourceRequestHash: refs.sourceRequestHash.length > 0,
+    receiptDurableRef: refs.durableRef.length > 0,
+    receiptWriterRef: refs.writerRef.length > 0,
+    runtimeEvidenceId: refs.runtimeEvidenceId.length > 0,
+    runtimeEvidenceHash: refs.runtimeEvidenceHash.length > 0,
+    runtimeTraceRef: refs.runtimeTraceRef.length > 0,
+    durableReceiptRef: refs.durableReceiptRef.length > 0,
+  };
+  const missingRefKinds = Object.entries(requiredRefs)
+    .filter(([, present]) => present === false)
+    .map(([kind]) => kind);
+  if (refs.sourceRepo !== "mesh-ecology-layer") {
+    missingRefKinds.push("layerOwnedSourceRepo");
+  }
+  if (refs.sourceRefs.length < 8) {
+    missingRefKinds.push("sourceRefs");
+  }
+
+  return {
+    reportKind: "layer_receipt_runtime_evidence_source_ref_completeness",
+    complete: missingRefKinds.length === 0,
+    sourceRefsPresent: refs.sourceRefs.length > 0,
+    layerOwnedSourceRepoPresent: refs.sourceRepo === "mesh-ecology-layer",
+    requiredRefs,
+    missingRefKinds,
+    preservedRefs: {
+      sourceRepos: refs.sourceRepos,
+      sourceRefs: refs.sourceRefs,
+      ...(refs.receiptId ? { receiptId: refs.receiptId } : {}),
+      ...(refs.receiptHash ? { receiptHash: refs.receiptHash } : {}),
+      ...(refs.sourceRequestId ? { sourceRequestId: refs.sourceRequestId } : {}),
+      ...(refs.sourceRequestHash ? { sourceRequestHash: refs.sourceRequestHash } : {}),
+      ...(refs.runtimeEvidenceId ? { runtimeEvidenceId: refs.runtimeEvidenceId } : {}),
+      ...(refs.runtimeEvidenceHash ? { runtimeEvidenceHash: refs.runtimeEvidenceHash } : {}),
+    },
+    boundary: {
+      reportOnly: true,
+      metadataOnly: true,
+      admitsLayerEvidence: false,
+      decidesLayerAdmission: false,
+      interpretsRbc: false,
+      acceptsCanonicalHistory: false,
+      grantsAuthority: false,
+      publishesToMesh: false,
+    },
+  };
 }
 
 export function buildLayerReceiptRuntimeEvidenceObservation(input: {

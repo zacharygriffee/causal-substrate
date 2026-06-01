@@ -11,6 +11,7 @@ import {
   assertLayerReceiptRuntimeEvidenceReadbackContract,
   buildLayerReceiptRuntimeEvidenceObservation,
   buildLayerReceiptRuntimeEvidenceReadbackContract,
+  buildLayerReceiptRuntimeEvidenceSourceRefCompleteness,
   CAUSAL_LAYER_RECEIPT_RUNTIME_EVIDENCE_OBSERVATION_ARTIFACT_KIND,
   CAUSAL_LAYER_RECEIPT_RUNTIME_EVIDENCE_OBSERVATION_SCHEMA,
 } from "../src/index.js";
@@ -380,4 +381,65 @@ test("Layer receipt runtime evidence CLI writes local observation and readback a
   } finally {
     await rm(tempRoot, { recursive: true, force: true });
   }
+});
+
+test("Layer receipt runtime evidence source-ref completeness reports complete and incomplete material", () => {
+  const complete = buildLayerReceiptRuntimeEvidenceSourceRefCompleteness(layerReceiptRuntimeEvidenceReport());
+
+  assert.equal(complete.reportKind, "layer_receipt_runtime_evidence_source_ref_completeness");
+  assert.equal(complete.complete, true);
+  assert.equal(complete.sourceRefsPresent, true);
+  assert.equal(complete.layerOwnedSourceRepoPresent, true);
+  assert.deepEqual(complete.missingRefKinds, []);
+  assert.equal(complete.requiredRefs.reportId, true);
+  assert.equal(complete.requiredRefs.reportHash, true);
+  assert.equal(complete.requiredRefs.sourceRepos, true);
+  assert.equal(complete.requiredRefs.receiptId, true);
+  assert.equal(complete.requiredRefs.receiptHash, true);
+  assert.equal(complete.requiredRefs.sourceRequestId, true);
+  assert.equal(complete.requiredRefs.sourceRequestHash, true);
+  assert.equal(complete.requiredRefs.receiptDurableRef, true);
+  assert.equal(complete.requiredRefs.receiptWriterRef, true);
+  assert.equal(complete.requiredRefs.runtimeEvidenceId, true);
+  assert.equal(complete.requiredRefs.runtimeEvidenceHash, true);
+  assert.equal(complete.requiredRefs.runtimeTraceRef, true);
+  assert.equal(complete.requiredRefs.durableReceiptRef, true);
+  assert.equal(complete.preservedRefs.receiptId, "layer-report-only-edge-seam-receipt:runtime-evidence:linked");
+  assert.equal(complete.preservedRefs.sourceRequestId, "edge-layer-report-only-seam-request:runtime-evidence:linked");
+  assert.equal(complete.preservedRefs.runtimeEvidenceId, "layer-receipt-runtime-evidence:linked");
+  assert.equal(complete.boundary.reportOnly, true);
+  assert.equal(complete.boundary.metadataOnly, true);
+  assert.equal(complete.boundary.admitsLayerEvidence, false);
+  assert.equal(complete.boundary.decidesLayerAdmission, false);
+  assert.equal(complete.boundary.interpretsRbc, false);
+  assert.equal(complete.boundary.acceptsCanonicalHistory, false);
+  assert.equal(complete.boundary.grantsAuthority, false);
+
+  const incompleteMaterial = layerReceiptRuntimeEvidenceReport();
+  incompleteMaterial.sourceRepo = "mesh-ecology-edge";
+  incompleteMaterial.sourceRefs = [];
+  delete (incompleteMaterial.receipt as Record<string, unknown>).receiptHash;
+  delete (incompleteMaterial.receipt as Record<string, unknown>).sourceRequestHash;
+  delete (incompleteMaterial.receipt as Record<string, unknown>).writerRef;
+  delete (incompleteMaterial.runtimeEvidence as Record<string, unknown>).runtimeEvidenceHash;
+  delete (incompleteMaterial.runtimeEvidence as Record<string, unknown>).durableReceiptRef;
+  const incomplete = buildLayerReceiptRuntimeEvidenceSourceRefCompleteness(incompleteMaterial);
+
+  assert.equal(incomplete.complete, false);
+  assert.equal(incomplete.sourceRefsPresent, true);
+  assert.equal(incomplete.layerOwnedSourceRepoPresent, false);
+  assert.equal(incomplete.requiredRefs.receiptHash, false);
+  assert.equal(incomplete.requiredRefs.sourceRequestHash, false);
+  assert.equal(incomplete.requiredRefs.receiptWriterRef, false);
+  assert.equal(incomplete.requiredRefs.runtimeEvidenceHash, false);
+  assert.equal(incomplete.requiredRefs.durableReceiptRef, false);
+  assert.ok(incomplete.missingRefKinds.includes("receiptHash"));
+  assert.ok(incomplete.missingRefKinds.includes("sourceRequestHash"));
+  assert.ok(incomplete.missingRefKinds.includes("receiptWriterRef"));
+  assert.ok(incomplete.missingRefKinds.includes("runtimeEvidenceHash"));
+  assert.ok(incomplete.missingRefKinds.includes("durableReceiptRef"));
+  assert.ok(incomplete.missingRefKinds.includes("layerOwnedSourceRepo"));
+  assert.equal(incomplete.boundary.admitsLayerEvidence, false);
+  assert.equal(incomplete.boundary.interpretsRbc, false);
+  assert.equal(incomplete.boundary.grantsAuthority, false);
 });
