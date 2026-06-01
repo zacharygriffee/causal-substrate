@@ -9,6 +9,7 @@ import { promisify } from "node:util";
 
 import {
   activeManagedCorestoreCount,
+  assertEdgeLayerSeamHistoryEdgeProjectionHandoffBundle,
   assertEdgeLayerSeamHistoryObservationResult,
   assertEdgeLayerSeamHistoryHyperswarmReaderReportReadback,
   buildEdgeLayerSeamHistoryObservationResult,
@@ -280,6 +281,10 @@ test("real Hyperswarm proof run instructions artifact stays instructions-only", 
     /readback-edge-layer-seam-history-hyperswarm-report\.ts --input-report hyperswarm-reader-report\.json --readback-output hyperswarm-reader-report-import-readback\.json/,
   );
   assert.match(
+    instructions.commands.deriveHandoffBundleFromSavedReport,
+    /derive-edge-layer-seam-history-handoff-bundle-from-hyperswarm-report\.ts --input-report hyperswarm-reader-report\.json --handoff-bundle-output edge-projection-handoff-bundle\.json/,
+  );
+  assert.match(
     instructions.commands.savedHandoffBundleReadback,
     /readback-edge-layer-seam-history-handoff-bundle\.ts --input-bundle edge-projection-handoff-bundle\.json --readback-output edge-projection-handoff-bundle-readback\.json/,
   );
@@ -303,6 +308,10 @@ test("real Hyperswarm proof run instructions artifact stays instructions-only", 
   assert.equal(
     instructions.expectedOutputRefs.savedReportImportReadbackOutputArtifact,
     "saved-report-import-readback-output",
+  );
+  assert.equal(
+    instructions.expectedOutputRefs.derivedHandoffBundleOutputArtifact,
+    "derived-handoff-bundle-output",
   );
   assert.equal(
     instructions.expectedOutputRefs.handoffBundleReadbackOutputArtifact,
@@ -449,6 +458,10 @@ test("real Hyperswarm reader CLI emits instructions only until explicitly enable
     assert.match(
       instructions.commands.savedReportImportReadback,
       /readback-edge-layer-seam-history-hyperswarm-report\.ts/,
+    );
+    assert.match(
+      instructions.commands.deriveHandoffBundleFromSavedReport,
+      /derive-edge-layer-seam-history-handoff-bundle-from-hyperswarm-report\.ts/,
     );
     assert.match(
       instructions.commands.savedHandoffBundleReadback,
@@ -874,6 +887,189 @@ test("Hyperswarm reader report import CLI emits readback without running a live 
     assert.equal(readback.boundary.admitsLayerEvidence, false);
     assert.equal(readback.boundary.interpretsRbc, false);
     assert.equal(readback.boundary.grantsAuthority, false);
+  } finally {
+    await rm(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test("saved Hyperswarm report can derive an Edge handoff bundle after readback validates", async () => {
+  const tempRoot = await mkdtemp(path.join(tmpdir(), "causal-seam-hs-report-derive-handoff-"));
+  const reportPath = path.join(tempRoot, "hyperswarm-reader-report.json");
+  const readbackPath = path.join(tempRoot, "hyperswarm-reader-report-readback.json");
+  const handoffBundlePath = path.join(tempRoot, "edge-projection-handoff-bundle.json");
+  try {
+    const seamHistory = seamHistoryMaterial();
+    const seamHistoryHash = `sha256:${"7".repeat(64)}`;
+    const sourceRefs = [
+      "layer-owned-edge-seam-status:hyperswarm-reader-test",
+      `sha256:${"8".repeat(64)}`,
+      "edge-layer-report-only-seam-request:hyperswarm-reader:linked",
+      `sha256:${"a".repeat(64)}`,
+      "layer-report-only-edge-seam-receipt:hyperswarm-reader:linked",
+      `sha256:${"b".repeat(64)}`,
+    ];
+    const record = {
+      artifactKind: "edge_layer_seam_history_durable_record",
+      schema: "causal-substrate/edge-layer-seam-history-durable-record/v1",
+      schemaVersion: 1,
+      recordId: "edge-layer-seam-history-durable-record:source-derive-handoff",
+      recordedAt: "2026-06-01T10:20:00.000Z",
+      seamHistory,
+      seamHistoryHash,
+      seamHistoryHashAlgorithm: "sha256-stable-json",
+      sourceRefs,
+      durableHistoryMaterial: true,
+    };
+    const replicatedRecord = {
+      ...record,
+      recordId: "edge-layer-seam-history-durable-record:replica-derive-handoff",
+    };
+    const observationResult = buildEdgeLayerSeamHistoryObservationResult({
+      seamHistory,
+      emittedAt: "2026-06-01T10:20:01.000Z",
+      sourcePath: replicatedRecord.recordId,
+      inputReadByCausalSubstrate: true,
+      durableCorestoreHistoryRead: true,
+      dhtOrHyperswarmInputObservedByCausalSubstrate: true,
+      replicatedViaHyperswarmTransport: true,
+      publicHyperswarmInputObservedByCausalSubstrate: true,
+    });
+    const report = {
+      namespaceParts: ["hyperswarm-seam-history-reader", "derive-handoff"],
+      record,
+      replicatedRecord,
+      observationResult,
+      readerProof: {
+        inputReadByCausalSubstrate: true,
+        durableCorestoreHistoryRead: true,
+        dhtOrHyperswarmInputObservedByCausalSubstrate: true,
+        replicatedViaHyperswarmTransport: true,
+        publicHyperswarmInputObservedByCausalSubstrate: true,
+        sourceCoreKeyHex: "11".repeat(32),
+        replicaCoreKeyHex: "11".repeat(32),
+        topicHex: "22".repeat(32),
+        sourceRecordCount: 1,
+        replicaRecordCount: 1,
+      },
+    };
+    await writeFile(reportPath, JSON.stringify(report, null, 2), "utf8");
+
+    const { stdout, stderr } = await execFileAsync("npx", [
+      "tsx",
+      "scripts/derive-edge-layer-seam-history-handoff-bundle-from-hyperswarm-report.ts",
+      "--input-report",
+      reportPath,
+      "--handoff-bundle-output",
+      handoffBundlePath,
+      "--report-readback-output",
+      readbackPath,
+      "--emitted-at",
+      "2026-06-01T10:20:02.000Z",
+    ], {
+      cwd: path.resolve("."),
+    });
+
+    assert.equal(stdout, "");
+    assert.equal(stderr, "");
+    const readback = JSON.parse(await readFile(readbackPath, "utf8"));
+    const handoffBundle = JSON.parse(await readFile(handoffBundlePath, "utf8"));
+    assertEdgeLayerSeamHistoryHyperswarmReaderReportReadback(readback);
+    assert.equal(readback.reviewStatus, "edge-layer-seam-history-hyperswarm-reader-report-readback-valid");
+    assertEdgeLayerSeamHistoryEdgeProjectionHandoffBundle(handoffBundle);
+    assert.equal(handoffBundle.reviewStatus, "edge-layer-seam-history-edge-projection-handoff-bundle-ready");
+    assert.equal(handoffBundle.source.sourceObservationArtifactId, observationResult.artifactId);
+    assert.equal(
+      handoffBundle.source.sourceObservationProofRung,
+      "public_hyperswarm_replicated_durable_seam_history_observation",
+    );
+    assert.equal(handoffBundle.source.sourceObservationNormalizedProofLabel, "public_hyperswarm_durable_seam_history_material");
+    assert.deepEqual(handoffBundle.sourceReferences.requestHashes, [
+      `sha256:${"a".repeat(64)}`,
+      `sha256:${"c".repeat(64)}`,
+    ]);
+    assert.equal(handoffBundle.validation.noCanonicalHistoryClaim, true);
+    assert.equal(handoffBundle.validation.noLayerAdmissionClaim, true);
+    assert.equal(handoffBundle.validation.noRbcInterpretationClaim, true);
+    assert.equal(handoffBundle.validation.noAuthorityClaim, true);
+    assert.equal(handoffBundle.boundary.writesEdgeProjection, false);
+    assert.equal(handoffBundle.boundary.admitsLayerEvidence, false);
+    assert.equal(handoffBundle.boundary.interpretsRbc, false);
+    assert.equal(handoffBundle.boundary.grantsAuthority, false);
+  } finally {
+    await rm(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test("saved Hyperswarm report handoff derivation rejects invalid report readback", async () => {
+  const tempRoot = await mkdtemp(path.join(tmpdir(), "causal-seam-hs-report-derive-handoff-invalid-"));
+  const reportPath = path.join(tempRoot, "hyperswarm-reader-report.json");
+  const readbackPath = path.join(tempRoot, "hyperswarm-reader-report-readback.json");
+  const handoffBundlePath = path.join(tempRoot, "edge-projection-handoff-bundle.json");
+  try {
+    const seamHistory = seamHistoryMaterial();
+    const record = {
+      artifactKind: "edge_layer_seam_history_durable_record",
+      schema: "causal-substrate/edge-layer-seam-history-durable-record/v1",
+      schemaVersion: 1,
+      recordId: "edge-layer-seam-history-durable-record:source-derive-handoff-invalid",
+      recordedAt: "2026-06-01T10:21:00.000Z",
+      seamHistory,
+      seamHistoryHash: `sha256:${"7".repeat(64)}`,
+      seamHistoryHashAlgorithm: "sha256-stable-json",
+      sourceRefs: ["layer-owned-edge-seam-status:hyperswarm-reader-test"],
+      durableHistoryMaterial: true,
+    };
+    const observationResult = buildEdgeLayerSeamHistoryObservationResult({
+      seamHistory,
+      emittedAt: "2026-06-01T10:21:01.000Z",
+      sourcePath: record.recordId,
+      inputReadByCausalSubstrate: true,
+    });
+    await writeFile(reportPath, JSON.stringify({
+      namespaceParts: ["hyperswarm-seam-history-reader", "derive-handoff-invalid"],
+      record,
+      replicatedRecord: {
+        ...record,
+        recordId: "edge-layer-seam-history-durable-record:replica-derive-handoff-invalid",
+        seamHistoryHash: `sha256:${"6".repeat(64)}`,
+      },
+      observationResult,
+      readerProof: {
+        inputReadByCausalSubstrate: true,
+        durableCorestoreHistoryRead: true,
+        dhtOrHyperswarmInputObservedByCausalSubstrate: true,
+        replicatedViaHyperswarmTransport: true,
+        publicHyperswarmInputObservedByCausalSubstrate: false,
+        sourceCoreKeyHex: "11".repeat(32),
+        replicaCoreKeyHex: "11".repeat(32),
+        topicHex: "22".repeat(32),
+        sourceRecordCount: 0,
+        replicaRecordCount: 0,
+      },
+    }, null, 2), "utf8");
+
+    await assert.rejects(
+      execFileAsync("npx", [
+        "tsx",
+        "scripts/derive-edge-layer-seam-history-handoff-bundle-from-hyperswarm-report.ts",
+        "--input-report",
+        reportPath,
+        "--handoff-bundle-output",
+        handoffBundlePath,
+        "--report-readback-output",
+        readbackPath,
+        "--emitted-at",
+        "2026-06-01T10:21:02.000Z",
+      ], {
+        cwd: path.resolve("."),
+      }),
+      /hyperswarm_reader_report_readback_invalid_for_handoff_derivation/,
+    );
+    const readback = JSON.parse(await readFile(readbackPath, "utf8"));
+    assertEdgeLayerSeamHistoryHyperswarmReaderReportReadback(readback);
+    assert.equal(readback.reviewStatus, "edge-layer-seam-history-hyperswarm-reader-report-readback-invalid");
+    assert.equal(readback.validation.reportConsumed, true);
+    assert.equal(readback.validation.seamHistoryHashPreserved, false);
   } finally {
     await rm(tempRoot, { recursive: true, force: true });
   }

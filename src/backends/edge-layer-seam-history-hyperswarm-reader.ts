@@ -353,6 +353,7 @@ export interface EdgeLayerSeamHistoryRealHyperswarmProofRunInstructions {
     publicOrConfiguredBootstrapProofRun: string;
     checkedCliOutputProofRun: string;
     savedReportImportReadback: string;
+    deriveHandoffBundleFromSavedReport: string;
     savedHandoffBundleReadback: string;
   };
   proofGate: {
@@ -376,6 +377,7 @@ export interface EdgeLayerSeamHistoryRealHyperswarmProofRunInstructions {
     reportOutputArtifact: "report-output";
     readbackOutputArtifact: "readback-output";
     savedReportImportReadbackOutputArtifact: "saved-report-import-readback-output";
+    derivedHandoffBundleOutputArtifact: "derived-handoff-bundle-output";
     handoffBundleReadbackOutputArtifact: "handoff-bundle-readback-output";
   };
   namespaceParts: string[];
@@ -536,6 +538,8 @@ export function buildEdgeLayerSeamHistoryRealHyperswarmProofRunInstructions(
         "CAUSAL_SUBSTRATE_REAL_HYPERSWARM=1 CAUSAL_SUBSTRATE_HYPERSWARM_PUBLIC=1 npx tsx scripts/run-edge-layer-seam-history-hyperswarm-reader.ts --input seam-history.json --report-output hyperswarm-reader-report.json --readback-output hyperswarm-reader-report-readback.json --storage-dir-a .tmp/hyperswarm-source --storage-dir-b .tmp/hyperswarm-replica --namespace hyperswarm-seam-history-reader,checked-cli-output",
       savedReportImportReadback:
         "npx tsx scripts/readback-edge-layer-seam-history-hyperswarm-report.ts --input-report hyperswarm-reader-report.json --readback-output hyperswarm-reader-report-import-readback.json",
+      deriveHandoffBundleFromSavedReport:
+        "npx tsx scripts/derive-edge-layer-seam-history-handoff-bundle-from-hyperswarm-report.ts --input-report hyperswarm-reader-report.json --handoff-bundle-output edge-projection-handoff-bundle.json --report-readback-output hyperswarm-reader-report-import-readback.json",
       savedHandoffBundleReadback:
         "npx tsx scripts/readback-edge-layer-seam-history-handoff-bundle.ts --input-bundle edge-projection-handoff-bundle.json --readback-output edge-projection-handoff-bundle-readback.json",
     },
@@ -560,6 +564,7 @@ export function buildEdgeLayerSeamHistoryRealHyperswarmProofRunInstructions(
       reportOutputArtifact: "report-output",
       readbackOutputArtifact: "readback-output",
       savedReportImportReadbackOutputArtifact: "saved-report-import-readback-output",
+      derivedHandoffBundleOutputArtifact: "derived-handoff-bundle-output",
       handoffBundleReadbackOutputArtifact: "handoff-bundle-readback-output",
     },
     namespaceParts: input.namespaceParts ?? [],
