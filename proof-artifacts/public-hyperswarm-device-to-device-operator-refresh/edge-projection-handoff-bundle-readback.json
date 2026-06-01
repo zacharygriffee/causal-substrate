@@ -1,0 +1,103 @@
+{
+  "artifactKind": "causal-edge-layer-seam-history-edge-projection-handoff-bundle-readback",
+  "schema": "causal-substrate/edge-layer-seam-history-edge-projection-handoff-bundle-readback/v1",
+  "schemaVersion": 1,
+  "artifactId": "causal-edge-layer-seam-history-edge-projection-handoff-bundle-readback:a074032040f9dd5a",
+  "emittedAt": "2026-06-01T07:35:41.037Z",
+  "source": {
+    "sourceBundleArtifactId": "causal-edge-layer-seam-history-edge-projection-handoff-bundle:6e06b73d33b98c55",
+    "sourceBundleStatus": "edge-layer-seam-history-edge-projection-handoff-bundle-ready",
+    "sourceObservationArtifactId": "causal-edge-layer-seam-history-observation:1e90908b1e28bcf8",
+    "sourceObservationProofRung": "public_hyperswarm_replicated_durable_seam_history_observation",
+    "sourceObservationNormalizedProofLabel": "public_hyperswarm_durable_seam_history_material"
+  },
+  "readback": {
+    "bundleReadable": true,
+    "bundleValid": true,
+    "bundledArtifactsReadable": true,
+    "sourceRefsPreserved": true,
+    "proofLabelsPreserved": true,
+    "nonClaimsPreserved": true,
+    "boundaryPreserved": true,
+    "consumerMaterialPresent": true
+  },
+  "preservedArtifactRefs": {
+    "observationResultArtifactId": "causal-edge-layer-seam-history-observation:1e90908b1e28bcf8",
+    "handoffFixtureArtifactId": "causal-edge-layer-seam-history-edge-projection-fixture:6e06b73d33b98c55",
+    "consumerFixtureArtifactId": "causal-edge-layer-seam-history-edge-projection-consumer-fixture:3d3aed8eb35b40df",
+    "completionGateComplete": true
+  },
+  "preservedSourceRefs": {
+    "sourceRepos": [
+      "mesh-ecology-edge",
+      "mesh-ecology-layer"
+    ],
+    "requestIds": [
+      "edge-layer-report-only-seam-request:public-hyperswarm-single-machine-2026-06-01:linked",
+      "edge-layer-report-only-seam-request:public-hyperswarm-single-machine-2026-06-01:unlinked"
+    ],
+    "requestHashes": [
+      "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+    ],
+    "requestDurableRefs": [
+      "corestore:edge-layer-seam-history:public-single-machine:request:0",
+      "corestore:edge-layer-seam-history:public-single-machine:request:2"
+    ],
+    "requestWriterRefs": [
+      "autobase-writer:edge-public-hyperswarm-single-machine"
+    ],
+    "receiptIds": [
+      "layer-report-only-edge-seam-receipt:public-hyperswarm-single-machine-2026-06-01:linked",
+      "layer-report-only-edge-seam-receipt:public-hyperswarm-single-machine-2026-06-01:unlinked"
+    ],
+    "receiptHashes": [
+      "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+    ],
+    "receiptDurableRefs": [
+      "corestore:edge-layer-seam-history:public-single-machine:receipt:1",
+      "corestore:edge-layer-seam-history:public-single-machine:receipt:3"
+    ],
+    "receiptWriterRefs": [
+      "autobase-writer:layer-public-hyperswarm-single-machine"
+    ]
+  },
+  "boundary": {
+    "readbackOnly": true,
+    "writesEdgeProjection": false,
+    "acceptsCanonicalHistory": false,
+    "admitsLayerEvidence": false,
+    "interpretsRbc": false,
+    "grantsAuthority": false,
+    "promotesReferents": false,
+    "publishesToMesh": false,
+    "writesProductionContinuity": false
+  },
+  "validation": {
+    "status": "edge-layer-seam-history-edge-projection-handoff-bundle-readback-valid",
+    "handoffBundleConsumed": true,
+    "bundledArtifactsIncluded": true,
+    "sourceRefsPreserved": true,
+    "proofLabelsPreserved": true,
+    "nonClaimsPreserved": true,
+    "boundaryPreserved": true,
+    "noCanonicalHistoryClaim": true,
+    "noLayerAdmissionClaim": true,
+    "noRbcInterpretationClaim": true,
+    "noAuthorityClaim": true,
+    "noReferentPromotion": true,
+    "issues": []
+  },
+  "reviewStatus": "edge-layer-seam-history-edge-projection-handoff-bundle-readback-valid",
+  "warnings": [
+    "edge-projection-handoff-bundle-readback-consumes-existing-bundle-only",
+    "edge-projection-handoff-bundle-readback-does-not-write-edge-projection-records",
+    "edge-projection-handoff-bundle-readback-does-not-claim-canonical-history",
+    "edge-projection-handoff-bundle-readback-does-not-admit-layer-evidence",
+    "edge-projection-handoff-bundle-readback-does-not-interpret-rbc",
+    "edge-projection-handoff-bundle-readback-does-not-grant-authority",
+    "edge-projection-handoff-bundle-readback-does-not-promote-referents"
+  ],
+  "rejections": []
+}

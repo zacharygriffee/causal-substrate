@@ -129,6 +129,10 @@ The local supplied-material lane can now:
   `CAUSAL_SUBSTRATE_HYPERSWARM_BOOTSTRAP` unset, producing a refreshed source
   manifest and replica report under
   `proof-artifacts/public-hyperswarm-device-to-device-operator-refresh/`.
+- derive the refreshed replica report readback, Edge handoff bundle, handoff
+  readback, proof summary, and reproducibility check from the refreshed public
+  material while preserving non-claim boundaries and labeling derived
+  saved-artifact operations as lower proof rungs.
 
 Strongest routinely proven rung in normal tests:
 `local_causal_observation_over_supplied_seam_history_material`.
@@ -150,11 +154,6 @@ The current saved-artifact readiness list is complete. Build the next list
 around an explicit operator-run public swarm refresh, if the operator chooses
 to run one:
 
-- after a real public refresh run, derive the replica report readback, Edge
-  handoff bundle, handoff readback, proof summary, and reproducibility check
-  from the refreshed durable public material without claiming canonical
-  history, Layer admission, RBC interpretation, Mesh publication, authority,
-  Edge projection writes, or production continuity;
 - after Edge imports any refreshed handoff bundle, derive a refreshed
   observation-to-Edge projection contract and consumer readback from saved
   artifacts only, preserving the public source proof rung without upgrading

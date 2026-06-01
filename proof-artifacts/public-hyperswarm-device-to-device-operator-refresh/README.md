@@ -25,6 +25,19 @@ The replica report is the first refreshed artifact in this directory that
 carries the live public proof rung
 `public_hyperswarm_replicated_durable_seam_history_observation`.
 
+The refreshed public report was then derived into local saved-artifact
+readbacks and handoff material:
+
+- `public-replica-reader-report-readback.json`
+- `edge-projection-handoff-bundle.json`
+- `edge-projection-handoff-bundle-readback.json`
+- `edge-layer-seam-history-proof-summary.json`
+- `public-artifact-reproducibility-check.json`
+
+Those derived artifacts preserve the public source proof rung while their own
+operations are local saved-artifact checks/readbacks. They do not open swarm or
+Corestore and do not upgrade proof.
+
 ## Prepared Public Commands
 
 Run the source command on `platform-lab`:
