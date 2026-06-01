@@ -160,6 +160,12 @@ The local supplied-material lane can now:
   and `mesh-lab` with `CAUSAL_SUBSTRATE_HYPERSWARM_BOOTSTRAP` unset, producing
   `public-source-manifest.json` and `public-replica-reader-report.json` under
   `proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/`.
+- derive the next public replica report into local saved-artifact readback,
+  Edge handoff bundle, handoff readback, proof summary, and reproducibility
+  check under
+  `proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/`,
+  preserving the public source proof rung while labeling derived operations as
+  lower proof rungs.
 
 Strongest routinely proven rung in normal tests:
 `local_causal_observation_over_supplied_seam_history_material`.
@@ -185,13 +191,16 @@ Strongest latest saved-artifact consumer readback rung:
 
 The current refreshed saved-artifact readiness and consumer handoff list is
 complete. The next prepared public-swarm-only objective has run. Build the next
-list around deriving the saved-artifact chain from that new public report or
-handing the current proof index to a consumer:
+list around handing the new handoff bundle to Edge for observation-only import,
+deriving the next index material, or handing the current proof index to a
+consumer:
 
-- derive the next public report readback, Edge handoff bundle, handoff
-  readback, proof summary, reproducibility check, refresh decision, proof
-  index, consumer handoff, and consumer handoff readback from
-  `proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/public-replica-reader-report.json`;
+- hand
+  `proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/edge-projection-handoff-bundle.json`
+  to Edge as observation-only projection input, then derive the next
+  observation-to-Edge contract and consumer readback from saved artifacts only;
+- derive the next refresh decision, proof index, consumer handoff, and consumer
+  handoff readback after the Edge import receipt exists;
 - if a consumer asks for the latest saved index, hand
   `public-proof-index-consumer-handoff.json`,
   `public-proof-index-consumer-handoff-readback.json`, and

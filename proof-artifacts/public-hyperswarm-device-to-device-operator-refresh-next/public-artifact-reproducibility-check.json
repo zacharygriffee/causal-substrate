@@ -1,0 +1,100 @@
+{
+  "artifactKind": "causal-edge-layer-seam-history-public-artifact-reproducibility",
+  "schema": "causal-substrate/edge-layer-seam-history-public-artifact-reproducibility/v1",
+  "schemaVersion": 1,
+  "artifactId": "causal-edge-layer-seam-history-public-artifact-reproducibility:72a2b1ea2dc765b9",
+  "emittedAt": "2026-06-01T09:12:09.380Z",
+  "runId": "public-hyperswarm-device-to-device-operator-refresh-next",
+  "runKind": "device_to_device_public_hyperswarm",
+  "sourcePaths": [
+    "/home/zevilz/work/mesh-ecology/causal-substrate/proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/public-replica-reader-report.json",
+    "/home/zevilz/work/mesh-ecology/causal-substrate/proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/public-replica-reader-report-readback.json",
+    "/home/zevilz/work/mesh-ecology/causal-substrate/proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/edge-projection-handoff-bundle.json",
+    "/home/zevilz/work/mesh-ecology/causal-substrate/proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/edge-projection-handoff-bundle-readback.json",
+    "/home/zevilz/work/mesh-ecology/causal-substrate/proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/edge-layer-seam-history-proof-summary.json"
+  ],
+  "preservedRefs": {
+    "requestIds": [
+      "edge-layer-report-only-seam-request:public-hyperswarm-single-machine-2026-06-01:linked",
+      "edge-layer-report-only-seam-request:public-hyperswarm-single-machine-2026-06-01:unlinked"
+    ],
+    "requestHashes": [
+      "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+    ],
+    "receiptIds": [
+      "layer-report-only-edge-seam-receipt:public-hyperswarm-single-machine-2026-06-01:linked",
+      "layer-report-only-edge-seam-receipt:public-hyperswarm-single-machine-2026-06-01:unlinked"
+    ],
+    "receiptHashes": [
+      "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+    ],
+    "sourceRepos": [
+      "mesh-ecology-edge",
+      "mesh-ecology-layer"
+    ],
+    "durableRefs": [
+      "corestore:edge-layer-seam-history:public-single-machine:request:0",
+      "corestore:edge-layer-seam-history:public-single-machine:request:2",
+      "corestore:edge-layer-seam-history:public-single-machine:receipt:1",
+      "corestore:edge-layer-seam-history:public-single-machine:receipt:3"
+    ],
+    "writerRefs": [
+      "autobase-writer:edge-public-hyperswarm-single-machine",
+      "autobase-writer:layer-public-hyperswarm-single-machine"
+    ]
+  },
+  "proof": {
+    "strongestSourceProofRungObserved": "public_hyperswarm_replicated_durable_seam_history_observation",
+    "strongestSourceProofLabelObserved": "public_hyperswarm_durable_seam_history_material",
+    "reproducibilityOperationProofRung": "local_reproducibility_check_over_saved_public_hyperswarm_artifacts",
+    "savedArtifactCheckOnly": true,
+    "liveSwarmRunClaimedByThisCheck": false,
+    "proofRungUpgradeClaimed": false
+  },
+  "validation": {
+    "status": "edge-layer-seam-history-public-artifacts-reproducible",
+    "artifactsConsumed": true,
+    "publicReaderReportPresent": true,
+    "reportReadbackValid": true,
+    "handoffBundleReady": true,
+    "handoffReadbackValid": true,
+    "proofSummaryReady": true,
+    "linkedPairDetected": true,
+    "damagedOrUnlinkedPairDetected": true,
+    "sourceRefsPreserved": true,
+    "publicProofLabelsPreserved": true,
+    "noCanonicalHistoryClaim": true,
+    "noLayerAdmissionClaim": true,
+    "noLayerEvidenceAdmissionClaim": true,
+    "noRbcInterpretationClaim": true,
+    "noAuthorityClaim": true,
+    "noMeshPublicationClaim": true,
+    "noProductionContinuityWriteClaim": true,
+    "noLiveSwarmClaimByThisCheck": true,
+    "issues": []
+  },
+  "boundary": {
+    "reproducibilityCheckOnly": true,
+    "readsSavedArtifactsOnly": true,
+    "opensSwarm": false,
+    "opensCorestore": false,
+    "writesEdgeProjection": false,
+    "writesLayerEvidence": false,
+    "acceptsCanonicalHistory": false,
+    "admitsLayerEvidence": false,
+    "decidesLayerAdmission": false,
+    "interpretsRbc": false,
+    "grantsAuthority": false,
+    "publishesToMesh": false,
+    "writesProductionContinuity": false
+  },
+  "reviewStatus": "edge-layer-seam-history-public-artifacts-reproducible",
+  "warnings": [
+    "reproducibility-check-reads-saved-artifacts-only",
+    "reproducibility-check-does-not-open-public-swarm",
+    "reproducibility-check-does-not-upgrade-proof-rung"
+  ],
+  "rejections": []
+}

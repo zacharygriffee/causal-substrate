@@ -9,6 +9,11 @@ Current contents:
 - `public-refresh-input-package.json`
 - `public-source-manifest.json`
 - `public-replica-reader-report.json`
+- `public-replica-reader-report-readback.json`
+- `edge-projection-handoff-bundle.json`
+- `edge-projection-handoff-bundle-readback.json`
+- `edge-layer-seam-history-proof-summary.json`
+- `public-artifact-reproducibility-check.json`
 
 The package operation rung is
 `local_refresh_input_package_over_saved_public_hyperswarm_material`.
@@ -28,6 +33,12 @@ The source and replica commands were run with
 `CAUSAL_SUBSTRATE_HYPERSWARM_PUBLIC=1`. The replica report is the first
 artifact in this directory carrying the live proof rung
 `public_hyperswarm_replicated_durable_seam_history_observation`.
+
+The replica report was then derived into local saved-artifact readbacks and
+handoff material. These derived artifacts preserve the public source proof rung
+but their own operations are local checks/readbacks. They do not open swarm,
+open Corestore, call Edge, admit Layer evidence, interpret RBC, grant
+authority, publish to Mesh, or upgrade proof.
 
 The prepared command and readiness gate live in the preceding refreshed run
 directory:
