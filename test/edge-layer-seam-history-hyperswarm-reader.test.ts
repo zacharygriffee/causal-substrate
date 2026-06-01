@@ -438,6 +438,113 @@ test("Hyperswarm reader report readback preserves durable refs without verifying
   assert.equal(readback.boundary.grantsAuthority, false);
 });
 
+test("Hyperswarm reader report import CLI emits readback without running a live swarm", async () => {
+  const tempRoot = await mkdtemp(path.join(tmpdir(), "causal-seam-hs-report-import-"));
+  const reportPath = path.join(tempRoot, "hyperswarm-reader-report.json");
+  const readbackPath = path.join(tempRoot, "hyperswarm-reader-report-readback.json");
+  try {
+    const seamHistory = seamHistoryMaterial();
+    const seamHistoryHash = `sha256:${"7".repeat(64)}`;
+    const sourceRefs = [
+      "layer-owned-edge-seam-status:hyperswarm-reader-test",
+      `sha256:${"8".repeat(64)}`,
+      "edge-layer-report-only-seam-request:hyperswarm-reader:linked",
+      `sha256:${"a".repeat(64)}`,
+      "layer-report-only-edge-seam-receipt:hyperswarm-reader:linked",
+      `sha256:${"b".repeat(64)}`,
+    ];
+    const record = {
+      artifactKind: "edge_layer_seam_history_durable_record",
+      schema: "causal-substrate/edge-layer-seam-history-durable-record/v1",
+      schemaVersion: 1,
+      recordId: "edge-layer-seam-history-durable-record:source-import-readback",
+      recordedAt: "2026-05-31T13:12:00.000Z",
+      seamHistory,
+      seamHistoryHash,
+      seamHistoryHashAlgorithm: "sha256-stable-json",
+      sourceRefs,
+      durableHistoryMaterial: true,
+    };
+    const replicatedRecord = {
+      ...record,
+      recordId: "edge-layer-seam-history-durable-record:replica-import-readback",
+    };
+    const observationResult = buildEdgeLayerSeamHistoryObservationResult({
+      seamHistory,
+      emittedAt: "2026-05-31T13:12:01.000Z",
+      sourcePath: replicatedRecord.recordId,
+      inputReadByCausalSubstrate: true,
+    });
+    const report = {
+      namespaceParts: ["hyperswarm-seam-history-reader", "report-import-readback"],
+      record,
+      replicatedRecord,
+      observationResult,
+      readerProof: {
+        inputReadByCausalSubstrate: true,
+        durableCorestoreHistoryRead: true,
+        dhtOrHyperswarmInputObservedByCausalSubstrate: true,
+        replicatedViaHyperswarmTransport: true,
+        sourceCoreKeyHex: "11".repeat(32),
+        replicaCoreKeyHex: "11".repeat(32),
+        topicHex: "22".repeat(32),
+        sourceRecordCount: 1,
+        replicaRecordCount: 1,
+      },
+    };
+    await writeFile(reportPath, JSON.stringify(report, null, 2), "utf8");
+
+    const { stdout, stderr } = await execFileAsync("npx", [
+      "tsx",
+      "scripts/readback-edge-layer-seam-history-hyperswarm-report.ts",
+      "--input-report",
+      reportPath,
+      "--readback-output",
+      readbackPath,
+      "--emitted-at",
+      "2026-05-31T13:12:02.000Z",
+    ], {
+      cwd: path.resolve("."),
+    });
+
+    assert.equal(stdout, "");
+    assert.equal(stderr, "");
+    const readback = JSON.parse(await readFile(readbackPath, "utf8"));
+    assertEdgeLayerSeamHistoryHyperswarmReaderReportReadback(readback);
+    assert.equal(readback.reviewStatus, "edge-layer-seam-history-hyperswarm-reader-report-readback-valid");
+    assert.equal(readback.validation.reportConsumed, true);
+    assert.equal(readback.validation.seamHistoryHashPreserved, true);
+    assert.equal(readback.validation.durableSourceRefsPreserved, true);
+    assert.equal(readback.validation.readerProofPreserved, true);
+    assert.equal(readback.source.sourceRecordId, record.recordId);
+    assert.equal(readback.source.replicatedRecordId, replicatedRecord.recordId);
+    assert.equal(readback.source.sourceObservationArtifactId, observationResult.artifactId);
+    assert.deepEqual(readback.source.namespaceParts, [
+      "hyperswarm-seam-history-reader",
+      "report-import-readback",
+    ]);
+    assert.equal(readback.durableRecordRefs.seamHistoryHash, seamHistoryHash);
+    assert.equal(readback.durableRecordRefs.replicatedSeamHistoryHash, seamHistoryHash);
+    assert.deepEqual(readback.durableRecordRefs.sourceRefs, sourceRefs);
+    assert.deepEqual(readback.durableRecordRefs.replicatedSourceRefs, sourceRefs);
+    assert.equal(readback.readerProof.inputReadByCausalSubstrate, true);
+    assert.equal(readback.readerProof.durableCorestoreHistoryRead, true);
+    assert.equal(readback.readerProof.dhtOrHyperswarmInputObservedByCausalSubstrate, true);
+    assert.equal(readback.readerProof.replicatedViaHyperswarmTransport, true);
+    assert.equal(readback.boundary.reportReadbackOnly, true);
+    assert.equal(readback.boundary.verifiesLiveSwarmRun, false);
+    assert.equal(readback.boundary.opensSwarm, false);
+    assert.equal(readback.boundary.opensCorestore, false);
+    assert.equal(readback.boundary.writesRecords, false);
+    assert.equal(readback.boundary.acceptsCanonicalHistory, false);
+    assert.equal(readback.boundary.admitsLayerEvidence, false);
+    assert.equal(readback.boundary.interpretsRbc, false);
+    assert.equal(readback.boundary.grantsAuthority, false);
+  } finally {
+    await rm(tempRoot, { recursive: true, force: true });
+  }
+});
+
 test("Hyperswarm reader report readback rejects weakened durable refs and proof labels", () => {
   const seamHistory = seamHistoryMaterial();
   const seamHistoryHash = `sha256:${"7".repeat(64)}`;
