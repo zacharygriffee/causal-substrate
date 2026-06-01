@@ -5,8 +5,10 @@ import {
   assertEdgeLayerSeamHistoryEdgeProjectionHandoffBundle,
   assertEdgeLayerSeamHistoryHyperswarmReaderReportReadback,
   assertEdgeLayerSeamHistoryObservationResult,
+  assertEdgeLayerSeamHistoryPublicDeviceReplicaReportReadback,
   buildEdgeLayerSeamHistoryEdgeProjectionHandoffBundle,
   buildEdgeLayerSeamHistoryHyperswarmReaderReportReadback,
+  buildEdgeLayerSeamHistoryPublicDeviceReplicaReportReadback,
 } from "../src/index.js";
 
 interface CliArgs {
@@ -27,15 +29,14 @@ async function main(): Promise<void> {
   if (!args.handoffBundleOutput) throw new Error("handoff_bundle_output_required_for_handoff_bundle_derivation");
 
   const report = JSON.parse(await readFile(path.resolve(args.inputReport), "utf8")) as unknown;
-  const reportReadback = buildEdgeLayerSeamHistoryHyperswarmReaderReportReadback({
-    report,
-    emittedAt: args.emittedAt,
-  });
-  assertEdgeLayerSeamHistoryHyperswarmReaderReportReadback(reportReadback);
+  const reportReadback = buildValidReportReadback(report, args.emittedAt);
   if (args.reportReadbackOutput) {
     await writeFile(path.resolve(args.reportReadbackOutput), `${JSON.stringify(reportReadback, null, 2)}\n`, "utf8");
   }
-  if (reportReadback.reviewStatus !== "edge-layer-seam-history-hyperswarm-reader-report-readback-valid") {
+  if (
+    reportReadback.reviewStatus !== "edge-layer-seam-history-hyperswarm-reader-report-readback-valid" &&
+    reportReadback.reviewStatus !== "edge-layer-seam-history-public-device-replica-report-readback-valid"
+  ) {
     throw new Error("hyperswarm_reader_report_readback_invalid_for_handoff_derivation");
   }
 
@@ -47,6 +48,28 @@ async function main(): Promise<void> {
   });
   assertEdgeLayerSeamHistoryEdgeProjectionHandoffBundle(handoffBundle);
   await writeFile(path.resolve(args.handoffBundleOutput), `${JSON.stringify(handoffBundle, null, 2)}\n`, "utf8");
+}
+
+function buildValidReportReadback(report: unknown, emittedAt: string) {
+  const hyperswarmReadback = buildEdgeLayerSeamHistoryHyperswarmReaderReportReadback({
+    report,
+    emittedAt,
+  });
+  assertEdgeLayerSeamHistoryHyperswarmReaderReportReadback(hyperswarmReadback);
+  if (hyperswarmReadback.reviewStatus === "edge-layer-seam-history-hyperswarm-reader-report-readback-valid") {
+    return hyperswarmReadback;
+  }
+
+  const publicDeviceReadback = buildEdgeLayerSeamHistoryPublicDeviceReplicaReportReadback({
+    report,
+    emittedAt,
+  });
+  assertEdgeLayerSeamHistoryPublicDeviceReplicaReportReadback(publicDeviceReadback);
+  if (publicDeviceReadback.reviewStatus === "edge-layer-seam-history-public-device-replica-report-readback-valid") {
+    return publicDeviceReadback;
+  }
+
+  return hyperswarmReadback;
 }
 
 function observationResultFromReport(report: unknown): unknown {
@@ -105,7 +128,7 @@ function printUsage(): void {
   process.stdout.write([
     "Usage: tsx scripts/derive-edge-layer-seam-history-handoff-bundle-from-hyperswarm-report.ts --input-report path --handoff-bundle-output path [--report-readback-output path] [--emitted-at iso]",
     "",
-    "Reads a saved Hyperswarm reader report, validates its readback, and derives an Edge handoff bundle from the contained observation result.",
+    "Reads a saved Hyperswarm reader report or public-device replica report, validates its readback, and derives an Edge handoff bundle from the contained observation result.",
     "This command does not open Hyperswarm, open Corestore, claim a new live swarm run, write Edge projection state, admit Layer evidence, interpret RBC, grant authority, or publish to Mesh.",
   ].join("\n") + "\n");
 }

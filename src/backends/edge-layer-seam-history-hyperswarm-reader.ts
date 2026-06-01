@@ -57,6 +57,12 @@ export const EDGE_LAYER_SEAM_HISTORY_PUBLIC_DEVICE_REPLICA_REPORT_SCHEMA =
 export const EDGE_LAYER_SEAM_HISTORY_PUBLIC_DEVICE_REPLICA_REPORT_ARTIFACT_KIND =
   "edge-layer-seam-history-public-device-replica-report" as const;
 
+export const EDGE_LAYER_SEAM_HISTORY_PUBLIC_DEVICE_REPLICA_REPORT_READBACK_SCHEMA =
+  "causal-substrate/edge-layer-seam-history-public-device-replica-report-readback/v1" as const;
+
+export const EDGE_LAYER_SEAM_HISTORY_PUBLIC_DEVICE_REPLICA_REPORT_READBACK_ARTIFACT_KIND =
+  "edge-layer-seam-history-public-device-replica-report-readback" as const;
+
 export type EdgeLayerSeamHistoryHyperswarmInputLaneReadinessStatus =
   | "edge-layer-seam-history-hyperswarm-input-lane-ready-to-run"
   | "edge-layer-seam-history-hyperswarm-input-lane-incomplete";
@@ -64,6 +70,10 @@ export type EdgeLayerSeamHistoryHyperswarmInputLaneReadinessStatus =
 export type EdgeLayerSeamHistoryHyperswarmReaderReportReadbackStatus =
   | "edge-layer-seam-history-hyperswarm-reader-report-readback-valid"
   | "edge-layer-seam-history-hyperswarm-reader-report-readback-invalid";
+
+export type EdgeLayerSeamHistoryPublicDeviceReplicaReportReadbackStatus =
+  | "edge-layer-seam-history-public-device-replica-report-readback-valid"
+  | "edge-layer-seam-history-public-device-replica-report-readback-invalid";
 
 export interface EdgeLayerSeamHistoryDurableRecord {
   artifactKind: typeof EDGE_LAYER_SEAM_HISTORY_DURABLE_RECORD_KIND;
@@ -234,6 +244,71 @@ export interface EdgeLayerSeamHistoryPublicDeviceReplicaReport {
     grantsAuthority: false;
     publishesToMesh: false;
   };
+}
+
+export interface EdgeLayerSeamHistoryPublicDeviceReplicaReportReadback {
+  artifactKind: typeof EDGE_LAYER_SEAM_HISTORY_PUBLIC_DEVICE_REPLICA_REPORT_READBACK_ARTIFACT_KIND;
+  schema: typeof EDGE_LAYER_SEAM_HISTORY_PUBLIC_DEVICE_REPLICA_REPORT_READBACK_SCHEMA;
+  schemaVersion: 1;
+  artifactId: string;
+  emittedAt: string;
+  source: {
+    sourceManifestSourceRecordId?: string | undefined;
+    replicatedRecordId?: string | undefined;
+    sourceObservationArtifactId?: string | undefined;
+    sourceObservationProofRung?: EdgeLayerSeamHistoryProofRung | undefined;
+    sourceObservationNormalizedProofLabel?: EdgeLayerSeamHistoryNormalizedProofLabel | undefined;
+    namespaceParts: string[];
+  };
+  readback: {
+    reportReadable: boolean;
+    sourceManifestReadable: boolean;
+    replicatedRecordReadable: boolean;
+    observationResultReadable: boolean;
+    readerProofReadable: boolean;
+    seamHistoryHashPreserved: boolean;
+    durableSourceRefsPreserved: boolean;
+    readerProofPreserved: boolean;
+    observationProofLabelsPreserved: boolean;
+  };
+  durableRecordRefs: {
+    sourceManifestSourceRecordId?: string | undefined;
+    replicatedRecordId?: string | undefined;
+    seamHistoryHash?: string | undefined;
+    replicatedSeamHistoryHash?: string | undefined;
+    sourceRefs: string[];
+    replicatedSourceRefs: string[];
+  };
+  readerProof: Partial<EdgeLayerSeamHistoryPublicDeviceReplicaReaderProof>;
+  boundary: {
+    reportReadbackOnly: true;
+    verifiesLiveSwarmRun: false;
+    opensSwarm: false;
+    opensCorestore: false;
+    writesRecords: false;
+    acceptsCanonicalHistory: false;
+    admitsLayerEvidence: false;
+    interpretsRbc: false;
+    grantsAuthority: false;
+    publishesToMesh: false;
+  };
+  validation: {
+    status: EdgeLayerSeamHistoryPublicDeviceReplicaReportReadbackStatus;
+    reportConsumed: boolean;
+    sourceManifestRead: boolean;
+    replicatedRecordRead: boolean;
+    observationResultRead: boolean;
+    readerProofRead: boolean;
+    seamHistoryHashPreserved: boolean;
+    durableSourceRefsPreserved: boolean;
+    readerProofPreserved: boolean;
+    noCanonicalHistoryClaim: true;
+    noLayerAdmissionClaim: true;
+    noRbcInterpretationClaim: true;
+    noAuthorityClaim: true;
+    issues: string[];
+  };
+  reviewStatus: EdgeLayerSeamHistoryPublicDeviceReplicaReportReadbackStatus;
 }
 
 export interface EdgeLayerSeamHistoryPublicDeviceSourcePublisherHandle {
@@ -458,6 +533,12 @@ export interface RunEdgeLayerSeamHistoryPublicDeviceReplicaReaderOptions {
 }
 
 export interface BuildEdgeLayerSeamHistoryHyperswarmReaderReportReadbackInput {
+  report: unknown;
+  emittedAt: string;
+  artifactId?: string | undefined;
+}
+
+export interface BuildEdgeLayerSeamHistoryPublicDeviceReplicaReportReadbackInput {
   report: unknown;
   emittedAt: string;
   artifactId?: string | undefined;
@@ -739,6 +820,78 @@ export function buildEdgeLayerSeamHistoryHyperswarmReaderReportReadback(
   };
 }
 
+export function buildEdgeLayerSeamHistoryPublicDeviceReplicaReportReadback(
+  input: BuildEdgeLayerSeamHistoryPublicDeviceReplicaReportReadbackInput,
+): EdgeLayerSeamHistoryPublicDeviceReplicaReportReadback {
+  const report = parsePublicDeviceReplicaReport(input.report);
+  const issues = validatePublicDeviceReplicaReport(report);
+  const status: EdgeLayerSeamHistoryPublicDeviceReplicaReportReadbackStatus = issues.length === 0
+    ? "edge-layer-seam-history-public-device-replica-report-readback-valid"
+    : "edge-layer-seam-history-public-device-replica-report-readback-invalid";
+  const artifactId = input.artifactId ?? createPublicDeviceReplicaReportReadbackArtifactId({
+    emittedAt: input.emittedAt,
+    sourceRecordId: report?.sourceManifest.source.sourceRecordId,
+    replicatedRecordId: report?.replicatedRecord.recordId,
+  });
+
+  return {
+    artifactKind: EDGE_LAYER_SEAM_HISTORY_PUBLIC_DEVICE_REPLICA_REPORT_READBACK_ARTIFACT_KIND,
+    schema: EDGE_LAYER_SEAM_HISTORY_PUBLIC_DEVICE_REPLICA_REPORT_READBACK_SCHEMA,
+    schemaVersion: 1,
+    artifactId,
+    emittedAt: input.emittedAt,
+    source: {
+      ...(report ? { sourceManifestSourceRecordId: report.sourceManifest.source.sourceRecordId } : {}),
+      ...(report ? { replicatedRecordId: report.replicatedRecord.recordId } : {}),
+      ...(report ? { sourceObservationArtifactId: report.observationResult.artifactId } : {}),
+      ...(report ? { sourceObservationProofRung: report.observationResult.proof.strongestProofRung } : {}),
+      ...(report
+        ? { sourceObservationNormalizedProofLabel: report.observationResult.proof.normalizedProofLabel }
+        : {}),
+      namespaceParts: report?.namespaceParts ?? [],
+    },
+    readback: {
+      reportReadable: report !== undefined,
+      sourceManifestReadable: report?.sourceManifest !== undefined,
+      replicatedRecordReadable: report?.replicatedRecord !== undefined,
+      observationResultReadable: report?.observationResult !== undefined,
+      readerProofReadable: report?.readerProof !== undefined,
+      seamHistoryHashPreserved: issues.includes("seam-history-hash-not-preserved") === false && report !== undefined,
+      durableSourceRefsPreserved: issues.includes("durable-source-refs-not-preserved") === false && report !== undefined,
+      readerProofPreserved: issues.includes("reader-proof-not-preserved") === false && report !== undefined,
+      observationProofLabelsPreserved:
+        issues.includes("observation-proof-labels-not-preserved") === false && report !== undefined,
+    },
+    durableRecordRefs: {
+      ...(report ? { sourceManifestSourceRecordId: report.sourceManifest.source.sourceRecordId } : {}),
+      ...(report ? { replicatedRecordId: report.replicatedRecord.recordId } : {}),
+      ...(report ? { seamHistoryHash: report.sourceManifest.source.seamHistoryHash } : {}),
+      ...(report ? { replicatedSeamHistoryHash: report.replicatedRecord.seamHistoryHash } : {}),
+      sourceRefs: report?.sourceManifest.source.sourceRefs ?? [],
+      replicatedSourceRefs: report?.replicatedRecord.sourceRefs ?? [],
+    },
+    readerProof: report?.readerProof ?? {},
+    boundary: buildReportReadbackBoundary(),
+    validation: {
+      status,
+      reportConsumed: report !== undefined,
+      sourceManifestRead: report?.sourceManifest !== undefined,
+      replicatedRecordRead: report?.replicatedRecord !== undefined,
+      observationResultRead: report?.observationResult !== undefined,
+      readerProofRead: report?.readerProof !== undefined,
+      seamHistoryHashPreserved: issues.includes("seam-history-hash-not-preserved") === false && report !== undefined,
+      durableSourceRefsPreserved: issues.includes("durable-source-refs-not-preserved") === false && report !== undefined,
+      readerProofPreserved: issues.includes("reader-proof-not-preserved") === false && report !== undefined,
+      noCanonicalHistoryClaim: true,
+      noLayerAdmissionClaim: true,
+      noRbcInterpretationClaim: true,
+      noAuthorityClaim: true,
+      issues,
+    },
+    reviewStatus: status,
+  };
+}
+
 export function buildEdgeLayerSeamHistoryDurableRecordSourceRefCompleteness(
   seamHistory: unknown,
   sourceRefs = collectSourceRefs(seamHistory),
@@ -796,6 +949,39 @@ export function assertEdgeLayerSeamHistoryHyperswarmReaderReportReadback(
   assertEqual(validation.noRbcInterpretationClaim, true, "validation.noRbcInterpretationClaim");
   assertEqual(validation.noAuthorityClaim, true, "validation.noAuthorityClaim");
   assertReportReadbackStatus(candidate.reviewStatus, "reviewStatus");
+}
+
+export function assertEdgeLayerSeamHistoryPublicDeviceReplicaReportReadback(
+  value: unknown,
+): asserts value is EdgeLayerSeamHistoryPublicDeviceReplicaReportReadback {
+  const candidate = assertObject(value, "edge layer seam history public device replica report readback");
+  assertEqual(
+    candidate.artifactKind,
+    EDGE_LAYER_SEAM_HISTORY_PUBLIC_DEVICE_REPLICA_REPORT_READBACK_ARTIFACT_KIND,
+    "artifactKind",
+  );
+  assertEqual(candidate.schema, EDGE_LAYER_SEAM_HISTORY_PUBLIC_DEVICE_REPLICA_REPORT_READBACK_SCHEMA, "schema");
+  assertEqual(candidate.schemaVersion, 1, "schemaVersion");
+  assertString(candidate.artifactId, "artifactId");
+  assertString(candidate.emittedAt, "emittedAt");
+  const boundary = assertObject(candidate.boundary, "boundary");
+  assertEqual(boundary.reportReadbackOnly, true, "boundary.reportReadbackOnly");
+  assertEqual(boundary.verifiesLiveSwarmRun, false, "boundary.verifiesLiveSwarmRun");
+  assertEqual(boundary.opensSwarm, false, "boundary.opensSwarm");
+  assertEqual(boundary.opensCorestore, false, "boundary.opensCorestore");
+  assertEqual(boundary.writesRecords, false, "boundary.writesRecords");
+  assertEqual(boundary.acceptsCanonicalHistory, false, "boundary.acceptsCanonicalHistory");
+  assertEqual(boundary.admitsLayerEvidence, false, "boundary.admitsLayerEvidence");
+  assertEqual(boundary.interpretsRbc, false, "boundary.interpretsRbc");
+  assertEqual(boundary.grantsAuthority, false, "boundary.grantsAuthority");
+  assertEqual(boundary.publishesToMesh, false, "boundary.publishesToMesh");
+  const validation = assertObject(candidate.validation, "validation");
+  assertPublicDeviceReplicaReportReadbackStatus(validation.status, "validation.status");
+  assertEqual(validation.noCanonicalHistoryClaim, true, "validation.noCanonicalHistoryClaim");
+  assertEqual(validation.noLayerAdmissionClaim, true, "validation.noLayerAdmissionClaim");
+  assertEqual(validation.noRbcInterpretationClaim, true, "validation.noRbcInterpretationClaim");
+  assertEqual(validation.noAuthorityClaim, true, "validation.noAuthorityClaim");
+  assertPublicDeviceReplicaReportReadbackStatus(candidate.reviewStatus, "reviewStatus");
 }
 
 export async function runEdgeLayerSeamHistoryHyperswarmReader(
@@ -1129,6 +1315,73 @@ function parseHyperswarmReaderReport(
   };
 }
 
+function parsePublicDeviceReplicaReport(
+  value: unknown,
+): EdgeLayerSeamHistoryPublicDeviceReplicaReport | undefined {
+  if (!isRecord(value)) return undefined;
+  if (value.artifactKind !== EDGE_LAYER_SEAM_HISTORY_PUBLIC_DEVICE_REPLICA_REPORT_ARTIFACT_KIND) return undefined;
+  if (value.schema !== EDGE_LAYER_SEAM_HISTORY_PUBLIC_DEVICE_REPLICA_REPORT_SCHEMA) return undefined;
+  if (value.schemaVersion !== 1) return undefined;
+  const sourceManifest = parsePublicDeviceSourceManifest(value.sourceManifest);
+  const replicatedRecord = isDurableRecord(value.replicatedRecord) ? value.replicatedRecord : undefined;
+  const observationResult = parseObservationResult(value.observationResult);
+  const readerProof = isPublicDeviceReplicaReaderProof(value.readerProof) ? value.readerProof : undefined;
+  const boundary = isRecord(value.boundary) ? value.boundary : undefined;
+  if (!sourceManifest || !replicatedRecord || !observationResult || !readerProof || !boundary) return undefined;
+  if (
+    boundary.observationOnly !== true ||
+    boundary.acceptsCanonicalHistory !== false ||
+    boundary.admitsLayerEvidence !== false ||
+    boundary.interpretsRbc !== false ||
+    boundary.grantsAuthority !== false ||
+    boundary.publishesToMesh !== false
+  ) {
+    return undefined;
+  }
+
+  return {
+    artifactKind: EDGE_LAYER_SEAM_HISTORY_PUBLIC_DEVICE_REPLICA_REPORT_ARTIFACT_KIND,
+    schema: EDGE_LAYER_SEAM_HISTORY_PUBLIC_DEVICE_REPLICA_REPORT_SCHEMA,
+    schemaVersion: 1,
+    emittedAt: typeof value.emittedAt === "string" ? value.emittedAt : "",
+    namespaceParts: stringArray(value.namespaceParts),
+    sourceManifest,
+    replicatedRecord,
+    observationResult,
+    readerProof,
+    boundary: {
+      observationOnly: true,
+      acceptsCanonicalHistory: false,
+      admitsLayerEvidence: false,
+      interpretsRbc: false,
+      grantsAuthority: false,
+      publishesToMesh: false,
+    },
+  };
+}
+
+function parsePublicDeviceSourceManifest(
+  value: unknown,
+): EdgeLayerSeamHistoryPublicDeviceSourceManifest | undefined {
+  if (!isRecord(value)) return undefined;
+  if (value.artifactKind !== EDGE_LAYER_SEAM_HISTORY_PUBLIC_DEVICE_SOURCE_MANIFEST_ARTIFACT_KIND) return undefined;
+  if (value.schema !== EDGE_LAYER_SEAM_HISTORY_PUBLIC_DEVICE_SOURCE_MANIFEST_SCHEMA) return undefined;
+  if (value.schemaVersion !== 1) return undefined;
+  const source = isRecord(value.source) ? value.source : undefined;
+  if (!source) return undefined;
+  if (
+    typeof source.sourceCoreKeyHex !== "string" ||
+    typeof source.topicHex !== "string" ||
+    typeof source.sourceRecordId !== "string" ||
+    typeof source.seamHistoryHash !== "string" ||
+    !Array.isArray(source.sourceRefs) ||
+    source.sourceRefs.every((entry) => typeof entry === "string") === false
+  ) {
+    return undefined;
+  }
+  return value as unknown as EdgeLayerSeamHistoryPublicDeviceSourceManifest;
+}
+
 function parseObservationResult(value: unknown): EdgeLayerSeamHistoryObservationResult | undefined {
   try {
     assertEdgeLayerSeamHistoryObservationResult(value);
@@ -1190,6 +1443,68 @@ function validateHyperswarmReaderReport(
   return issues;
 }
 
+function validatePublicDeviceReplicaReport(
+  report: EdgeLayerSeamHistoryPublicDeviceReplicaReport | undefined,
+): string[] {
+  if (!report) return ["public-device-replica-report-invalid"];
+  const issues: string[] = [];
+  if (
+    report.sourceManifest.source.sourceRecordId.trim() === "" ||
+    report.replicatedRecord.recordId.trim() === ""
+  ) {
+    issues.push("durable-record-ids-missing");
+  }
+  if (report.sourceManifest.source.seamHistoryHash !== report.replicatedRecord.seamHistoryHash) {
+    issues.push("seam-history-hash-not-preserved");
+  }
+  if (
+    report.sourceManifest.source.sourceRefs.length === 0 ||
+    stableJson(report.sourceManifest.source.sourceRefs) !== stableJson(report.replicatedRecord.sourceRefs)
+  ) {
+    issues.push("durable-source-refs-not-preserved");
+  }
+  if (
+    report.readerProof.inputReadByCausalSubstrate !== true ||
+    report.readerProof.durableCorestoreHistoryRead !== true ||
+    report.readerProof.dhtOrHyperswarmInputObservedByCausalSubstrate !== true ||
+    report.readerProof.replicatedViaHyperswarmTransport !== true ||
+    report.readerProof.publicHyperswarmInputObservedByCausalSubstrate !== true ||
+    report.readerProof.sourceManifestConsumed !== true ||
+    report.readerProof.sourceCoreKeyHex.trim() === "" ||
+    report.readerProof.replicaCoreKeyHex.trim() === "" ||
+    report.readerProof.topicHex.trim() === "" ||
+    report.readerProof.replicatedRecordCount < 1
+  ) {
+    issues.push("reader-proof-not-preserved");
+  }
+  if (
+    report.observationResult.validation.strongestProofRung !== report.observationResult.proof.strongestProofRung ||
+    report.observationResult.validation.normalizedProofLabel !== report.observationResult.proof.normalizedProofLabel
+  ) {
+    issues.push("observation-proof-labels-not-preserved");
+  }
+  if (
+    report.observationResult.proof.strongestProofRung !==
+      "public_hyperswarm_replicated_durable_seam_history_observation" ||
+    report.observationResult.proof.normalizedProofLabel !==
+      "public_hyperswarm_durable_seam_history_material" ||
+    report.observationResult.proof.publicHyperswarmInputObservedByCausalSubstrate !== true
+  ) {
+    issues.push("public-swarm-proof-labels-not-preserved");
+  }
+  if (
+    report.boundary.observationOnly !== true ||
+    report.boundary.acceptsCanonicalHistory !== false ||
+    report.boundary.admitsLayerEvidence !== false ||
+    report.boundary.interpretsRbc !== false ||
+    report.boundary.grantsAuthority !== false ||
+    report.boundary.publishesToMesh !== false
+  ) {
+    issues.push("boundary-overclaim");
+  }
+  return issues;
+}
+
 function buildReportReadbackBoundary(): EdgeLayerSeamHistoryHyperswarmReaderReportReadback["boundary"] {
   return {
     reportReadbackOnly: true,
@@ -1211,6 +1526,14 @@ function createReportReadbackArtifactId(input: {
   replicatedRecordId?: string | undefined;
 }): string {
   return `edge-layer-seam-history-hyperswarm-reader-report-readback:${hash(stableJson(input)).slice(0, 16)}`;
+}
+
+function createPublicDeviceReplicaReportReadbackArtifactId(input: {
+  emittedAt: string;
+  sourceRecordId?: string | undefined;
+  replicatedRecordId?: string | undefined;
+}): string {
+  return `edge-layer-seam-history-public-device-replica-report-readback:${hash(stableJson(input)).slice(0, 16)}`;
 }
 
 async function readDurableRecords(
@@ -1245,6 +1568,20 @@ function isReaderProof(value: unknown): value is EdgeLayerSeamHistoryHyperswarmR
     typeof value.topicHex === "string" &&
     typeof value.sourceRecordCount === "number" &&
     typeof value.replicaRecordCount === "number";
+}
+
+function isPublicDeviceReplicaReaderProof(value: unknown): value is EdgeLayerSeamHistoryPublicDeviceReplicaReaderProof {
+  return isRecord(value) &&
+    value.inputReadByCausalSubstrate === true &&
+    value.durableCorestoreHistoryRead === true &&
+    value.dhtOrHyperswarmInputObservedByCausalSubstrate === true &&
+    value.replicatedViaHyperswarmTransport === true &&
+    value.publicHyperswarmInputObservedByCausalSubstrate === true &&
+    value.sourceManifestConsumed === true &&
+    typeof value.sourceCoreKeyHex === "string" &&
+    typeof value.replicaCoreKeyHex === "string" &&
+    typeof value.topicHex === "string" &&
+    typeof value.replicatedRecordCount === "number";
 }
 
 function wireReplicationSockets(
@@ -1488,6 +1825,18 @@ function assertReportReadbackStatus(
     value !== "edge-layer-seam-history-hyperswarm-reader-report-readback-invalid"
   ) {
     throw new Error(`${label} must be a hyperswarm reader report readback status`);
+  }
+}
+
+function assertPublicDeviceReplicaReportReadbackStatus(
+  value: unknown,
+  label: string,
+): asserts value is EdgeLayerSeamHistoryPublicDeviceReplicaReportReadbackStatus {
+  if (
+    value !== "edge-layer-seam-history-public-device-replica-report-readback-valid" &&
+    value !== "edge-layer-seam-history-public-device-replica-report-readback-invalid"
+  ) {
+    throw new Error(`${label} must be a public device replica report readback status`);
   }
 }
 

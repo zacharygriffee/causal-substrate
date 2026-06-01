@@ -1,0 +1,56 @@
+{
+  "artifactKind": "edge_layer_seam_history_material",
+  "schemaVersion": "edge-layer-seam-history-material.v0",
+  "historyId": "layer-owned-edge-seam-status:public-hyperswarm-single-machine-2026-06-01",
+  "historyHash": "sha256:8888888888888888888888888888888888888888888888888888888888888888",
+  "sourceRepos": [
+    "mesh-ecology-edge",
+    "mesh-ecology-layer"
+  ],
+  "pairs": [
+    {
+      "request": {
+        "sourceRepo": "mesh-ecology-edge",
+        "requestId": "edge-layer-report-only-seam-request:public-hyperswarm-single-machine-2026-06-01:linked",
+        "requestHash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "durableRef": "corestore:edge-layer-seam-history:public-single-machine:request:0",
+        "writerRef": "autobase-writer:edge-public-hyperswarm-single-machine"
+      },
+      "receipt": {
+        "sourceRepo": "mesh-ecology-layer",
+        "receiptId": "layer-report-only-edge-seam-receipt:public-hyperswarm-single-machine-2026-06-01:linked",
+        "receiptHash": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "sourceRequestId": "edge-layer-report-only-seam-request:public-hyperswarm-single-machine-2026-06-01:linked",
+        "sourceRequestHash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "durableRef": "corestore:edge-layer-seam-history:public-single-machine:receipt:1",
+        "writerRef": "autobase-writer:layer-public-hyperswarm-single-machine"
+      },
+      "linkage": {
+        "linked": true,
+        "source": "receipt_source_request_refs"
+      }
+    },
+    {
+      "request": {
+        "sourceRepo": "mesh-ecology-edge",
+        "requestId": "edge-layer-report-only-seam-request:public-hyperswarm-single-machine-2026-06-01:unlinked",
+        "requestHash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "durableRef": "corestore:edge-layer-seam-history:public-single-machine:request:2",
+        "writerRef": "autobase-writer:edge-public-hyperswarm-single-machine"
+      },
+      "receipt": {
+        "sourceRepo": "mesh-ecology-layer",
+        "receiptId": "layer-report-only-edge-seam-receipt:public-hyperswarm-single-machine-2026-06-01:unlinked",
+        "receiptHash": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "sourceRequestId": "edge-layer-report-only-seam-request:public-hyperswarm-single-machine-2026-06-01:different",
+        "sourceRequestHash": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "durableRef": "corestore:edge-layer-seam-history:public-single-machine:receipt:3",
+        "writerRef": "autobase-writer:layer-public-hyperswarm-single-machine"
+      },
+      "linkage": {
+        "linked": false,
+        "source": "receipt_source_request_refs"
+      }
+    }
+  ]
+}
