@@ -113,6 +113,15 @@ npx tsx scripts/index-edge-layer-seam-history-public-proof.ts \
   --output proof-artifacts/public-hyperswarm-device-to-device-2026-06-01/public-seam-proof-index.json
 ```
 
+```bash
+npx tsx scripts/prepare-edge-layer-seam-history-operator-public-refresh-command.ts \
+  --run-dir proof-artifacts/public-hyperswarm-device-to-device-2026-06-01 \
+  --output proof-artifacts/public-hyperswarm-device-to-device-2026-06-01/operator-selected-public-refresh-command.json \
+  --operator-selected-refresh \
+  --refresh-run-id public-hyperswarm-device-to-device-operator-refresh \
+  --refresh-output-dir proof-artifacts/public-hyperswarm-device-to-device-operator-refresh
+```
+
 ## Result
 
 The replica report preserves:
@@ -162,6 +171,15 @@ run, reproducibility check, Edge contract, consumer readback, and refresh
 decision without duplicating artifact bodies. Its operation rung is
 `local_index_over_saved_public_hyperswarm_seam_proof_artifacts`; it does not
 open swarm, open Corestore, or upgrade saved artifacts into a new live proof.
+
+The operator-selected public refresh command artifact reads the saved proof
+index and refresh decision, requires an explicit operator selection, and names
+the exact public Hyperswarm source and replica commands plus local downstream
+readback/handoff/reproducibility outputs for a future run. Its operation rung
+is
+`local_operator_refresh_command_preparation_over_saved_public_hyperswarm_artifacts`;
+it is instructions-only and does not run public swarm, open Corestore, call
+Edge or Layer, write projection state, or upgrade proof.
 
 ## Boundary
 
