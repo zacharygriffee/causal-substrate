@@ -59,6 +59,16 @@ at refreshed public-run material, preserve request/receipt refs and public
 source proof labels, reject configured-bootstrap evidence, and do not claim a
 new live swarm run.
 
+The refreshed proof index is also exposed as an observation-only consumer
+handoff:
+
+- `public-proof-index-consumer-handoff.json`
+
+This handoff is a local saved-index operation. It preserves the public source
+proof rung for Edge, Layer, and Spine consumers, but it does not call those
+systems, write projection state, admit Layer evidence, interpret RBC, grant
+authority, publish to Mesh, or upgrade proof.
+
 The refreshed proof index was then used to prepare the next public-swarm-only
 device objective:
 

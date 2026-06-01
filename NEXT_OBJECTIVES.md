@@ -147,6 +147,11 @@ The local supplied-material lane can now:
   `proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/`;
   this preparation keeps `CAUSAL_SUBSTRATE_HYPERSWARM_BOOTSTRAP` unset and
   remains below live swarm proof until the device commands actually run.
+- expose the refreshed public seam proof index as
+  `public-proof-index-consumer-handoff.json`, an observation-only consumer
+  handoff for Edge, Layer, and Spine that preserves refs and public source
+  proof labels without calling consumers, writing projection state, admitting
+  Layer evidence, interpreting RBC, or upgrading proof.
 
 Strongest routinely proven rung in normal tests:
 `local_causal_observation_over_supplied_seam_history_material`.
@@ -173,8 +178,9 @@ current proof index to a consumer:
   `proof-artifacts/public-hyperswarm-device-to-device-operator-refresh/operator-selected-public-refresh-command.json`
   on real public Hyperswarm only, with `CAUSAL_SUBSTRATE_HYPERSWARM_BOOTSTRAP`
   unset and no testnet or configured bootstrap;
-- optionally hand `public-seam-proof-index.json` to Edge, Layer, or Spine as an
-  observation-only consumer index;
+- if a consumer asks for the latest saved index, hand
+  `public-proof-index-consumer-handoff.json` and `public-seam-proof-index.json`
+  as observation-only material;
 - if Edge or Layer provides fresh public endpoint/history material, prefer a
   narrow observation/readback path over another solo saved-artifact expansion;
 - keep any new saved-artifact consumer checks explicitly lower than the source

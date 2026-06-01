@@ -1,0 +1,109 @@
+{
+  "artifactKind": "causal-edge-layer-seam-history-public-proof-index-consumer-handoff",
+  "schema": "causal-substrate/edge-layer-seam-history-public-proof-index-consumer-handoff/v1",
+  "schemaVersion": 1,
+  "artifactId": "causal-edge-layer-seam-history-public-proof-index-consumer-handoff:fcab4c9ede4aaff4",
+  "emittedAt": "2026-06-01T08:42:00.000Z",
+  "sourcePaths": {
+    "publicSeamProofIndex": "/home/zevilz/work/mesh-ecology/causal-substrate/proof-artifacts/public-hyperswarm-device-to-device-operator-refresh/public-seam-proof-index.json"
+  },
+  "indexSummary": {
+    "artifactId": "causal-edge-layer-seam-history-public-seam-proof-index:20b5560f0e32c20e",
+    "runId": "public-hyperswarm-device-to-device-operator-refresh",
+    "reviewStatus": "edge-layer-seam-history-public-seam-proof-index-ready",
+    "strongestSourceProofRungObserved": "public_hyperswarm_replicated_durable_seam_history_observation",
+    "strongestSourceProofLabelObserved": "public_hyperswarm_durable_seam_history_material",
+    "indexOperationProofRung": "local_index_over_saved_public_hyperswarm_seam_proof_artifacts"
+  },
+  "consumerHandoff": {
+    "edgeMayConsumeAsObservationOnlyIndex": true,
+    "layerMayConsumeAsObservationOnlyFeedbackIndex": true,
+    "spineMayConsumeAsFamilyPressureIndex": true,
+    "sourceProofRungPreservedForConsumers": true,
+    "savedIndexHandoffOnly": true,
+    "doesNotUpgradeSavedIndex": true
+  },
+  "preservedRefs": {
+    "requestIds": [
+      "edge-layer-report-only-seam-request:public-hyperswarm-single-machine-2026-06-01:linked",
+      "edge-layer-report-only-seam-request:public-hyperswarm-single-machine-2026-06-01:unlinked"
+    ],
+    "requestHashes": [
+      "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+    ],
+    "receiptIds": [
+      "layer-report-only-edge-seam-receipt:public-hyperswarm-single-machine-2026-06-01:linked",
+      "layer-report-only-edge-seam-receipt:public-hyperswarm-single-machine-2026-06-01:unlinked"
+    ],
+    "receiptHashes": [
+      "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+    ],
+    "sourceRepos": [
+      "mesh-ecology-edge",
+      "mesh-ecology-layer"
+    ],
+    "durableRefs": [
+      "corestore:edge-layer-seam-history:public-single-machine:request:0",
+      "corestore:edge-layer-seam-history:public-single-machine:request:2",
+      "corestore:edge-layer-seam-history:public-single-machine:receipt:1",
+      "corestore:edge-layer-seam-history:public-single-machine:receipt:3"
+    ],
+    "writerRefs": [
+      "autobase-writer:edge-public-hyperswarm-single-machine",
+      "autobase-writer:layer-public-hyperswarm-single-machine"
+    ]
+  },
+  "proof": {
+    "strongestSourceProofRungObserved": "public_hyperswarm_replicated_durable_seam_history_observation",
+    "strongestSourceProofLabelObserved": "public_hyperswarm_durable_seam_history_material",
+    "consumerHandoffOperationProofRung": "local_consumer_handoff_over_saved_public_seam_proof_index",
+    "savedIndexHandoffOnly": true,
+    "liveSwarmRunClaimedByThisHandoff": false,
+    "proofRungUpgradeClaimed": false
+  },
+  "validation": {
+    "status": "edge-layer-seam-history-public-proof-index-consumer-handoff-ready",
+    "publicSeamProofIndexReady": true,
+    "sourceRefsPreserved": true,
+    "proofLabelsPreserved": true,
+    "publicSourceProofRungPreserved": true,
+    "configuredBootstrapEvidenceAbsent": true,
+    "consumerSuitabilityPreserved": true,
+    "noCanonicalHistoryClaim": true,
+    "noLayerAdmissionClaim": true,
+    "noLayerEvidenceAdmissionClaim": true,
+    "noRbcInterpretationClaim": true,
+    "noAuthorityClaim": true,
+    "noMeshPublicationClaim": true,
+    "noEdgeProjectionWriteClaim": true,
+    "noProductionContinuityWriteClaim": true,
+    "noLiveSwarmClaimByThisHandoff": true,
+    "issues": []
+  },
+  "boundary": {
+    "consumerHandoffOnly": true,
+    "readsSavedArtifactsOnly": true,
+    "opensSwarm": false,
+    "opensCorestore": false,
+    "callsEdge": false,
+    "callsLayer": false,
+    "writesEdgeProjection": false,
+    "writesLayerEvidence": false,
+    "acceptsCanonicalHistory": false,
+    "admitsLayerEvidence": false,
+    "decidesLayerAdmission": false,
+    "interpretsRbc": false,
+    "grantsAuthority": false,
+    "publishesToMesh": false,
+    "writesProductionContinuity": false
+  },
+  "reviewStatus": "edge-layer-seam-history-public-proof-index-consumer-handoff-ready",
+  "warnings": [
+    "public-proof-index-consumer-handoff-reads-saved-index-only",
+    "public-proof-index-consumer-handoff-does-not-upgrade-source-proof",
+    "public-proof-index-consumer-handoff-does-not-call-edge-layer-or-spine"
+  ],
+  "rejections": []
+}
