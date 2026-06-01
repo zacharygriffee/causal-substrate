@@ -167,6 +167,11 @@ to run one:
   configured bootstrap;
 - optionally hand `public-seam-proof-index.json` to Edge, Layer, or Spine as an
   observation-only consumer index;
+- if Edge or Layer provides fresh public endpoint/history material, prefer a
+  narrow observation/readback path over another solo saved-artifact expansion;
+- keep any new saved-artifact consumer checks explicitly lower than the source
+  public swarm proof unless Causal itself reopens and reads durable replicated
+  seam history over public Hyperswarm;
 - defer ontology, referent promotion, canonical continuity, RBC, Mesh,
   authority, Layer admission, and production continuity.
 
@@ -197,6 +202,8 @@ admission, or grant authority.
   history ready to consume.
 - Spine needs a next family-pressure signal after Edge, Layer, and Causal
   Substrate all have accepted public-swarm lanes.
+- Layer or Edge has new public-swarm endpoint/history material that needs
+  bounded causal observation rather than more Causal-only artifact indexing.
 - A higher proof rung is tempting but input came from supplied JSON, files,
   stdin/stdout, direct imports, or fixtures.
 - Layer receipt/evidence refs would need Layer admission interpretation.
