@@ -89,6 +89,20 @@ The local supplied-material lane can now:
   refs in
   `mesh-ecology-edge/proof-artifacts/causal-substrate-public-device-handoff-2026-06-01/`
   without writing Edge projection state.
+- check preserved public run artifact chains for reproducibility through code,
+  including linked/damaged detection, source id/hash preservation, public proof
+  label preservation, and non-claim boundaries, while labeling the check as
+  `local_reproducibility_check_over_saved_public_hyperswarm_artifacts`.
+- derive a saved observation-to-handoff-to-Edge projection contract from the
+  public device run and Edge's saved import receipt, proving source refs match
+  across Causal and Edge without writing Edge projection state.
+- emit a Spine/Edge consumer readback over the saved proof summary and Edge
+  contract so consumers can see the preserved public source proof rung while
+  the readback itself remains
+  `local_consumer_readback_over_saved_edge_layer_seam_history_proof_summary`.
+- emit a public swarm refresh decision over the saved reproducibility check,
+  Edge contract, and consumer readback; the current recommendation is
+  `not_required_artifacts_stable`, and the decision does not run public swarm.
 
 Strongest routinely proven rung in normal tests:
 `local_causal_observation_over_supplied_seam_history_material`.
@@ -106,18 +120,23 @@ run:
 
 ## Next Outward Moves
 
-The current outward list is complete. Build the next list from preserved
-public-run artifacts and Edge handoff consumption:
+The current outward list is complete. Build the next list from the stable
+saved public-run chain:
 
-- keep public device proof artifacts reproducible and checkable;
-- derive a stable observation-to-handoff-to-Edge projection contract from the
-  preserved artifacts;
-- make proof summary and readback clearer for Spine and Edge while not
-  upgrading saved imports into new live proof;
-- decide the next Causal-owned public swarm repeat or refresh command only
-  after public artifacts remain stable;
+- expose a compact Causal public seam proof index for Edge, Layer, and Spine
+  that points at the preserved public run, reproducibility check, Edge
+  contract, consumer readback, and refresh decision without duplicating or
+  upgrading the artifacts;
+- add a negative saved-artifact proof-index case that rejects missing source
+  refs, weakened proof labels, or overclaims before any consumer-facing index
+  is considered ready;
+- prepare an operator-selected public refresh command artifact that names the
+  exact public-swarm command, device prerequisites, and expected outputs, while
+  remaining instructions-only until explicitly run on public swarm;
+- only run a new public swarm refresh after an operator explicitly requests it
+  and the run uses public Hyperswarm with no configured bootstrap override;
 - defer ontology, referent promotion, canonical continuity, RBC, Mesh,
-  authority, and production continuity.
+  authority, Layer admission, and production continuity.
 
 ## Handoff Expectations
 
