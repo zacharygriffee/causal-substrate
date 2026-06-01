@@ -152,6 +152,10 @@ The local supplied-material lane can now:
   handoff for Edge, Layer, and Spine that preserves refs and public source
   proof labels without calling consumers, writing projection state, admitting
   Layer evidence, interpreting RBC, or upgrading proof.
+- read back the consumer handoff as
+  `public-proof-index-consumer-handoff-readback.json`, proving through code that
+  the saved handoff remains readable, preserves source refs, and keeps
+  consumer suitability/non-claim boundaries without upgrading proof.
 
 Strongest routinely proven rung in normal tests:
 `local_causal_observation_over_supplied_seam_history_material`.
@@ -183,6 +187,8 @@ current proof index to a consumer:
   as observation-only material;
 - if Edge or Layer provides fresh public endpoint/history material, prefer a
   narrow observation/readback path over another solo saved-artifact expansion;
+  no fresh Edge/Layer public proof artifact was present locally during the last
+  scan beyond the already-consumed Edge receipts;
 - keep any new saved-artifact consumer checks explicitly lower than the source
   public swarm proof unless Causal itself reopens and reads durable replicated
   seam history over public Hyperswarm;
