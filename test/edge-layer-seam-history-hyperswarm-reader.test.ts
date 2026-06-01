@@ -12,6 +12,7 @@ import {
   assertEdgeLayerSeamHistoryObservationResult,
   assertEdgeLayerSeamHistoryHyperswarmReaderReportReadback,
   buildEdgeLayerSeamHistoryObservationResult,
+  buildEdgeLayerSeamHistoryDurableRecordSourceRefCompleteness,
   buildEdgeLayerSeamHistoryHyperswarmInputLaneReadiness,
   buildEdgeLayerSeamHistoryHyperswarmReaderReportReadback,
   buildEdgeLayerSeamHistoryRealHyperswarmProofRunInstructions,
@@ -208,6 +209,53 @@ test("Hyperswarm seam-history input lane readiness is explicit without claiming 
   assert.ok(incomplete.issues.includes("hyperswarm-factory-missing"));
   assert.ok(incomplete.issues.includes("namespace-parts-missing"));
   assert.ok(incomplete.issues.includes("seam-history-input-missing"));
+});
+
+test("durable seam-history record source-ref completeness reports complete and incomplete material", () => {
+  const complete = buildEdgeLayerSeamHistoryDurableRecordSourceRefCompleteness(seamHistoryMaterial());
+
+  assert.equal(complete.reportKind, "edge_layer_seam_history_durable_record_source_ref_completeness");
+  assert.equal(complete.complete, true);
+  assert.equal(complete.sourceRefsPresent, true);
+  assert.deepEqual(complete.missingRefKinds, []);
+  assert.equal(complete.requiredRefs.historyId, true);
+  assert.equal(complete.requiredRefs.historyHash, true);
+  assert.equal(complete.requiredRefs.requestIds, true);
+  assert.equal(complete.requiredRefs.requestHashes, true);
+  assert.equal(complete.requiredRefs.requestDurableRefs, true);
+  assert.equal(complete.requiredRefs.requestWriterRefs, true);
+  assert.equal(complete.requiredRefs.receiptIds, true);
+  assert.equal(complete.requiredRefs.receiptHashes, true);
+  assert.equal(complete.requiredRefs.receiptDurableRefs, true);
+  assert.equal(complete.requiredRefs.receiptWriterRefs, true);
+  assert.equal(complete.boundary.reportOnly, true);
+  assert.equal(complete.boundary.durableRecordMetadataOnly, true);
+  assert.equal(complete.boundary.acceptsCanonicalHistory, false);
+  assert.equal(complete.boundary.admitsLayerEvidence, false);
+  assert.equal(complete.boundary.interpretsRbc, false);
+  assert.equal(complete.boundary.grantsAuthority, false);
+
+  const incompleteMaterial = seamHistoryMaterial();
+  delete incompleteMaterial.historyHash;
+  delete incompleteMaterial.pairs[1].receipt.receiptHash;
+  delete incompleteMaterial.pairs[1].receipt.durableRef;
+  delete incompleteMaterial.pairs[1].receipt.writerRef;
+  const incomplete = buildEdgeLayerSeamHistoryDurableRecordSourceRefCompleteness(incompleteMaterial);
+
+  assert.equal(incomplete.complete, false);
+  assert.equal(incomplete.sourceRefsPresent, true);
+  assert.equal(incomplete.requiredRefs.historyHash, false);
+  assert.equal(incomplete.requiredRefs.receiptHashes, false);
+  assert.equal(incomplete.requiredRefs.receiptDurableRefs, false);
+  assert.equal(incomplete.requiredRefs.receiptWriterRefs, false);
+  assert.ok(incomplete.missingRefKinds.includes("historyHash"));
+  assert.ok(incomplete.missingRefKinds.includes("receiptHashes"));
+  assert.ok(incomplete.missingRefKinds.includes("receiptDurableRefs"));
+  assert.ok(incomplete.missingRefKinds.includes("receiptWriterRefs"));
+  assert.equal(incomplete.boundary.acceptsCanonicalHistory, false);
+  assert.equal(incomplete.boundary.admitsLayerEvidence, false);
+  assert.equal(incomplete.boundary.interpretsRbc, false);
+  assert.equal(incomplete.boundary.grantsAuthority, false);
 });
 
 test("real Hyperswarm proof run instructions artifact stays instructions-only", () => {

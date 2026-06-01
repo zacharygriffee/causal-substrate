@@ -57,7 +57,36 @@ export interface EdgeLayerSeamHistoryDurableRecord {
   seamHistoryHash: string;
   seamHistoryHashAlgorithm: "sha256-stable-json";
   sourceRefs: string[];
+  sourceRefCompleteness: EdgeLayerSeamHistoryDurableRecordSourceRefCompleteness;
   durableHistoryMaterial: true;
+}
+
+export interface EdgeLayerSeamHistoryDurableRecordSourceRefCompleteness {
+  reportKind: "edge_layer_seam_history_durable_record_source_ref_completeness";
+  complete: boolean;
+  sourceRefsPresent: boolean;
+  requiredRefs: {
+    historyId: boolean;
+    historyHash: boolean;
+    sourceRepos: boolean;
+    requestIds: boolean;
+    requestHashes: boolean;
+    requestDurableRefs: boolean;
+    requestWriterRefs: boolean;
+    receiptIds: boolean;
+    receiptHashes: boolean;
+    receiptDurableRefs: boolean;
+    receiptWriterRefs: boolean;
+  };
+  missingRefKinds: string[];
+  boundary: {
+    reportOnly: true;
+    durableRecordMetadataOnly: true;
+    acceptsCanonicalHistory: false;
+    admitsLayerEvidence: false;
+    interpretsRbc: false;
+    grantsAuthority: false;
+  };
 }
 
 export interface EdgeLayerSeamHistoryHyperswarmReaderProof {
@@ -429,6 +458,32 @@ export function buildEdgeLayerSeamHistoryHyperswarmReaderReportReadback(
   };
 }
 
+export function buildEdgeLayerSeamHistoryDurableRecordSourceRefCompleteness(
+  seamHistory: unknown,
+  sourceRefs = collectSourceRefs(seamHistory),
+): EdgeLayerSeamHistoryDurableRecordSourceRefCompleteness {
+  const requiredRefs = collectRequiredSourceRefPresence(seamHistory);
+  const missingRefKinds = Object.entries(requiredRefs)
+    .filter(([, present]) => present === false)
+    .map(([kind]) => kind);
+
+  return {
+    reportKind: "edge_layer_seam_history_durable_record_source_ref_completeness",
+    complete: missingRefKinds.length === 0 && sourceRefs.length > 0,
+    sourceRefsPresent: sourceRefs.length > 0,
+    requiredRefs,
+    missingRefKinds,
+    boundary: {
+      reportOnly: true,
+      durableRecordMetadataOnly: true,
+      acceptsCanonicalHistory: false,
+      admitsLayerEvidence: false,
+      interpretsRbc: false,
+      grantsAuthority: false,
+    },
+  };
+}
+
 export function assertEdgeLayerSeamHistoryHyperswarmReaderReportReadback(
   value: unknown,
 ): asserts value is EdgeLayerSeamHistoryHyperswarmReaderReportReadback {
@@ -571,6 +626,7 @@ function buildDurableRecord(input: {
   recordedAt: string;
 }): EdgeLayerSeamHistoryDurableRecord {
   const seamHistoryHash = `sha256:${hash(stableJson(input.seamHistory))}`;
+  const sourceRefs = collectSourceRefs(input.seamHistory);
   return {
     artifactKind: EDGE_LAYER_SEAM_HISTORY_DURABLE_RECORD_KIND,
     schema: EDGE_LAYER_SEAM_HISTORY_DURABLE_RECORD_SCHEMA,
@@ -581,7 +637,8 @@ function buildDurableRecord(input: {
     seamHistory: input.seamHistory,
     seamHistoryHash,
     seamHistoryHashAlgorithm: "sha256-stable-json",
-    sourceRefs: collectSourceRefs(input.seamHistory),
+    sourceRefs,
+    sourceRefCompleteness: buildEdgeLayerSeamHistoryDurableRecordSourceRefCompleteness(input.seamHistory, sourceRefs),
     durableHistoryMaterial: true,
   };
 }
@@ -837,6 +894,52 @@ function collectSourceRefs(value: unknown): string[] {
     refs.push(...sourceRefsFromPair(pair));
   }
   return uniqueStrings(refs);
+}
+
+function collectRequiredSourceRefPresence(
+  value: unknown,
+): EdgeLayerSeamHistoryDurableRecordSourceRefCompleteness["requiredRefs"] {
+  const pairs = collectSourceRefPairs(value);
+  return {
+    historyId: isRecord(value) && typeof value.historyId === "string" && value.historyId.trim() !== "",
+    historyHash: isRecord(value) && typeof value.historyHash === "string" && value.historyHash.trim() !== "",
+    sourceRepos: isRecord(value) && stringArray(value.sourceRepos).length > 0,
+    requestIds: pairs.length > 0 && pairs.every((pair) => pair.requestIds.length > 0),
+    requestHashes: pairs.length > 0 && pairs.every((pair) => pair.requestHashes.length > 0),
+    requestDurableRefs: pairs.length > 0 && pairs.every((pair) => pair.requestDurableRefs.length > 0),
+    requestWriterRefs: pairs.length > 0 && pairs.every((pair) => pair.requestWriterRefs.length > 0),
+    receiptIds: pairs.length > 0 && pairs.every((pair) => pair.receiptIds.length > 0),
+    receiptHashes: pairs.length > 0 && pairs.every((pair) => pair.receiptHashes.length > 0),
+    receiptDurableRefs: pairs.length > 0 && pairs.every((pair) => pair.receiptDurableRefs.length > 0),
+    receiptWriterRefs: pairs.length > 0 && pairs.every((pair) => pair.receiptWriterRefs.length > 0),
+  };
+}
+
+function collectSourceRefPairs(value: unknown): Array<{
+  requestIds: string[];
+  requestHashes: string[];
+  requestDurableRefs: string[];
+  requestWriterRefs: string[];
+  receiptIds: string[];
+  receiptHashes: string[];
+  receiptDurableRefs: string[];
+  receiptWriterRefs: string[];
+}> {
+  if (!isRecord(value)) return [];
+  return [...arrayRecords(value.pairs), ...arrayRecords(value.linkedPairs)].map((pair) => {
+    const request = isRecord(pair.request) ? pair.request : pair;
+    const receipt = isRecord(pair.receipt) ? pair.receipt : pair;
+    return {
+      requestIds: uniqueStrings([request.requestId, request.id]),
+      requestHashes: uniqueStrings([request.requestHash, request.hash]),
+      requestDurableRefs: uniqueStrings([request.durableRef]),
+      requestWriterRefs: uniqueStrings([request.writerRef]),
+      receiptIds: uniqueStrings([receipt.receiptId, receipt.id]),
+      receiptHashes: uniqueStrings([receipt.receiptHash, receipt.hash]),
+      receiptDurableRefs: uniqueStrings([receipt.durableRef]),
+      receiptWriterRefs: uniqueStrings([receipt.writerRef]),
+    };
+  });
 }
 
 function sourceRefsFromPair(pair: Record<string, unknown>): unknown[] {
