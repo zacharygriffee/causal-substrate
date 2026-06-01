@@ -1,12 +1,21 @@
 import assert from "node:assert/strict";
+import { execFile } from "node:child_process";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
 import test from "node:test";
+import { promisify } from "node:util";
 
 import {
   assertEdgeLayerSeamHistoryEdgeProjectionHandoffBundle,
+  assertEdgeLayerSeamHistoryEdgeProjectionHandoffBundleReadback,
   buildEdgeLayerSeamHistoryEdgeProjectionHandoffBundle,
+  buildEdgeLayerSeamHistoryEdgeProjectionHandoffBundleReadback,
   buildEdgeLayerSeamHistoryObservationResult,
   type EdgeLayerSeamHistoryEdgeProjectionHandoffBundle,
 } from "../src/index.js";
+
+const execFileAsync = promisify(execFile);
 
 function seamHistoryMaterial() {
   return {
@@ -182,4 +191,133 @@ test("Edge consumer contract rejects incomplete handoff bundle before projection
   assert.equal(bundle.boundary.grantsAuthority, false);
   assert.equal(bundle.boundary.promotesReferents, false);
   assert.equal(bundle.boundary.publishesToMesh, false);
+});
+
+test("handoff bundle readback command preserves source refs from disk without projection writes", async () => {
+  const tempRoot = await mkdtemp(path.join(tmpdir(), "causal-handoff-bundle-readback-"));
+  const inputPath = path.join(tempRoot, "handoff-bundle.json");
+  const outputPath = path.join(tempRoot, "handoff-bundle-readback.json");
+  try {
+    const observationResult = buildEdgeLayerSeamHistoryObservationResult({
+      seamHistory: seamHistoryMaterial(),
+      emittedAt: "2026-05-31T14:22:00.000Z",
+      sourcePath: "layer-owned-edge-seam-status:edge-consumer-contract-readback",
+      inputReadByCausalSubstrate: true,
+    });
+    const bundle = buildEdgeLayerSeamHistoryEdgeProjectionHandoffBundle({
+      observationResult,
+      emittedAt: "2026-05-31T14:22:01.000Z",
+    });
+    await writeFile(inputPath, JSON.stringify(bundle, null, 2), "utf8");
+
+    const { stdout, stderr } = await execFileAsync("npx", [
+      "tsx",
+      "scripts/readback-edge-layer-seam-history-handoff-bundle.ts",
+      "--input-bundle",
+      inputPath,
+      "--readback-output",
+      outputPath,
+      "--emitted-at",
+      "2026-05-31T14:22:02.000Z",
+    ], {
+      cwd: path.resolve("."),
+    });
+
+    assert.equal(stdout, "");
+    assert.equal(stderr, "");
+    const readback = JSON.parse(await readFile(outputPath, "utf8"));
+
+    assertEdgeLayerSeamHistoryEdgeProjectionHandoffBundleReadback(readback);
+    assert.equal(readback.reviewStatus, "edge-layer-seam-history-edge-projection-handoff-bundle-readback-valid");
+    assert.equal(readback.source.sourceBundleArtifactId, bundle.artifactId);
+    assert.equal(readback.source.sourceBundleStatus, "edge-layer-seam-history-edge-projection-handoff-bundle-ready");
+    assert.equal(readback.source.sourceObservationArtifactId, observationResult.artifactId);
+    assert.equal(
+      readback.source.sourceObservationProofRung,
+      "local_causal_observation_over_supplied_seam_history_material",
+    );
+    assert.equal(readback.source.sourceObservationNormalizedProofLabel, "local_supplied_material");
+    assert.equal(readback.readback.bundleReadable, true);
+    assert.equal(readback.readback.bundledArtifactsReadable, true);
+    assert.equal(readback.readback.sourceRefsPreserved, true);
+    assert.equal(readback.readback.proofLabelsPreserved, true);
+    assert.equal(readback.readback.nonClaimsPreserved, true);
+    assert.deepEqual(readback.preservedSourceRefs.requestIds, [
+      "edge-layer-report-only-seam-request:edge-consumer-contract:linked",
+      "edge-layer-report-only-seam-request:edge-consumer-contract:unlinked",
+    ]);
+    assert.deepEqual(readback.preservedSourceRefs.requestHashes, [
+      `sha256:${"a".repeat(64)}`,
+      `sha256:${"c".repeat(64)}`,
+    ]);
+    assert.deepEqual(readback.preservedSourceRefs.receiptIds, [
+      "layer-report-only-edge-seam-receipt:edge-consumer-contract:linked",
+      "layer-report-only-edge-seam-receipt:edge-consumer-contract:unlinked",
+    ]);
+    assert.deepEqual(readback.preservedSourceRefs.receiptHashes, [
+      `sha256:${"b".repeat(64)}`,
+      `sha256:${"d".repeat(64)}`,
+    ]);
+    assert.equal(readback.preservedArtifactRefs.observationResultArtifactId, observationResult.artifactId);
+    assert.equal(readback.preservedArtifactRefs.handoffFixtureArtifactId, bundle.artifacts.handoffFixture.artifactId);
+    assert.equal(readback.preservedArtifactRefs.consumerFixtureArtifactId, bundle.artifacts.consumerFixture.artifactId);
+    assert.equal(readback.preservedArtifactRefs.completionGateComplete, true);
+    assert.equal(readback.validation.handoffBundleConsumed, true);
+    assert.equal(readback.validation.bundledArtifactsIncluded, true);
+    assert.equal(readback.validation.noCanonicalHistoryClaim, true);
+    assert.equal(readback.validation.noLayerAdmissionClaim, true);
+    assert.equal(readback.validation.noRbcInterpretationClaim, true);
+    assert.equal(readback.validation.noAuthorityClaim, true);
+    assert.equal(readback.validation.noReferentPromotion, true);
+    assert.equal(readback.boundary.readbackOnly, true);
+    assert.equal(readback.boundary.writesEdgeProjection, false);
+    assert.equal(readback.boundary.acceptsCanonicalHistory, false);
+    assert.equal(readback.boundary.admitsLayerEvidence, false);
+    assert.equal(readback.boundary.interpretsRbc, false);
+    assert.equal(readback.boundary.grantsAuthority, false);
+    assert.equal(readback.boundary.promotesReferents, false);
+    assert.equal(readback.boundary.publishesToMesh, false);
+    assert.equal(readback.boundary.writesProductionContinuity, false);
+  } finally {
+    await rm(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test("handoff bundle readback rejects weakened source refs and proof labels", () => {
+  const observationResult = buildEdgeLayerSeamHistoryObservationResult({
+    seamHistory: seamHistoryMaterial(),
+    emittedAt: "2026-05-31T14:23:00.000Z",
+    sourcePath: "layer-owned-edge-seam-status:edge-consumer-contract-readback-invalid",
+    inputReadByCausalSubstrate: true,
+  });
+  const bundle = buildEdgeLayerSeamHistoryEdgeProjectionHandoffBundle({
+    observationResult,
+    emittedAt: "2026-05-31T14:23:01.000Z",
+  });
+  const weakened = structuredClone(bundle);
+  weakened.sourceReferences.requestHashes = [];
+  (weakened.source as Record<string, unknown>).sourceObservationNormalizedProofLabel = "local_json_fixture_only";
+
+  const readback = buildEdgeLayerSeamHistoryEdgeProjectionHandoffBundleReadback({
+    bundle: weakened,
+    emittedAt: "2026-05-31T14:23:02.000Z",
+  });
+
+  assertEdgeLayerSeamHistoryEdgeProjectionHandoffBundleReadback(readback);
+  assert.equal(readback.reviewStatus, "edge-layer-seam-history-edge-projection-handoff-bundle-readback-invalid");
+  assert.equal(readback.validation.handoffBundleConsumed, true);
+  assert.equal(readback.validation.sourceRefsPreserved, false);
+  assert.equal(readback.validation.proofLabelsPreserved, false);
+  assert.ok(readback.validation.issues.includes("handoff-bundle-source-refs-not-preserved"));
+  assert.ok(readback.validation.issues.includes("handoff-bundle-proof-labels-not-preserved"));
+  assert.equal(readback.validation.noCanonicalHistoryClaim, true);
+  assert.equal(readback.validation.noLayerAdmissionClaim, true);
+  assert.equal(readback.validation.noRbcInterpretationClaim, true);
+  assert.equal(readback.validation.noAuthorityClaim, true);
+  assert.equal(readback.validation.noReferentPromotion, true);
+  assert.equal(readback.boundary.writesEdgeProjection, false);
+  assert.equal(readback.boundary.acceptsCanonicalHistory, false);
+  assert.equal(readback.boundary.admitsLayerEvidence, false);
+  assert.equal(readback.boundary.interpretsRbc, false);
+  assert.equal(readback.boundary.grantsAuthority, false);
 });
