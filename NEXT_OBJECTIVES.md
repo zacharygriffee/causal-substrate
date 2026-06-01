@@ -106,8 +106,18 @@ run:
 
 ## Next Outward Moves
 
-The current outward list is complete. Construct the next list from the preserved
-public-run artifacts before adding new ontology or promotion lanes.
+The current outward list is complete. Build the next list from preserved
+public-run artifacts and Edge handoff consumption:
+
+- keep public device proof artifacts reproducible and checkable;
+- derive a stable observation-to-handoff-to-Edge projection contract from the
+  preserved artifacts;
+- make proof summary and readback clearer for Spine and Edge while not
+  upgrading saved imports into new live proof;
+- decide the next Causal-owned public swarm repeat or refresh command only
+  after public artifacts remain stable;
+- defer ontology, referent promotion, canonical continuity, RBC, Mesh,
+  authority, and production continuity.
 
 ## Handoff Expectations
 
@@ -134,6 +144,8 @@ admission, or grant authority.
 
 - Causal work is refining local fixtures while Edge/Layer have durable seam
   history ready to consume.
+- Spine needs a next family-pressure signal after Edge, Layer, and Causal
+  Substrate all have accepted public-swarm lanes.
 - A higher proof rung is tempting but input came from supplied JSON, files,
   stdin/stdout, direct imports, or fixtures.
 - Layer receipt/evidence refs would need Layer admission interpretation.
