@@ -4,6 +4,7 @@ import path from "node:path";
 import {
   assertEdgeLayerSeamHistoryEdgeProjectionConsumerFixture,
   assertEdgeLayerSeamHistoryEdgeProjectionFixture,
+  assertEdgeLayerSeamHistoryEdgeProjectionHandoffBundle,
   assertEdgeLayerSeamHistoryEdgeProjectionHandoffReadback,
   assertEdgeLayerSeamHistoryObservationContractSnapshot,
   assertEdgeLayerSeamHistoryObservationResult,
@@ -11,6 +12,7 @@ import {
   assertEdgeLayerSeamHistoryOutwardLaneCompletionGate,
   buildEdgeLayerSeamHistoryEdgeProjectionConsumerFixture,
   buildEdgeLayerSeamHistoryEdgeProjectionFixture,
+  buildEdgeLayerSeamHistoryEdgeProjectionHandoffBundle,
   buildEdgeLayerSeamHistoryEdgeProjectionHandoffReadback,
   buildEdgeLayerSeamHistoryHyperswarmInputLaneReadiness,
   buildEdgeLayerSeamHistoryObservationContractSnapshot,
@@ -25,6 +27,7 @@ interface CliArgs {
   contractOutput?: string;
   snapshotOutput?: string;
   handoffOutput?: string;
+  handoffBundleOutput?: string;
   consumerFixtureOutput?: string;
   handoffReadbackOutput?: string;
   hyperswarmReadinessOutput?: string;
@@ -105,6 +108,15 @@ async function main() {
     });
     assertEdgeLayerSeamHistoryEdgeProjectionConsumerFixture(consumerFixture);
     await writeFile(path.resolve(args.consumerFixtureOutput), `${JSON.stringify(consumerFixture, null, 2)}\n`, "utf8");
+  }
+
+  if (args.handoffBundleOutput) {
+    const handoffBundle = buildEdgeLayerSeamHistoryEdgeProjectionHandoffBundle({
+      observationResult: observationForDerivedOutputs,
+      emittedAt: args.emittedAt,
+    });
+    assertEdgeLayerSeamHistoryEdgeProjectionHandoffBundle(handoffBundle);
+    await writeFile(path.resolve(args.handoffBundleOutput), `${JSON.stringify(handoffBundle, null, 2)}\n`, "utf8");
   }
 
   if (args.snapshotOutput) {
@@ -208,6 +220,11 @@ function parseArgs(argv: string[]): CliArgs {
       index += 1;
       continue;
     }
+    if (arg === "--handoff-bundle-output") {
+      args.handoffBundleOutput = requireNext(argv, index, arg);
+      index += 1;
+      continue;
+    }
     if (arg === "--consumer-fixture-output") {
       args.consumerFixtureOutput = requireNext(argv, index, arg);
       index += 1;
@@ -277,12 +294,13 @@ async function readStdin(): Promise<string> {
 
 function printUsage(): void {
   process.stdout.write([
-    "Usage: tsx scripts/observe-edge-layer-seam-history.ts [--input path] [--output path] [--contract-output path] [--snapshot-output path] [--handoff-output path] [--consumer-fixture-output path] [--handoff-readback-output path] [--hyperswarm-readiness-output path] [--completion-gate-output path] [--hyperswarm-namespace comma,list] [--emitted-at iso] [--readback]",
+    "Usage: tsx scripts/observe-edge-layer-seam-history.ts [--input path] [--output path] [--contract-output path] [--snapshot-output path] [--handoff-output path] [--handoff-bundle-output path] [--consumer-fixture-output path] [--handoff-readback-output path] [--hyperswarm-readiness-output path] [--completion-gate-output path] [--hyperswarm-namespace comma,list] [--emitted-at iso] [--readback]",
     "",
     "Reads supplied Edge/Layer seam-history JSON and emits a bounded local causal observation.",
     "With --contract-output, writes a readback contract over the emitted observation file.",
     "With --snapshot-output, writes a stable observation contract snapshot.",
     "With --handoff-output, writes an Edge projection handoff fixture derived from the observation result.",
+    "With --handoff-bundle-output, writes a single Edge handoff bundle derived from the observation result.",
     "With --consumer-fixture-output, writes Edge-consumable observation-only projection material.",
     "With --handoff-readback-output, writes a readback artifact over the emitted handoff fixture.",
     "With --hyperswarm-readiness-output, writes a readiness-only Hyperswarm input lane report.",

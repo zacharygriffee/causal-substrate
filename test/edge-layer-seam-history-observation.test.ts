@@ -838,6 +838,7 @@ test("seam-history observation command reads supplied material, writes result, a
   const contractPath = path.join(tempRoot, "observation-readback-contract.json");
   const snapshotPath = path.join(tempRoot, "observation-contract-snapshot.json");
   const handoffPath = path.join(tempRoot, "edge-projection-handoff.json");
+  const handoffBundlePath = path.join(tempRoot, "edge-projection-handoff-bundle.json");
   const consumerFixturePath = path.join(tempRoot, "edge-projection-consumer-fixture.json");
   const handoffReadbackPath = path.join(tempRoot, "edge-projection-handoff-readback.json");
   const hyperswarmReadinessPath = path.join(tempRoot, "hyperswarm-input-lane-readiness.json");
@@ -858,6 +859,8 @@ test("seam-history observation command reads supplied material, writes result, a
       snapshotPath,
       "--handoff-output",
       handoffPath,
+      "--handoff-bundle-output",
+      handoffBundlePath,
       "--consumer-fixture-output",
       consumerFixturePath,
       "--handoff-readback-output",
@@ -1006,6 +1009,38 @@ test("seam-history observation command reads supplied material, writes result, a
     assert.equal(consumerFixture.boundary.admitsLayerEvidence, false);
     assert.equal(consumerFixture.boundary.interpretsRbc, false);
     assert.equal(consumerFixture.boundary.grantsAuthority, false);
+
+    const handoffBundle = JSON.parse(await readFile(handoffBundlePath, "utf8"));
+    assertEdgeLayerSeamHistoryEdgeProjectionHandoffBundle(handoffBundle);
+    assert.equal(handoffBundle.reviewStatus, "edge-layer-seam-history-edge-projection-handoff-bundle-ready");
+    assert.equal(handoffBundle.source.sourceObservationArtifactId, result.artifactId);
+    assert.equal(handoffBundle.source.sourceObservationNormalizedProofLabel, "local_supplied_material");
+    assert.equal(handoffBundle.validation.observationResultConsumed, true);
+    assert.equal(handoffBundle.validation.contractSnapshotIncluded, true);
+    assert.equal(handoffBundle.validation.handoffFixtureIncluded, true);
+    assert.equal(handoffBundle.validation.consumerFixtureIncluded, true);
+    assert.equal(handoffBundle.validation.completionGateIncluded, true);
+    assert.equal(handoffBundle.validation.completionGateComplete, true);
+    assert.equal(handoffBundle.validation.sourceRefsPreserved, true);
+    assert.equal(handoffBundle.artifacts.observationResult.artifactId, result.artifactId);
+    assert.equal(handoffBundle.artifacts.contractSnapshot.sourceObservation.artifactId, result.artifactId);
+    assert.equal(handoffBundle.artifacts.handoffFixture.source.sourceObservationArtifactId, result.artifactId);
+    assert.equal(handoffBundle.artifacts.consumerFixture.source.sourceObservationArtifactId, result.artifactId);
+    assert.equal(handoffBundle.artifacts.completionGate.sourceObservation.artifactId, result.artifactId);
+    assert.deepEqual(handoffBundle.sourceReferences.requestIds, [
+      "edge-layer-report-only-seam-request:causal-observation:linked",
+      "edge-layer-report-only-seam-request:causal-observation:damaged",
+    ]);
+    assert.deepEqual(handoffBundle.sourceReferences.receiptHashes, [
+      `sha256:${"b".repeat(64)}`,
+      `sha256:${"d".repeat(64)}`,
+    ]);
+    assert.equal(handoffBundle.boundary.edgeMayConsume, true);
+    assert.equal(handoffBundle.boundary.writesEdgeProjection, false);
+    assert.equal(handoffBundle.boundary.acceptsCanonicalHistory, false);
+    assert.equal(handoffBundle.boundary.admitsLayerEvidence, false);
+    assert.equal(handoffBundle.boundary.interpretsRbc, false);
+    assert.equal(handoffBundle.boundary.grantsAuthority, false);
 
     const handoffReadback = JSON.parse(await readFile(handoffReadbackPath, "utf8"));
     assertEdgeLayerSeamHistoryEdgeProjectionHandoffReadback(handoffReadback);
