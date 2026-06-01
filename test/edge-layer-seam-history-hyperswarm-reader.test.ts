@@ -286,9 +286,20 @@ test("real Hyperswarm proof run instructions artifact stays instructions-only", 
     instructions.commands.checkedCliOutputProofRun,
     /run-edge-layer-seam-history-hyperswarm-reader\.ts --input seam-history\.json --report-output hyperswarm-reader-report\.json --readback-output hyperswarm-reader-report-readback\.json/,
   );
+  assert.match(
+    instructions.commands.savedReportImportReadback,
+    /readback-edge-layer-seam-history-hyperswarm-report\.ts --input-report hyperswarm-reader-report\.json --readback-output hyperswarm-reader-report-import-readback\.json/,
+  );
+  assert.match(
+    instructions.commands.savedHandoffBundleReadback,
+    /readback-edge-layer-seam-history-handoff-bundle\.ts --input-bundle edge-projection-handoff-bundle\.json --readback-output edge-projection-handoff-bundle-readback\.json/,
+  );
   assert.equal(instructions.proofGate.instructionsOnly, true);
   assert.equal(instructions.proofGate.dhtHyperswarmProofClaimedNow, false);
   assert.equal(instructions.proofGate.proofOnlyIfCommandRunsAndPasses, true);
+  assert.equal(instructions.proofGate.importReadbackDoesNotVerifyLiveSwarmRun, true);
+  assert.equal(instructions.proofGate.handoffBundleReadbackDoesNotVerifyLiveSwarmRun, true);
+  assert.equal(instructions.proofGate.lowerProofRungsRemainLowerUntilLiveRun, true);
   assert.equal(instructions.proofGate.requiresDurableCorestoreRead, true);
   assert.equal(instructions.proofGate.requiresHyperswarmTransport, true);
   assert.equal(instructions.proofGate.requiresReplicatedRecordReadback, true);
@@ -300,6 +311,14 @@ test("real Hyperswarm proof run instructions artifact stays instructions-only", 
   assert.equal(instructions.expectedOutputRefs.readerProof, "readerProof");
   assert.equal(instructions.expectedOutputRefs.reportOutputArtifact, "report-output");
   assert.equal(instructions.expectedOutputRefs.readbackOutputArtifact, "readback-output");
+  assert.equal(
+    instructions.expectedOutputRefs.savedReportImportReadbackOutputArtifact,
+    "saved-report-import-readback-output",
+  );
+  assert.equal(
+    instructions.expectedOutputRefs.handoffBundleReadbackOutputArtifact,
+    "handoff-bundle-readback-output",
+  );
   assert.deepEqual(instructions.namespaceParts, ["hyperswarm-seam-history-reader", "real-proof"]);
   assert.equal(instructions.boundary.opensSwarmNow, false);
   assert.equal(instructions.boundary.opensCorestoreNow, false);
@@ -342,6 +361,17 @@ test("real Hyperswarm reader CLI emits instructions only until explicitly enable
     assert.equal(instructions.proofGate.instructionsOnly, true);
     assert.equal(instructions.proofGate.dhtHyperswarmProofClaimedNow, false);
     assert.equal(instructions.proofGate.proofOnlyIfCommandRunsAndPasses, true);
+    assert.equal(instructions.proofGate.importReadbackDoesNotVerifyLiveSwarmRun, true);
+    assert.equal(instructions.proofGate.handoffBundleReadbackDoesNotVerifyLiveSwarmRun, true);
+    assert.equal(instructions.proofGate.lowerProofRungsRemainLowerUntilLiveRun, true);
+    assert.match(
+      instructions.commands.savedReportImportReadback,
+      /readback-edge-layer-seam-history-hyperswarm-report\.ts/,
+    );
+    assert.match(
+      instructions.commands.savedHandoffBundleReadback,
+      /readback-edge-layer-seam-history-handoff-bundle\.ts/,
+    );
     assert.deepEqual(instructions.namespaceParts, ["hyperswarm-seam-history-reader", "cli-surface"]);
     assert.equal(instructions.boundary.opensSwarmNow, false);
     assert.equal(instructions.boundary.opensCorestoreNow, false);

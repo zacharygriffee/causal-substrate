@@ -219,11 +219,16 @@ export interface EdgeLayerSeamHistoryRealHyperswarmProofRunInstructions {
     localTestnetProofRun: string;
     publicOrConfiguredBootstrapProofRun: string;
     checkedCliOutputProofRun: string;
+    savedReportImportReadback: string;
+    savedHandoffBundleReadback: string;
   };
   proofGate: {
     instructionsOnly: true;
     dhtHyperswarmProofClaimedNow: false;
     proofOnlyIfCommandRunsAndPasses: true;
+    importReadbackDoesNotVerifyLiveSwarmRun: true;
+    handoffBundleReadbackDoesNotVerifyLiveSwarmRun: true;
+    lowerProofRungsRemainLowerUntilLiveRun: true;
     requiresDurableCorestoreRead: true;
     requiresHyperswarmTransport: true;
     requiresReplicatedRecordReadback: true;
@@ -237,6 +242,8 @@ export interface EdgeLayerSeamHistoryRealHyperswarmProofRunInstructions {
     replicatedRecord: "replicatedRecord";
     reportOutputArtifact: "report-output";
     readbackOutputArtifact: "readback-output";
+    savedReportImportReadbackOutputArtifact: "saved-report-import-readback-output";
+    handoffBundleReadbackOutputArtifact: "handoff-bundle-readback-output";
   };
   namespaceParts: string[];
   boundary: {
@@ -359,11 +366,18 @@ export function buildEdgeLayerSeamHistoryRealHyperswarmProofRunInstructions(
         "CAUSAL_SUBSTRATE_REAL_HYPERSWARM=1 CAUSAL_SUBSTRATE_HYPERSWARM_PUBLIC=1 npx tsx --test test/edge-layer-seam-history-hyperswarm-reader.test.ts",
       checkedCliOutputProofRun:
         "CAUSAL_SUBSTRATE_REAL_HYPERSWARM=1 npx tsx scripts/run-edge-layer-seam-history-hyperswarm-reader.ts --input seam-history.json --report-output hyperswarm-reader-report.json --readback-output hyperswarm-reader-report-readback.json --storage-dir-a .tmp/hyperswarm-source --storage-dir-b .tmp/hyperswarm-replica --namespace hyperswarm-seam-history-reader,checked-cli-output",
+      savedReportImportReadback:
+        "npx tsx scripts/readback-edge-layer-seam-history-hyperswarm-report.ts --input-report hyperswarm-reader-report.json --readback-output hyperswarm-reader-report-import-readback.json",
+      savedHandoffBundleReadback:
+        "npx tsx scripts/readback-edge-layer-seam-history-handoff-bundle.ts --input-bundle edge-projection-handoff-bundle.json --readback-output edge-projection-handoff-bundle-readback.json",
     },
     proofGate: {
       instructionsOnly: true,
       dhtHyperswarmProofClaimedNow: false,
       proofOnlyIfCommandRunsAndPasses: true,
+      importReadbackDoesNotVerifyLiveSwarmRun: true,
+      handoffBundleReadbackDoesNotVerifyLiveSwarmRun: true,
+      lowerProofRungsRemainLowerUntilLiveRun: true,
       requiresDurableCorestoreRead: true,
       requiresHyperswarmTransport: true,
       requiresReplicatedRecordReadback: true,
@@ -377,6 +391,8 @@ export function buildEdgeLayerSeamHistoryRealHyperswarmProofRunInstructions(
       replicatedRecord: "replicatedRecord",
       reportOutputArtifact: "report-output",
       readbackOutputArtifact: "readback-output",
+      savedReportImportReadbackOutputArtifact: "saved-report-import-readback-output",
+      handoffBundleReadbackOutputArtifact: "handoff-bundle-readback-output",
     },
     namespaceParts: input.namespaceParts ?? [],
     boundary: {
