@@ -103,6 +103,22 @@ The local supplied-material lane can now:
 - emit a public swarm refresh decision over the saved reproducibility check,
   Edge contract, and consumer readback; the current recommendation is
   `not_required_artifacts_stable`, and the decision does not run public swarm.
+- expose a compact public seam proof index for Edge, Layer, and Spine that
+  points at the preserved public run, reproducibility check, Edge contract,
+  consumer readback, and refresh decision without duplicating artifact bodies
+  or upgrading saved artifacts into a new public swarm proof.
+- reject weakened public seam proof indexes when saved refs are missing, proof
+  labels are weakened, or indexed artifacts overclaim projection, authority,
+  Layer admission, RBC interpretation, Mesh publication, or production
+  continuity.
+- prepare an operator-selected public refresh command artifact that reads the
+  saved public seam proof index and refresh decision, preserves source refs,
+  names exact public Hyperswarm source/replica commands plus local downstream
+  readback/handoff/reproducibility outputs, and remains instructions-only.
+- gate the prepared public refresh command artifact so an operator can see
+  whether the prepared commands are public-swarm-only, bootstrap-unset,
+  source-ref-preserving, and instructions-only before any live public refresh
+  is run.
 
 Strongest routinely proven rung in normal tests:
 `local_causal_observation_over_supplied_seam_history_material`.
@@ -120,21 +136,28 @@ run:
 
 ## Next Outward Moves
 
-The current outward list is complete. Build the next list from the stable
-saved public-run chain:
+The current saved-artifact readiness list is complete. Build the next list
+around an explicit operator-run public swarm refresh, if the operator chooses
+to run one:
 
-- expose a compact Causal public seam proof index for Edge, Layer, and Spine
-  that points at the preserved public run, reproducibility check, Edge
-  contract, consumer readback, and refresh decision without duplicating or
-  upgrading the artifacts;
-- add a negative saved-artifact proof-index case that rejects missing source
-  refs, weakened proof labels, or overclaims before any consumer-facing index
-  is considered ready;
-- prepare an operator-selected public refresh command artifact that names the
-  exact public-swarm command, device prerequisites, and expected outputs, while
-  remaining instructions-only until explicitly run on public swarm;
-- only run a new public swarm refresh after an operator explicitly requests it
-  and the run uses public Hyperswarm with no configured bootstrap override;
+- prepare a refresh-run input package under the command artifact's expected
+  output directory, preserving the current seam-history material and labeling
+  the package as local supplied input until a public swarm reader consumes it;
+- run the prepared source and replica commands on the standby devices only
+  after an explicit operator request, with public Hyperswarm enabled and
+  `CAUSAL_SUBSTRATE_HYPERSWARM_BOOTSTRAP` unset on both devices;
+- after a real public refresh run, derive the replica report readback, Edge
+  handoff bundle, handoff readback, proof summary, and reproducibility check
+  from the refreshed durable public material without claiming canonical
+  history, Layer admission, RBC interpretation, Mesh publication, authority,
+  Edge projection writes, or production continuity;
+- after Edge imports any refreshed handoff bundle, derive a refreshed
+  observation-to-Edge projection contract and consumer readback from saved
+  artifacts only, preserving the public source proof rung without upgrading
+  the contract/readback operations;
+- index the refreshed public run and add a negative refreshed-index case that
+  rejects missing refs, weakened proof labels, configured bootstrap evidence,
+  or projection/authority overclaims;
 - defer ontology, referent promotion, canonical continuity, RBC, Mesh,
   authority, Layer admission, and production continuity.
 
