@@ -75,6 +75,10 @@ The local supplied-material lane can now:
 - document the exact live public Hyperswarm report to Edge handoff bundle
   artifact chain, including single-machine and device-to-device public paths,
   while keeping import/readback-only steps labeled as lower proof.
+- preserve a single-machine public Hyperswarm/Corestore seam-history run under
+  `proof-artifacts/public-hyperswarm-single-machine-2026-06-01/`, including
+  reader report, checked report readbacks, Edge handoff bundle, handoff
+  readback, and proof summary.
 
 Strongest routinely proven rung in normal tests:
 `local_causal_observation_over_supplied_seam_history_material`.
@@ -82,14 +86,15 @@ Strongest routinely proven rung in normal tests:
 The real Hyperswarm reader remains a higher proof lane only when the
 environment-gated command actually runs against durable replicated material.
 
+Strongest preserved artifact rung from the 2026-06-01 single-machine public
+run:
+`public_hyperswarm_replicated_durable_seam_history_observation`.
+
 ## Next Outward Moves
 
 These are not complete until a command actually runs against public
 Hyperswarm-derived durable seam history:
 
-- Run the single-machine public Hyperswarm reader chain from
-  `docs/edge-layer-seam-history-public-run.md` and preserve the report,
-  report readback, handoff bundle, handoff readback, and proof summary.
 - Run the device-to-device public source/replica chain from
   `docs/edge-layer-seam-history-public-run.md` using two standby devices and
   preserve the replica report plus downstream handoff artifacts.
