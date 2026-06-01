@@ -33,6 +33,12 @@ export const CAUSAL_EDGE_LAYER_SEAM_HISTORY_EDGE_LAYER_CONSUMER_CONTRACT_SNAPSHO
 export const CAUSAL_EDGE_LAYER_SEAM_HISTORY_EDGE_LAYER_CONSUMER_CONTRACT_SNAPSHOT_READBACK_ARTIFACT_KIND =
   "causal-edge-layer-seam-history-edge-layer-consumer-contract-snapshot-readback" as const;
 
+export const CAUSAL_EDGE_LAYER_SEAM_HISTORY_EDGE_LAYER_CONSUMER_CONTRACT_SNAPSHOT_SOURCE_REF_COMPLETENESS_SCHEMA =
+  "causal-substrate/edge-layer-seam-history-edge-layer-consumer-contract-snapshot-source-ref-completeness/v1" as const;
+
+export const CAUSAL_EDGE_LAYER_SEAM_HISTORY_EDGE_LAYER_CONSUMER_CONTRACT_SNAPSHOT_SOURCE_REF_COMPLETENESS_ARTIFACT_KIND =
+  "causal-edge-layer-seam-history-edge-layer-consumer-contract-snapshot-source-ref-completeness" as const;
+
 export type EdgeLayerSeamHistoryLayerReceiptAdjacentFixtureStatus =
   | "edge-layer-seam-history-layer-receipt-adjacent-fixture-ready"
   | "edge-layer-seam-history-layer-receipt-adjacent-fixture-incomplete"
@@ -50,6 +56,11 @@ export type EdgeLayerSeamHistoryEdgeLayerConsumerContractSnapshotStatus =
 export type EdgeLayerSeamHistoryEdgeLayerConsumerContractSnapshotReadbackStatus =
   | "edge-layer-seam-history-edge-layer-consumer-contract-snapshot-readback-valid"
   | "edge-layer-seam-history-edge-layer-consumer-contract-snapshot-readback-invalid";
+
+export type EdgeLayerSeamHistoryEdgeLayerConsumerContractSnapshotSourceRefCompletenessStatus =
+  | "edge-layer-seam-history-edge-layer-consumer-contract-snapshot-source-ref-completeness-ready"
+  | "edge-layer-seam-history-edge-layer-consumer-contract-snapshot-source-ref-completeness-incomplete"
+  | "edge-layer-seam-history-edge-layer-consumer-contract-snapshot-source-ref-completeness-invalid";
 
 export interface EdgeLayerSeamHistoryLayerReceiptAdjacentFixture {
   artifactKind: typeof CAUSAL_EDGE_LAYER_SEAM_HISTORY_LAYER_RECEIPT_ADJACENT_FIXTURE_ARTIFACT_KIND;
@@ -404,6 +415,88 @@ export interface EdgeLayerSeamHistoryEdgeLayerConsumerContractSnapshotReadback {
     issues: string[];
   };
   reviewStatus: EdgeLayerSeamHistoryEdgeLayerConsumerContractSnapshotReadbackStatus;
+  warnings: string[];
+  rejections: string[];
+}
+
+export interface EdgeLayerSeamHistoryEdgeLayerConsumerContractSnapshotSourceRefCompleteness {
+  artifactKind:
+    typeof CAUSAL_EDGE_LAYER_SEAM_HISTORY_EDGE_LAYER_CONSUMER_CONTRACT_SNAPSHOT_SOURCE_REF_COMPLETENESS_ARTIFACT_KIND;
+  schema:
+    typeof CAUSAL_EDGE_LAYER_SEAM_HISTORY_EDGE_LAYER_CONSUMER_CONTRACT_SNAPSHOT_SOURCE_REF_COMPLETENESS_SCHEMA;
+  schemaVersion: 1;
+  artifactId: string;
+  emittedAt: string;
+  source: {
+    sourceSnapshotArtifactId?: string | undefined;
+    sourceSnapshotStatus?: EdgeLayerSeamHistoryEdgeLayerConsumerContractSnapshotStatus | undefined;
+    snapshotProofRung?: "local_causal_observation_over_supplied_edge_layer_observation_artifacts" | undefined;
+    snapshotProofLabel?: "local_supplied_edge_layer_consumer_contract_snapshot" | undefined;
+  };
+  completeness: {
+    snapshotConsumed: boolean;
+    complete: boolean;
+    sourceObservationRefsPresent: boolean;
+    seamClassificationsPresent: boolean;
+    layerRuntimeRefsPresent: boolean;
+    adjacentMatchedRefsPresent: boolean;
+    sourceReposPresent: boolean;
+    sourceRefsPresent: boolean;
+    missingRefKinds: string[];
+  };
+  preservedRefs: {
+    seamHistoryObservationArtifactId?: string | undefined;
+    layerReceiptObservationArtifactId?: string | undefined;
+    adjacentFixtureArtifactId?: string | undefined;
+    compatibleObservationIds: string[];
+    unresolvedOrDamagedObservationIds: string[];
+    layerRuntimeRefs: EdgeLayerSeamHistoryEdgeLayerConsumerContractSnapshot["contract"]["layerRuntimeRefs"];
+    matchedReceiptIds: string[];
+    matchedReceiptHashes: string[];
+    matchedRequestIds: string[];
+    matchedRequestHashes: string[];
+    sourceRepos: string[];
+    sourceRefs: string[];
+  };
+  boundary: {
+    sourceRefCompletenessOnly: true;
+    readsSnapshotOnly: true;
+    opensEdgeRuntime: false;
+    opensLayerRuntime: false;
+    callsEdge: false;
+    callsLayer: false;
+    writesEdgeProjection: false;
+    writesLayerEvidence: false;
+    acceptsCanonicalHistory: false;
+    admitsLayerEvidence: false;
+    decidesLayerAdmission: false;
+    interpretsRbc: false;
+    claimsQuorumSatisfaction: false;
+    grantsAuthority: false;
+    promotesReferents: false;
+    publishesToMesh: false;
+    writesProductionContinuity: false;
+  };
+  validation: {
+    status: EdgeLayerSeamHistoryEdgeLayerConsumerContractSnapshotSourceRefCompletenessStatus;
+    snapshotArtifactConsumed: boolean;
+    sourceObservationRefsPresent: boolean;
+    seamClassificationsPresent: boolean;
+    layerRuntimeRefsPresent: boolean;
+    adjacentMatchedRefsPresent: boolean;
+    sourceReposPresent: boolean;
+    sourceRefsPresent: boolean;
+    noCanonicalHistoryClaim: true;
+    noLayerAdmissionClaim: true;
+    noLayerEvidenceAdmissionClaim: true;
+    noRbcInterpretationClaim: true;
+    noQuorumSatisfactionClaim: true;
+    noAuthorityClaim: true;
+    noMeshPublicationClaim: true;
+    noProductionContinuityWriteClaim: true;
+    issues: string[];
+  };
+  reviewStatus: EdgeLayerSeamHistoryEdgeLayerConsumerContractSnapshotSourceRefCompletenessStatus;
   warnings: string[];
   rejections: string[];
 }
@@ -858,6 +951,109 @@ export function buildEdgeLayerSeamHistoryEdgeLayerConsumerContractSnapshotReadba
   };
 }
 
+export function buildEdgeLayerSeamHistoryEdgeLayerConsumerContractSnapshotSourceRefCompleteness(input: {
+  snapshot: unknown;
+  emittedAt: string;
+  artifactId?: string | undefined;
+}): EdgeLayerSeamHistoryEdgeLayerConsumerContractSnapshotSourceRefCompleteness {
+  const snapshot = parseEdgeLayerConsumerContractSnapshot(input.snapshot);
+  const requiredRefs = collectEdgeLayerConsumerContractSnapshotRequiredRefs(snapshot);
+  const missingRefKinds = Object.entries(requiredRefs)
+    .filter(([, present]) => present === false)
+    .map(([kind]) => kind);
+  const status: EdgeLayerSeamHistoryEdgeLayerConsumerContractSnapshotSourceRefCompletenessStatus =
+    !snapshot
+      ? "edge-layer-seam-history-edge-layer-consumer-contract-snapshot-source-ref-completeness-invalid"
+      : missingRefKinds.length === 0
+        ? "edge-layer-seam-history-edge-layer-consumer-contract-snapshot-source-ref-completeness-ready"
+        : "edge-layer-seam-history-edge-layer-consumer-contract-snapshot-source-ref-completeness-incomplete";
+  const artifactId = input.artifactId ??
+    `causal-edge-layer-seam-history-edge-layer-consumer-contract-snapshot-source-ref-completeness:${hash(stableJson({
+      emittedAt: input.emittedAt,
+      sourceSnapshotArtifactId: snapshot?.artifactId,
+    })).slice(0, 16)}`;
+
+  return {
+    artifactKind:
+      CAUSAL_EDGE_LAYER_SEAM_HISTORY_EDGE_LAYER_CONSUMER_CONTRACT_SNAPSHOT_SOURCE_REF_COMPLETENESS_ARTIFACT_KIND,
+    schema: CAUSAL_EDGE_LAYER_SEAM_HISTORY_EDGE_LAYER_CONSUMER_CONTRACT_SNAPSHOT_SOURCE_REF_COMPLETENESS_SCHEMA,
+    schemaVersion: 1,
+    artifactId,
+    emittedAt: input.emittedAt,
+    source: {
+      ...(snapshot ? { sourceSnapshotArtifactId: snapshot.artifactId } : {}),
+      ...(snapshot ? { sourceSnapshotStatus: snapshot.reviewStatus } : {}),
+      ...(snapshot ? { snapshotProofRung: snapshot.proof.strongestProofRung } : {}),
+      ...(snapshot ? { snapshotProofLabel: snapshot.proof.normalizedProofLabel } : {}),
+    },
+    completeness: {
+      snapshotConsumed: snapshot !== undefined,
+      complete: missingRefKinds.length === 0 && snapshot !== undefined,
+      sourceObservationRefsPresent: requiredRefs.sourceObservationRefs,
+      seamClassificationsPresent: requiredRefs.seamClassifications,
+      layerRuntimeRefsPresent: requiredRefs.layerRuntimeRefs,
+      adjacentMatchedRefsPresent: requiredRefs.adjacentMatchedRefs,
+      sourceReposPresent: requiredRefs.sourceRepos,
+      sourceRefsPresent: requiredRefs.sourceRefs,
+      missingRefKinds,
+    },
+    preservedRefs: {
+      ...(snapshot?.source.seamHistoryObservationArtifactId
+        ? { seamHistoryObservationArtifactId: snapshot.source.seamHistoryObservationArtifactId }
+        : {}),
+      ...(snapshot?.source.layerReceiptObservationArtifactId
+        ? { layerReceiptObservationArtifactId: snapshot.source.layerReceiptObservationArtifactId }
+        : {}),
+      ...(snapshot?.source.adjacentFixtureArtifactId
+        ? { adjacentFixtureArtifactId: snapshot.source.adjacentFixtureArtifactId }
+        : {}),
+      compatibleObservationIds: snapshot?.contract.seamClassifications.compatibleObservationIds ?? [],
+      unresolvedOrDamagedObservationIds:
+        snapshot?.contract.seamClassifications.unresolvedOrDamagedObservationIds ?? [],
+      layerRuntimeRefs: snapshot?.contract.layerRuntimeRefs ?? {},
+      matchedReceiptIds: snapshot?.contract.adjacentMatchedRefs.matchedReceiptIds ?? [],
+      matchedReceiptHashes: snapshot?.contract.adjacentMatchedRefs.matchedReceiptHashes ?? [],
+      matchedRequestIds: snapshot?.contract.adjacentMatchedRefs.matchedRequestIds ?? [],
+      matchedRequestHashes: snapshot?.contract.adjacentMatchedRefs.matchedRequestHashes ?? [],
+      sourceRepos: snapshot?.contract.preservedSourceRefs.sourceRepos ?? [],
+      sourceRefs: snapshot?.contract.preservedSourceRefs.sourceRefs ?? [],
+    },
+    boundary: buildConsumerContractSnapshotSourceRefCompletenessBoundary(),
+    validation: {
+      status,
+      snapshotArtifactConsumed: snapshot !== undefined,
+      sourceObservationRefsPresent: requiredRefs.sourceObservationRefs,
+      seamClassificationsPresent: requiredRefs.seamClassifications,
+      layerRuntimeRefsPresent: requiredRefs.layerRuntimeRefs,
+      adjacentMatchedRefsPresent: requiredRefs.adjacentMatchedRefs,
+      sourceReposPresent: requiredRefs.sourceRepos,
+      sourceRefsPresent: requiredRefs.sourceRefs,
+      noCanonicalHistoryClaim: true,
+      noLayerAdmissionClaim: true,
+      noLayerEvidenceAdmissionClaim: true,
+      noRbcInterpretationClaim: true,
+      noQuorumSatisfactionClaim: true,
+      noAuthorityClaim: true,
+      noMeshPublicationClaim: true,
+      noProductionContinuityWriteClaim: true,
+      issues: snapshot ? missingRefKinds.map((kind) => `${kind}-missing`) : ["snapshot-invalid"],
+    },
+    reviewStatus: status,
+    warnings: [
+      "edge-layer-consumer-contract-snapshot-source-ref-completeness-is-report-only",
+      "edge-layer-consumer-contract-snapshot-source-ref-completeness-does-not-admit-layer-evidence",
+      "edge-layer-consumer-contract-snapshot-source-ref-completeness-does-not-interpret-rbc",
+      "edge-layer-consumer-contract-snapshot-source-ref-completeness-does-not-grant-authority",
+    ],
+    rejections: status ===
+        "edge-layer-seam-history-edge-layer-consumer-contract-snapshot-source-ref-completeness-ready"
+      ? []
+      : snapshot
+        ? missingRefKinds.map((kind) => `${kind}-missing`)
+        : ["snapshot-invalid"],
+  };
+}
+
 export function assertEdgeLayerSeamHistoryLayerReceiptAdjacentFixture(
   value: unknown,
 ): asserts value is EdgeLayerSeamHistoryLayerReceiptAdjacentFixture {
@@ -1102,6 +1298,54 @@ export function assertEdgeLayerSeamHistoryEdgeLayerConsumerContractSnapshotReadb
   assertConsumerContractSnapshotReadbackStatus(candidate.reviewStatus, "reviewStatus");
 }
 
+export function assertEdgeLayerSeamHistoryEdgeLayerConsumerContractSnapshotSourceRefCompleteness(
+  value: unknown,
+): asserts value is EdgeLayerSeamHistoryEdgeLayerConsumerContractSnapshotSourceRefCompleteness {
+  const candidate = assertObject(value, "edge layer consumer contract snapshot source ref completeness");
+  assertEqual(
+    candidate.artifactKind,
+    CAUSAL_EDGE_LAYER_SEAM_HISTORY_EDGE_LAYER_CONSUMER_CONTRACT_SNAPSHOT_SOURCE_REF_COMPLETENESS_ARTIFACT_KIND,
+    "artifactKind",
+  );
+  assertEqual(
+    candidate.schema,
+    CAUSAL_EDGE_LAYER_SEAM_HISTORY_EDGE_LAYER_CONSUMER_CONTRACT_SNAPSHOT_SOURCE_REF_COMPLETENESS_SCHEMA,
+    "schema",
+  );
+  assertEqual(candidate.schemaVersion, 1, "schemaVersion");
+  assertString(candidate.artifactId, "artifactId");
+  assertString(candidate.emittedAt, "emittedAt");
+  const boundary = assertObject(candidate.boundary, "boundary");
+  assertEqual(boundary.sourceRefCompletenessOnly, true, "boundary.sourceRefCompletenessOnly");
+  assertEqual(boundary.readsSnapshotOnly, true, "boundary.readsSnapshotOnly");
+  assertEqual(boundary.opensEdgeRuntime, false, "boundary.opensEdgeRuntime");
+  assertEqual(boundary.opensLayerRuntime, false, "boundary.opensLayerRuntime");
+  assertEqual(boundary.callsEdge, false, "boundary.callsEdge");
+  assertEqual(boundary.callsLayer, false, "boundary.callsLayer");
+  assertEqual(boundary.writesEdgeProjection, false, "boundary.writesEdgeProjection");
+  assertEqual(boundary.writesLayerEvidence, false, "boundary.writesLayerEvidence");
+  assertEqual(boundary.acceptsCanonicalHistory, false, "boundary.acceptsCanonicalHistory");
+  assertEqual(boundary.admitsLayerEvidence, false, "boundary.admitsLayerEvidence");
+  assertEqual(boundary.decidesLayerAdmission, false, "boundary.decidesLayerAdmission");
+  assertEqual(boundary.interpretsRbc, false, "boundary.interpretsRbc");
+  assertEqual(boundary.claimsQuorumSatisfaction, false, "boundary.claimsQuorumSatisfaction");
+  assertEqual(boundary.grantsAuthority, false, "boundary.grantsAuthority");
+  assertEqual(boundary.promotesReferents, false, "boundary.promotesReferents");
+  assertEqual(boundary.publishesToMesh, false, "boundary.publishesToMesh");
+  assertEqual(boundary.writesProductionContinuity, false, "boundary.writesProductionContinuity");
+  const validation = assertObject(candidate.validation, "validation");
+  assertConsumerContractSnapshotSourceRefCompletenessStatus(validation.status, "validation.status");
+  assertEqual(validation.noCanonicalHistoryClaim, true, "validation.noCanonicalHistoryClaim");
+  assertEqual(validation.noLayerAdmissionClaim, true, "validation.noLayerAdmissionClaim");
+  assertEqual(validation.noLayerEvidenceAdmissionClaim, true, "validation.noLayerEvidenceAdmissionClaim");
+  assertEqual(validation.noRbcInterpretationClaim, true, "validation.noRbcInterpretationClaim");
+  assertEqual(validation.noQuorumSatisfactionClaim, true, "validation.noQuorumSatisfactionClaim");
+  assertEqual(validation.noAuthorityClaim, true, "validation.noAuthorityClaim");
+  assertEqual(validation.noMeshPublicationClaim, true, "validation.noMeshPublicationClaim");
+  assertEqual(validation.noProductionContinuityWriteClaim, true, "validation.noProductionContinuityWriteClaim");
+  assertConsumerContractSnapshotSourceRefCompletenessStatus(candidate.reviewStatus, "reviewStatus");
+}
+
 function parseEdgeLayerConsumerContractSnapshot(
   value: unknown,
 ): EdgeLayerSeamHistoryEdgeLayerConsumerContractSnapshot | undefined {
@@ -1317,6 +1561,43 @@ function validateEdgeLayerConsumerContractSnapshot(input: {
   return [...new Set(issues)];
 }
 
+function collectEdgeLayerConsumerContractSnapshotRequiredRefs(
+  snapshot: EdgeLayerSeamHistoryEdgeLayerConsumerContractSnapshot | undefined,
+): {
+  sourceObservationRefs: boolean;
+  seamClassifications: boolean;
+  layerRuntimeRefs: boolean;
+  adjacentMatchedRefs: boolean;
+  sourceRepos: boolean;
+  sourceRefs: boolean;
+} {
+  return {
+    sourceObservationRefs:
+      snapshot?.source.seamHistoryObservationArtifactId !== undefined &&
+      snapshot.source.layerReceiptObservationArtifactId !== undefined &&
+      snapshot.source.adjacentFixtureArtifactId !== undefined,
+    seamClassifications:
+      (snapshot?.contract.seamClassifications.compatibleObservationIds.length ?? 0) > 0 &&
+      (snapshot?.contract.seamClassifications.unresolvedOrDamagedObservationIds.length ?? 0) > 0,
+    layerRuntimeRefs:
+      snapshot?.contract.layerRuntimeRefs.receiptId !== undefined &&
+      snapshot.contract.layerRuntimeRefs.receiptHash !== undefined &&
+      snapshot.contract.layerRuntimeRefs.sourceRequestId !== undefined &&
+      snapshot.contract.layerRuntimeRefs.sourceRequestHash !== undefined &&
+      snapshot.contract.layerRuntimeRefs.runtimeEvidenceId !== undefined &&
+      snapshot.contract.layerRuntimeRefs.runtimeEvidenceHash !== undefined &&
+      snapshot.contract.layerRuntimeRefs.runtimeTraceRef !== undefined &&
+      snapshot.contract.layerRuntimeRefs.durableReceiptRef !== undefined,
+    adjacentMatchedRefs:
+      (snapshot?.contract.adjacentMatchedRefs.matchedReceiptIds.length ?? 0) > 0 &&
+      (snapshot?.contract.adjacentMatchedRefs.matchedReceiptHashes.length ?? 0) > 0 &&
+      (snapshot?.contract.adjacentMatchedRefs.matchedRequestIds.length ?? 0) > 0 &&
+      (snapshot?.contract.adjacentMatchedRefs.matchedRequestHashes.length ?? 0) > 0,
+    sourceRepos: (snapshot?.contract.preservedSourceRefs.sourceRepos.length ?? 0) > 0,
+    sourceRefs: (snapshot?.contract.preservedSourceRefs.sourceRefs.length ?? 0) > 0,
+  };
+}
+
 function buildNonClaims(): EdgeLayerSeamHistoryLayerReceiptAdjacentFixture["nonClaims"] {
   return {
     canonicalHistoryAccepted: false,
@@ -1382,6 +1663,29 @@ function buildConsumerContractSnapshotReadbackBoundary():
   return {
     readbackOnly: true,
     writesSnapshot: false,
+    opensEdgeRuntime: false,
+    opensLayerRuntime: false,
+    callsEdge: false,
+    callsLayer: false,
+    writesEdgeProjection: false,
+    writesLayerEvidence: false,
+    acceptsCanonicalHistory: false,
+    admitsLayerEvidence: false,
+    decidesLayerAdmission: false,
+    interpretsRbc: false,
+    claimsQuorumSatisfaction: false,
+    grantsAuthority: false,
+    promotesReferents: false,
+    publishesToMesh: false,
+    writesProductionContinuity: false,
+  };
+}
+
+function buildConsumerContractSnapshotSourceRefCompletenessBoundary():
+  EdgeLayerSeamHistoryEdgeLayerConsumerContractSnapshotSourceRefCompleteness["boundary"] {
+  return {
+    sourceRefCompletenessOnly: true,
+    readsSnapshotOnly: true,
     opensEdgeRuntime: false,
     opensLayerRuntime: false,
     callsEdge: false,
@@ -1529,5 +1833,18 @@ function assertConsumerContractSnapshotReadbackStatus(
     value !== "edge-layer-seam-history-edge-layer-consumer-contract-snapshot-readback-invalid"
   ) {
     throw new Error(`${label} must be an edge layer consumer contract snapshot readback status`);
+  }
+}
+
+function assertConsumerContractSnapshotSourceRefCompletenessStatus(
+  value: unknown,
+  label: string,
+): asserts value is EdgeLayerSeamHistoryEdgeLayerConsumerContractSnapshotSourceRefCompletenessStatus {
+  if (
+    value !== "edge-layer-seam-history-edge-layer-consumer-contract-snapshot-source-ref-completeness-ready" &&
+    value !== "edge-layer-seam-history-edge-layer-consumer-contract-snapshot-source-ref-completeness-incomplete" &&
+    value !== "edge-layer-seam-history-edge-layer-consumer-contract-snapshot-source-ref-completeness-invalid"
+  ) {
+    throw new Error(`${label} must be an edge layer consumer contract snapshot source ref completeness status`);
   }
 }
