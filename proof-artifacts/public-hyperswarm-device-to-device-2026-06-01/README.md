@@ -81,6 +81,12 @@ npx tsx scripts/summarize-edge-layer-seam-history-proof.ts \
   --output proof-artifacts/public-hyperswarm-device-to-device-2026-06-01/edge-layer-seam-history-proof-summary.json
 ```
 
+```bash
+npx tsx scripts/check-edge-layer-seam-history-public-artifacts.ts \
+  --run-dir proof-artifacts/public-hyperswarm-device-to-device-2026-06-01 \
+  --output proof-artifacts/public-hyperswarm-device-to-device-2026-06-01/public-artifact-reproducibility-check.json
+```
+
 ## Result
 
 The replica report preserves:
@@ -99,9 +105,13 @@ The proof summary preserves that strongest source rung but labels the summary
 operation itself as
 `local_causal_summary_over_supplied_edge_layer_seam_history_artifacts`.
 
+The reproducibility check proves the saved artifact chain remains mutually
+consistent and labels its own operation as
+`local_reproducibility_check_over_saved_public_hyperswarm_artifacts`. It does
+not open Hyperswarm or Corestore and does not claim a new live public run.
+
 ## Boundary
 
 These artifacts do not claim canonical history, Layer admission, RBC
 interpretation, quorum satisfaction, Mesh publication, authority, referent
 promotion, Edge projection writes, or production continuity.
-
