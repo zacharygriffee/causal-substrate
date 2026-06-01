@@ -102,6 +102,62 @@ test("public seam proof index CLI writes compact saved-artifact index", async ()
   }
 });
 
+test("public seam proof index rejects weakened refs proof labels and overclaims", async () => {
+  const cases: Array<{
+    name: string;
+    mutate: (artifacts: Awaited<ReturnType<typeof readPublicDeviceArtifacts>>) => void;
+    issue: string;
+  }> = [
+    {
+      name: "missing source refs",
+      mutate: (artifacts) => {
+        const contract = artifacts.observationToEdgeContract as any;
+        contract.validation.sourceRefsMatchBetweenCausalAndEdge = false;
+        contract.preservedRefs.requestIds = [];
+      },
+      issue: "source-refs-not-preserved",
+    },
+    {
+      name: "weakened proof label",
+      mutate: (artifacts) => {
+        const reproducibilityCheck = artifacts.reproducibilityCheck as any;
+        reproducibilityCheck.proof.strongestSourceProofLabelObserved = "local_supplied_material";
+      },
+      issue: "proof-labels-not-preserved",
+    },
+    {
+      name: "projection overclaim",
+      mutate: (artifacts) => {
+        const handoffBundle = artifacts.edgeHandoffBundle as any;
+        handoffBundle.boundary.writesEdgeProjection = true;
+      },
+      issue: "indexed-artifact-overclaim",
+    },
+  ];
+
+  for (const testCase of cases) {
+    const artifacts = await readPublicDeviceArtifacts();
+    testCase.mutate(artifacts);
+
+    const index = buildEdgeLayerSeamHistoryPublicSeamProofIndex({
+      runId: `public-hyperswarm-device-to-device-2026-06-01:${testCase.name}`,
+      runKind: "device_to_device_public_hyperswarm",
+      artifacts,
+      emittedAt: "2026-06-01T19:24:00.000Z",
+    });
+
+    assertEdgeLayerSeamHistoryPublicSeamProofIndex(index);
+    assert.equal(index.reviewStatus, "edge-layer-seam-history-public-seam-proof-index-incomplete");
+    assert.equal(index.consumerSuitability.edgeMayConsumeAsObservationOnlyIndex, false);
+    assert.equal(index.consumerSuitability.layerMayConsumeAsObservationOnlyFeedbackIndex, false);
+    assert.equal(index.consumerSuitability.spineMayConsumeAsFamilyPressureIndex, false);
+    assert.equal(index.proof.liveSwarmRunClaimedByThisIndex, false);
+    assert.equal(index.boundary.opensSwarm, false);
+    assert.equal(index.boundary.writesEdgeProjection, false);
+    assert.ok(index.validation.issues.includes(testCase.issue), testCase.name);
+  }
+});
+
 async function readPublicDeviceArtifacts(): Promise<Parameters<typeof buildEdgeLayerSeamHistoryPublicSeamProofIndex>[0]["artifacts"]> {
   return {
     sourceManifest: await readJson(path.join(publicDeviceRunDir, "public-source-manifest.json")),
