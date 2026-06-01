@@ -6,11 +6,13 @@ import {
   assertEdgeLayerSeamHistoryEdgeProjectionHandoffReadback,
   assertEdgeLayerSeamHistoryObservationResult,
   assertEdgeLayerSeamHistoryObservationReadbackContract,
+  assertEdgeLayerSeamHistoryOutwardLaneCompletionGate,
   buildEdgeLayerSeamHistoryEdgeProjectionFixture,
   buildEdgeLayerSeamHistoryEdgeProjectionHandoffReadback,
   buildEdgeLayerSeamHistoryHyperswarmInputLaneReadiness,
   buildEdgeLayerSeamHistoryObservationResult,
   buildEdgeLayerSeamHistoryObservationReadbackContract,
+  buildEdgeLayerSeamHistoryOutwardLaneCompletionGate,
 } from "../src/index.js";
 
 interface CliArgs {
@@ -20,6 +22,7 @@ interface CliArgs {
   handoffOutput?: string;
   handoffReadbackOutput?: string;
   hyperswarmReadinessOutput?: string;
+  completionGateOutput?: string;
   hyperswarmNamespaceParts?: string[];
   emittedAt: string;
   readback: boolean;
@@ -81,6 +84,12 @@ async function main() {
       assertEdgeLayerSeamHistoryEdgeProjectionHandoffReadback(handoffReadback);
       await writeFile(path.resolve(args.handoffReadbackOutput), `${JSON.stringify(handoffReadback, null, 2)}\n`, "utf8");
     }
+  }
+
+  if (args.completionGateOutput) {
+    const completionGate = buildEdgeLayerSeamHistoryOutwardLaneCompletionGate(observationForDerivedOutputs);
+    assertEdgeLayerSeamHistoryOutwardLaneCompletionGate(completionGate);
+    await writeFile(path.resolve(args.completionGateOutput), `${JSON.stringify(completionGate, null, 2)}\n`, "utf8");
   }
 
   if (args.output) {
@@ -177,6 +186,11 @@ function parseArgs(argv: string[]): CliArgs {
       index += 1;
       continue;
     }
+    if (arg === "--completion-gate-output") {
+      args.completionGateOutput = requireNext(argv, index, arg);
+      index += 1;
+      continue;
+    }
     if (arg === "--hyperswarm-namespace") {
       args.hyperswarmNamespaceParts = splitNamespaceParts(requireNext(argv, index, arg));
       index += 1;
@@ -226,13 +240,14 @@ async function readStdin(): Promise<string> {
 
 function printUsage(): void {
   process.stdout.write([
-    "Usage: tsx scripts/observe-edge-layer-seam-history.ts [--input path] [--output path] [--contract-output path] [--handoff-output path] [--handoff-readback-output path] [--hyperswarm-readiness-output path] [--hyperswarm-namespace comma,list] [--emitted-at iso] [--readback]",
+    "Usage: tsx scripts/observe-edge-layer-seam-history.ts [--input path] [--output path] [--contract-output path] [--handoff-output path] [--handoff-readback-output path] [--hyperswarm-readiness-output path] [--completion-gate-output path] [--hyperswarm-namespace comma,list] [--emitted-at iso] [--readback]",
     "",
     "Reads supplied Edge/Layer seam-history JSON and emits a bounded local causal observation.",
     "With --contract-output, writes a readback contract over the emitted observation file.",
     "With --handoff-output, writes an Edge projection handoff fixture derived from the observation result.",
     "With --handoff-readback-output, writes a readback artifact over the emitted handoff fixture.",
     "With --hyperswarm-readiness-output, writes a readiness-only Hyperswarm input lane report.",
+    "With --completion-gate-output, writes the outward lane completion gate for the observation result.",
     "This command does not claim DHT/Hyperswarm or decentralized seam proof.",
     "",
   ].join("\n"));

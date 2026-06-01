@@ -779,6 +779,7 @@ test("seam-history observation command reads supplied material, writes result, a
   const handoffPath = path.join(tempRoot, "edge-projection-handoff.json");
   const handoffReadbackPath = path.join(tempRoot, "edge-projection-handoff-readback.json");
   const hyperswarmReadinessPath = path.join(tempRoot, "hyperswarm-input-lane-readiness.json");
+  const completionGatePath = path.join(tempRoot, "outward-lane-completion-gate.json");
   try {
     await writeFile(inputPath, JSON.stringify(operationShapedSeamHistory(), null, 2), "utf8");
 
@@ -797,6 +798,8 @@ test("seam-history observation command reads supplied material, writes result, a
       handoffReadbackPath,
       "--hyperswarm-readiness-output",
       hyperswarmReadinessPath,
+      "--completion-gate-output",
+      completionGatePath,
       "--hyperswarm-namespace",
       "hyperswarm-seam-history-reader,cli-readiness",
       "--emitted-at",
@@ -915,6 +918,33 @@ test("seam-history observation command reads supplied material, writes result, a
     assert.equal(hyperswarmReadiness.boundary.publishesToMesh, false);
     assert.equal(hyperswarmReadiness.boundary.grantsAuthority, false);
     assert.deepEqual(hyperswarmReadiness.issues, []);
+
+    const completionGate = JSON.parse(await readFile(completionGatePath, "utf8"));
+    assertEdgeLayerSeamHistoryOutwardLaneCompletionGate(completionGate);
+    assert.equal(completionGate.sourceObservation.artifactId, result.artifactId);
+    assert.equal(completionGate.completion.currentLaneComplete, true);
+    assert.equal(completionGate.completion.suitableForEdgeProjectionHandoff, true);
+    assert.equal(completionGate.completion.normalizedProofLabel, "local_supplied_material");
+    assert.equal(completionGate.completion.decentralizedSeamProofClaimed, false);
+    assert.equal(completionGate.checks.operationRan, true);
+    assert.equal(completionGate.checks.seamHistoryInputConsumed, true);
+    assert.equal(completionGate.checks.linkedPairClassified, true);
+    assert.equal(completionGate.checks.damagedOrUnlinkedPairClassified, true);
+    assert.equal(completionGate.checks.sourceIdsAndHashesPreserved, true);
+    assert.deepEqual(completionGate.sourceRefs.requestHashes, [
+      `sha256:${"a".repeat(64)}`,
+      `sha256:${"c".repeat(64)}`,
+    ]);
+    assert.deepEqual(completionGate.sourceRefs.receiptIds, [
+      "layer-report-only-edge-seam-receipt:causal-observation:linked",
+      "layer-report-only-edge-seam-receipt:causal-observation:damaged",
+    ]);
+    assert.equal(completionGate.boundary.writesProjectionArtifact, false);
+    assert.equal(completionGate.boundary.acceptsCanonicalHistory, false);
+    assert.equal(completionGate.boundary.admitsLayerEvidence, false);
+    assert.equal(completionGate.boundary.interpretsRbc, false);
+    assert.equal(completionGate.boundary.grantsAuthority, false);
+    assert.deepEqual(completionGate.issues, []);
   } finally {
     await rm(tempRoot, { recursive: true, force: true });
   }
