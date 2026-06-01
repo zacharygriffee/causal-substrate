@@ -1,16 +1,25 @@
 import assert from "node:assert/strict";
+import { execFile } from "node:child_process";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
 import test from "node:test";
+import { promisify } from "node:util";
 
 import {
   assertEdgeLayerSeamHistoryEdgeLayerConsumerContractSnapshot,
+  assertEdgeLayerSeamHistoryEdgeLayerConsumerContractSnapshotReadback,
   assertEdgeLayerSeamHistoryLayerReceiptAdjacentFixture,
   assertEdgeLayerSeamHistoryLayerReceiptAdjacentFixtureReadback,
   buildEdgeLayerSeamHistoryEdgeLayerConsumerContractSnapshot,
+  buildEdgeLayerSeamHistoryEdgeLayerConsumerContractSnapshotReadback,
   buildEdgeLayerSeamHistoryLayerReceiptAdjacentFixture,
   buildEdgeLayerSeamHistoryLayerReceiptAdjacentFixtureReadback,
   buildEdgeLayerSeamHistoryObservationResult,
   buildLayerReceiptRuntimeEvidenceObservation,
   CAUSAL_EDGE_LAYER_SEAM_HISTORY_EDGE_LAYER_CONSUMER_CONTRACT_SNAPSHOT_ARTIFACT_KIND,
+  CAUSAL_EDGE_LAYER_SEAM_HISTORY_EDGE_LAYER_CONSUMER_CONTRACT_SNAPSHOT_READBACK_ARTIFACT_KIND,
+  CAUSAL_EDGE_LAYER_SEAM_HISTORY_EDGE_LAYER_CONSUMER_CONTRACT_SNAPSHOT_READBACK_SCHEMA,
   CAUSAL_EDGE_LAYER_SEAM_HISTORY_EDGE_LAYER_CONSUMER_CONTRACT_SNAPSHOT_SCHEMA,
   CAUSAL_EDGE_LAYER_SEAM_HISTORY_LAYER_RECEIPT_ADJACENT_FIXTURE_ARTIFACT_KIND,
   CAUSAL_EDGE_LAYER_SEAM_HISTORY_LAYER_RECEIPT_ADJACENT_FIXTURE_READBACK_ARTIFACT_KIND,
@@ -19,6 +28,7 @@ import {
 } from "../src/index.js";
 
 const EMITTED_AT = "2026-05-31T15:00:00.000Z";
+const execFileAsync = promisify(execFile);
 
 function seamHistoryMaterial() {
   return {
@@ -343,6 +353,226 @@ test("combined Edge Layer consumer contract snapshot stays incomplete when adjac
   assert.equal(snapshot.boundary.admitsLayerEvidence, false);
   assert.equal(snapshot.boundary.interpretsRbc, false);
   assert.equal(snapshot.boundary.grantsAuthority, false);
+});
+
+test("combined Edge Layer consumer contract snapshot readback preserves classifications refs and non-claims", () => {
+  const seamObservation = buildEdgeLayerSeamHistoryObservationResult({
+    seamHistory: seamHistoryMaterial(),
+    emittedAt: EMITTED_AT,
+    sourcePath: "layer-owned-edge-seam-status:edge-layer-consumer-snapshot-readback",
+  });
+  const layerReceiptObservation = buildLayerReceiptRuntimeEvidenceObservation({
+    layerReceiptRuntimeEvidence: layerReceiptRuntimeEvidenceReport(),
+    emittedAt: "2026-05-31T15:04:01.000Z",
+  });
+  const adjacentFixture = buildEdgeLayerSeamHistoryLayerReceiptAdjacentFixture({
+    seamHistoryObservation: seamObservation,
+    layerReceiptObservation,
+    emittedAt: "2026-05-31T15:04:02.000Z",
+  });
+  const snapshot = buildEdgeLayerSeamHistoryEdgeLayerConsumerContractSnapshot({
+    seamHistoryObservation: seamObservation,
+    layerReceiptObservation,
+    adjacentFixture,
+    emittedAt: "2026-05-31T15:04:03.000Z",
+  });
+  const roundTripped = JSON.parse(JSON.stringify(snapshot)) as unknown;
+
+  const readback = buildEdgeLayerSeamHistoryEdgeLayerConsumerContractSnapshotReadback({
+    snapshot: roundTripped,
+    emittedAt: "2026-05-31T15:04:04.000Z",
+  });
+
+  assertEdgeLayerSeamHistoryEdgeLayerConsumerContractSnapshotReadback(readback);
+  assert.equal(
+    readback.artifactKind,
+    CAUSAL_EDGE_LAYER_SEAM_HISTORY_EDGE_LAYER_CONSUMER_CONTRACT_SNAPSHOT_READBACK_ARTIFACT_KIND,
+  );
+  assert.equal(
+    readback.schema,
+    CAUSAL_EDGE_LAYER_SEAM_HISTORY_EDGE_LAYER_CONSUMER_CONTRACT_SNAPSHOT_READBACK_SCHEMA,
+  );
+  assert.equal(
+    readback.reviewStatus,
+    "edge-layer-seam-history-edge-layer-consumer-contract-snapshot-readback-valid",
+  );
+  assert.equal(readback.source.sourceSnapshotArtifactId, snapshot.artifactId);
+  assert.equal(readback.source.sourceSnapshotStatus, "edge-layer-seam-history-edge-layer-consumer-contract-snapshot-ready");
+  assert.equal(readback.source.seamHistoryObservationArtifactId, seamObservation.artifactId);
+  assert.equal(readback.source.layerReceiptObservationArtifactId, layerReceiptObservation.artifactId);
+  assert.equal(readback.source.adjacentFixtureArtifactId, adjacentFixture.artifactId);
+  assert.equal(readback.source.snapshotProofLabel, "local_supplied_edge_layer_consumer_contract_snapshot");
+  assert.equal(readback.readback.snapshotReadable, true);
+  assert.equal(readback.readback.snapshotValid, true);
+  assert.equal(readback.readback.sourceObservationRefsPreserved, true);
+  assert.equal(readback.readback.seamClassificationsPreserved, true);
+  assert.equal(readback.readback.layerRuntimeRefsPreserved, true);
+  assert.equal(readback.readback.adjacentMatchedRefsPreserved, true);
+  assert.equal(readback.readback.sourceRefsPreserved, true);
+  assert.equal(readback.readback.proofLabelsPreserved, true);
+  assert.equal(readback.readback.nonClaimsPreserved, true);
+  assert.deepEqual(
+    readback.preservedRefs.compatibleObservationIds,
+    snapshot.contract.seamClassifications.compatibleObservationIds,
+  );
+  assert.deepEqual(
+    readback.preservedRefs.unresolvedOrDamagedObservationIds,
+    snapshot.contract.seamClassifications.unresolvedOrDamagedObservationIds,
+  );
+  assert.deepEqual(readback.preservedRefs.layerRuntimeRefs, snapshot.contract.layerRuntimeRefs);
+  assert.deepEqual(readback.preservedRefs.matchedReceiptIds, [
+    "layer-report-only-edge-seam-receipt:runtime-evidence:linked",
+  ]);
+  assert.deepEqual(readback.preservedRefs.matchedReceiptHashes, [`sha256:${"2".repeat(64)}`]);
+  assert.deepEqual(readback.preservedRefs.matchedRequestIds, [
+    "edge-layer-report-only-seam-request:runtime-evidence:linked",
+  ]);
+  assert.deepEqual(readback.preservedRefs.matchedRequestHashes, [`sha256:${"3".repeat(64)}`]);
+  assert.ok(readback.preservedRefs.preservedSourceRepos.includes("mesh-ecology-edge"));
+  assert.ok(readback.preservedRefs.preservedSourceRepos.includes("mesh-ecology-layer"));
+  assert.ok(readback.preservedRefs.preservedSourceRefs.includes("corestore:layer-runtime-receipts:receipt:linked"));
+  assert.equal(readback.validation.snapshotArtifactConsumed, true);
+  assert.equal(readback.validation.noCanonicalHistoryClaim, true);
+  assert.equal(readback.validation.noLayerAdmissionClaim, true);
+  assert.equal(readback.validation.noLayerEvidenceAdmissionClaim, true);
+  assert.equal(readback.validation.noRbcInterpretationClaim, true);
+  assert.equal(readback.validation.noAuthorityClaim, true);
+  assert.deepEqual(readback.validation.issues, []);
+  assert.equal(readback.boundary.readbackOnly, true);
+  assert.equal(readback.boundary.writesSnapshot, false);
+  assert.equal(readback.boundary.opensEdgeRuntime, false);
+  assert.equal(readback.boundary.opensLayerRuntime, false);
+  assert.equal(readback.boundary.writesEdgeProjection, false);
+  assert.equal(readback.boundary.writesLayerEvidence, false);
+  assert.equal(readback.boundary.admitsLayerEvidence, false);
+  assert.equal(readback.boundary.interpretsRbc, false);
+  assert.equal(readback.boundary.grantsAuthority, false);
+  assert.equal(readback.boundary.publishesToMesh, false);
+});
+
+test("combined Edge Layer consumer contract snapshot readback rejects weakened refs", () => {
+  const seamObservation = buildEdgeLayerSeamHistoryObservationResult({
+    seamHistory: seamHistoryMaterial(),
+    emittedAt: EMITTED_AT,
+    sourcePath: "layer-owned-edge-seam-status:edge-layer-consumer-snapshot-readback-negative",
+  });
+  const layerReceiptObservation = buildLayerReceiptRuntimeEvidenceObservation({
+    layerReceiptRuntimeEvidence: layerReceiptRuntimeEvidenceReport(),
+    emittedAt: "2026-05-31T15:05:01.000Z",
+  });
+  const adjacentFixture = buildEdgeLayerSeamHistoryLayerReceiptAdjacentFixture({
+    seamHistoryObservation: seamObservation,
+    layerReceiptObservation,
+    emittedAt: "2026-05-31T15:05:02.000Z",
+  });
+  const snapshot = buildEdgeLayerSeamHistoryEdgeLayerConsumerContractSnapshot({
+    seamHistoryObservation: seamObservation,
+    layerReceiptObservation,
+    adjacentFixture,
+    emittedAt: "2026-05-31T15:05:03.000Z",
+  });
+  const weakened = JSON.parse(JSON.stringify(snapshot)) as any;
+  weakened.contract.seamClassifications.compatibleObservationIds = [];
+  delete weakened.contract.layerRuntimeRefs.runtimeEvidenceHash;
+  weakened.contract.adjacentMatchedRefs.matchedReceiptHashes = [];
+  weakened.contract.preservedSourceRefs.sourceRefs = [];
+
+  const readback = buildEdgeLayerSeamHistoryEdgeLayerConsumerContractSnapshotReadback({
+    snapshot: weakened,
+    emittedAt: "2026-05-31T15:05:04.000Z",
+  });
+
+  assertEdgeLayerSeamHistoryEdgeLayerConsumerContractSnapshotReadback(readback);
+  assert.equal(
+    readback.reviewStatus,
+    "edge-layer-seam-history-edge-layer-consumer-contract-snapshot-readback-invalid",
+  );
+  assert.equal(readback.validation.snapshotArtifactConsumed, true);
+  assert.equal(readback.validation.seamClassificationsPreserved, false);
+  assert.equal(readback.validation.layerRuntimeRefsPreserved, false);
+  assert.equal(readback.validation.adjacentMatchedRefsPreserved, false);
+  assert.equal(readback.validation.sourceRefsPreserved, false);
+  assert.equal(readback.validation.proofLabelsPreserved, true);
+  assert.equal(readback.validation.nonClaimsPreserved, true);
+  assert.ok(readback.validation.issues.includes("seam-classifications-not-preserved"));
+  assert.ok(readback.validation.issues.includes("layer-runtime-refs-not-preserved"));
+  assert.ok(readback.validation.issues.includes("adjacent-matched-refs-not-preserved"));
+  assert.ok(readback.validation.issues.includes("source-refs-not-preserved"));
+  assert.equal(readback.boundary.readbackOnly, true);
+  assert.equal(readback.boundary.writesEdgeProjection, false);
+  assert.equal(readback.boundary.writesLayerEvidence, false);
+  assert.equal(readback.boundary.admitsLayerEvidence, false);
+  assert.equal(readback.boundary.interpretsRbc, false);
+  assert.equal(readback.boundary.grantsAuthority, false);
+});
+
+test("combined Edge Layer consumer contract snapshot readback CLI writes readback artifact from disk", async () => {
+  const tempRoot = await mkdtemp(path.join(tmpdir(), "causal-edge-layer-snapshot-readback-"));
+  const snapshotPath = path.join(tempRoot, "edge-layer-consumer-contract-snapshot.json");
+  const readbackPath = path.join(tempRoot, "edge-layer-consumer-contract-snapshot-readback.json");
+  try {
+    const seamObservation = buildEdgeLayerSeamHistoryObservationResult({
+      seamHistory: seamHistoryMaterial(),
+      emittedAt: EMITTED_AT,
+      sourcePath: "layer-owned-edge-seam-status:edge-layer-consumer-snapshot-readback-cli",
+    });
+    const layerReceiptObservation = buildLayerReceiptRuntimeEvidenceObservation({
+      layerReceiptRuntimeEvidence: layerReceiptRuntimeEvidenceReport(),
+      emittedAt: "2026-05-31T15:06:01.000Z",
+    });
+    const adjacentFixture = buildEdgeLayerSeamHistoryLayerReceiptAdjacentFixture({
+      seamHistoryObservation: seamObservation,
+      layerReceiptObservation,
+      emittedAt: "2026-05-31T15:06:02.000Z",
+    });
+    const snapshot = buildEdgeLayerSeamHistoryEdgeLayerConsumerContractSnapshot({
+      seamHistoryObservation: seamObservation,
+      layerReceiptObservation,
+      adjacentFixture,
+      emittedAt: "2026-05-31T15:06:03.000Z",
+    });
+    await writeFile(snapshotPath, `${JSON.stringify(snapshot, null, 2)}\n`, "utf8");
+
+    const { stdout, stderr } = await execFileAsync("npx", [
+      "tsx",
+      "scripts/readback-edge-layer-consumer-contract-snapshot.ts",
+      "--input-snapshot",
+      snapshotPath,
+      "--readback-output",
+      readbackPath,
+      "--emitted-at",
+      "2026-05-31T15:06:04.000Z",
+    ], {
+      cwd: path.resolve("."),
+    });
+
+    assert.equal(stdout, "");
+    assert.equal(stderr, "");
+    const readback = JSON.parse(await readFile(readbackPath, "utf8"));
+    assertEdgeLayerSeamHistoryEdgeLayerConsumerContractSnapshotReadback(readback);
+    assert.equal(
+      readback.reviewStatus,
+      "edge-layer-seam-history-edge-layer-consumer-contract-snapshot-readback-valid",
+    );
+    assert.equal(readback.source.sourceSnapshotArtifactId, snapshot.artifactId);
+    assert.equal(readback.source.seamHistoryObservationArtifactId, seamObservation.artifactId);
+    assert.equal(readback.source.layerReceiptObservationArtifactId, layerReceiptObservation.artifactId);
+    assert.equal(readback.source.adjacentFixtureArtifactId, adjacentFixture.artifactId);
+    assert.equal(readback.validation.snapshotArtifactConsumed, true);
+    assert.equal(readback.validation.seamClassificationsPreserved, true);
+    assert.equal(readback.validation.layerRuntimeRefsPreserved, true);
+    assert.equal(readback.validation.adjacentMatchedRefsPreserved, true);
+    assert.equal(readback.validation.sourceRefsPreserved, true);
+    assert.equal(readback.validation.proofLabelsPreserved, true);
+    assert.equal(readback.validation.nonClaimsPreserved, true);
+    assert.equal(readback.boundary.readbackOnly, true);
+    assert.equal(readback.boundary.writesSnapshot, false);
+    assert.equal(readback.boundary.admitsLayerEvidence, false);
+    assert.equal(readback.boundary.interpretsRbc, false);
+    assert.equal(readback.boundary.grantsAuthority, false);
+  } finally {
+    await rm(tempRoot, { recursive: true, force: true });
+  }
 });
 
 test("combined seam-history and Layer receipt adjacent fixture stays incomplete when refs do not match", () => {
