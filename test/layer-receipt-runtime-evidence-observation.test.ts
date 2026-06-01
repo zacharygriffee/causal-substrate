@@ -124,3 +124,114 @@ test("Layer receipt runtime evidence is observed as adjacent local material only
   assert.equal(observation.deferredAttachmentPoints.rbcInterpretation.active, false);
   assert.equal(observation.deferredAttachmentPoints.authorityDecision.writes, false);
 });
+
+test("Layer receipt runtime evidence remains incomplete when receipt and runtime refs are missing", () => {
+  const report = layerReceiptRuntimeEvidenceReport();
+  delete (report.receipt as Record<string, unknown>).receiptHash;
+  delete (report.receipt as Record<string, unknown>).durableRef;
+  delete (report.runtimeEvidence as Record<string, unknown>).runtimeEvidenceHash;
+  report.sourceRefs = [
+    "layer-receipt-runtime-evidence-report:edge-layer-seam:linked",
+    `sha256:${"1".repeat(64)}`,
+  ];
+
+  const observation = buildLayerReceiptRuntimeEvidenceObservation({
+    layerReceiptRuntimeEvidence: report,
+    emittedAt: EMITTED_AT,
+  });
+
+  assertLayerReceiptRuntimeEvidenceObservation(observation);
+  assert.equal(observation.reviewStatus, "layer-receipt-runtime-evidence-observation-incomplete");
+  assert.equal(observation.validation.reportConsumed, true);
+  assert.equal(observation.validation.layerSourceRepoPreserved, true);
+  assert.equal(observation.validation.receiptRefsPreserved, false);
+  assert.equal(observation.validation.runtimeRefsPreserved, false);
+  assert.equal(observation.validation.durableAndWriterRefsPreserved, false);
+  assert.equal(observation.validation.sourceRefsPreserved, true);
+  assert.equal(observation.receiptRefs.receiptId, "layer-report-only-edge-seam-receipt:runtime-evidence:linked");
+  assert.equal(observation.receiptRefs.receiptHash, undefined);
+  assert.equal(observation.runtimeRefs.runtimeEvidenceId, "layer-receipt-runtime-evidence:linked");
+  assert.equal(observation.runtimeRefs.runtimeEvidenceHash, undefined);
+  assert.ok(observation.validation.issues.includes("receipt-refs-missing"));
+  assert.ok(observation.validation.issues.includes("runtime-evidence-refs-missing"));
+  assert.ok(observation.validation.issues.includes("receipt-durable-or-writer-ref-missing"));
+  assert.equal(observation.nonClaims.layerEvidenceAdmitted, false);
+  assert.equal(observation.nonClaims.layerAdmissionDecided, false);
+  assert.equal(observation.nonClaims.rbcInterpreted, false);
+  assert.equal(observation.boundary.admitsLayerEvidence, false);
+  assert.equal(observation.boundary.decidesLayerAdmission, false);
+  assert.equal(observation.boundary.interpretsRbc, false);
+  assert.equal(observation.boundary.grantsAuthority, false);
+});
+
+test("Layer receipt runtime evidence rejects non-Layer source ownership", () => {
+  const report = layerReceiptRuntimeEvidenceReport();
+  report.sourceRepo = "mesh-ecology-edge";
+  report.sourceRepos = ["mesh-ecology-edge"];
+
+  const observation = buildLayerReceiptRuntimeEvidenceObservation({
+    layerReceiptRuntimeEvidence: report,
+    emittedAt: EMITTED_AT,
+  });
+
+  assertLayerReceiptRuntimeEvidenceObservation(observation);
+  assert.equal(observation.reviewStatus, "layer-receipt-runtime-evidence-observation-guardrail-blocked");
+  assert.equal(observation.validation.reportConsumed, true);
+  assert.equal(observation.validation.layerSourceRepoPreserved, false);
+  assert.ok(observation.validation.issues.includes("layer-source-repo-missing-or-unowned"));
+  assert.equal(observation.source.sourceRepo, "mesh-ecology-edge");
+  assert.deepEqual(observation.receiptRefs.sourceRepos, ["mesh-ecology-edge"]);
+  assert.equal(observation.proof.layerOwnedInputObserved, false);
+  assert.equal(observation.proof.dhtOrHyperswarmInputObservedByCausalSubstrate, false);
+  assert.equal(observation.nonClaims.layerEvidenceAdmitted, false);
+  assert.equal(observation.nonClaims.layerAdmissionDecided, false);
+  assert.equal(observation.nonClaims.authorityGranted, false);
+  assert.equal(observation.boundary.callsLayer, false);
+  assert.equal(observation.boundary.admitsLayerEvidence, false);
+  assert.equal(observation.boundary.decidesLayerAdmission, false);
+  assert.equal(observation.boundary.interpretsRbc, false);
+  assert.equal(observation.boundary.grantsAuthority, false);
+});
+
+test("Layer receipt runtime evidence blocks admission RBC and authority overclaims", () => {
+  const report = layerReceiptRuntimeEvidenceReport();
+  report.posture.layerEvidenceAdmitted = true;
+  report.posture.layerAdmissionDecided = true;
+  report.posture.rbcInterpreted = true;
+  report.posture.authorityGranted = true;
+  report.posture.canonicalHistoryClaimed = true;
+  report.boundary.admitsLayerEvidence = true;
+  report.boundary.decidesLayerAdmission = true;
+  report.boundary.interpretsRbc = true;
+  report.boundary.grantsAuthority = true;
+  report.nonClaims.authorityGranted = true;
+
+  const observation = buildLayerReceiptRuntimeEvidenceObservation({
+    layerReceiptRuntimeEvidence: report,
+    emittedAt: EMITTED_AT,
+  });
+
+  assertLayerReceiptRuntimeEvidenceObservation(observation);
+  assert.equal(observation.reviewStatus, "layer-receipt-runtime-evidence-observation-guardrail-blocked");
+  assert.equal(observation.validation.reportConsumed, true);
+  assert.equal(observation.validation.reportRefsPreserved, true);
+  assert.equal(observation.validation.receiptRefsPreserved, true);
+  assert.equal(observation.validation.runtimeRefsPreserved, true);
+  assert.ok(observation.validation.issues.includes("layer-receipt-runtime-overclaim"));
+  assert.equal(observation.validation.noCanonicalHistoryClaim, true);
+  assert.equal(observation.validation.noLayerAdmissionClaim, true);
+  assert.equal(observation.validation.noLayerEvidenceAdmissionClaim, true);
+  assert.equal(observation.validation.noRbcInterpretationClaim, true);
+  assert.equal(observation.validation.noAuthorityClaim, true);
+  assert.equal(observation.nonClaims.canonicalHistoryAccepted, false);
+  assert.equal(observation.nonClaims.layerEvidenceAdmitted, false);
+  assert.equal(observation.nonClaims.layerAdmissionDecided, false);
+  assert.equal(observation.nonClaims.rbcInterpreted, false);
+  assert.equal(observation.nonClaims.authorityGranted, false);
+  assert.equal(observation.boundary.acceptsCanonicalHistory, false);
+  assert.equal(observation.boundary.admitsLayerEvidence, false);
+  assert.equal(observation.boundary.decidesLayerAdmission, false);
+  assert.equal(observation.boundary.interpretsRbc, false);
+  assert.equal(observation.boundary.grantsAuthority, false);
+  assert.equal(observation.boundary.writesContinuityRecords, false);
+});
