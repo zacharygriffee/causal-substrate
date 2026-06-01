@@ -58,4 +58,5 @@ export * from "./adapters/edge-layer-seam-history-layer-receipt-adjacent-fixture
 export * from "./adapters/edge-layer-seam-history-proof-summary.js";
 export * from "./adapters/edge-layer-seam-history-public-artifact-reproducibility.js";
 export * from "./adapters/edge-layer-seam-history-observation-to-edge-projection-contract.js";
+export * from "./adapters/edge-layer-seam-history-proof-summary-consumer-readback.js";
 export * from "./prototypes/continuity-workstation.js";

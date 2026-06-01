@@ -94,6 +94,13 @@ npx tsx scripts/derive-edge-layer-seam-history-observation-to-edge-projection-co
   --output proof-artifacts/public-hyperswarm-device-to-device-2026-06-01/observation-to-edge-projection-contract.json
 ```
 
+```bash
+npx tsx scripts/readback-edge-layer-seam-history-proof-summary-for-consumers.ts \
+  --proof-summary proof-artifacts/public-hyperswarm-device-to-device-2026-06-01/edge-layer-seam-history-proof-summary.json \
+  --observation-to-edge-contract proof-artifacts/public-hyperswarm-device-to-device-2026-06-01/observation-to-edge-projection-contract.json \
+  --output proof-artifacts/public-hyperswarm-device-to-device-2026-06-01/proof-summary-consumer-readback.json
+```
+
 ## Result
 
 The replica report preserves:
@@ -123,6 +130,13 @@ ids/hashes, receipt ids/hashes, source repos, durable refs, writer refs, and the
 public source proof label. The contract operation itself is
 `local_contract_check_over_saved_causal_handoff_and_edge_receipt`; it does not
 call Edge, write Edge projection state, or claim a new live swarm run.
+
+The proof-summary consumer readback gives Spine and Edge a clearer saved
+artifact view: Spine may treat the preserved public source proof rung as a
+family-pressure signal, and Edge may treat the contract-backed refs as
+observation-only projection context. The readback operation itself is
+`local_consumer_readback_over_saved_edge_layer_seam_history_proof_summary` and
+does not upgrade saved imports into new public swarm proof.
 
 ## Boundary
 
