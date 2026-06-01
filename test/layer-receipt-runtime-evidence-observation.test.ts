@@ -486,6 +486,68 @@ test("Layer receipt runtime evidence CLI writes bounded negative observations wi
   }
 });
 
+test("Layer receipt runtime evidence CLI labels non-object input as malformed without overclaims", async () => {
+  const tempRoot = await mkdtemp(path.join(tmpdir(), "causal-layer-receipt-runtime-malformed-cli-"));
+  const inputPath = path.join(tempRoot, "non-object-input.json");
+  const outputPath = path.join(tempRoot, "malformed-observation.json");
+  const readbackPath = path.join(tempRoot, "malformed-readback.json");
+  try {
+    await writeFile(inputPath, JSON.stringify("not-a-layer-receipt-runtime-report"), "utf8");
+
+    const { stdout, stderr } = await execFileAsync("npx", [
+      "tsx",
+      "scripts/observe-layer-receipt-runtime-evidence.ts",
+      "--input",
+      inputPath,
+      "--output",
+      outputPath,
+      "--readback-output",
+      readbackPath,
+      "--emitted-at",
+      "2026-05-31T14:03:30.000Z",
+      "--readback-emitted-at",
+      "2026-05-31T14:03:31.000Z",
+    ], {
+      cwd: path.resolve("."),
+    });
+
+    assert.equal(stdout, "");
+    assert.equal(stderr, "");
+    const observation = JSON.parse(await readFile(outputPath, "utf8"));
+    const readback = JSON.parse(await readFile(readbackPath, "utf8"));
+
+    assertLayerReceiptRuntimeEvidenceObservation(observation);
+    assertLayerReceiptRuntimeEvidenceReadbackContract(readback);
+    assert.equal(observation.reviewStatus, "layer-receipt-runtime-evidence-observation-malformed");
+    assert.equal(observation.validation.reportConsumed, false);
+    assert.equal(observation.validation.sourceRefsPreserved, false);
+    assert.ok(observation.validation.issues.includes("layer-receipt-runtime-report-not-object"));
+    assert.equal(observation.proof.strongestProofRung, "local_causal_observation_over_supplied_layer_receipt_runtime_evidence");
+    assert.equal(observation.proof.dhtOrHyperswarmInputObservedByCausalSubstrate, false);
+    assert.equal(observation.nonClaims.canonicalHistoryAccepted, false);
+    assert.equal(observation.nonClaims.layerEvidenceAdmitted, false);
+    assert.equal(observation.nonClaims.layerAdmissionDecided, false);
+    assert.equal(observation.nonClaims.rbcInterpreted, false);
+    assert.equal(observation.nonClaims.authorityGranted, false);
+    assert.equal(observation.boundary.callsLayer, false);
+    assert.equal(observation.boundary.admitsLayerEvidence, false);
+    assert.equal(observation.boundary.decidesLayerAdmission, false);
+    assert.equal(observation.boundary.interpretsRbc, false);
+    assert.equal(observation.boundary.grantsAuthority, false);
+    assert.equal(readback.reviewStatus, "layer-receipt-runtime-evidence-readback-contract-invalid");
+    assert.equal(readback.validation.observationArtifactConsumed, true);
+    assert.ok(readback.validation.issues.includes("source-report-refs-not-preserved"));
+    assert.ok(readback.validation.issues.includes("receipt-refs-not-preserved"));
+    assert.ok(readback.validation.issues.includes("runtime-refs-not-preserved"));
+    assert.equal(readback.boundary.readbackOnly, true);
+    assert.equal(readback.boundary.admitsLayerEvidence, false);
+    assert.equal(readback.boundary.interpretsRbc, false);
+    assert.equal(readback.boundary.grantsAuthority, false);
+  } finally {
+    await rm(tempRoot, { recursive: true, force: true });
+  }
+});
+
 test("Layer receipt runtime evidence source-ref completeness reports complete and incomplete material", () => {
   const complete = buildLayerReceiptRuntimeEvidenceSourceRefCompleteness(layerReceiptRuntimeEvidenceReport());
 
