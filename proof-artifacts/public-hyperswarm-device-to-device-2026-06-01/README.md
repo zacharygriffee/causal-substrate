@@ -101,6 +101,12 @@ npx tsx scripts/readback-edge-layer-seam-history-proof-summary-for-consumers.ts 
   --output proof-artifacts/public-hyperswarm-device-to-device-2026-06-01/proof-summary-consumer-readback.json
 ```
 
+```bash
+npx tsx scripts/decide-edge-layer-seam-history-public-swarm-refresh.ts \
+  --run-dir proof-artifacts/public-hyperswarm-device-to-device-2026-06-01 \
+  --output proof-artifacts/public-hyperswarm-device-to-device-2026-06-01/public-swarm-refresh-decision.json
+```
+
 ## Result
 
 The replica report preserves:
@@ -137,6 +143,13 @@ family-pressure signal, and Edge may treat the contract-backed refs as
 observation-only projection context. The readback operation itself is
 `local_consumer_readback_over_saved_edge_layer_seam_history_proof_summary` and
 does not upgrade saved imports into new public swarm proof.
+
+The public swarm refresh decision reads the saved reproducibility check,
+observation-to-Edge contract, and consumer readback, then recommends
+`not_required_artifacts_stable`. Its operation rung is
+`local_refresh_decision_over_saved_public_hyperswarm_artifacts`; it does not run
+public swarm or prepare a refresh command unless an operator explicitly selects
+that later.
 
 ## Boundary
 

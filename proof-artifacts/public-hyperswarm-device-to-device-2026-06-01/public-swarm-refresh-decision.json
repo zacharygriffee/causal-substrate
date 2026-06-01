@@ -1,0 +1,72 @@
+{
+  "artifactKind": "causal-edge-layer-seam-history-public-swarm-refresh-decision",
+  "schema": "causal-substrate/edge-layer-seam-history-public-swarm-refresh-decision/v1",
+  "schemaVersion": 1,
+  "artifactId": "causal-edge-layer-seam-history-public-swarm-refresh-decision:b15d948708b939ec",
+  "emittedAt": "2026-06-01T19:04:00.000Z",
+  "sourcePaths": {
+    "reproducibilityCheck": "/home/zevilz/work/mesh-ecology/causal-substrate/proof-artifacts/public-hyperswarm-device-to-device-2026-06-01/public-artifact-reproducibility-check.json",
+    "observationToEdgeContract": "/home/zevilz/work/mesh-ecology/causal-substrate/proof-artifacts/public-hyperswarm-device-to-device-2026-06-01/observation-to-edge-projection-contract.json",
+    "proofSummaryConsumerReadback": "/home/zevilz/work/mesh-ecology/causal-substrate/proof-artifacts/public-hyperswarm-device-to-device-2026-06-01/proof-summary-consumer-readback.json"
+  },
+  "decision": {
+    "status": "edge-layer-seam-history-public-swarm-refresh-decision-ready",
+    "recommendation": "not_required_artifacts_stable",
+    "rationale": [
+      "saved public artifact chain is stable; no immediate Causal-owned public refresh is required"
+    ],
+    "publicRefreshCommandPrepared": false,
+    "publicRefreshExecutedByThisDecision": false
+  },
+  "proof": {
+    "strongestSourceProofRungObserved": "public_hyperswarm_replicated_durable_seam_history_observation",
+    "strongestSourceProofLabelObserved": "public_hyperswarm_durable_seam_history_material",
+    "decisionOperationProofRung": "local_refresh_decision_over_saved_public_hyperswarm_artifacts",
+    "savedArtifactDecisionOnly": true,
+    "liveSwarmRunClaimedByThisDecision": false,
+    "proofRungUpgradeClaimed": false
+  },
+  "validation": {
+    "status": "edge-layer-seam-history-public-swarm-refresh-decision-ready",
+    "reproducibilityCheckReady": true,
+    "edgeContractReady": true,
+    "consumerReadbackReady": true,
+    "sourceRefsPreserved": true,
+    "publicSourceProofRungPreserved": true,
+    "noCanonicalHistoryClaim": true,
+    "noLayerAdmissionClaim": true,
+    "noLayerEvidenceAdmissionClaim": true,
+    "noRbcInterpretationClaim": true,
+    "noAuthorityClaim": true,
+    "noMeshPublicationClaim": true,
+    "noEdgeProjectionWriteClaim": true,
+    "noProductionContinuityWriteClaim": true,
+    "noLiveSwarmClaimByThisDecision": true,
+    "issues": []
+  },
+  "boundary": {
+    "refreshDecisionOnly": true,
+    "readsSavedArtifactsOnly": true,
+    "opensSwarm": false,
+    "opensCorestore": false,
+    "runsPublicRefresh": false,
+    "callsEdge": false,
+    "callsLayer": false,
+    "writesEdgeProjection": false,
+    "writesLayerEvidence": false,
+    "acceptsCanonicalHistory": false,
+    "admitsLayerEvidence": false,
+    "decidesLayerAdmission": false,
+    "interpretsRbc": false,
+    "grantsAuthority": false,
+    "publishesToMesh": false,
+    "writesProductionContinuity": false
+  },
+  "reviewStatus": "edge-layer-seam-history-public-swarm-refresh-decision-ready",
+  "warnings": [
+    "public-swarm-refresh-decision-reads-saved-artifacts-only",
+    "public-swarm-refresh-decision-does-not-run-public-swarm",
+    "public-swarm-refresh-decision-does-not-upgrade-proof"
+  ],
+  "rejections": []
+}
