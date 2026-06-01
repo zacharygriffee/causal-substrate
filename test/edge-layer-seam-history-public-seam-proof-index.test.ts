@@ -13,6 +13,7 @@ import {
 
 const execFileAsync = promisify(execFile);
 const publicDeviceRunDir = path.resolve("proof-artifacts/public-hyperswarm-device-to-device-2026-06-01");
+const operatorRefreshRunDir = path.resolve("proof-artifacts/public-hyperswarm-device-to-device-operator-refresh");
 
 test("public seam proof index points at saved public artifacts without upgrading proof", async () => {
   const artifacts = await readPublicDeviceArtifacts();
@@ -51,6 +52,7 @@ test("public seam proof index points at saved public artifacts without upgrading
   assert.equal(index.validation.sourceRefsPreserved, true);
   assert.equal(index.validation.proofLabelsPreserved, true);
   assert.equal(index.validation.publicSourceProofRungPreserved, true);
+  assert.equal(index.validation.configuredBootstrapEvidenceAbsent, true);
   assert.deepEqual(index.validation.issues, []);
   assert.equal(index.indexedArtifacts.length, 7);
   assert.equal(index.preservedRefs.requestIds.length, 2);
@@ -158,15 +160,90 @@ test("public seam proof index rejects weakened refs proof labels and overclaims"
   }
 });
 
+test("refreshed public seam proof index rejects missing refs labels configured bootstrap and overclaims", async () => {
+  const cases: Array<{
+    name: string;
+    mutate: (artifacts: Awaited<ReturnType<typeof readPublicDeviceArtifacts>>) => void;
+    issue: string;
+  }> = [
+    {
+      name: "missing refreshed source refs",
+      mutate: (artifacts) => {
+        const contract = artifacts.observationToEdgeContract as any;
+        contract.validation.sourceRefsMatchBetweenCausalAndEdge = false;
+        contract.preservedRefs.receiptHashes = [];
+      },
+      issue: "source-refs-not-preserved",
+    },
+    {
+      name: "weakened refreshed proof label",
+      mutate: (artifacts) => {
+        const reproducibilityCheck = artifacts.reproducibilityCheck as any;
+        reproducibilityCheck.proof.strongestSourceProofLabelObserved = "local_supplied_material";
+      },
+      issue: "proof-labels-not-preserved",
+    },
+    {
+      name: "configured bootstrap evidence",
+      mutate: (artifacts) => {
+        const sourceManifest = artifacts.sourceManifest as any;
+        sourceManifest.proofPosture = {
+          ...(sourceManifest.proofPosture ?? {}),
+          configuredBootstrapOverride: "127.0.0.1:49737",
+        };
+      },
+      issue: "configured-bootstrap-evidence-present",
+    },
+    {
+      name: "projection authority overclaim",
+      mutate: (artifacts) => {
+        const contract = artifacts.observationToEdgeContract as any;
+        contract.boundary.writesEdgeProjection = true;
+        contract.boundary.grantsAuthority = true;
+      },
+      issue: "indexed-artifact-overclaim",
+    },
+  ];
+
+  for (const testCase of cases) {
+    const artifacts = await readArtifactsFromRunDir(operatorRefreshRunDir);
+    testCase.mutate(artifacts);
+
+    const index = buildEdgeLayerSeamHistoryPublicSeamProofIndex({
+      runId: `public-hyperswarm-device-to-device-operator-refresh:${testCase.name}`,
+      runKind: "device_to_device_public_hyperswarm",
+      artifacts,
+      emittedAt: "2026-06-01T08:07:00.000Z",
+    });
+
+    assertEdgeLayerSeamHistoryPublicSeamProofIndex(index);
+    assert.equal(index.reviewStatus, "edge-layer-seam-history-public-seam-proof-index-incomplete");
+    assert.equal(index.consumerSuitability.edgeMayConsumeAsObservationOnlyIndex, false);
+    assert.equal(index.proof.liveSwarmRunClaimedByThisIndex, false);
+    assert.equal(index.boundary.opensSwarm, false);
+    assert.equal(index.boundary.writesEdgeProjection, false);
+    assert.ok(index.validation.issues.includes(testCase.issue), testCase.name);
+    if (testCase.issue === "configured-bootstrap-evidence-present") {
+      assert.equal(index.validation.configuredBootstrapEvidenceAbsent, false);
+    }
+  }
+});
+
 async function readPublicDeviceArtifacts(): Promise<Parameters<typeof buildEdgeLayerSeamHistoryPublicSeamProofIndex>[0]["artifacts"]> {
+  return readArtifactsFromRunDir(publicDeviceRunDir);
+}
+
+async function readArtifactsFromRunDir(
+  runDir: string,
+): Promise<Parameters<typeof buildEdgeLayerSeamHistoryPublicSeamProofIndex>[0]["artifacts"]> {
   return {
-    sourceManifest: await readJson(path.join(publicDeviceRunDir, "public-source-manifest.json")),
-    replicaReaderReport: await readJson(path.join(publicDeviceRunDir, "public-replica-reader-report.json")),
-    reproducibilityCheck: await readJson(path.join(publicDeviceRunDir, "public-artifact-reproducibility-check.json")),
-    edgeHandoffBundle: await readJson(path.join(publicDeviceRunDir, "edge-projection-handoff-bundle.json")),
-    observationToEdgeContract: await readJson(path.join(publicDeviceRunDir, "observation-to-edge-projection-contract.json")),
-    proofSummaryConsumerReadback: await readJson(path.join(publicDeviceRunDir, "proof-summary-consumer-readback.json")),
-    publicSwarmRefreshDecision: await readJson(path.join(publicDeviceRunDir, "public-swarm-refresh-decision.json")),
+    sourceManifest: await readJson(path.join(runDir, "public-source-manifest.json")),
+    replicaReaderReport: await readJson(path.join(runDir, "public-replica-reader-report.json")),
+    reproducibilityCheck: await readJson(path.join(runDir, "public-artifact-reproducibility-check.json")),
+    edgeHandoffBundle: await readJson(path.join(runDir, "edge-projection-handoff-bundle.json")),
+    observationToEdgeContract: await readJson(path.join(runDir, "observation-to-edge-projection-contract.json")),
+    proofSummaryConsumerReadback: await readJson(path.join(runDir, "proof-summary-consumer-readback.json")),
+    publicSwarmRefreshDecision: await readJson(path.join(runDir, "public-swarm-refresh-decision.json")),
   };
 }
 

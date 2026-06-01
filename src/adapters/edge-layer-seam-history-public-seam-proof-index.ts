@@ -79,6 +79,7 @@ export interface EdgeLayerSeamHistoryPublicSeamProofIndex {
     sourceRefsPreserved: boolean;
     proofLabelsPreserved: boolean;
     publicSourceProofRungPreserved: boolean;
+    configuredBootstrapEvidenceAbsent: boolean;
     noCanonicalHistoryClaim: true;
     noLayerAdmissionClaim: true;
     noLayerEvidenceAdmissionClaim: true;
@@ -176,6 +177,15 @@ export function buildEdgeLayerSeamHistoryPublicSeamProofIndex(input: {
       "public_hyperswarm_replicated_durable_seam_history_observation" &&
     contractValidation?.publicSourceProofRungPreserved === true &&
     refreshDecisionValidation?.publicSourceProofRungPreserved === true;
+  const configuredBootstrapEvidenceAbsent = ![
+    sourceManifest,
+    replicaReaderReport,
+    reproducibilityCheck,
+    edgeHandoffBundle,
+    observationToEdgeContract,
+    proofSummaryConsumerReadback,
+    publicSwarmRefreshDecision,
+  ].some(hasConfiguredBootstrapEvidence);
 
   if (!requiredArtifactsPresent) issues.push("required-index-artifacts-missing");
   if (!reproducibilityCheckReady) issues.push("reproducibility-check-not-ready");
@@ -185,6 +195,7 @@ export function buildEdgeLayerSeamHistoryPublicSeamProofIndex(input: {
   if (!sourceRefsPreserved) issues.push("source-refs-not-preserved");
   if (!proofLabelsPreserved) issues.push("proof-labels-not-preserved");
   if (!publicSourceProofRungPreserved) issues.push("public-source-proof-rung-not-preserved");
+  if (!configuredBootstrapEvidenceAbsent) issues.push("configured-bootstrap-evidence-present");
   if (
     hasOverclaim(reproducibilityCheck) ||
     hasOverclaim(edgeHandoffBundle) ||
@@ -280,6 +291,7 @@ export function buildEdgeLayerSeamHistoryPublicSeamProofIndex(input: {
       sourceRefsPreserved,
       proofLabelsPreserved,
       publicSourceProofRungPreserved,
+      configuredBootstrapEvidenceAbsent,
       noCanonicalHistoryClaim: true,
       noLayerAdmissionClaim: true,
       noLayerEvidenceAdmissionClaim: true,
@@ -348,6 +360,7 @@ export function assertEdgeLayerSeamHistoryPublicSeamProofIndex(
   assertEqual(consumerSuitability.canonicalHistoryClaimed, false, "consumerSuitability.canonicalHistoryClaimed");
   const validation = assertObject(candidate.validation, "validation");
   assertIndexStatus(validation.status, "validation.status");
+  assertBoolean(validation.configuredBootstrapEvidenceAbsent, "validation.configuredBootstrapEvidenceAbsent");
   assertEqual(validation.noCanonicalHistoryClaim, true, "validation.noCanonicalHistoryClaim");
   assertEqual(validation.noLayerAdmissionClaim, true, "validation.noLayerAdmissionClaim");
   assertEqual(validation.noLayerEvidenceAdmissionClaim, true, "validation.noLayerEvidenceAdmissionClaim");
@@ -441,6 +454,55 @@ function hasOverclaim(value: Record<string, unknown> | undefined): boolean {
   ].some((key) => boundary[key] === true);
 }
 
+function hasConfiguredBootstrapEvidence(value: unknown): boolean {
+  if (Array.isArray(value)) return value.some(hasConfiguredBootstrapEvidence);
+  const record = maybeRecord(value);
+  if (!record) return false;
+  return Object.entries(record).some(([key, entry]) => {
+    if (configuredBootstrapEvidenceKey(key) && configuredBootstrapEvidenceValue(entry)) return true;
+    return hasConfiguredBootstrapEvidence(entry);
+  });
+}
+
+function configuredBootstrapEvidenceKey(key: string): boolean {
+  const normalized = key.toLowerCase().replace(/[^a-z0-9]/g, "");
+  if (normalized === "causalsubstratehyperswarmbootstrap") return true;
+  if (!normalized.includes("bootstrap")) return false;
+  if (
+    normalized.includes("unset") ||
+    normalized.includes("absent") ||
+    normalized.includes("disabled") ||
+    normalized.includes("rejected") ||
+    normalized.includes("blocked")
+  ) {
+    return false;
+  }
+  return [
+    "configured",
+    "override",
+    "host",
+    "hosts",
+    "node",
+    "nodes",
+    "peer",
+    "peers",
+    "url",
+    "urls",
+    "env",
+  ].some((term) => normalized.includes(term));
+}
+
+function configuredBootstrapEvidenceValue(value: unknown): boolean {
+  if (typeof value === "boolean") return value === true;
+  if (typeof value === "number") return Number.isFinite(value);
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+    return normalized !== "" && normalized !== "unset" && normalized !== "none";
+  }
+  if (Array.isArray(value)) return value.length > 0;
+  return isRecord(value) && Object.keys(value).length > 0;
+}
+
 function maybeRecord(value: unknown): Record<string, unknown> | undefined {
   return isRecord(value) ? value : undefined;
 }
@@ -462,6 +524,10 @@ function assertEqual(actual: unknown, expected: unknown, label: string): void {
 
 function assertString(value: unknown, label: string): void {
   if (typeof value !== "string" || value.trim() === "") throw new Error(`${label} must be a non-empty string`);
+}
+
+function assertBoolean(value: unknown, label: string): void {
+  if (typeof value !== "boolean") throw new Error(`${label} must be a boolean`);
 }
 
 function assertIndexStatus(

@@ -49,6 +49,16 @@ These artifacts read saved Causal and Edge artifacts only. They preserve the
 public source proof rung for consumers but do not call Edge, write Edge
 projection state, or upgrade proof.
 
+The refreshed saved-artifact chain was then indexed for consumers:
+
+- `public-swarm-refresh-decision.json`
+- `public-seam-proof-index.json`
+
+The refresh decision and index are local saved-artifact operations. They point
+at refreshed public-run material, preserve request/receipt refs and public
+source proof labels, reject configured-bootstrap evidence, and do not claim a
+new live swarm run.
+
 ## Prepared Public Commands
 
 Run the source command on `platform-lab`:

@@ -137,6 +137,10 @@ The local supplied-material lane can now:
   projection input, derive a refreshed observation-to-Edge projection contract
   and consumer readback from saved artifacts only, preserving the public source
   proof rung without upgrading the contract/readback operations.
+- index the refreshed public run through a local saved-artifact refresh
+  decision and proof index, preserving source refs and public source proof
+  labels while rejecting configured-bootstrap evidence and projection or
+  authority overclaims.
 
 Strongest routinely proven rung in normal tests:
 `local_causal_observation_over_supplied_seam_history_material`.
@@ -154,13 +158,15 @@ run:
 
 ## Next Outward Moves
 
-The current saved-artifact readiness list is complete. Build the next list
-around an explicit operator-run public swarm refresh, if the operator chooses
+The current refreshed saved-artifact readiness list is complete. Build the next
+list around a new explicit public swarm objective only if the operator chooses
 to run one:
 
-- index the refreshed public run and add a negative refreshed-index case that
-  rejects missing refs, weakened proof labels, configured bootstrap evidence,
-  or projection/authority overclaims;
+- prepare the next public-swarm-only device objective from the refreshed proof
+  index, with `CAUSAL_SUBSTRATE_HYPERSWARM_BOOTSTRAP` unset and no testnet or
+  configured bootstrap;
+- optionally hand `public-seam-proof-index.json` to Edge, Layer, or Spine as an
+  observation-only consumer index;
 - defer ontology, referent promotion, canonical continuity, RBC, Mesh,
   authority, Layer admission, and production continuity.
 
