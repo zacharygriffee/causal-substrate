@@ -69,6 +69,12 @@ The local supplied-material lane can now:
 - keep the real Hyperswarm proof-run instructions artifact current with saved
   report import/readback and handoff bundle readback commands while labeling
   them as lower proof unless the gated reader actually runs.
+- summarize saved seam-history observation/readback artifacts through a CLI
+  while preserving the strongest source proof label without upgrading supplied
+  material;
+- document the exact live public Hyperswarm report to Edge handoff bundle
+  artifact chain, including single-machine and device-to-device public paths,
+  while keeping import/readback-only steps labeled as lower proof.
 
 Strongest routinely proven rung in normal tests:
 `local_causal_observation_over_supplied_seam_history_material`.
@@ -76,25 +82,19 @@ Strongest routinely proven rung in normal tests:
 The real Hyperswarm reader remains a higher proof lane only when the
 environment-gated command actually runs against durable replicated material.
 
-## Good Next Moves
+## Next Outward Moves
 
-Choose work that improves bounded causal observation:
+These are not complete until a command actually runs against public
+Hyperswarm-derived durable seam history:
 
-- Add a disk/CLI readback path for the combined Edge/Layer consumer contract
-  snapshot, preserving seam classifications, Layer runtime refs, proof labels,
-  and non-claims.
-- Add malformed/non-object negative CLI cases for saved handoff bundle and
-  combined snapshot readbacks.
-- Add a compact source-ref completeness report for the combined Edge/Layer
-  consumer contract snapshot.
-- Add an operation-shaped command that derives a handoff bundle from a saved
-  real Hyperswarm reader report after the report readback validates.
-- Add a proof-summary command that reads observation/readback artifacts and
-  reports the strongest honestly proven rung without upgrading supplied
-  material.
-- Add real-run documentation for the exact artifact chain from live
-  Hyperswarm reader report to Edge handoff bundle, while keeping local/import
-  runs labeled as lower proof.
+- Run the single-machine public Hyperswarm reader chain from
+  `docs/edge-layer-seam-history-public-run.md` and preserve the report,
+  report readback, handoff bundle, handoff readback, and proof summary.
+- Run the device-to-device public source/replica chain from
+  `docs/edge-layer-seam-history-public-run.md` using two standby devices and
+  preserve the replica report plus downstream handoff artifacts.
+- Feed the resulting Edge handoff bundle to Edge as observation-only projection
+  input, without Causal Substrate writing Edge projection state.
 
 ## Handoff Expectations
 
