@@ -196,6 +196,41 @@ Strongest latest saved-artifact consumer handoff rung:
 Strongest latest saved-artifact consumer readback rung:
 `local_readback_over_saved_public_proof_index_consumer_handoff`.
 
+## Operational Proof-Rung Discipline
+
+A seam is any repo-to-repo interpolation. Local artifacts, saved readbacks,
+repo handoffs, receipts, runtime contact, swarm contact, and public durable
+replicated contact can all be seams, but every seam must carry its proof rung.
+The objective decides which rung is sufficient.
+
+Preferred rung vocabulary for new Causal-facing work:
+
+- `local_artifact_seam`
+- `saved_readback_seam`
+- `consumer_handoff_seam`
+- `local_runtime_seam`
+- `swarm_discovered_seam`
+- `public_swarm_seam`
+- `durable_replicated_public_swarm_seam`
+
+No new lower-rung seam expansion should be added unless it names the
+swarm-rung, public-swarm-rung, or durable-replicated-rung pressure it serves.
+If proposed Causal work is below the swarm rung, state:
+
+- what proof rung it occupies;
+- what higher rung it prepares, preserves, or protects;
+- what overclaim it prevents;
+- why it is not horizontal expansion below swarm;
+- what live swarm-carried objective remains next.
+
+Lower-rung Causal work is valid for shape compatibility, consumer validation,
+adapter validation, readback preservation, negative overclaim testing, operator
+inspection, preservation or indexing of material derived from a stronger live
+seam, or preparation for the next swarm/public-swarm attempt. It must not be
+described as swarm proof, public seam proof, durable replicated proof,
+production continuity, Layer admission, RBC evaluation, Mesh dispatch, or
+authority.
+
 ## Next Outward Moves
 
 The current refreshed saved-artifact readiness, consumer handoff, next public
@@ -221,7 +256,8 @@ or waiting for fresh Edge/Layer public material:
   public swarm proof unless Causal itself reopens and reads durable replicated
   seam history over public Hyperswarm;
 - do not add another saved-artifact expansion unless it removes a real
-  consumer ambiguity or guards a real overclaim risk;
+  consumer ambiguity or guards a real overclaim risk, and names the stronger
+  swarm/public-swarm pressure it serves;
 - defer ontology, referent promotion, canonical continuity, RBC, Mesh,
   authority, Layer admission, and production continuity.
 
@@ -261,8 +297,11 @@ admission, or grant authority.
 
 ## Guardrail
 
-No swarm-carried communication, no seam proof. A Causal observation over
-supplied material is useful, but it is not DHT/Hyperswarm-derived seam proof.
+Lower-rung seam proof is valid when it proves artifact compatibility, saved
+readback, consumer handoff, or local observation. It is not swarm-derived seam
+proof. Public swarm seam proof requires swarm-carried contact; durable
+replicated public swarm seam proof requires durable write, replication, reopen,
+and readback through the declared public swarm path.
 
 Instructions artifacts, readiness reports, static fixtures, JSON files, and
 operation-shaped report readbacks are lower proof rungs unless the reader
