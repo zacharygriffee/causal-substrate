@@ -292,6 +292,13 @@ The local supplied-material lane can now:
   changing proof rung; this is adapter validation for the next concrete Edge
   handoff artifact, not a substitute for the handed artifact and not live
   Causal swarm proof.
+- inspect Edge for a concrete compatible Causal handoff export artifact and
+  record the result in
+  `docs/edge-compatible-handoff-artifact-scan-2026-06-03.md`; this is
+  `local_artifact_seam` operator inspection only, found no current Edge
+  handoff export JSON in `proof-artifacts/`, and prevents treating Edge CLI
+  capability, tests, dirty worktree state, or Causal-generated smoke material
+  as handed Edge artifact proof.
 
 Strongest routinely proven rung in normal tests:
 `local_causal_observation_over_supplied_seam_history_material`.
@@ -547,7 +554,13 @@ Immediate objective list:
    or broaden local fixtures around a missing artifact. The useful Causal work
    is to consume the handed Edge export as `saved_readback_seam`, preserve
    refs/non-claims, and classify it without claiming live Causal swarm proof.
-24. Coordination pressure: Layer's concrete export pressure is satisfied for
+24. Completed local inspection: Edge current head exposes compatible Causal
+   handoff export capability, but no concrete current Edge compatible handoff
+   export JSON was present in Edge `proof-artifacts/` during Causal inspection.
+   See `docs/edge-compatible-handoff-artifact-scan-2026-06-03.md`. Causal
+   should not use Edge source code, tests, dirty worktree changes, or a local
+   Causal-generated smoke as a substitute for the handed artifact.
+25. Coordination pressure: Layer's concrete export pressure is satisfied for
    now; Edge is the current missing handoff-artifact source. Causal may
    continue consuming actual Layer public proof files when a concrete question
    exists, but the next repo-family convergence move is Edge handoff
