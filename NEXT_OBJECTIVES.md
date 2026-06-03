@@ -822,13 +822,17 @@ or deliberately consuming fresh Edge/Layer public material:
 - fresh Edge/Layer material should now mean current lifecycle material, not
   older retained handoff loops. Prefer running the adjacent-material path over
   actual handed outputs from:
-  - Edge `671c3c0c1df1f39649bc33628eaf682c992e8c41`, once its
-    `compatible-public-process-up/probe/status/down` path has produced a
-    sanitized public/default or device-boundary process export with linked
-    result or unresolved flake evidence.
-  - Layer `55cd561b03d25e470e68624542e18bd9c83bcd5e`, if Edge or Spine needs
-    Causal to observe the held participant handoff output as saved adjacent
-    material.
+  - Edge's current `edge-public-process-device-boundary-attempt` material only
+    after Edge sanitizes committed runtime paths in the packet, manifest, and
+    process artifact copies. Treat the current attempt as same-device/default
+    public or saved-readback lifecycle evidence unless a returned second-host
+    artifact proves an actual device boundary.
+  - Layer's current two-device public device-boundary lab output only after the
+    compatible-client result has been returned and classified. Causal may
+    observe `device_boundary_public_swarm_complete` or
+    `unresolved_public_swarm_timeout` as bounded causal input, but must preserve
+    Layer receipt/evidence refs without admitting evidence, deciding Layer
+    policy, or upgrading proof beyond what Layer's result actually claims.
   Reading Edge/Layer-derived durable replicated seam history through public
   Hyperswarm remains stronger than another saved-artifact expansion, but only
   if Causal itself performs that durable public reader operation.
