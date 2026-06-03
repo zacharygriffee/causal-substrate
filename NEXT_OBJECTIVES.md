@@ -483,6 +483,33 @@ client is a proof probe, not a canonical operator surface and not a side-channel
 authority. It must not write Edge or Layer state, admit Layer evidence, decide
 canonical history, interpret RBC, publish Mesh, or grant authority.
 
+## Device-Boundary Observation Guardrail
+
+Causal may consume public device-boundary artifacts only as sanitized causal
+input material unless Causal itself performs the durable public-swarm reader
+operation. The useful next device-boundary input is a concrete Edge/Layer
+artifact set that preserves request/receipt ids and hashes, writer refs,
+durable feed/readback refs, source proof rung, transport observations,
+linkage/unresolved status, warnings, and non-claims.
+
+Do not add or publish SSH orchestration details in Causal artifacts or docs.
+No concrete SSH host aliases, LAN IPs, usernames, identity-file paths,
+known-host fingerprints, or device-local private paths should be committed in
+Causal. If a handed artifact includes those details, either reject it as
+unsuitable for tracked Causal proof material or preserve only sanitized logical
+device refs such as `<edge-device>` and `<layer-device>`.
+
+SSH is setup/control evidence only. It is not the seam and must not upgrade any
+Causal observation. Causal proof can upgrade only when Causal reads durable
+replicated seam history through the declared public swarm path, or when it
+honestly reports a lower-rung saved-material observation over artifacts produced
+by Edge/Layer.
+
+Use the prototype's unresolved public-swarm posture and `mesh-v0-2`
+waiter/retry examples as references for flakiness: bounded phases, retry
+evidence, timeout/unresolved classification, and no success claim when public
+swarm or durable readback does not converge.
+
 Next Causal progress should produce one of:
 
 - completed locally: a public observer `up/status/down` lane plus one-shot
@@ -756,16 +783,17 @@ Immediate objective list:
    overclaim risk to guard, or fresh Edge/Layer live public-swarm material
    intended for direct Causal reading.
 32. Current adjacent pressure: Edge commit
-   `ccad5b6361da4bb0b662eb97138a868d21a33864` adds
-   `compatible-public-process-up/probe/status/down`, but the green process
-   lifecycle test path is still local-bootstrapper scoped. Causal should wait
-   for the public/default HyperDHT execution result, or a preserved unresolved
-   flake packet, before claiming a new Edge public process observation.
+   `671c3c0c1df1f39649bc33628eaf682c992e8c41` preserves
+   `compatible-public-process-up/probe/status/down`, default-public same-device
+   results, and unresolved device-boundary-missing packets. Causal should wait
+   for a concrete sanitized process export or returned device-boundary artifact
+   before claiming a new Edge public process observation.
 33. Current Layer support pressure: Layer commit
-   `3e23ab27c01d1c195cfe5945b98dc471cbc9a850` adds a held default-public
-   participant smoke. Causal may consume its committed output as saved adjacent
-   material if a consumer needs that observation, but must not label that saved
-   artifact as Causal's own live public-swarm read.
+   `55cd561b03d25e470e68624542e18bd9c83bcd5e` adds a held participant
+   consumer handoff surface. Causal may consume its committed output as saved
+   adjacent material if a consumer needs that observation, but must not label
+   that saved artifact as Causal's own live public-swarm read or publish SSH
+   setup details.
 
 This is not permission to claim Edge/Layer public seam proof. Causal may claim
 that only after it actually consumes Edge/Layer-derived durable public-swarm
@@ -794,12 +822,12 @@ or deliberately consuming fresh Edge/Layer public material:
 - fresh Edge/Layer material should now mean current lifecycle material, not
   older retained handoff loops. Prefer running the adjacent-material path over
   actual handed outputs from:
-  - Edge `ccad5b6361da4bb0b662eb97138a868d21a33864`, once its
-    `compatible-public-process-up/probe/status/down` path has been executed
-    against default public HyperDHT or a second-host compatible endpoint and
-    preserved linked result or unresolved flake evidence.
-  - Layer `3e23ab27c01d1c195cfe5945b98dc471cbc9a850`, if Edge or Spine needs
-    Causal to observe the held public participant output as saved adjacent
+  - Edge `671c3c0c1df1f39649bc33628eaf682c992e8c41`, once its
+    `compatible-public-process-up/probe/status/down` path has produced a
+    sanitized public/default or device-boundary process export with linked
+    result or unresolved flake evidence.
+  - Layer `55cd561b03d25e470e68624542e18bd9c83bcd5e`, if Edge or Spine needs
+    Causal to observe the held participant handoff output as saved adjacent
     material.
   Reading Edge/Layer-derived durable replicated seam history through public
   Hyperswarm remains stronger than another saved-artifact expansion, but only
