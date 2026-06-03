@@ -108,6 +108,54 @@ test("classifies unresolved Layer readiness without treating timeout or missing 
   assert.equal(observation.proof.liveCausalSwarmProofClaimed, false);
 });
 
+test("observes Layer public seam lifecycle smoke without inventing missing ids", () => {
+  const observation = buildAdjacentPublicMaterialObservation({
+    layerPublicMaterial: buildLayerLifecycleSmoke(),
+    emittedAt: "2026-06-03T18:02:30.000Z",
+  });
+
+  assertAdjacentPublicMaterialObservation(observation);
+  assert.equal(observation.classification, "compatible");
+  assert.equal(observation.sourceClassifications.layer, "compatible");
+  assert.equal(observation.proof.operationProofRung, "saved_readback_seam");
+  assert.equal(observation.proof.strongestSourceProofRungObserved, "default_public_hyperdht_hyperswarm_feed_backed");
+  assert.equal(observation.proof.layerPublicProofObserved, true);
+  assert.equal(observation.proof.liveCausalSwarmProofClaimed, false);
+  assert.equal(observation.validation.layerRefsPreserved, true);
+  assert.equal(observation.validation.layerRequestReceiptEvidenceLinked, true);
+  assert.deepEqual(observation.preservedRefs.requestIds, []);
+  assert.deepEqual(observation.preservedRefs.receiptIds, []);
+  assert.deepEqual(observation.preservedRefs.requestHashes, [`sha256:${"6".repeat(64)}`]);
+  assert.deepEqual(observation.preservedRefs.receiptHashes, [`sha256:${"7".repeat(64)}`]);
+  assert.deepEqual(observation.preservedRefs.evidenceIds, ["layer-owned-edge-seam-evidence:lifecycle:2"]);
+  assert.ok(observation.preservedRefs.durableRefs.includes("layer-public-seam-lifecycle-smoke"));
+  assert.ok(observation.preservedRefs.durableRefs.includes("b".repeat(64)));
+  assert.ok(observation.preservedRefs.writerRefs.includes("autobase-writer:layer-lifecycle"));
+  assert.ok(observation.preservedRefs.linkageStatuses.includes("layer_public_seam_lifecycle_linked"));
+  assert.ok(observation.preservedRefs.linkageStatuses.includes("linkedPairCount:2"));
+  assert.equal(observation.boundary.opensSwarm, false);
+  assert.equal(observation.boundary.admitsLayerEvidence, false);
+});
+
+test("classifies unresolved Layer lifecycle smoke linkage without upgrading proof", () => {
+  const material = buildLayerLifecycleSmoke();
+  material.status.unlinkedCount = 1;
+  material.lifecycleStatus = "public_seam_lifecycle_completed_with_unresolved_history";
+
+  const observation = buildAdjacentPublicMaterialObservation({
+    layerPublicMaterial: material,
+    emittedAt: "2026-06-03T18:02:45.000Z",
+  });
+
+  assertAdjacentPublicMaterialObservation(observation);
+  assert.equal(observation.classification, "unresolved");
+  assert.equal(observation.sourceClassifications.layer, "unresolved");
+  assert.ok(observation.validation.issues.includes("layer-lifecycle-linkage-unresolved"));
+  assert.equal(observation.proof.layerPublicProofObserved, true);
+  assert.equal(observation.proof.liveCausalSwarmProofClaimed, false);
+  assert.equal(observation.boundary.opensSwarm, false);
+});
+
 test("observes Edge compatible handoff readback as lower-rung exported material", () => {
   const observation = buildAdjacentPublicMaterialObservation({
     edgeHandoffReadback: {
@@ -250,6 +298,73 @@ function buildLayerPublicMaterial(): any {
         rbcEnforced: false,
       },
     },
+  };
+}
+
+function buildLayerLifecycleSmoke(): any {
+  return {
+    artifactKind: "layer_public_seam_lifecycle_smoke_result",
+    schemaVersion: "layer-public-seam-lifecycle-smoke-result.v0",
+    createdAt: "2026-05-30T00:00:00.000Z",
+    namespace: "layer-public-seam-lifecycle-smoke",
+    sourceStorageRoot: "/tmp/layer-public-seam-source",
+    layerStorageRoot: "/tmp/layer-public-seam-layer",
+    autobaseKey: "a".repeat(64),
+    strongestProofRung: "default_public_hyperdht_hyperswarm_feed_backed",
+    lifecycleStatus: "public_seam_lifecycle_completed_with_durable_readback",
+    up: {
+      artifactKind: "layer_public_seam_up_descriptor",
+      endpointDescriptor: {
+        transportKind: "hyperswarm",
+        bootstrapMode: "default_public_hyperdht",
+        defaultPublicHyperDht: true,
+        topicHex: "b".repeat(64),
+        autobaseKey: "a".repeat(64),
+        namespace: "layer-public-seam-lifecycle-smoke",
+        layerWriterRef: "autobase-writer:layer-lifecycle",
+        reportOnly: true,
+      },
+    },
+    status: {
+      artifactKind: "layer_public_seam_status",
+      lifecycleState: "receipt_evidence_observed",
+      requestCount: 2,
+      receiptCount: 2,
+      evidenceCount: 2,
+      linkedPairCount: 2,
+      unlinkedCount: 0,
+      latestRequestHash: `sha256:${"6".repeat(64)}`,
+      latestReceiptHash: `sha256:${"7".repeat(64)}`,
+      latestEvidenceRef: "layer-owned-edge-seam-evidence:lifecycle:2",
+      derivedFromReopenedDurableHistory: true,
+    },
+    down: {
+      lifecycleState: "participant_stopped_cleanly_after_smoke",
+      durableHistoryRemainsReadable: true,
+    },
+    operationProof: {
+      publicHyperDhtParticipantStarted: true,
+      defaultPublicHyperDhtObserved: true,
+      swarmConnectionObserved: true,
+      durableRequestObservedByLayer: true,
+      layerOwnedReceiptEmitted: true,
+      receiptCausallyReferencesRequest: true,
+      layerLocalEvidenceRecorded: true,
+      reopenedReadbackRecoveredHistory: true,
+      participantStoppedBeforeFinalReadback: true,
+      layerMutationOccurred: false,
+      evidenceAdmissionOccurred: false,
+      authorityGrantOccurred: false,
+      rbcEnforced: false,
+    },
+    reportOnly: true,
+    readOnly: true,
+    mutatesLayer: false,
+    admitsEvidence: false,
+    acceptsResult: false,
+    executesWork: false,
+    grantsAuthority: false,
+    rbcEnforced: false,
   };
 }
 

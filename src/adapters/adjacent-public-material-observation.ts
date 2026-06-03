@@ -106,6 +106,7 @@ interface SourceAssessment {
   layerPublicBoundaryPreserved?: boolean | undefined;
   layerCausalReadinessAccepted?: boolean | undefined;
   layerRequestReceiptEvidenceLinked?: boolean | undefined;
+  layerLifecycleObserved?: boolean | undefined;
   edgeReadbackOnly?: boolean | undefined;
   edgeProofRungNotUpgraded?: boolean | undefined;
 }
@@ -280,6 +281,9 @@ function assessLayerPublicMaterial(value: unknown): SourceAssessment {
   if (value === undefined) return emptyAssessment("unresolved");
   const material = maybeRecord(value);
   if (!material) return withIssue(emptyAssessment("unresolved"), "layer-material-not-object");
+  if (material.artifactKind === "layer_public_seam_lifecycle_smoke_result") {
+    return assessLayerPublicSeamLifecycleSmoke(material);
+  }
 
   const readiness = maybeRecord(material.objectiveProof)?.causalReadiness &&
       maybeRecord(maybeRecord(material.objectiveProof)?.causalReadiness)
@@ -374,6 +378,90 @@ function assessLayerPublicMaterial(value: unknown): SourceAssessment {
   };
 }
 
+function assessLayerPublicSeamLifecycleSmoke(material: Record<string, unknown>): SourceAssessment {
+  const status = maybeRecord(material.status);
+  const up = maybeRecord(material.up);
+  const endpointDescriptor = maybeRecord(up?.endpointDescriptor);
+  const operationProof = maybeRecord(material.operationProof);
+  const issues: string[] = [];
+  const strongestProofRung = stringValue(material.strongestProofRung);
+  const latestRequestHash = stringValue(status?.latestRequestHash);
+  const latestReceiptHash = stringValue(status?.latestReceiptHash);
+  const latestEvidenceRef = stringValue(status?.latestEvidenceRef);
+  const linkedPairCount = numberValue(status?.linkedPairCount);
+  const requestCount = numberValue(status?.requestCount);
+  const receiptCount = numberValue(status?.receiptCount);
+  const evidenceCount = numberValue(status?.evidenceCount);
+  const unlinkedCount = numberValue(status?.unlinkedCount);
+  const publicBoundary =
+    endpointDescriptor?.bootstrapMode === "default_public_hyperdht" &&
+    endpointDescriptor?.defaultPublicHyperDht === true &&
+    operationProof?.publicHyperDhtParticipantStarted === true &&
+    operationProof?.defaultPublicHyperDhtObserved === true &&
+    operationProof?.swarmConnectionObserved === true &&
+    operationProof?.reopenedReadbackRecoveredHistory === true;
+  const linked =
+    latestRequestHash !== undefined &&
+    latestReceiptHash !== undefined &&
+    latestEvidenceRef !== undefined &&
+    (linkedPairCount ?? 0) > 0 &&
+    (requestCount ?? 0) > 0 &&
+    (receiptCount ?? 0) > 0 &&
+    (evidenceCount ?? 0) > 0 &&
+    (unlinkedCount ?? 0) === 0 &&
+    operationProof?.receiptCausallyReferencesRequest === true;
+  const lifecycleComplete =
+    material.lifecycleStatus === "public_seam_lifecycle_completed_with_durable_readback" ||
+    material.lifecycleStatus === "public_seam_lifecycle_completed_with_unresolved_history";
+
+  if (!latestRequestHash) issues.push("layer-lifecycle-latest-request-hash-missing");
+  if (!latestReceiptHash) issues.push("layer-lifecycle-latest-receipt-hash-missing");
+  if (!latestEvidenceRef) issues.push("layer-lifecycle-latest-evidence-ref-missing");
+  if (!linked) issues.push("layer-lifecycle-linkage-unresolved");
+  if (!publicBoundary) issues.push("layer-lifecycle-public-boundary-not-preserved");
+  if (!lifecycleComplete) issues.push("layer-lifecycle-status-not-complete");
+  if (hasAuthorityOverclaim(material) || hasAuthorityOverclaim(operationProof)) {
+    issues.push("layer-adjacent-material-overclaim");
+  }
+  if (operationProof?.rbcEnforced === true || material.rbcEnforced === true) issues.push("layer-rbc-overclaim");
+
+  return {
+    classification: issues.some((issue) => issue.includes("overclaim"))
+      ? "damaged"
+      : issues.length > 0
+        ? "unresolved"
+        : "compatible",
+    requestIds: [],
+    requestHashes: arrayOf(latestRequestHash),
+    receiptIds: [],
+    receiptHashes: arrayOf(latestReceiptHash),
+    evidenceIds: arrayOf(latestEvidenceRef),
+    evidenceHashes: [],
+    durableRefs: collectStrings([
+      material.namespace,
+      material.sourceStorageRoot,
+      material.layerStorageRoot,
+      material.autobaseKey,
+      endpointDescriptor?.topicHex,
+      endpointDescriptor?.autobaseKey,
+      endpointDescriptor?.namespace,
+    ]),
+    writerRefs: collectStrings([endpointDescriptor?.layerWriterRef]),
+    sourceRepos: ["mesh-ecology-layer"],
+    proofRungs: collectStrings([strongestProofRung]),
+    linkageStatuses: collectStrings([
+      linked ? "layer_public_seam_lifecycle_linked" : undefined,
+      typeof linkedPairCount === "number" ? `linkedPairCount:${linkedPairCount}` : undefined,
+      typeof unlinkedCount === "number" ? `unlinkedCount:${unlinkedCount}` : undefined,
+    ]),
+    issues,
+    layerPublicBoundaryPreserved: publicBoundary,
+    layerCausalReadinessAccepted: lifecycleComplete,
+    layerRequestReceiptEvidenceLinked: linked,
+    layerLifecycleObserved: true,
+  };
+}
+
 function assessEdgeHandoffReadback(value: unknown): SourceAssessment {
   if (value === undefined) return emptyAssessment("unresolved");
   const container = maybeRecord(value);
@@ -425,6 +513,13 @@ function assessEdgeHandoffReadback(value: unknown): SourceAssessment {
 }
 
 function hasLayerRefs(assessment: SourceAssessment): boolean {
+  if (assessment.layerLifecycleObserved === true) {
+    return assessment.requestHashes.length > 0 &&
+      assessment.receiptHashes.length > 0 &&
+      assessment.evidenceIds.length > 0 &&
+      assessment.durableRefs.length > 0 &&
+      assessment.writerRefs.length > 0;
+  }
   return assessment.requestIds.length > 0 &&
     assessment.requestHashes.length > 0 &&
     assessment.receiptIds.length > 0 &&
@@ -432,6 +527,10 @@ function hasLayerRefs(assessment: SourceAssessment): boolean {
     assessment.evidenceIds.length > 0 &&
     assessment.evidenceHashes.length > 0 &&
     assessment.writerRefs.length > 0;
+}
+
+function numberValue(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
 }
 
 function hasEdgeRefs(assessment: SourceAssessment): boolean {

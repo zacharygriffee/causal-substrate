@@ -528,6 +528,17 @@ retained descriptor material into live Causal public-swarm observation. Next
 still requires a fresh Edge/Layer lifecycle source manifest or equivalent
 Causal-observable public descriptor.
 
+Completed saved observation: after Layer produced
+`proof-artifacts/layer-public-seam-lifecycle-smoke-latest.json`, Causal
+consumed it under
+`proof-artifacts/adjacent-layer-public-lifecycle-smoke-2026-06-03/`. This is
+`saved_readback_seam`; it preserves the Layer lifecycle smoke's latest
+request/receipt hashes, latest evidence ref, durable storage/topic/autobase
+refs, writer ref, source proof rung, and linkage counts without inventing
+missing request/receipt ids. It does not claim live Causal public-swarm proof.
+Next still requires direct public-observer use over a Causal-observable source
+manifest or equivalent live Edge/Layer lifecycle descriptor.
+
 ## RBC Creation Tripwire
 
 Do not create or depend on `mesh-ecology-rbc` to make the first Edge/Layer/Causal
