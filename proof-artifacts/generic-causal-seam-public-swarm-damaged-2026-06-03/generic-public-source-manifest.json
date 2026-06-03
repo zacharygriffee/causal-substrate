@@ -1,0 +1,61 @@
+{
+  "artifactKind": "generic-causal-seam-public-source-manifest",
+  "schema": "causal-substrate/generic-causal-seam-public-source-manifest/v1",
+  "schemaVersion": 1,
+  "emittedAt": "2026-06-03T16:00:00.000Z",
+  "lane": "generic_causal_seam_public_swarm",
+  "namespaceParts": [
+    "causal-substrate",
+    "v1",
+    "generic-causal-seam-public-swarm",
+    "generic",
+    "causal",
+    "seam",
+    "public",
+    "damaged",
+    "hash-mismatch",
+    "2026-06-03"
+  ],
+  "source": {
+    "sourceCoreKeyHex": "5c05351ab65388f916878d4d04583f90976543e26d97bba7a166da849d6efa73",
+    "topicHex": "7677a6a1ed6bbe5c5eddda3514822f0072c214c2b0c91f333752b4b479ca3176",
+    "sourceRecordId": "generic-causal-seam-durable-record:42feb76c32e607c0",
+    "seamHistoryHash": "sha256:d88b3fa515ed1f8e3c64c3624fe5d2b57aaa688d54eafa9792db97eefdc58634",
+    "sourceRefs": [
+      "generic-public-seam-history:2026-06-03:damaged-hash-mismatch",
+      "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+      "neutral-source-repo",
+      "neutral-receipt-repo",
+      "neutral/request/v1",
+      "neutral/receipt/v1",
+      "generic-core:request:damaged:0",
+      "generic-core:receipt:damaged:1",
+      "generic-writer:request:damaged",
+      "generic-writer:receipt:damaged",
+      "generic-request:2026-06-03:hash-mismatch",
+      "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "generic-receipt:2026-06-03:hash-mismatch",
+      "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "neutral_generic_damaged_seam_history_material"
+    ]
+  },
+  "proofPosture": {
+    "sourceManifestOnly": true,
+    "publicSwarmObservationProofClaimedNow": false,
+    "replicaMustReadDurableMaterial": true,
+    "lowerProofRungsRemainLowerUntilReplicaReport": true
+  },
+  "boundary": {
+    "acceptsCanonicalHistory": false,
+    "admitsLayerEvidence": false,
+    "interpretsRbc": false,
+    "grantsAuthority": false,
+    "publishesToMesh": false,
+    "writesProductionContinuity": false,
+    "opensSwarmBySourceCommand": true,
+    "opensCorestoreBySourceCommand": true,
+    "writesDurableHistoryBySourceCommand": true,
+    "replicaReadProvenByThisArtifact": false
+  }
+}

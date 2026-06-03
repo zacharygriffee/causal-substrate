@@ -1,0 +1,68 @@
+{
+  "historyId": "generic-public-seam-history:2026-06-03:damaged-hash-mismatch",
+  "historyHash": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+  "sourceRepos": [
+    "neutral-source-repo",
+    "neutral-receipt-repo"
+  ],
+  "sourceSchemaRefs": [
+    "neutral/request/v1",
+    "neutral/receipt/v1"
+  ],
+  "transportProof": {
+    "evidenceSource": "local_artifact_fixture",
+    "publicSwarmTransportHappened": false,
+    "testnetSwarmTransportHappened": false,
+    "controlPlaneOnly": true,
+    "durableFeedBackedHistoryObserved": false,
+    "receivingRepoObservedReplicatedPath": false,
+    "receiptOrResultCausallyReferencesSources": true
+  },
+  "durableRefs": [
+    "generic-core:request:damaged:0",
+    "generic-core:receipt:damaged:1"
+  ],
+  "writerRefs": [
+    "generic-writer:request:damaged",
+    "generic-writer:receipt:damaged"
+  ],
+  "requests": [
+    {
+      "id": "generic-request:2026-06-03:hash-mismatch",
+      "hash": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "sourceRepo": "neutral-source-repo",
+      "durableRef": "generic-core:request:damaged:0",
+      "writerRef": "generic-writer:request:damaged",
+      "schemaRef": "neutral/request/v1",
+      "observedProofRung": "local_artifact_seam"
+    }
+  ],
+  "receipts": [
+    {
+      "id": "generic-receipt:2026-06-03:hash-mismatch",
+      "hash": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "sourceRepo": "neutral-receipt-repo",
+      "durableRef": "generic-core:receipt:damaged:1",
+      "writerRef": "generic-writer:receipt:damaged",
+      "schemaRef": "neutral/receipt/v1",
+      "sourceRequestId": "generic-request:2026-06-03:hash-mismatch",
+      "sourceRequestHash": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "observedProofRung": "local_artifact_seam"
+    }
+  ],
+  "evidenceRefs": [],
+  "linkage": [
+    {
+      "requestId": "generic-request:2026-06-03:hash-mismatch",
+      "requestHash": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "receiptId": "generic-receipt:2026-06-03:hash-mismatch",
+      "receiptHash": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+    }
+  ],
+  "proofLabels": [
+    "neutral_generic_damaged_seam_history_material"
+  ],
+  "warnings": [
+    "fixture-intentionally-hash-mismatch"
+  ]
+}

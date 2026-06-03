@@ -1,0 +1,125 @@
+{
+  "schema": "causal-substrate/generic-causal-seam-observation/v1",
+  "schemaVersion": 1,
+  "repo": "causal-substrate",
+  "lane": "generic-causal-seam-surface",
+  "proofCommand": "run-generic-causal-seam-public-replica-device",
+  "generatedAt": "2026-06-03T16:01:00.000Z",
+  "observationId": "generic-causal-seam-observation:728e7d8b87309592",
+  "observationHash": "sha256:21a22a3480f6ade16fc3ad3c1f5b8ff270f7216420b37c5a389c1e8fb782061d",
+  "observedHistoryId": "generic-public-seam-history:2026-06-03:damaged-hash-mismatch",
+  "observedHistoryHash": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+  "sourceRefsPreserved": {
+    "requestIds": [
+      "generic-request:2026-06-03:hash-mismatch"
+    ],
+    "requestHashes": [
+      "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+    ],
+    "receiptIds": [
+      "generic-receipt:2026-06-03:hash-mismatch"
+    ],
+    "receiptHashes": [
+      "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+    ],
+    "sourceRepos": [
+      "neutral-source-repo",
+      "neutral-receipt-repo"
+    ],
+    "durableRefs": [
+      "generic-core:request:damaged:0",
+      "generic-core:receipt:damaged:1"
+    ],
+    "writerRefs": [
+      "generic-writer:request:damaged",
+      "generic-writer:receipt:damaged"
+    ],
+    "evidenceIds": []
+  },
+  "strongestProofRung": "durable_replicated_public_swarm_seam",
+  "operationProofRung": "durable_replicated_public_swarm_seam",
+  "sourceProofRung": "durable_replicated_public_swarm_seam",
+  "finalClassification": "damaged",
+  "classification": "damaged",
+  "classifiedHappenings": [
+    {
+      "happeningId": "generic-causal-happening:d6383e4db9639a3c",
+      "classification": "hash_mismatch",
+      "requestId": "generic-request:2026-06-03:hash-mismatch",
+      "requestHash": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "receiptId": "generic-receipt:2026-06-03:hash-mismatch",
+      "receiptHash": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "sourceRefs": [
+        "generic-request:2026-06-03:hash-mismatch",
+        "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "generic-core:request:damaged:0",
+        "generic-writer:request:damaged",
+        "generic-receipt:2026-06-03:hash-mismatch",
+        "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "generic-core:receipt:damaged:1",
+        "generic-writer:receipt:damaged"
+      ],
+      "detail": "receipt source request hash does not match the referenced request hash"
+    }
+  ],
+  "damageFindings": [
+    "receipt source request hash does not match the referenced request hash"
+  ],
+  "unresolvedFindings": [],
+  "overclaimFindings": [],
+  "proof": {
+    "strongestProofRung": "durable_replicated_public_swarm_seam",
+    "operationProofRung": "durable_replicated_public_swarm_seam",
+    "sourceProofRung": "durable_replicated_public_swarm_seam",
+    "proofLabels": [
+      "neutral_generic_damaged_seam_history_material"
+    ],
+    "proofRungUpgradeClaimed": false
+  },
+  "transportBooleans": {
+    "publicSwarmTransportHappened": true,
+    "testnetSwarmTransportHappened": false,
+    "controlPlaneOnly": false,
+    "durableFeedBackedHistoryObserved": true,
+    "receivingRepoObservedReplicatedPath": true,
+    "durableObservationResultEmitted": true,
+    "receiptOrResultCausallyReferencesSources": true,
+    "reopenedReadbackDerivedFromDurableHistory": true
+  },
+  "publicSwarmTransportHappened": true,
+  "testnetSwarmTransportHappened": false,
+  "controlPlaneOnly": false,
+  "consumerProjection": {
+    "genericConsumersMayRead": true,
+    "edgeMayConsumeAsObservationOnlyInput": true,
+    "layerMayConsumeAsObservationOnlyFeedback": true,
+    "spineMayConsumeAsPostureEvidence": true,
+    "writesConsumerState": false
+  },
+  "nonClaims": {
+    "canonicalHistoryClaimed": false,
+    "layerEvidenceAdmitted": false,
+    "layerAdmissionDecided": false,
+    "rbcInterpreted": false,
+    "quorumSatisfied": false,
+    "authorityGranted": false,
+    "meshPublished": false,
+    "productionContinuityWritten": false
+  },
+  "deferredAttachmentPoints": {
+    "referentPromotion": null,
+    "branchCompatibilityGraph": null,
+    "canonicalContinuityState": null,
+    "rbcInterpretation": null,
+    "layerAdmission": null,
+    "meshPublication": null,
+    "authorityDecisions": null,
+    "productionCausalHistory": null
+  },
+  "nextPressure": "hand-generic-observation-to-test-consumer",
+  "warnings": [
+    "fixture-intentionally-hash-mismatch",
+    "generic-causal-seam-observation-does-not-grant-authority",
+    "generic-causal-seam-observation-preserves-consumer-refs-as-input-only"
+  ]
+}

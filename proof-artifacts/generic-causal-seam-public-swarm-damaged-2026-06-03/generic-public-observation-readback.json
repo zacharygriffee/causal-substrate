@@ -1,0 +1,80 @@
+{
+  "artifactKind": "generic-causal-seam-public-observation-readback",
+  "schema": "causal-substrate/generic-causal-seam-public-observation-readback/v1",
+  "schemaVersion": 1,
+  "emittedAt": "2026-06-03T16:02:00.000Z",
+  "sourcePaths": {
+    "replicaReport": "proof-artifacts/generic-causal-seam-public-swarm-damaged-2026-06-03/generic-public-replica-report.json",
+    "observationResult": "proof-artifacts/generic-causal-seam-public-swarm-damaged-2026-06-03/generic-public-observation-result.json"
+  },
+  "readback": {
+    "reportReadable": true,
+    "observationResultReadable": true,
+    "observationHashPreserved": true,
+    "sourceRefsPreserved": true,
+    "publicSwarmTransportHappened": true,
+    "durableFeedBackedHistoryObserved": true,
+    "receivingRepoObservedReplicatedPath": true,
+    "durableObservationResultEmitted": true,
+    "reopenedReadbackDerivedFromDurableHistory": true,
+    "finalClassification": "damaged",
+    "strongestProofRung": "durable_replicated_public_swarm_seam",
+    "damageFindings": [
+      "receipt source request hash does not match the referenced request hash"
+    ],
+    "classifiedHappenings": [
+      "hash_mismatch"
+    ]
+  },
+  "preservedRefs": {
+    "requestIds": [
+      "generic-request:2026-06-03:hash-mismatch"
+    ],
+    "requestHashes": [
+      "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+    ],
+    "receiptIds": [
+      "generic-receipt:2026-06-03:hash-mismatch"
+    ],
+    "receiptHashes": [
+      "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+    ],
+    "sourceRepos": [
+      "neutral-source-repo",
+      "neutral-receipt-repo"
+    ],
+    "durableRefs": [
+      "generic-core:request:damaged:0",
+      "generic-core:receipt:damaged:1"
+    ],
+    "writerRefs": [
+      "generic-writer:request:damaged",
+      "generic-writer:receipt:damaged"
+    ],
+    "evidenceIds": []
+  },
+  "validation": {
+    "status": "generic-causal-seam-public-observation-readback-valid",
+    "noCanonicalHistoryClaim": true,
+    "noLayerAdmissionClaim": true,
+    "noRbcInterpretationClaim": true,
+    "noAuthorityClaim": true,
+    "noMeshPublicationClaim": true,
+    "noProductionContinuityWriteClaim": true,
+    "issues": []
+  },
+  "boundary": {
+    "readbackOnly": true,
+    "opensSwarm": false,
+    "opensCorestore": false,
+    "callsEdge": false,
+    "callsLayer": false,
+    "writesConsumerState": false,
+    "acceptsCanonicalHistory": false,
+    "admitsLayerEvidence": false,
+    "interpretsRbc": false,
+    "grantsAuthority": false,
+    "publishesToMesh": false,
+    "writesProductionContinuity": false
+  }
+}

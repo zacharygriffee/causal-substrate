@@ -251,6 +251,13 @@ The local supplied-material lane can now:
   receipt finding, and still proved Causal read durable replicated material
   through the declared public swarm path with strongest source rung
   `durable_replicated_public_swarm_seam`.
+- run the generic source and replica CLIs over the declared public Hyperswarm
+  path with fresh intentionally damaged generic seam-history material under
+  `proof-artifacts/generic-causal-seam-public-swarm-damaged-2026-06-03/`;
+  the replica report classified the run as `damaged`, preserved the
+  `hash_mismatch` happening, and still proved Causal read durable replicated
+  material through the declared public swarm path with strongest source rung
+  `durable_replicated_public_swarm_seam`.
 
 Strongest routinely proven rung in normal tests:
 `local_causal_observation_over_supplied_seam_history_material`.
@@ -373,6 +380,17 @@ Immediate objective list:
    overclaim, and either execute it over public swarm or name the exact
    public-swarm pressure it prepares. Otherwise, wait for a real generic
    consumer need or fresh Edge/Layer public material.
+14. Completed public run: prove the generic public-swarm lane preserves
+   damaged classifier behavior over fresh seam-history material by running
+   `proof-artifacts/generic-causal-seam-public-swarm-damaged-2026-06-03/`.
+   The replica report reached `damaged`, preserved the `hash_mismatch`
+   classified happening, and kept the saved observation readback below the live
+   public-swarm proof operation.
+15. Next: only add another generic public matrix run for a distinct remaining
+   branch, such as proof-label overclaim, receipt without request, or duplicate
+   id, if it serves a real generic consumer need or explicitly prepares a
+   named public-swarm attempt. Otherwise, wait for fresh Edge/Layer public
+   material or consumer demand.
 
 This is not permission to claim Edge/Layer public seam proof. Causal may claim
 that only after it actually consumes Edge/Layer-derived durable public-swarm
