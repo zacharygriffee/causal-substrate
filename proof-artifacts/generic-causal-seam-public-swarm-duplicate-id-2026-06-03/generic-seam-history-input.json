@@ -1,0 +1,79 @@
+{
+  "historyId": "generic-public-seam-history:2026-06-03:damaged-duplicate-id",
+  "historyHash": "sha256:1212121212121212121212121212121212121212121212121212121212121212",
+  "sourceRepos": [
+    "neutral-source-repo",
+    "neutral-receipt-repo"
+  ],
+  "sourceSchemaRefs": [
+    "neutral/request/v1",
+    "neutral/receipt/v1"
+  ],
+  "transportProof": {
+    "evidenceSource": "local_artifact_fixture",
+    "publicSwarmTransportHappened": false,
+    "testnetSwarmTransportHappened": false,
+    "controlPlaneOnly": true,
+    "durableFeedBackedHistoryObserved": false,
+    "receivingRepoObservedReplicatedPath": false,
+    "receiptOrResultCausallyReferencesSources": true
+  },
+  "durableRefs": [
+    "generic-core:request:duplicate:0",
+    "generic-core:request:duplicate:1",
+    "generic-core:receipt:duplicate:2"
+  ],
+  "writerRefs": [
+    "generic-writer:request:duplicate:a",
+    "generic-writer:request:duplicate:b",
+    "generic-writer:receipt:duplicate"
+  ],
+  "requests": [
+    {
+      "id": "generic-request:2026-06-03:duplicate-id",
+      "hash": "sha256:abababababababababababababababababababababababababababababababab",
+      "sourceRepo": "neutral-source-repo",
+      "durableRef": "generic-core:request:duplicate:0",
+      "writerRef": "generic-writer:request:duplicate:a",
+      "schemaRef": "neutral/request/v1",
+      "observedProofRung": "local_artifact_seam"
+    },
+    {
+      "id": "generic-request:2026-06-03:duplicate-id",
+      "hash": "sha256:babababababababababababababababababababababababababababababababa",
+      "sourceRepo": "neutral-source-repo",
+      "durableRef": "generic-core:request:duplicate:1",
+      "writerRef": "generic-writer:request:duplicate:b",
+      "schemaRef": "neutral/request/v1",
+      "observedProofRung": "local_artifact_seam"
+    }
+  ],
+  "receipts": [
+    {
+      "id": "generic-receipt:2026-06-03:duplicate-id",
+      "hash": "sha256:cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+      "sourceRepo": "neutral-receipt-repo",
+      "durableRef": "generic-core:receipt:duplicate:2",
+      "writerRef": "generic-writer:receipt:duplicate",
+      "schemaRef": "neutral/receipt/v1",
+      "sourceRequestId": "generic-request:2026-06-03:duplicate-id",
+      "sourceRequestHash": "sha256:abababababababababababababababababababababababababababababababab",
+      "observedProofRung": "local_artifact_seam"
+    }
+  ],
+  "evidenceRefs": [],
+  "linkage": [
+    {
+      "requestId": "generic-request:2026-06-03:duplicate-id",
+      "requestHash": "sha256:abababababababababababababababababababababababababababababababab",
+      "receiptId": "generic-receipt:2026-06-03:duplicate-id",
+      "receiptHash": "sha256:cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd"
+    }
+  ],
+  "proofLabels": [
+    "neutral_generic_duplicate_id_seam_history_material"
+  ],
+  "warnings": [
+    "fixture-intentionally-duplicate-request-id"
+  ]
+}

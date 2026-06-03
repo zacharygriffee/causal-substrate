@@ -1,0 +1,360 @@
+{
+  "artifactKind": "generic-causal-seam-public-replica-report",
+  "schema": "causal-substrate/generic-causal-seam-public-replica-report/v1",
+  "schemaVersion": 1,
+  "emittedAt": "2026-06-03T17:01:00.000Z",
+  "lane": "generic_causal_seam_public_swarm",
+  "status": "damaged",
+  "namespaceParts": [
+    "causal-substrate",
+    "v1",
+    "generic-causal-seam-public-swarm",
+    "generic",
+    "causal",
+    "seam",
+    "public",
+    "duplicate-id",
+    "2026-06-03"
+  ],
+  "sourceManifest": {
+    "artifactKind": "generic-causal-seam-public-source-manifest",
+    "schema": "causal-substrate/generic-causal-seam-public-source-manifest/v1",
+    "schemaVersion": 1,
+    "emittedAt": "2026-06-03T17:00:00.000Z",
+    "lane": "generic_causal_seam_public_swarm",
+    "namespaceParts": [
+      "causal-substrate",
+      "v1",
+      "generic-causal-seam-public-swarm",
+      "generic",
+      "causal",
+      "seam",
+      "public",
+      "duplicate-id",
+      "2026-06-03"
+    ],
+    "source": {
+      "sourceCoreKeyHex": "4e224ee51d2f885fec2ec2dbef32ea8c15bc416826f6923d4b0dafc02d7624d6",
+      "topicHex": "5acb34e7616929165f94781841376d0b16a1548506da05e1e383b631c2f8227f",
+      "sourceRecordId": "generic-causal-seam-durable-record:7aeaf5a45d941f86",
+      "seamHistoryHash": "sha256:e2a061b832b79080f5f506e6b3b6c8e2fdf97136cd9c9e2b3bb1c1c730276ca9",
+      "sourceRefs": [
+        "generic-public-seam-history:2026-06-03:damaged-duplicate-id",
+        "sha256:1212121212121212121212121212121212121212121212121212121212121212",
+        "neutral-source-repo",
+        "neutral-receipt-repo",
+        "neutral/request/v1",
+        "neutral/receipt/v1",
+        "generic-core:request:duplicate:0",
+        "generic-core:request:duplicate:1",
+        "generic-core:receipt:duplicate:2",
+        "generic-writer:request:duplicate:a",
+        "generic-writer:request:duplicate:b",
+        "generic-writer:receipt:duplicate",
+        "generic-request:2026-06-03:duplicate-id",
+        "sha256:abababababababababababababababababababababababababababababababab",
+        "sha256:babababababababababababababababababababababababababababababababa",
+        "generic-receipt:2026-06-03:duplicate-id",
+        "sha256:cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+        "neutral_generic_duplicate_id_seam_history_material"
+      ]
+    },
+    "proofPosture": {
+      "sourceManifestOnly": true,
+      "publicSwarmObservationProofClaimedNow": false,
+      "replicaMustReadDurableMaterial": true,
+      "lowerProofRungsRemainLowerUntilReplicaReport": true
+    },
+    "boundary": {
+      "acceptsCanonicalHistory": false,
+      "admitsLayerEvidence": false,
+      "interpretsRbc": false,
+      "grantsAuthority": false,
+      "publishesToMesh": false,
+      "writesProductionContinuity": false,
+      "opensSwarmBySourceCommand": true,
+      "opensCorestoreBySourceCommand": true,
+      "writesDurableHistoryBySourceCommand": true,
+      "replicaReadProvenByThisArtifact": false
+    }
+  },
+  "replicatedRecord": {
+    "artifactKind": "generic_causal_seam_durable_record",
+    "schema": "causal-substrate/generic-causal-seam-durable-record/v1",
+    "schemaVersion": 1,
+    "recordId": "generic-causal-seam-durable-record:7aeaf5a45d941f86",
+    "recordedAt": "2026-06-03T17:00:00.000Z",
+    "seamHistory": {
+      "historyId": "generic-public-seam-history:2026-06-03:damaged-duplicate-id",
+      "historyHash": "sha256:1212121212121212121212121212121212121212121212121212121212121212",
+      "sourceRepos": [
+        "neutral-source-repo",
+        "neutral-receipt-repo"
+      ],
+      "sourceSchemaRefs": [
+        "neutral/request/v1",
+        "neutral/receipt/v1"
+      ],
+      "transportProof": {
+        "evidenceSource": "local_artifact_fixture",
+        "publicSwarmTransportHappened": false,
+        "testnetSwarmTransportHappened": false,
+        "controlPlaneOnly": true,
+        "durableFeedBackedHistoryObserved": false,
+        "receivingRepoObservedReplicatedPath": false,
+        "receiptOrResultCausallyReferencesSources": true
+      },
+      "durableRefs": [
+        "generic-core:request:duplicate:0",
+        "generic-core:request:duplicate:1",
+        "generic-core:receipt:duplicate:2"
+      ],
+      "writerRefs": [
+        "generic-writer:request:duplicate:a",
+        "generic-writer:request:duplicate:b",
+        "generic-writer:receipt:duplicate"
+      ],
+      "requests": [
+        {
+          "id": "generic-request:2026-06-03:duplicate-id",
+          "hash": "sha256:abababababababababababababababababababababababababababababababab",
+          "sourceRepo": "neutral-source-repo",
+          "durableRef": "generic-core:request:duplicate:0",
+          "writerRef": "generic-writer:request:duplicate:a",
+          "schemaRef": "neutral/request/v1",
+          "observedProofRung": "local_artifact_seam"
+        },
+        {
+          "id": "generic-request:2026-06-03:duplicate-id",
+          "hash": "sha256:babababababababababababababababababababababababababababababababa",
+          "sourceRepo": "neutral-source-repo",
+          "durableRef": "generic-core:request:duplicate:1",
+          "writerRef": "generic-writer:request:duplicate:b",
+          "schemaRef": "neutral/request/v1",
+          "observedProofRung": "local_artifact_seam"
+        }
+      ],
+      "receipts": [
+        {
+          "id": "generic-receipt:2026-06-03:duplicate-id",
+          "hash": "sha256:cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+          "sourceRepo": "neutral-receipt-repo",
+          "durableRef": "generic-core:receipt:duplicate:2",
+          "writerRef": "generic-writer:receipt:duplicate",
+          "schemaRef": "neutral/receipt/v1",
+          "sourceRequestId": "generic-request:2026-06-03:duplicate-id",
+          "sourceRequestHash": "sha256:abababababababababababababababababababababababababababababababab",
+          "observedProofRung": "local_artifact_seam"
+        }
+      ],
+      "evidenceRefs": [],
+      "linkage": [
+        {
+          "requestId": "generic-request:2026-06-03:duplicate-id",
+          "requestHash": "sha256:abababababababababababababababababababababababababababababababab",
+          "receiptId": "generic-receipt:2026-06-03:duplicate-id",
+          "receiptHash": "sha256:cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd"
+        }
+      ],
+      "proofLabels": [
+        "neutral_generic_duplicate_id_seam_history_material"
+      ],
+      "warnings": [
+        "fixture-intentionally-duplicate-request-id"
+      ]
+    },
+    "seamHistoryHash": "sha256:e2a061b832b79080f5f506e6b3b6c8e2fdf97136cd9c9e2b3bb1c1c730276ca9",
+    "seamHistoryHashAlgorithm": "sha256-stable-json",
+    "sourceRefs": [
+      "generic-public-seam-history:2026-06-03:damaged-duplicate-id",
+      "sha256:1212121212121212121212121212121212121212121212121212121212121212",
+      "neutral-source-repo",
+      "neutral-receipt-repo",
+      "neutral/request/v1",
+      "neutral/receipt/v1",
+      "generic-core:request:duplicate:0",
+      "generic-core:request:duplicate:1",
+      "generic-core:receipt:duplicate:2",
+      "generic-writer:request:duplicate:a",
+      "generic-writer:request:duplicate:b",
+      "generic-writer:receipt:duplicate",
+      "generic-request:2026-06-03:duplicate-id",
+      "sha256:abababababababababababababababababababababababababababababababab",
+      "sha256:babababababababababababababababababababababababababababababababa",
+      "generic-receipt:2026-06-03:duplicate-id",
+      "sha256:cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+      "neutral_generic_duplicate_id_seam_history_material"
+    ],
+    "durableHistoryMaterial": true
+  },
+  "observationResult": {
+    "schema": "causal-substrate/generic-causal-seam-observation/v1",
+    "schemaVersion": 1,
+    "repo": "causal-substrate",
+    "lane": "generic-causal-seam-surface",
+    "proofCommand": "run-generic-causal-seam-public-replica-device",
+    "generatedAt": "2026-06-03T17:01:00.000Z",
+    "observationId": "generic-causal-seam-observation:12e825eedfd39a76",
+    "observationHash": "sha256:7f9d142972a6212f331bf5b0969e7554d665ae650a5539938ed06f1fff25c51b",
+    "observedHistoryId": "generic-public-seam-history:2026-06-03:damaged-duplicate-id",
+    "observedHistoryHash": "sha256:1212121212121212121212121212121212121212121212121212121212121212",
+    "sourceRefsPreserved": {
+      "requestIds": [
+        "generic-request:2026-06-03:duplicate-id",
+        "generic-request:2026-06-03:duplicate-id"
+      ],
+      "requestHashes": [
+        "sha256:abababababababababababababababababababababababababababababababab",
+        "sha256:babababababababababababababababababababababababababababababababa"
+      ],
+      "receiptIds": [
+        "generic-receipt:2026-06-03:duplicate-id"
+      ],
+      "receiptHashes": [
+        "sha256:cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd"
+      ],
+      "sourceRepos": [
+        "neutral-source-repo",
+        "neutral-receipt-repo"
+      ],
+      "durableRefs": [
+        "generic-core:request:duplicate:0",
+        "generic-core:request:duplicate:1",
+        "generic-core:receipt:duplicate:2"
+      ],
+      "writerRefs": [
+        "generic-writer:request:duplicate:a",
+        "generic-writer:request:duplicate:b",
+        "generic-writer:receipt:duplicate"
+      ],
+      "evidenceIds": []
+    },
+    "strongestProofRung": "durable_replicated_public_swarm_seam",
+    "operationProofRung": "durable_replicated_public_swarm_seam",
+    "sourceProofRung": "durable_replicated_public_swarm_seam",
+    "finalClassification": "damaged",
+    "classification": "damaged",
+    "classifiedHappenings": [
+      {
+        "happeningId": "generic-causal-happening:12a2e7cad826ae96",
+        "classification": "duplicate_id",
+        "requestId": "generic-request:2026-06-03:duplicate-id",
+        "requestHash": "sha256:babababababababababababababababababababababababababababababababa",
+        "sourceRefs": [
+          "generic-request:2026-06-03:duplicate-id",
+          "sha256:babababababababababababababababababababababababababababababababa",
+          "generic-core:request:duplicate:1",
+          "generic-writer:request:duplicate:b"
+        ],
+        "detail": "duplicate request id generic-request:2026-06-03:duplicate-id"
+      },
+      {
+        "happeningId": "generic-causal-happening:2afc86ecdaca9f3c",
+        "classification": "linked_request_receipt",
+        "requestId": "generic-request:2026-06-03:duplicate-id",
+        "requestHash": "sha256:abababababababababababababababababababababababababababababababab",
+        "receiptId": "generic-receipt:2026-06-03:duplicate-id",
+        "receiptHash": "sha256:cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+        "sourceRefs": [
+          "generic-request:2026-06-03:duplicate-id",
+          "sha256:abababababababababababababababababababababababababababababababab",
+          "generic-core:request:duplicate:0",
+          "generic-writer:request:duplicate:a",
+          "generic-receipt:2026-06-03:duplicate-id",
+          "sha256:cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+          "generic-core:receipt:duplicate:2",
+          "generic-writer:receipt:duplicate"
+        ],
+        "detail": "receipt references a request with matching id and hash"
+      }
+    ],
+    "damageFindings": [
+      "duplicate request id generic-request:2026-06-03:duplicate-id"
+    ],
+    "unresolvedFindings": [],
+    "overclaimFindings": [],
+    "proof": {
+      "strongestProofRung": "durable_replicated_public_swarm_seam",
+      "operationProofRung": "durable_replicated_public_swarm_seam",
+      "sourceProofRung": "durable_replicated_public_swarm_seam",
+      "proofLabels": [
+        "neutral_generic_duplicate_id_seam_history_material"
+      ],
+      "proofRungUpgradeClaimed": false
+    },
+    "transportBooleans": {
+      "publicSwarmTransportHappened": true,
+      "testnetSwarmTransportHappened": false,
+      "controlPlaneOnly": false,
+      "durableFeedBackedHistoryObserved": true,
+      "receivingRepoObservedReplicatedPath": true,
+      "durableObservationResultEmitted": true,
+      "receiptOrResultCausallyReferencesSources": true,
+      "reopenedReadbackDerivedFromDurableHistory": true
+    },
+    "publicSwarmTransportHappened": true,
+    "testnetSwarmTransportHappened": false,
+    "controlPlaneOnly": false,
+    "consumerProjection": {
+      "genericConsumersMayRead": true,
+      "edgeMayConsumeAsObservationOnlyInput": true,
+      "layerMayConsumeAsObservationOnlyFeedback": true,
+      "spineMayConsumeAsPostureEvidence": true,
+      "writesConsumerState": false
+    },
+    "nonClaims": {
+      "canonicalHistoryClaimed": false,
+      "layerEvidenceAdmitted": false,
+      "layerAdmissionDecided": false,
+      "rbcInterpreted": false,
+      "quorumSatisfied": false,
+      "authorityGranted": false,
+      "meshPublished": false,
+      "productionContinuityWritten": false
+    },
+    "deferredAttachmentPoints": {
+      "referentPromotion": null,
+      "branchCompatibilityGraph": null,
+      "canonicalContinuityState": null,
+      "rbcInterpretation": null,
+      "layerAdmission": null,
+      "meshPublication": null,
+      "authorityDecisions": null,
+      "productionCausalHistory": null
+    },
+    "nextPressure": "hand-generic-observation-to-test-consumer",
+    "warnings": [
+      "fixture-intentionally-duplicate-request-id",
+      "generic-causal-seam-observation-does-not-grant-authority",
+      "generic-causal-seam-observation-preserves-consumer-refs-as-input-only"
+    ]
+  },
+  "readerProof": {
+    "sourceManifestConsumed": true,
+    "inputReadByCausalSubstrate": true,
+    "durableCorestoreHistoryRead": true,
+    "dhtOrHyperswarmInputObservedByCausalSubstrate": true,
+    "replicatedViaHyperswarmTransport": true,
+    "publicHyperswarmInputObservedByCausalSubstrate": true,
+    "sourceCoreKeyHex": "4e224ee51d2f885fec2ec2dbef32ea8c15bc416826f6923d4b0dafc02d7624d6",
+    "replicaCoreKeyHex": "4e224ee51d2f885fec2ec2dbef32ea8c15bc416826f6923d4b0dafc02d7624d6",
+    "topicHex": "5acb34e7616929165f94781841376d0b16a1548506da05e1e383b631c2f8227f",
+    "replicatedRecordCount": 1,
+    "evidenceSource": "reader_observed_replicated_public_swarm_path"
+  },
+  "unresolvedFindings": [],
+  "damageFindings": [
+    "duplicate request id generic-request:2026-06-03:duplicate-id"
+  ],
+  "overclaimFindings": [],
+  "boundary": {
+    "acceptsCanonicalHistory": false,
+    "admitsLayerEvidence": false,
+    "interpretsRbc": false,
+    "grantsAuthority": false,
+    "publishesToMesh": false,
+    "writesProductionContinuity": false,
+    "observationOnly": true,
+    "writesConsumerState": false
+  }
+}

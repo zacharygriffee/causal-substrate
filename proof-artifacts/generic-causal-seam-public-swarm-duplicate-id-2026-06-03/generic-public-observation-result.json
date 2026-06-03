@@ -1,0 +1,142 @@
+{
+  "schema": "causal-substrate/generic-causal-seam-observation/v1",
+  "schemaVersion": 1,
+  "repo": "causal-substrate",
+  "lane": "generic-causal-seam-surface",
+  "proofCommand": "run-generic-causal-seam-public-replica-device",
+  "generatedAt": "2026-06-03T17:01:00.000Z",
+  "observationId": "generic-causal-seam-observation:12e825eedfd39a76",
+  "observationHash": "sha256:7f9d142972a6212f331bf5b0969e7554d665ae650a5539938ed06f1fff25c51b",
+  "observedHistoryId": "generic-public-seam-history:2026-06-03:damaged-duplicate-id",
+  "observedHistoryHash": "sha256:1212121212121212121212121212121212121212121212121212121212121212",
+  "sourceRefsPreserved": {
+    "requestIds": [
+      "generic-request:2026-06-03:duplicate-id",
+      "generic-request:2026-06-03:duplicate-id"
+    ],
+    "requestHashes": [
+      "sha256:abababababababababababababababababababababababababababababababab",
+      "sha256:babababababababababababababababababababababababababababababababa"
+    ],
+    "receiptIds": [
+      "generic-receipt:2026-06-03:duplicate-id"
+    ],
+    "receiptHashes": [
+      "sha256:cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd"
+    ],
+    "sourceRepos": [
+      "neutral-source-repo",
+      "neutral-receipt-repo"
+    ],
+    "durableRefs": [
+      "generic-core:request:duplicate:0",
+      "generic-core:request:duplicate:1",
+      "generic-core:receipt:duplicate:2"
+    ],
+    "writerRefs": [
+      "generic-writer:request:duplicate:a",
+      "generic-writer:request:duplicate:b",
+      "generic-writer:receipt:duplicate"
+    ],
+    "evidenceIds": []
+  },
+  "strongestProofRung": "durable_replicated_public_swarm_seam",
+  "operationProofRung": "durable_replicated_public_swarm_seam",
+  "sourceProofRung": "durable_replicated_public_swarm_seam",
+  "finalClassification": "damaged",
+  "classification": "damaged",
+  "classifiedHappenings": [
+    {
+      "happeningId": "generic-causal-happening:12a2e7cad826ae96",
+      "classification": "duplicate_id",
+      "requestId": "generic-request:2026-06-03:duplicate-id",
+      "requestHash": "sha256:babababababababababababababababababababababababababababababababa",
+      "sourceRefs": [
+        "generic-request:2026-06-03:duplicate-id",
+        "sha256:babababababababababababababababababababababababababababababababa",
+        "generic-core:request:duplicate:1",
+        "generic-writer:request:duplicate:b"
+      ],
+      "detail": "duplicate request id generic-request:2026-06-03:duplicate-id"
+    },
+    {
+      "happeningId": "generic-causal-happening:2afc86ecdaca9f3c",
+      "classification": "linked_request_receipt",
+      "requestId": "generic-request:2026-06-03:duplicate-id",
+      "requestHash": "sha256:abababababababababababababababababababababababababababababababab",
+      "receiptId": "generic-receipt:2026-06-03:duplicate-id",
+      "receiptHash": "sha256:cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+      "sourceRefs": [
+        "generic-request:2026-06-03:duplicate-id",
+        "sha256:abababababababababababababababababababababababababababababababab",
+        "generic-core:request:duplicate:0",
+        "generic-writer:request:duplicate:a",
+        "generic-receipt:2026-06-03:duplicate-id",
+        "sha256:cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+        "generic-core:receipt:duplicate:2",
+        "generic-writer:receipt:duplicate"
+      ],
+      "detail": "receipt references a request with matching id and hash"
+    }
+  ],
+  "damageFindings": [
+    "duplicate request id generic-request:2026-06-03:duplicate-id"
+  ],
+  "unresolvedFindings": [],
+  "overclaimFindings": [],
+  "proof": {
+    "strongestProofRung": "durable_replicated_public_swarm_seam",
+    "operationProofRung": "durable_replicated_public_swarm_seam",
+    "sourceProofRung": "durable_replicated_public_swarm_seam",
+    "proofLabels": [
+      "neutral_generic_duplicate_id_seam_history_material"
+    ],
+    "proofRungUpgradeClaimed": false
+  },
+  "transportBooleans": {
+    "publicSwarmTransportHappened": true,
+    "testnetSwarmTransportHappened": false,
+    "controlPlaneOnly": false,
+    "durableFeedBackedHistoryObserved": true,
+    "receivingRepoObservedReplicatedPath": true,
+    "durableObservationResultEmitted": true,
+    "receiptOrResultCausallyReferencesSources": true,
+    "reopenedReadbackDerivedFromDurableHistory": true
+  },
+  "publicSwarmTransportHappened": true,
+  "testnetSwarmTransportHappened": false,
+  "controlPlaneOnly": false,
+  "consumerProjection": {
+    "genericConsumersMayRead": true,
+    "edgeMayConsumeAsObservationOnlyInput": true,
+    "layerMayConsumeAsObservationOnlyFeedback": true,
+    "spineMayConsumeAsPostureEvidence": true,
+    "writesConsumerState": false
+  },
+  "nonClaims": {
+    "canonicalHistoryClaimed": false,
+    "layerEvidenceAdmitted": false,
+    "layerAdmissionDecided": false,
+    "rbcInterpreted": false,
+    "quorumSatisfied": false,
+    "authorityGranted": false,
+    "meshPublished": false,
+    "productionContinuityWritten": false
+  },
+  "deferredAttachmentPoints": {
+    "referentPromotion": null,
+    "branchCompatibilityGraph": null,
+    "canonicalContinuityState": null,
+    "rbcInterpretation": null,
+    "layerAdmission": null,
+    "meshPublication": null,
+    "authorityDecisions": null,
+    "productionCausalHistory": null
+  },
+  "nextPressure": "hand-generic-observation-to-test-consumer",
+  "warnings": [
+    "fixture-intentionally-duplicate-request-id",
+    "generic-causal-seam-observation-does-not-grant-authority",
+    "generic-causal-seam-observation-preserves-consumer-refs-as-input-only"
+  ]
+}

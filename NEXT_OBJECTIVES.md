@@ -258,6 +258,13 @@ The local supplied-material lane can now:
   `hash_mismatch` happening, and still proved Causal read durable replicated
   material through the declared public swarm path with strongest source rung
   `durable_replicated_public_swarm_seam`.
+- run the generic source and replica CLIs over the declared public Hyperswarm
+  path with fresh duplicate-id generic seam-history material under
+  `proof-artifacts/generic-causal-seam-public-swarm-duplicate-id-2026-06-03/`;
+  the replica report classified the run as `damaged`, preserved the
+  `duplicate_id` happening, and still proved Causal read durable replicated
+  material through the declared public swarm path with strongest source rung
+  `durable_replicated_public_swarm_seam`.
 
 Strongest routinely proven rung in normal tests:
 `local_causal_observation_over_supplied_seam_history_material`.
@@ -391,6 +398,17 @@ Immediate objective list:
    id, if it serves a real generic consumer need or explicitly prepares a
    named public-swarm attempt. Otherwise, wait for fresh Edge/Layer public
    material or consumer demand.
+16. Completed public run: prove the generic public-swarm lane preserves
+   duplicate-id damaged classifier behavior over fresh seam-history material
+   by running
+   `proof-artifacts/generic-causal-seam-public-swarm-duplicate-id-2026-06-03/`.
+   The replica report reached `damaged`, preserved the `duplicate_id`
+   classified happening, and kept the saved observation readback below the live
+   public-swarm proof operation.
+17. Next: stop expanding the generic public matrix unless a real consumer need
+   or fresh public-swarm objective names the remaining branch. Receipt without
+   request and proof-label overclaim remain available branches, but should not
+   be run just to add more artifacts.
 
 This is not permission to claim Edge/Layer public seam proof. Causal may claim
 that only after it actually consumes Edge/Layer-derived durable public-swarm
