@@ -233,6 +233,17 @@ The local supplied-material lane can now:
   report classified the run as `compatible`, preserved neutral request/receipt
   refs and hashes, and emitted a generic observation result with strongest rung
   `durable_replicated_public_swarm_seam`.
+- expose a compact generic public seam proof index over
+  `proof-artifacts/generic-causal-seam-public-swarm-2026-06-03/` as
+  `generic-public-seam-proof-index.json`, preserving history, observation,
+  request, receipt, source repo, durable, writer, proof-label, and non-claim
+  material while labeling the index operation as `saved_readback_seam`.
+- expose `generic-public-proof-index-consumer-handoff.json` and
+  `generic-public-proof-index-consumer-handoff-readback.json` so generic
+  consumers, Edge, Layer, and Spine can inspect the preserved public source
+  rung as observation-only material without Causal calling consumers, writing
+  consumer state, admitting Layer evidence, interpreting RBC, publishing to
+  Mesh, granting authority, or upgrading proof.
 
 Strongest routinely proven rung in normal tests:
 `local_causal_observation_over_supplied_seam_history_material`.
@@ -253,6 +264,15 @@ Strongest latest saved-artifact consumer handoff rung:
 
 Strongest latest saved-artifact consumer readback rung:
 `local_readback_over_saved_public_proof_index_consumer_handoff`.
+
+Strongest latest generic public source proof rung:
+`durable_replicated_public_swarm_seam`.
+
+Strongest latest generic public index/readback operation rung:
+`saved_readback_seam`.
+
+Strongest latest generic consumer handoff operation rung:
+`consumer_handoff_seam`.
 
 ## Operational Proof-Rung Discipline
 
@@ -325,11 +345,17 @@ Immediate objective list:
    unset, then preserve the resulting manifest, replica report, durable
    observation result, and reopened readback as Causal-owned generic
    public-swarm proof.
-10. Next: expose a compact generic public seam proof index and generic consumer
-   handoff over
+10. Completed locally: expose a compact generic public seam proof index and
+   generic consumer handoff over
    `proof-artifacts/generic-causal-seam-public-swarm-2026-06-03/`, preserving
    the public source proof rung while keeping the index/readback below the live
    public-swarm proof operation.
+11. Next: use the generic proof-index consumer handoff only if a real generic
+   consumer ambiguity needs it, or prepare/execute the next Causal-owned live
+   public-swarm objective that consumes fresh generic seam-history material.
+   Avoid adding another saved-artifact layer over the same run unless it
+   protects against a concrete overclaim or prepares a named public-swarm
+   attempt.
 
 This is not permission to claim Edge/Layer public seam proof. Causal may claim
 that only after it actually consumes Edge/Layer-derived durable public-swarm

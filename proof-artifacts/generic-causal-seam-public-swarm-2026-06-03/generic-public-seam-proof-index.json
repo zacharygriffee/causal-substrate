@@ -1,0 +1,153 @@
+{
+  "artifactKind": "generic-causal-seam-public-proof-index",
+  "schema": "causal-substrate/generic-causal-seam-public-proof-index/v1",
+  "schemaVersion": 1,
+  "artifactId": "generic-causal-seam-public-proof-index:43d2d18c3c568159",
+  "emittedAt": "2026-06-03T14:03:00.000Z",
+  "runId": "generic-causal-seam-public-swarm-2026-06-03",
+  "runKind": "generic_public_hyperswarm",
+  "artifactPointers": {
+    "publicRunDir": "/home/zevilz/work/mesh-ecology/causal-substrate/proof-artifacts/generic-causal-seam-public-swarm-2026-06-03",
+    "seamHistoryInput": "/home/zevilz/work/mesh-ecology/causal-substrate/proof-artifacts/generic-causal-seam-public-swarm-2026-06-03/generic-seam-history-input.json",
+    "sourceManifest": "/home/zevilz/work/mesh-ecology/causal-substrate/proof-artifacts/generic-causal-seam-public-swarm-2026-06-03/generic-public-source-manifest.json",
+    "replicaReport": "/home/zevilz/work/mesh-ecology/causal-substrate/proof-artifacts/generic-causal-seam-public-swarm-2026-06-03/generic-public-replica-report.json",
+    "observationResult": "/home/zevilz/work/mesh-ecology/causal-substrate/proof-artifacts/generic-causal-seam-public-swarm-2026-06-03/generic-public-observation-result.json",
+    "observationReadback": "/home/zevilz/work/mesh-ecology/causal-substrate/proof-artifacts/generic-causal-seam-public-swarm-2026-06-03/generic-public-observation-readback.json"
+  },
+  "indexedArtifacts": [
+    {
+      "role": "generic_seam_history_input",
+      "path": "/home/zevilz/work/mesh-ecology/causal-substrate/proof-artifacts/generic-causal-seam-public-swarm-2026-06-03/generic-seam-history-input.json"
+    },
+    {
+      "role": "generic_public_source_manifest",
+      "path": "/home/zevilz/work/mesh-ecology/causal-substrate/proof-artifacts/generic-causal-seam-public-swarm-2026-06-03/generic-public-source-manifest.json",
+      "artifactKind": "generic-causal-seam-public-source-manifest",
+      "schema": "causal-substrate/generic-causal-seam-public-source-manifest/v1"
+    },
+    {
+      "role": "generic_public_replica_report",
+      "path": "/home/zevilz/work/mesh-ecology/causal-substrate/proof-artifacts/generic-causal-seam-public-swarm-2026-06-03/generic-public-replica-report.json",
+      "artifactKind": "generic-causal-seam-public-replica-report",
+      "schema": "causal-substrate/generic-causal-seam-public-replica-report/v1",
+      "proofRung": "durable_replicated_public_swarm_seam"
+    },
+    {
+      "role": "generic_public_observation_result",
+      "path": "/home/zevilz/work/mesh-ecology/causal-substrate/proof-artifacts/generic-causal-seam-public-swarm-2026-06-03/generic-public-observation-result.json",
+      "schema": "causal-substrate/generic-causal-seam-observation/v1",
+      "artifactId": "generic-causal-seam-observation:a62e468587ecfa48",
+      "proofRung": "durable_replicated_public_swarm_seam"
+    },
+    {
+      "role": "generic_public_observation_readback",
+      "path": "/home/zevilz/work/mesh-ecology/causal-substrate/proof-artifacts/generic-causal-seam-public-swarm-2026-06-03/generic-public-observation-readback.json",
+      "artifactKind": "generic-causal-seam-public-observation-readback",
+      "schema": "causal-substrate/generic-causal-seam-public-observation-readback/v1",
+      "reviewStatus": "generic-causal-seam-public-observation-readback-valid",
+      "proofRung": "durable_replicated_public_swarm_seam"
+    }
+  ],
+  "preservedRefs": {
+    "historyIds": [
+      "generic-public-seam-history:2026-06-03:neutral-compatible"
+    ],
+    "historyHashes": [
+      "sha256:7777777777777777777777777777777777777777777777777777777777777777"
+    ],
+    "observationIds": [
+      "generic-causal-seam-observation:a62e468587ecfa48"
+    ],
+    "observationHashes": [
+      "sha256:71ca759d8708004eb7fbdd87b3553a49de8bbf4c0e4f3c5644edf15b3c6d20c2"
+    ],
+    "requestIds": [
+      "generic-request:2026-06-03:linked"
+    ],
+    "requestHashes": [
+      "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    ],
+    "receiptIds": [
+      "generic-receipt:2026-06-03:linked"
+    ],
+    "receiptHashes": [
+      "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    ],
+    "sourceRepos": [
+      "neutral-source-repo",
+      "neutral-receipt-repo"
+    ],
+    "durableRefs": [
+      "generic-core:request:0",
+      "generic-core:receipt:1"
+    ],
+    "writerRefs": [
+      "generic-writer:request",
+      "generic-writer:receipt"
+    ],
+    "evidenceIds": []
+  },
+  "proof": {
+    "strongestSourceProofRungObserved": "durable_replicated_public_swarm_seam",
+    "proofLabels": [
+      "neutral_generic_seam_history_material"
+    ],
+    "indexOperationProofRung": "saved_readback_seam",
+    "preservesHigherRung": "durable_replicated_public_swarm_seam",
+    "savedArtifactIndexOnly": true,
+    "liveSwarmRunClaimedByThisIndex": false,
+    "proofRungUpgradeClaimed": false
+  },
+  "consumerSuitability": {
+    "genericConsumersMayReadAsObservationOnlyIndex": true,
+    "edgeMayConsumeAsObservationOnlyInput": true,
+    "layerMayConsumeAsObservationOnlyFeedback": true,
+    "spineMayConsumeAsPostureEvidence": true,
+    "consumerStateWritten": false,
+    "canonicalHistoryClaimed": false
+  },
+  "validation": {
+    "status": "generic-causal-seam-public-proof-index-ready",
+    "requiredArtifactsPresent": true,
+    "replicaReportCompatible": true,
+    "observationResultCompatible": true,
+    "observationReadbackValid": true,
+    "sourceRefsPreserved": true,
+    "proofLabelsPreserved": true,
+    "publicSourceProofRungPreserved": true,
+    "publicSwarmTransportPreserved": true,
+    "durableReadbackPreserved": true,
+    "noCanonicalHistoryClaim": true,
+    "noLayerAdmissionClaim": true,
+    "noRbcInterpretationClaim": true,
+    "noAuthorityClaim": true,
+    "noMeshPublicationClaim": true,
+    "noProductionContinuityWriteClaim": true,
+    "noLiveSwarmClaimByThisIndex": true,
+    "issues": []
+  },
+  "boundary": {
+    "proofIndexOnly": true,
+    "readsSavedArtifactsOnly": true,
+    "opensSwarm": false,
+    "opensCorestore": false,
+    "callsConsumers": false,
+    "callsEdge": false,
+    "callsLayer": false,
+    "writesConsumerState": false,
+    "acceptsCanonicalHistory": false,
+    "admitsLayerEvidence": false,
+    "decidesLayerAdmission": false,
+    "interpretsRbc": false,
+    "grantsAuthority": false,
+    "publishesToMesh": false,
+    "writesProductionContinuity": false
+  },
+  "reviewStatus": "generic-causal-seam-public-proof-index-ready",
+  "warnings": [
+    "generic-public-proof-index-reads-saved-artifacts-only",
+    "generic-public-proof-index-does-not-upgrade-source-proof",
+    "generic-public-proof-index-preserves-public-swarm-run-refs-for-consumers"
+  ],
+  "rejections": []
+}

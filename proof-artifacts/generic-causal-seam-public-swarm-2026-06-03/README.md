@@ -14,6 +14,9 @@ Artifacts:
 - `generic-public-replica-report.json`
 - `generic-public-observation-result.json`
 - `generic-public-observation-readback.json`
+- `generic-public-seam-proof-index.json`
+- `generic-public-proof-index-consumer-handoff.json`
+- `generic-public-proof-index-consumer-handoff-readback.json`
 
 The source command ran with:
 
@@ -30,3 +33,8 @@ the artifact that proves Causal read replicated durable generic seam material
 through the declared public Hyperswarm path. The extracted observation result
 and readback are saved-artifact readback material that preserve the source
 public proof rung without opening swarm again.
+
+The proof index, consumer handoff, and consumer handoff readback are lower-rung
+preservation artifacts. They let generic consumers inspect preserved ids,
+hashes, refs, proof labels, and non-claims from this run without treating the
+saved index or handoff as a new live public-swarm proof operation.
