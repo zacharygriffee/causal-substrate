@@ -13,6 +13,34 @@ Causal Substrate does not claim canonical truth, Layer admission, RBC
 interpretation, quorum satisfaction, Mesh publication, authority, or production
 continuity.
 
+## Prototype Alignment
+
+Use `/home/zevilz/work/prototypes/mesh-ecology-prototype` as a conceptual and
+snag-prevention reference, not as Causal proof. Before adding another
+observation, readback, handoff, or proof-index lane, check the prototype's
+`MODEL.md`, `docs/agent-snag-index.md`, and `docs/artifact-contract.md` for
+vocabulary and artifact fields that prevent common overclaims.
+
+Causal Substrate should specifically absorb these prototype lessons:
+
+- supplied JSON, saved artifacts, and readbacks are lower-rung material unless
+  Causal itself reads durable replicated seam history over public swarm;
+- public/default swarm timeout is `unresolved` evidence, not success and not a
+  doctrine failure;
+- local/testnet transport does not become public durable replicated seam
+  observation;
+- Autobase writer/indexer/readonly/optimistic posture is useful causal input
+  vocabulary but not authority, RBC, Layer admission, or canonical truth;
+- prototype proto-RBC/future-RBC shapes are only model pressure, not real RBC
+  interpretation.
+
+When Causal emits observations or consumer handoffs, keep them compatible with
+the prototype artifact contract where useful: preserve proof rung,
+classification, transport booleans, request/receipt refs, hashes, source refs,
+writer refs, warnings, non-claims, and next pressure. Do not cite prototype
+artifacts as live Causal observations; use them to avoid category errors while
+waiting for fresh Edge/Layer public material or running a real public reader.
+
 ## Completed Local Seam-History Observation Surface
 
 The local supplied-material lane can now:
