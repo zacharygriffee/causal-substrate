@@ -271,6 +271,15 @@ The local supplied-material lane can now:
   `local_artifact_seam` operator inspection only, found no committed fresh
   adjacent public proof material ready for Causal observation, and prevents
   treating dirty adjacent worktree state as Causal-consumable public proof.
+- add a narrow adjacent-material observation surface over fresh Layer public
+  proof/readiness material and Edge compatible handoff readback shapes through
+  `scripts/observe-adjacent-public-material.ts`; this is
+  `saved_readback_seam` over supplied/exported material, preserves
+  request/receipt/evidence ids and hashes, durable refs, writer refs, source
+  repo refs, proof rungs, linkage status, and non-claims, classifies
+  compatible/damaged/unresolved honestly, and does not claim live Causal swarm
+  proof, Layer evidence admission, RBC interpretation, Mesh publication,
+  authority, or production continuity.
 
 Strongest routinely proven rung in normal tests:
 `local_causal_observation_over_supplied_seam_history_material`.
@@ -300,6 +309,9 @@ Strongest latest generic public index/readback operation rung:
 
 Strongest latest generic consumer handoff operation rung:
 `consumer_handoff_seam`.
+
+Strongest latest adjacent-material observation operation rung:
+`saved_readback_seam`.
 
 ## Operational Proof-Rung Discipline
 
@@ -495,14 +507,21 @@ Immediate objective list:
      `compatible-handoff-readback`, with proof boundary
      `handoff_export_file_readback_only`, `proofRungNotUpgraded: true`, and
      read-only/non-authority posture.
-20. Next: add a narrow adjacent-material observation path over the fresh Layer
-   and/or Edge material. Prefer Layer first because it carries public/default
-   HyperDHT proof plus request/receipt/evidence refs explicitly shaped for
-   `ready_for_causal_substrate_read_only_observation`. Then inspect Edge
-   compatible handoff readback as lower-rung exported material. Preserve source
-   ids/hashes, durable refs, writer refs, proof rungs, linkage status, and
-   non-claims. Do not claim live Causal swarm proof unless Causal itself reads
-   durable replicated seam history over public Hyperswarm.
+20. Completed locally: add a narrow adjacent-material observation path over
+   fresh Layer public proof/readiness material and Edge compatible handoff
+   readback shapes. The command path preserves request ids/hashes, receipt
+   ids/hashes, evidence refs/hashes where present, durable refs, writer refs,
+   source repo refs, proof rung labels, linkage status, and non-claims while
+   classifying compatible, damaged, or unresolved. This remains
+   `saved_readback_seam` over supplied/exported material and does not claim
+   live Causal swarm proof.
+21. Next: run the adjacent-material observation CLI against actual committed
+   Layer public proof/readiness output and Edge compatible handoff readback
+   output when those artifacts are handed to Causal, or have Causal itself read
+   Edge/Layer-derived durable replicated seam history through the declared
+   public Hyperswarm path. Do not add more local adjacent-material expansion
+   unless it removes a concrete consumer ambiguity or protects against a
+   concrete overclaim.
 
 This is not permission to claim Edge/Layer public seam proof. Causal may claim
 that only after it actually consumes Edge/Layer-derived durable public-swarm
@@ -528,9 +547,11 @@ or deliberately consuming fresh Edge/Layer public material:
   and
   `proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/public-seam-proof-index.json`
   as observation-only material;
-- fresh Edge/Layer material is now present. Prefer a narrow
-  adjacent-material observation/readback path over another solo saved-artifact
-  expansion:
+- fresh Edge/Layer material is now present and Causal now has a narrow
+  adjacent-material observation CLI/test path for the expected shapes. Prefer
+  running that path over actual handed Layer/Edge outputs, or reading
+  Edge/Layer-derived durable replicated seam history through public
+  Hyperswarm, over another solo saved-artifact expansion:
   - Layer `33321fbe81abad42565c35b1b4cba5c926cbc5ea` provides public proof
     readback material with `causalReadinessConsumerAccepted: true`,
     linked request/receipt/evidence triples, public/default HyperDHT proof
