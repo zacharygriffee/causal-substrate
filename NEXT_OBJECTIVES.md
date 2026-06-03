@@ -287,6 +287,11 @@ The local supplied-material lane can now:
   `compatible`, and Causal preserved request/receipt/evidence ids and hashes,
   durable refs, writer refs, source repo refs, proof labels, linkage status,
   and non-claims without claiming live Causal swarm proof.
+- prepare Causal's adjacent-material adapter to consume Edge's current
+  `causalHandoffExport.edgeHandoffReadback` export-pack wrapper without
+  changing proof rung; this is adapter validation for the next concrete Edge
+  handoff artifact, not a substitute for the handed artifact and not live
+  Causal swarm proof.
 
 Strongest routinely proven rung in normal tests:
 `local_causal_observation_over_supplied_seam_history_material`.
@@ -531,13 +536,18 @@ Immediate objective list:
    refs, durable refs, writer refs, source repo refs, proof labels, linkage
    status, and non-claims. This remains `saved_readback_seam` and does not
    claim live Causal swarm proof.
-22. Current Edge pressure: consume actual Edge compatible handoff export
+22. Completed adapter preparation: Causal now accepts Edge's current
+   `causalHandoffExport.edgeHandoffReadback` wrapper shape as the same
+   lower-rung Edge handoff readback input. This prevents wrapper mismatch when
+   the concrete Edge export pack is handed over, but it does not synthesize
+   Edge material or claim that Causal has consumed a current Edge artifact.
+23. Current Edge pressure: consume actual Edge compatible handoff export
    material once Edge preserves it as a concrete artifact from current head.
    Do not synthesize replacement Edge material, rerun old failed assumptions,
    or broaden local fixtures around a missing artifact. The useful Causal work
    is to consume the handed Edge export as `saved_readback_seam`, preserve
    refs/non-claims, and classify it without claiming live Causal swarm proof.
-23. Coordination pressure: Layer's concrete export pressure is satisfied for
+24. Coordination pressure: Layer's concrete export pressure is satisfied for
    now; Edge is the current missing handoff-artifact source. Causal may
    continue consuming actual Layer public proof files when a concrete question
    exists, but the next repo-family convergence move is Edge handoff

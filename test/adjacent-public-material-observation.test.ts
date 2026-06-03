@@ -110,7 +110,18 @@ test("classifies unresolved Layer readiness without treating timeout or missing 
 
 test("observes Edge compatible handoff readback as lower-rung exported material", () => {
   const observation = buildAdjacentPublicMaterialObservation({
-    edgeHandoffReadback: { handoffReadback: buildEdgeHandoffReadback() },
+    edgeHandoffReadback: {
+      causalHandoffExport: {
+        artifactKind: "edge_compatible_swarm_seam_causal_handoff_export",
+        targetConsumer: "causal-substrate",
+        operationProofRung: "saved_readback_seam",
+        proofRungNotUpgraded: true,
+        edgeHandoffReadback: buildEdgeHandoffReadback(),
+        operationProof: {
+          causalObservationRan: false,
+        },
+      },
+    },
     emittedAt: "2026-06-03T18:03:00.000Z",
   });
 
