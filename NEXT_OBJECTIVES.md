@@ -336,6 +336,43 @@ described as swarm proof, public seam proof, durable replicated proof,
 production continuity, Layer admission, RBC evaluation, Mesh dispatch, or
 authority.
 
+## Collective Operational Enough Tripwires
+
+These tripwires mark model-level repo-family readiness, not completion,
+canonical history, Layer admission, RBC, Mesh, authority, production durability,
+or an obligation to keep adding solo artifacts. When one fires, report it to
+Spine with the command, result refs, proof rung, warnings, and next pressure.
+
+Causal's standalone tripwire fires when Causal can observe generic
+public-swarm-derived seam-history material across compatible, unresolved, and
+damaged branches, preserve request/receipt ids and hashes, durable refs, writer
+refs, source repos, proof labels, transport booleans, and non-claims, then emit
+durable observation results and readbacks without Edge or Layer participation.
+
+Causal's adjacent-material tripwire fires when Causal consumes committed
+Edge/Layer public-swarm-derived endpoint/history/proof material, classifies it
+as compatible, unresolved, or damaged, and emits a bounded observation handoff
+that Edge, Layer, or Spine can read as observation-only input without Causal
+writing their state or claiming Layer admission, canonical truth, RBC, Mesh,
+authority, or production continuity.
+
+Causal's repo-family demonstration tripwire fires when a fresh Edge-originated
+report-only public-swarm request produces Layer-owned durable receipt/evidence,
+Edge reopens/projects the result, Causal observes that resulting public-swarm
+history or proof envelope, and Spine can summarize the chain with preserved
+source refs and honest proof rungs.
+
+Causal's stop-solo-expansion tripwire fires when new work would add another
+generic public matrix case, saved-artifact readback, or consumer handoff without
+a concrete consumer ambiguity, a fresh Edge/Layer public material input, or a
+named live public-swarm objective. At that point, prefer outward observation or
+wait for adjacent repos.
+
+Causal's blocker tripwire fires when adjacent repos provide only dirty
+worktree state, supplied JSON/files/stdin material, direct imports, local
+fixtures, or control-channel output while asking Causal to claim
+DHT/Hyperswarm-derived observation.
+
 ## Priority: Generic Causal Seam Surface
 
 Before depending on fresh Edge or Layer material, Causal Substrate should
