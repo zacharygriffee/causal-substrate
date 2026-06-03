@@ -485,9 +485,24 @@ Immediate objective list:
    already-consumed Edge receipts and dirty Layer public HyperDHT worktree
    changes, not committed adjacent proof artifacts. See
    `docs/outward-public-material-scan-2026-06-03.md`.
-19. Next: wait for committed Layer public endpoint/proof/readback material,
-   committed fresh Edge public endpoint/history material, or a real generic
-   consumer request before adding more Causal lower-rung material.
+19. Cleared wait condition: Edge and Layer now have fresh committed adjacent
+   material for Causal to inspect.
+   - Layer commit `33321fbe81abad42565c35b1b4cba5c926cbc5ea` strengthens
+     public proof consumer replay, causal-readiness consumer checks, unresolved
+     partial replay, and emits `causalReadinessConsumerAccepted: true` from
+     `npm run verify:public-hyperdht-seam-proof`.
+   - Edge commit `727bf1f9c34657769dc67476d297161668041580` adds
+     `compatible-handoff-readback`, with proof boundary
+     `handoff_export_file_readback_only`, `proofRungNotUpgraded: true`, and
+     read-only/non-authority posture.
+20. Next: add a narrow adjacent-material observation path over the fresh Layer
+   and/or Edge material. Prefer Layer first because it carries public/default
+   HyperDHT proof plus request/receipt/evidence refs explicitly shaped for
+   `ready_for_causal_substrate_read_only_observation`. Then inspect Edge
+   compatible handoff readback as lower-rung exported material. Preserve source
+   ids/hashes, durable refs, writer refs, proof rungs, linkage status, and
+   non-claims. Do not claim live Causal swarm proof unless Causal itself reads
+   durable replicated seam history over public Hyperswarm.
 
 This is not permission to claim Edge/Layer public seam proof. Causal may claim
 that only after it actually consumes Edge/Layer-derived durable public-swarm
@@ -513,10 +528,16 @@ or deliberately consuming fresh Edge/Layer public material:
   and
   `proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/public-seam-proof-index.json`
   as observation-only material;
-- if Edge or Layer provides fresh public endpoint/history material, prefer a
-  narrow observation/readback path over another solo saved-artifact expansion;
-  no fresh Edge/Layer public proof artifact was present locally during the last
-  scan beyond the already-consumed Edge receipts;
+- fresh Edge/Layer material is now present. Prefer a narrow
+  adjacent-material observation/readback path over another solo saved-artifact
+  expansion:
+  - Layer `33321fbe81abad42565c35b1b4cba5c926cbc5ea` provides public proof
+    readback material with `causalReadinessConsumerAccepted: true`,
+    linked request/receipt/evidence triples, public/default HyperDHT proof
+    boundary fields, and non-authority/RBC false flags.
+  - Edge `727bf1f9c34657769dc67476d297161668041580` provides
+    compatible-handoff readback material with `handoff_export_file_readback_only`
+    proof boundary and no proof-rung upgrade.
 - keep any new saved-artifact consumer checks explicitly lower than the source
   public swarm proof unless Causal itself reopens and reads durable replicated
   seam history over public Hyperswarm;
