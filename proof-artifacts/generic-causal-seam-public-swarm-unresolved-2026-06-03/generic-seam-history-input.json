@@ -1,0 +1,50 @@
+{
+  "historyId": "generic-public-seam-history:2026-06-03:unresolved-missing-receipt",
+  "historyHash": "sha256:8888888888888888888888888888888888888888888888888888888888888888",
+  "sourceRepos": [
+    "neutral-source-repo"
+  ],
+  "sourceSchemaRefs": [
+    "neutral/request/v1"
+  ],
+  "transportProof": {
+    "evidenceSource": "local_artifact_fixture",
+    "publicSwarmTransportHappened": false,
+    "testnetSwarmTransportHappened": false,
+    "controlPlaneOnly": true,
+    "durableFeedBackedHistoryObserved": false,
+    "receivingRepoObservedReplicatedPath": false,
+    "receiptOrResultCausallyReferencesSources": true
+  },
+  "durableRefs": [
+    "generic-core:request:unresolved:0"
+  ],
+  "writerRefs": [
+    "generic-writer:request:unresolved"
+  ],
+  "requests": [
+    {
+      "id": "generic-request:2026-06-03:missing-receipt",
+      "hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "sourceRepo": "neutral-source-repo",
+      "durableRef": "generic-core:request:unresolved:0",
+      "writerRef": "generic-writer:request:unresolved",
+      "schemaRef": "neutral/request/v1",
+      "observedProofRung": "local_artifact_seam"
+    }
+  ],
+  "receipts": [],
+  "evidenceRefs": [],
+  "linkage": [
+    {
+      "requestId": "generic-request:2026-06-03:missing-receipt",
+      "requestHash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+    }
+  ],
+  "proofLabels": [
+    "neutral_generic_unresolved_seam_history_material"
+  ],
+  "warnings": [
+    "fixture-intentionally-missing-receipt"
+  ]
+}

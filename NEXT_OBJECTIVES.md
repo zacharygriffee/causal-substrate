@@ -244,6 +244,13 @@ The local supplied-material lane can now:
   rung as observation-only material without Causal calling consumers, writing
   consumer state, admitting Layer evidence, interpreting RBC, publishing to
   Mesh, granting authority, or upgrading proof.
+- run the generic source and replica CLIs over the declared public Hyperswarm
+  path with fresh intentionally unresolved generic seam-history material under
+  `proof-artifacts/generic-causal-seam-public-swarm-unresolved-2026-06-03/`;
+  the replica report classified the run as `unresolved`, preserved the missing
+  receipt finding, and still proved Causal read durable replicated material
+  through the declared public swarm path with strongest source rung
+  `durable_replicated_public_swarm_seam`.
 
 Strongest routinely proven rung in normal tests:
 `local_causal_observation_over_supplied_seam_history_material`.
@@ -356,6 +363,16 @@ Immediate objective list:
    Avoid adding another saved-artifact layer over the same run unless it
    protects against a concrete overclaim or prepares a named public-swarm
    attempt.
+12. Completed public run: prove the generic public-swarm lane preserves
+   unresolved classifier behavior over fresh seam-history material by running
+   `proof-artifacts/generic-causal-seam-public-swarm-unresolved-2026-06-03/`.
+   This preserves a durable public source proof rung but does not turn the
+   saved observation readback into a new live swarm proof.
+13. Next: only broaden the generic public run matrix if it covers a materially
+   different classifier branch, such as hash mismatch damage or proof-label
+   overclaim, and either execute it over public swarm or name the exact
+   public-swarm pressure it prepares. Otherwise, wait for a real generic
+   consumer need or fresh Edge/Layer public material.
 
 This is not permission to claim Edge/Layer public seam proof. Causal may claim
 that only after it actually consumes Edge/Layer-derived durable public-swarm

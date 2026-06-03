@@ -1,0 +1,112 @@
+{
+  "schema": "causal-substrate/generic-causal-seam-observation/v1",
+  "schemaVersion": 1,
+  "repo": "causal-substrate",
+  "lane": "generic-causal-seam-surface",
+  "proofCommand": "run-generic-causal-seam-public-replica-device",
+  "generatedAt": "2026-06-03T15:01:00.000Z",
+  "observationId": "generic-causal-seam-observation:9a9c2c4b6dd1cae8",
+  "observationHash": "sha256:af5c39faba5245ff6b7b966297fb1d9fe056055ea2838f81af83f8b3041aced5",
+  "observedHistoryId": "generic-public-seam-history:2026-06-03:unresolved-missing-receipt",
+  "observedHistoryHash": "sha256:8888888888888888888888888888888888888888888888888888888888888888",
+  "sourceRefsPreserved": {
+    "requestIds": [
+      "generic-request:2026-06-03:missing-receipt"
+    ],
+    "requestHashes": [
+      "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+    ],
+    "receiptIds": [],
+    "receiptHashes": [],
+    "sourceRepos": [
+      "neutral-source-repo"
+    ],
+    "durableRefs": [
+      "generic-core:request:unresolved:0"
+    ],
+    "writerRefs": [
+      "generic-writer:request:unresolved"
+    ],
+    "evidenceIds": []
+  },
+  "strongestProofRung": "durable_replicated_public_swarm_seam",
+  "operationProofRung": "durable_replicated_public_swarm_seam",
+  "sourceProofRung": "durable_replicated_public_swarm_seam",
+  "finalClassification": "unresolved",
+  "classification": "unresolved",
+  "classifiedHappenings": [
+    {
+      "happeningId": "generic-causal-happening:18076379ff249084",
+      "classification": "missing_receipt",
+      "requestId": "generic-request:2026-06-03:missing-receipt",
+      "requestHash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "sourceRefs": [
+        "generic-request:2026-06-03:missing-receipt",
+        "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "generic-core:request:unresolved:0",
+        "generic-writer:request:unresolved"
+      ],
+      "detail": "request has no matching receipt in the envelope"
+    }
+  ],
+  "damageFindings": [],
+  "unresolvedFindings": [
+    "request has no matching receipt in the envelope"
+  ],
+  "overclaimFindings": [],
+  "proof": {
+    "strongestProofRung": "durable_replicated_public_swarm_seam",
+    "operationProofRung": "durable_replicated_public_swarm_seam",
+    "sourceProofRung": "durable_replicated_public_swarm_seam",
+    "proofLabels": [
+      "neutral_generic_unresolved_seam_history_material"
+    ],
+    "proofRungUpgradeClaimed": false
+  },
+  "transportBooleans": {
+    "publicSwarmTransportHappened": true,
+    "testnetSwarmTransportHappened": false,
+    "controlPlaneOnly": false,
+    "durableFeedBackedHistoryObserved": true,
+    "receivingRepoObservedReplicatedPath": true,
+    "durableObservationResultEmitted": true,
+    "receiptOrResultCausallyReferencesSources": true,
+    "reopenedReadbackDerivedFromDurableHistory": true
+  },
+  "publicSwarmTransportHappened": true,
+  "testnetSwarmTransportHappened": false,
+  "controlPlaneOnly": false,
+  "consumerProjection": {
+    "genericConsumersMayRead": true,
+    "edgeMayConsumeAsObservationOnlyInput": true,
+    "layerMayConsumeAsObservationOnlyFeedback": true,
+    "spineMayConsumeAsPostureEvidence": true,
+    "writesConsumerState": false
+  },
+  "nonClaims": {
+    "canonicalHistoryClaimed": false,
+    "layerEvidenceAdmitted": false,
+    "layerAdmissionDecided": false,
+    "rbcInterpreted": false,
+    "quorumSatisfied": false,
+    "authorityGranted": false,
+    "meshPublished": false,
+    "productionContinuityWritten": false
+  },
+  "deferredAttachmentPoints": {
+    "referentPromotion": null,
+    "branchCompatibilityGraph": null,
+    "canonicalContinuityState": null,
+    "rbcInterpretation": null,
+    "layerAdmission": null,
+    "meshPublication": null,
+    "authorityDecisions": null,
+    "productionCausalHistory": null
+  },
+  "nextPressure": "hand-generic-observation-to-test-consumer",
+  "warnings": [
+    "fixture-intentionally-missing-receipt",
+    "generic-causal-seam-observation-does-not-grant-authority",
+    "generic-causal-seam-observation-preserves-consumer-refs-as-input-only"
+  ]
+}

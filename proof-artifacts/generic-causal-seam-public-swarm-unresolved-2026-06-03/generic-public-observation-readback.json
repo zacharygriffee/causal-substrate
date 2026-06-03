@@ -1,0 +1,70 @@
+{
+  "artifactKind": "generic-causal-seam-public-observation-readback",
+  "schema": "causal-substrate/generic-causal-seam-public-observation-readback/v1",
+  "schemaVersion": 1,
+  "emittedAt": "2026-06-03T15:02:00.000Z",
+  "sourcePaths": {
+    "replicaReport": "proof-artifacts/generic-causal-seam-public-swarm-unresolved-2026-06-03/generic-public-replica-report.json",
+    "observationResult": "proof-artifacts/generic-causal-seam-public-swarm-unresolved-2026-06-03/generic-public-observation-result.json"
+  },
+  "readback": {
+    "reportReadable": true,
+    "observationResultReadable": true,
+    "observationHashPreserved": true,
+    "sourceRefsPreserved": true,
+    "publicSwarmTransportHappened": true,
+    "durableFeedBackedHistoryObserved": true,
+    "receivingRepoObservedReplicatedPath": true,
+    "durableObservationResultEmitted": true,
+    "reopenedReadbackDerivedFromDurableHistory": true,
+    "finalClassification": "unresolved",
+    "strongestProofRung": "durable_replicated_public_swarm_seam",
+    "unresolvedFindings": [
+      "request has no matching receipt in the envelope"
+    ]
+  },
+  "preservedRefs": {
+    "requestIds": [
+      "generic-request:2026-06-03:missing-receipt"
+    ],
+    "requestHashes": [
+      "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+    ],
+    "receiptIds": [],
+    "receiptHashes": [],
+    "sourceRepos": [
+      "neutral-source-repo"
+    ],
+    "durableRefs": [
+      "generic-core:request:unresolved:0"
+    ],
+    "writerRefs": [
+      "generic-writer:request:unresolved"
+    ],
+    "evidenceIds": []
+  },
+  "validation": {
+    "status": "generic-causal-seam-public-observation-readback-valid",
+    "noCanonicalHistoryClaim": true,
+    "noLayerAdmissionClaim": true,
+    "noRbcInterpretationClaim": true,
+    "noAuthorityClaim": true,
+    "noMeshPublicationClaim": true,
+    "noProductionContinuityWriteClaim": true,
+    "issues": []
+  },
+  "boundary": {
+    "readbackOnly": true,
+    "opensSwarm": false,
+    "opensCorestore": false,
+    "callsEdge": false,
+    "callsLayer": false,
+    "writesConsumerState": false,
+    "acceptsCanonicalHistory": false,
+    "admitsLayerEvidence": false,
+    "interpretsRbc": false,
+    "grantsAuthority": false,
+    "publishesToMesh": false,
+    "writesProductionContinuity": false
+  }
+}

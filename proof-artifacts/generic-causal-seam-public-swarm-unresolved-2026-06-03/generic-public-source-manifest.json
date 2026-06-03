@@ -1,0 +1,53 @@
+{
+  "artifactKind": "generic-causal-seam-public-source-manifest",
+  "schema": "causal-substrate/generic-causal-seam-public-source-manifest/v1",
+  "schemaVersion": 1,
+  "emittedAt": "2026-06-03T15:00:00.000Z",
+  "lane": "generic_causal_seam_public_swarm",
+  "namespaceParts": [
+    "causal-substrate",
+    "v1",
+    "generic-causal-seam-public-swarm",
+    "generic",
+    "causal",
+    "seam",
+    "public",
+    "unresolved",
+    "2026-06-03"
+  ],
+  "source": {
+    "sourceCoreKeyHex": "a264bd467f39df47ea486764f6a3c88191010b5c22ed194de7c01749d0849051",
+    "topicHex": "b3605540a309d8f78449021fdae4fe9e2031ebea8a755665d83413d3fe96ed87",
+    "sourceRecordId": "generic-causal-seam-durable-record:623b1572f53b9dca",
+    "seamHistoryHash": "sha256:6fae3bc660fe470148f9c3db230e8770dab5a15e08fdaaf593ca26852f6e6ca9",
+    "sourceRefs": [
+      "generic-public-seam-history:2026-06-03:unresolved-missing-receipt",
+      "sha256:8888888888888888888888888888888888888888888888888888888888888888",
+      "neutral-source-repo",
+      "neutral/request/v1",
+      "generic-core:request:unresolved:0",
+      "generic-writer:request:unresolved",
+      "generic-request:2026-06-03:missing-receipt",
+      "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "neutral_generic_unresolved_seam_history_material"
+    ]
+  },
+  "proofPosture": {
+    "sourceManifestOnly": true,
+    "publicSwarmObservationProofClaimedNow": false,
+    "replicaMustReadDurableMaterial": true,
+    "lowerProofRungsRemainLowerUntilReplicaReport": true
+  },
+  "boundary": {
+    "acceptsCanonicalHistory": false,
+    "admitsLayerEvidence": false,
+    "interpretsRbc": false,
+    "grantsAuthority": false,
+    "publishesToMesh": false,
+    "writesProductionContinuity": false,
+    "opensSwarmBySourceCommand": true,
+    "opensCorestoreBySourceCommand": true,
+    "writesDurableHistoryBySourceCommand": true,
+    "replicaReadProvenByThisArtifact": false
+  }
+}
