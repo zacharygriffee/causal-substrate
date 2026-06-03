@@ -1,0 +1,51 @@
+{
+  "artifactKind": "causal-public-observer-descriptor-preflight-report",
+  "schema": "causal-substrate/public-observer-descriptor-preflight-report/v1",
+  "schemaVersion": 1,
+  "emittedAt": "2026-06-03T21:00:00.000Z",
+  "operationProofRung": "local_artifact_seam",
+  "status": "blocked_waiting_for_causal_observable_source_manifest",
+  "descriptorRefs": [
+    {
+      "role": "edge_descriptor",
+      "path": "../mesh-ecology-edge/proof-artifacts/edge-causal-spine-handoff-readiness-2026-06-03/second-host-compatible-endpoint-descriptor.json",
+      "sha256": "e6736c013f681db3a26be665340b8f751a20b29090b63771b59fedf65e920d2f"
+    },
+    {
+      "role": "layer_descriptor",
+      "path": "../mesh-ecology-layer/proof-artifacts/layer-public-proof-export-bundle-latest/artifacts/public-endpoint.json",
+      "sha256": "6982cfda362d5a26a162810762f197e453f34ead33873b4f0ca58b721c7e633c"
+    }
+  ],
+  "publicSwarmProofClaimedNow": false,
+  "opensSwarmNow": false,
+  "opensCorestoreNow": false,
+  "unresolvedFindings": [
+    "observe_requires_causal_observable_source_manifest_before_swarm_can_open"
+  ],
+  "overclaimFindings": [
+    "retained_endpoint_or_descriptor_material_is_not_live_causal_public_swarm_observation",
+    "source_manifest_shape_must_be_valid_before_observe_can_claim_public_swarm_read"
+  ],
+  "proofGate": {
+    "lifecycleStateDoesNotClaimSwarmProof": true,
+    "publicSwarmProofRequiresObserveCommand": true,
+    "observeRequiresRealHyperswarmEnv": "CAUSAL_SUBSTRATE_REAL_HYPERSWARM=1",
+    "observeRequiresPublicHyperswarmEnv": "CAUSAL_SUBSTRATE_HYPERSWARM_PUBLIC=1",
+    "configuredBootstrapRejectedForPublicProof": true,
+    "durableReadRequiredForDurableReplicatedPublicSwarmProof": true
+  },
+  "boundary": {
+    "observationOnly": true,
+    "writesEdgeState": false,
+    "writesLayerState": false,
+    "acceptsCanonicalHistory": false,
+    "admitsLayerEvidence": false,
+    "interpretsRbc": false,
+    "claimsQuorum": false,
+    "grantsAuthority": false,
+    "publishesToMesh": false,
+    "writesProductionContinuity": false
+  },
+  "nextPressure": "produce_fresh_edge_layer_lifecycle_source_manifest_or_descriptor_that_causal_can_observe_live"
+}

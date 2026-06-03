@@ -91,6 +91,27 @@ interface PublicObserverInstructions {
   nextPressure: string;
 }
 
+interface PublicObserverDescriptorPreflightReport {
+  artifactKind: "causal-public-observer-descriptor-preflight-report";
+  schema: "causal-substrate/public-observer-descriptor-preflight-report/v1";
+  schemaVersion: 1;
+  emittedAt: string;
+  operationProofRung: "local_artifact_seam";
+  status:
+    | "ready_for_manifest_backed_observe"
+    | "blocked_waiting_for_causal_observable_source_manifest";
+  descriptorRefs: DescriptorRef[];
+  manifestRef?: DescriptorRef | undefined;
+  publicSwarmProofClaimedNow: false;
+  opensSwarmNow: false;
+  opensCorestoreNow: false;
+  unresolvedFindings: string[];
+  overclaimFindings: string[];
+  proofGate: PublicObserverLifecycleState["proofGate"];
+  boundary: PublicObserverBoundary;
+  nextPressure: string;
+}
+
 interface PublicObserverBoundary {
   observationOnly: true;
   writesEdgeState: false;
@@ -175,13 +196,25 @@ async function commandObserve(args: CliArgs): Promise<void> {
   }
 
   requirePublicHyperswarmLane();
-  if (!args.manifest) throw new Error("manifest_required_for_causal_public_observer_observe");
   if (!args.reportOutput) throw new Error("report_output_required_for_causal_public_observer_observe");
+  if (!args.manifest) {
+    const preflight = await buildDescriptorPreflightReport(args, [
+      "observe_requires_causal_observable_source_manifest_before_swarm_can_open",
+    ]);
+    await writeJson(args.reportOutput, preflight);
+    return;
+  }
   if (!args.storageDir) throw new Error("storage_dir_required_for_causal_public_observer_observe");
 
   const sourceManifest = JSON.parse(
     await readFile(path.resolve(args.manifest), "utf8"),
   ) as GenericCausalSeamPublicSourceManifest;
+  const manifestIssues = validateGenericSourceManifest(sourceManifest);
+  if (manifestIssues.length > 0) {
+    const preflight = await buildDescriptorPreflightReport(args, manifestIssues);
+    await writeJson(args.reportOutput, preflight);
+    return;
+  }
   const report = await runGenericCausalSeamPublicReplicaReader({
     storageDir: path.resolve(args.storageDir),
     createSwarm: async (seed) => {
@@ -205,6 +238,69 @@ async function commandObserve(args: CliArgs): Promise<void> {
     });
     await writeJson(args.readbackOutput, readback);
   }
+}
+
+async function buildDescriptorPreflightReport(
+  args: CliArgs,
+  findings: string[],
+): Promise<PublicObserverDescriptorPreflightReport> {
+  const descriptorRefs: DescriptorRef[] = [];
+  if (args.edgeDescriptor) descriptorRefs.push(await descriptorRef("edge_descriptor", args.edgeDescriptor));
+  if (args.layerDescriptor) descriptorRefs.push(await descriptorRef("layer_descriptor", args.layerDescriptor));
+  const manifestRef = args.manifest ? await descriptorRef("source_manifest", args.manifest) : undefined;
+  return {
+    artifactKind: "causal-public-observer-descriptor-preflight-report",
+    schema: "causal-substrate/public-observer-descriptor-preflight-report/v1",
+    schemaVersion: 1,
+    emittedAt: args.emittedAt,
+    operationProofRung: "local_artifact_seam",
+    status: findings.length === 0
+      ? "ready_for_manifest_backed_observe"
+      : "blocked_waiting_for_causal_observable_source_manifest",
+    descriptorRefs,
+    ...(manifestRef ? { manifestRef } : {}),
+    publicSwarmProofClaimedNow: false,
+    opensSwarmNow: false,
+    opensCorestoreNow: false,
+    unresolvedFindings: findings,
+    overclaimFindings: [
+      "retained_endpoint_or_descriptor_material_is_not_live_causal_public_swarm_observation",
+      "source_manifest_shape_must_be_valid_before_observe_can_claim_public_swarm_read",
+    ],
+    proofGate: proofGate(),
+    boundary: boundary(),
+    nextPressure: "produce_fresh_edge_layer_lifecycle_source_manifest_or_descriptor_that_causal_can_observe_live",
+  };
+}
+
+function validateGenericSourceManifest(value: GenericCausalSeamPublicSourceManifest): string[] {
+  const issues: string[] = [];
+  if (!value || typeof value !== "object") {
+    return ["source_manifest_must_be_json_object"];
+  }
+  if (value.artifactKind !== "generic-causal-seam-public-source-manifest") {
+    issues.push("source_manifest_artifact_kind_mismatch");
+  }
+  if (value.schema !== "causal-substrate/generic-causal-seam-public-source-manifest/v1") {
+    issues.push("source_manifest_schema_mismatch");
+  }
+  if (!value.source || typeof value.source !== "object") {
+    issues.push("source_manifest_source_missing");
+    return issues;
+  }
+  if (typeof value.source.sourceCoreKeyHex !== "string" || !/^[0-9a-f]+$/i.test(value.source.sourceCoreKeyHex)) {
+    issues.push("source_manifest_source_core_key_missing_or_invalid");
+  }
+  if (typeof value.source.topicHex !== "string" || !/^[0-9a-f]+$/i.test(value.source.topicHex)) {
+    issues.push("source_manifest_topic_missing_or_invalid");
+  }
+  if (typeof value.source.sourceRecordId !== "string" || !value.source.sourceRecordId) {
+    issues.push("source_manifest_record_id_missing");
+  }
+  if (typeof value.source.seamHistoryHash !== "string" || !value.source.seamHistoryHash) {
+    issues.push("source_manifest_seam_history_hash_missing");
+  }
+  return issues;
 }
 
 function buildLifecycleState(input: {

@@ -456,6 +456,10 @@ The `observe` command emits instructions only until
 source manifest through Causal's public Hyperswarm replica reader, writes the
 bounded replica report/readback, and labels durable replicated public swarm
 proof only if the reader actually consumes durable material through that path.
+If an enabled observe attempt receives only Edge/Layer descriptors, or a
+retained Layer/Edge manifest that is not a Causal-readable source manifest, it
+writes a `local_artifact_seam` descriptor preflight report instead of opening
+swarm or upgrading proof.
 
 The exact command names may follow existing CLI conventions, but the behavior
 should be concrete: accept Edge/Layer endpoint or durable-history descriptors,
@@ -498,8 +502,10 @@ saved-artifact indexes, or lifecycle-status files unless that work directly
 supports the public observer chain above.
 
 Current pressure after the latest work: Causal has the public observer
-`up/status/down/observe` CLI surface. The next Causal objective should be a live
-observer use, not another lifecycle wrapper:
+`up/status/down/observe` CLI surface, plus fail-closed descriptor preflight for
+enabled observe attempts that lack a Causal-readable source manifest. The next
+Causal objective should be a live observer use, not another lifecycle wrapper
+or descriptor-readiness artifact:
 
 ```text
 CAUSAL_SUBSTRATE_REAL_HYPERSWARM=1 \
@@ -509,8 +515,18 @@ npm run public-observer -- observe ...
 
 using a fresh Edge/Layer public descriptor or durable-history source manifest
 when available. If Edge/Layer are not ready, Causal should stay poised with the
-observer CLI and avoid adding more generic matrices or saved handoff summaries
-unless they remove a concrete blocker for the live observe run.
+observer CLI and avoid adding more generic matrices, descriptor preflights, or
+saved handoff summaries unless they remove a concrete blocker for the live
+observe run.
+
+Completed preflight: Causal ran the enabled public observer against the current
+retained Edge descriptor and Layer public endpoint under
+`proof-artifacts/public-observer-descriptor-preflight-2026-06-03/`. The result
+is `blocked_waiting_for_causal_observable_source_manifest`; it is
+`local_artifact_seam`, did not open swarm or Corestore, and prevents upgrading
+retained descriptor material into live Causal public-swarm observation. Next
+still requires a fresh Edge/Layer lifecycle source manifest or equivalent
+Causal-observable public descriptor.
 
 ## RBC Creation Tripwire
 

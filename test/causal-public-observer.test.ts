@@ -131,3 +131,109 @@ test("causal public observer rejects configured bootstrap for public proof", asy
 
   assert.match(stderr, /configured_bootstrap_deferred_for_causal_public_observer/);
 });
+
+test("causal public observer preflights descriptor-only live observe without claiming swarm proof", async () => {
+  const root = await mkdtemp(path.join(tmpdir(), "causal-public-observer-preflight-"));
+  try {
+    const layerDescriptor = path.join(root, "layer-public-endpoint.json");
+    const reportPath = path.join(root, "preflight-report.json");
+    await writeFile(
+      layerDescriptor,
+      JSON.stringify({
+        artifactKind: "layer_owned_edge_seam_public_endpoint_projection",
+        proofBoundary: {
+          publicSwarmProof: true,
+        },
+      }),
+      "utf8",
+    );
+
+    await execFileAsync("npx", [
+      "tsx",
+      "scripts/causal-public-observer.ts",
+      "observe",
+      "--layer-descriptor",
+      layerDescriptor,
+      "--report-output",
+      reportPath,
+      "--emitted-at",
+      "2026-06-03T20:04:00.000Z",
+    ], {
+      env: {
+        ...process.env,
+        CAUSAL_SUBSTRATE_REAL_HYPERSWARM: "1",
+        CAUSAL_SUBSTRATE_HYPERSWARM_PUBLIC: "1",
+        CAUSAL_SUBSTRATE_HYPERSWARM_BOOTSTRAP: "",
+      },
+    });
+
+    const report = JSON.parse(await readFile(reportPath, "utf8"));
+    assert.equal(report.artifactKind, "causal-public-observer-descriptor-preflight-report");
+    assert.equal(report.operationProofRung, "local_artifact_seam");
+    assert.equal(report.status, "blocked_waiting_for_causal_observable_source_manifest");
+    assert.equal(report.publicSwarmProofClaimedNow, false);
+    assert.equal(report.opensSwarmNow, false);
+    assert.equal(report.opensCorestoreNow, false);
+    assert.equal(report.descriptorRefs[0].role, "layer_descriptor");
+    assert.match(report.descriptorRefs[0].sha256, /^[0-9a-f]{64}$/);
+    assert.ok(report.unresolvedFindings.includes("observe_requires_causal_observable_source_manifest_before_swarm_can_open"));
+    assert.ok(report.overclaimFindings.includes("retained_endpoint_or_descriptor_material_is_not_live_causal_public_swarm_observation"));
+    assert.equal(report.boundary.admitsLayerEvidence, false);
+    assert.equal(report.boundary.grantsAuthority, false);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("causal public observer rejects non-Causal source manifests before opening swarm", async () => {
+  const root = await mkdtemp(path.join(tmpdir(), "causal-public-observer-wrong-manifest-"));
+  try {
+    const manifestPath = path.join(root, "layer-manifest.json");
+    const reportPath = path.join(root, "preflight-report.json");
+    await writeFile(
+      manifestPath,
+      JSON.stringify({
+        artifactKind: "layer_owned_edge_seam_readback_manifest",
+        schema: "layer-owned-edge-seam-readback-manifest.v0",
+        publicEndpoint: {
+          proofBoundary: {
+            publicSwarmProof: true,
+          },
+        },
+      }),
+      "utf8",
+    );
+
+    await execFileAsync("npx", [
+      "tsx",
+      "scripts/causal-public-observer.ts",
+      "observe",
+      "--manifest",
+      manifestPath,
+      "--report-output",
+      reportPath,
+      "--storage-dir",
+      path.join(root, "storage"),
+      "--emitted-at",
+      "2026-06-03T20:05:00.000Z",
+    ], {
+      env: {
+        ...process.env,
+        CAUSAL_SUBSTRATE_REAL_HYPERSWARM: "1",
+        CAUSAL_SUBSTRATE_HYPERSWARM_PUBLIC: "1",
+        CAUSAL_SUBSTRATE_HYPERSWARM_BOOTSTRAP: "",
+      },
+    });
+
+    const report = JSON.parse(await readFile(reportPath, "utf8"));
+    assert.equal(report.status, "blocked_waiting_for_causal_observable_source_manifest");
+    assert.equal(report.publicSwarmProofClaimedNow, false);
+    assert.equal(report.opensSwarmNow, false);
+    assert.equal(report.manifestRef.role, "source_manifest");
+    assert.ok(report.unresolvedFindings.includes("source_manifest_artifact_kind_mismatch"));
+    assert.ok(report.unresolvedFindings.includes("source_manifest_schema_mismatch"));
+    assert.ok(report.unresolvedFindings.includes("source_manifest_source_missing"));
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
