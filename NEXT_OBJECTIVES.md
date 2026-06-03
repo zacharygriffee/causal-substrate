@@ -522,6 +522,14 @@ Immediate objective list:
    public Hyperswarm path. Do not add more local adjacent-material expansion
    unless it removes a concrete consumer ambiguity or protects against a
    concrete overclaim.
+22. Coordination pressure: ask Edge and Layer for concrete exported artifacts,
+   not more shape descriptions. Current relevant heads are Edge
+   `7d240ba33acda4a30f5019bf6be81182030a2907` and Layer
+   `33321fbe81abad42565c35b1b4cba5c926cbc5ea`. Causal should consume actual
+   files such as Layer `causal-readiness.json`, `public-endpoint.json`,
+   `history-index.json`, `proof-bundle.json`, and Edge
+   compatible-handoff-readback/feed readback material when supplied. Until then,
+   do not broaden the adjacent-material adapter with more synthetic cases.
 
 This is not permission to claim Edge/Layer public seam proof. Causal may claim
 that only after it actually consumes Edge/Layer-derived durable public-swarm
