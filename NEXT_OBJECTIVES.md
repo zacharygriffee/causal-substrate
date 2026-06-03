@@ -220,6 +220,12 @@ The local supplied-material lane can now:
   including durable local observation result write and reopened readback.
 - reject descriptor-declared or label-declared public swarm proof unless the
   input carries explicit reader-observed replicated public-swarm-path evidence.
+- add a standalone generic public-swarm source/replica lane with source and
+  replica CLIs; the CLIs emit instructions only until explicitly enabled,
+  reject configured bootstrap for public proof, keep source manifests as
+  manifest-only lower proof, classify replica timeout as unresolved evidence,
+  and prove local direct-peer replication remains below public/default swarm
+  proof unless public reader evidence is present.
 
 Strongest routinely proven rung in normal tests:
 `local_causal_observation_over_supplied_seam_history_material`.
@@ -299,12 +305,18 @@ Immediate objective list:
 5. Completed locally: make public swarm transport booleans evidence-derived,
    never descriptor-, env-, bootstrap-, manifest-, command-name-, or
    declared-rung-derived.
-6. Next: add a standalone public-swarm lane using neutral compatible seam-history
-   material so Causal can prove its own generic observer seam without waiting
-   for Edge/Layer.
+6. Completed locally: add a standalone public-swarm lane using neutral
+   compatible seam-history material so Causal can prove its own generic
+   observer seam without waiting for Edge/Layer. The local tests cover
+   instructions, manifest-only posture, timeout-as-unresolved, and direct-peer
+   replication below public/default proof.
 7. Completed locally: prove durable observation result write and reopened
    readback.
 8. Preserve Edge/Layer/RBC/Mesh/Platform refs as causal input refs only.
+9. Next: run the generic source and replica CLIs over the declared public
+   Hyperswarm path with `CAUSAL_SUBSTRATE_HYPERSWARM_BOOTSTRAP` unset, then
+   preserve the resulting manifest, replica report, durable observation
+   result, and reopened readback as Causal-owned generic public-swarm proof.
 
 This is not permission to claim Edge/Layer public seam proof. Causal may claim
 that only after it actually consumes Edge/Layer-derived durable public-swarm
