@@ -46,7 +46,7 @@ the prototype artifact contract where useful: preserve proof rung,
 classification, transport booleans, request/receipt refs, hashes, source refs,
 writer refs, warnings, non-claims, and next pressure. Do not cite prototype
 artifacts as live Causal observations; use them to avoid category errors while
-waiting for fresh Edge/Layer public material or running a real public reader.
+hardening the generic Causal seam surface or running a real public reader.
 
 ## Completed Local Seam-History Observation Surface
 
@@ -268,26 +268,28 @@ authority.
 
 ## Priority: Generic Causal Seam Surface
 
-Before waiting on fresh Edge or Layer material, Causal Substrate should harden
-its own generic seam posture. Use
-`docs/generic-causal-seam-surface.md` as the current contract.
+Before depending on fresh Edge or Layer material, Causal Substrate should
+harden its own generic seam posture. Use `docs/generic-causal-seam-surface.md`
+as the current contract.
 
-Immediate priority:
+Immediate objective list:
 
-- expose a library-neutral Causal endpoint descriptor shape;
-- expose a generic seam-history input envelope that can accept compatible
-  request, receipt, evidence, durable, writer, and linkage refs from any repo
-  or library;
-- expose a generic observation result envelope with classifications, damage
-  findings, unresolved findings, overclaim findings, proof fields, transport
-  booleans, non-claims, and deferred attachment points;
-- make public swarm transport booleans evidence-derived, never descriptor-,
-  env-, bootstrap-, manifest-, command-name-, or declared-rung-derived;
-- add a standalone public-swarm lane using neutral compatible seam-history
-  material so Causal can prove its own generic observer seam without waiting
-  for Edge/Layer;
-- prove durable observation result write and reopened readback;
-- preserve Edge/Layer/RBC/Mesh/Platform refs as causal input refs only.
+1. Expose a library-neutral Causal endpoint descriptor shape.
+2. Expose a generic seam-history input envelope that can accept compatible
+   request, receipt, evidence, durable, writer, and linkage refs from any repo
+   or library.
+3. Expose a generic observation result envelope with classifications, damage
+   findings, unresolved findings, overclaim findings, proof fields, transport
+   booleans, non-claims, deferred attachment points, and `nextPressure`.
+4. Add Causal-owned test consumers/smokes that consume the generic descriptor,
+   input envelope, and observation result without Edge or Layer participation.
+5. Make public swarm transport booleans evidence-derived, never descriptor-,
+   env-, bootstrap-, manifest-, command-name-, or declared-rung-derived.
+6. Add a standalone public-swarm lane using neutral compatible seam-history
+   material so Causal can prove its own generic observer seam without waiting
+   for Edge/Layer.
+7. Prove durable observation result write and reopened readback.
+8. Preserve Edge/Layer/RBC/Mesh/Platform refs as causal input refs only.
 
 This is not permission to claim Edge/Layer public seam proof. Causal may claim
 that only after it actually consumes Edge/Layer-derived durable public-swarm
@@ -298,10 +300,11 @@ compatible seam-history material over public swarm.
 
 The current refreshed saved-artifact readiness, consumer handoff, next public
 run, next Edge handoff contract, and next proof index list is complete. The
-next list should first harden the generic Causal seam surface above. After that,
-build outward moves around either preparing another explicit public-swarm-only
-device objective from the latest index, handing the current proof index to a
-consumer, or consuming fresh Edge/Layer public material:
+next list should first harden the generic Causal seam surface above and prove
+it with Causal-owned test consumers/smokes. After that, build outward moves
+around either preparing another explicit public-swarm-only device objective
+from the latest index, handing the current proof index to a generic consumer,
+or deliberately consuming fresh Edge/Layer public material:
 
 - prepare another public-swarm-only device objective from
   `proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/public-seam-proof-index.json`

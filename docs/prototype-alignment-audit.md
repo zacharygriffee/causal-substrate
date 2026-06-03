@@ -30,9 +30,10 @@ It prevents these overclaims:
 This is not horizontal expansion below swarm because it creates no new
 readback lane, handoff bundle, proof index, fixture family, or artifact schema.
 It records whether a future consumer-facing normalization pass is justified.
-The live swarm-carried objective remains: use fresh Edge/Layer public material
-or an operator-selected public device run to produce public-swarm-carried
-seam-history evidence.
+The live swarm-carried objective remains: prove Causal's own generic observer
+seam with neutral compatible seam-history material over public swarm, then
+deliberately consume Edge/Layer public material only when that material exists
+and needs Causal observation.
 
 ## Prototype References Read
 
@@ -122,8 +123,8 @@ normalized fields without knowing Causal's nested locations.
 Do not retrofit every saved artifact now. That would be lower-rung schema
 polish without a live consumer or public-swarm pressure.
 
-If a consumer asks for prototype-compatible Causal material, or before the next
-operator-selected public device run, add one bounded normalization surface:
+If a generic test consumer or external consumer needs prototype-compatible
+Causal material, add one bounded normalization surface:
 
 - a read-only summary/manifest over an existing public run directory;
 - proof rung: `consumer_handoff_seam` or `saved_readback_seam`;
@@ -134,6 +135,7 @@ operator-selected public device run, add one bounded normalization surface:
 - no new swarm claim unless the command itself opens swarm/Corestore and reads
   durable replicated material through the declared public path.
 
-Until that consumer pressure exists, the next useful Causal move remains
-outside this audit: consume fresh Edge/Layer public material or run another
-operator-selected public-swarm-only device objective.
+The next useful Causal move is not to wait on Edge or Layer. Build the generic
+Causal seam descriptor/input/output surface, prove it with Causal-owned test
+consumers/smokes, then move that neutral lane toward public-swarm-carried
+evidence.
