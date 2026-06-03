@@ -315,6 +315,12 @@ The local supplied-material lane can now:
   material through the declared public Hyperswarm path with strongest rung
   `durable_replicated_public_swarm_seam` while preserving the warning that the
   source material began as saved adjacent observations.
+- emit a compact current-posture consumer handoff under
+  `proof-artifacts/current-causal-posture-handoff-2026-06-03/`; this is
+  `consumer_handoff_seam`, preserves exact artifact refs and proof rungs for
+  the saved Layer observation, saved Edge observation, and derived public
+  Hyperswarm read, and does not upgrade proof or claim direct Edge/Layer live
+  publication to Causal.
 
 Strongest routinely proven rung in normal tests:
 `local_causal_observation_over_supplied_seam_history_material`.
@@ -610,6 +616,16 @@ Immediate objective list:
    needs guarding, or Edge/Layer produce a live public-swarm handoff intended
    for direct Causal reading. Otherwise report the current posture to Spine or
    the requesting consumer with exact artifact refs and proof rungs.
+30. Completed consumer handoff: emit
+   `proof-artifacts/current-causal-posture-handoff-2026-06-03/current-causal-posture-consumer-handoff.json`
+   as `consumer_handoff_seam` for Spine, Edge, Layer, or generic consumers.
+   It preserves exact artifact refs, hashes, request/receipt refs, proof rungs,
+   non-claims, and the caveat that the public read is over derived material,
+   not direct Edge/Layer live publication to Causal.
+31. Next: pause local expansion. The useful next move now requires one of:
+   a concrete consumer response to the current-posture handoff, a distinct
+   overclaim risk to guard, or fresh Edge/Layer live public-swarm material
+   intended for direct Causal reading.
 
 This is not permission to claim Edge/Layer public seam proof. Causal may claim
 that only after it actually consumes Edge/Layer-derived durable public-swarm
