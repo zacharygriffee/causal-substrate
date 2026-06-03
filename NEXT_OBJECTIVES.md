@@ -426,6 +426,56 @@ worktree state, supplied JSON/files/stdin material, direct imports, local
 fixtures, or control-channel output while asking Causal to claim
 DHT/Hyperswarm-derived observation.
 
+## Immediate Direction: Public-Swarm Observer For The Chain
+
+Move briskly from posture handoffs and saved-artifact indexes into a Causal
+observer lane that can participate in the repo-family public swarm chain.
+
+Causal should expose lifecycle or CLI surfaces equivalent to:
+
+```text
+causal public-observer up
+causal public-observer observe
+causal public-observer status
+causal public-observer down
+```
+
+The exact command names may follow existing CLI conventions, but the behavior
+should be concrete: accept Edge/Layer endpoint or durable-history descriptors,
+read durable replicated material through the declared public swarm path when
+that proof is claimed, emit bounded compatible/damaged/unresolved observations,
+write durable observation readback, and shut down cleanly.
+
+The repo-family chain target is:
+
+```text
+Edge persistent public seam/client intent
+-> Layer persistent public participant
+-> Layer durable receipt/evidence
+-> Edge readback/projection
+-> Causal public-swarm-derived observation
+-> Spine posture evidence
+```
+
+Causal may also provide a one-shot observer CLI for test harnesses, but that
+client is a proof probe, not a canonical operator surface and not a side-channel
+authority. It must not write Edge or Layer state, admit Layer evidence, decide
+canonical history, interpret RBC, publish Mesh, or grant authority.
+
+Next Causal progress should produce one of:
+
+- a public observer `up/status/down` lane or one-shot `observe` command tied to
+  Edge/Layer public descriptors;
+- a fresh observation over live Edge/Layer public-swarm-derived material;
+- an unresolved public observation when the chain flakes or the receipt/evidence
+  path is incomplete;
+- a compact Spine/Edge/Layer handoff from that live observation preserving
+  source refs without upgrading proof.
+
+Do not spend another cycle only expanding posture handoffs, generic matrices,
+or saved-artifact indexes unless that work directly supports the public observer
+chain above.
+
 ## RBC Creation Tripwire
 
 Do not create or depend on `mesh-ecology-rbc` to make the first Edge/Layer/Causal
