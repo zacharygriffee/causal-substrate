@@ -21,6 +21,13 @@ observation, readback, handoff, or proof-index lane, check the prototype's
 `MODEL.md`, `docs/agent-snag-index.md`, and `docs/artifact-contract.md` for
 vocabulary and artifact fields that prevent common overclaims.
 
+Current local audit:
+`docs/prototype-alignment-audit.md`. It records that Causal is semantically
+aligned with the prototype proof-boundary doctrine, but does not yet expose all
+prototype common artifact fields at top level. Do not retrofit saved artifacts
+unless a real consumer needs the normalized surface or the next public-swarm
+run needs it to prevent proof-rung ambiguity.
+
 Causal Substrate should specifically absorb these prototype lessons:
 
 - supplied JSON, saved artifacts, and readbacks are lower-rung material unless
