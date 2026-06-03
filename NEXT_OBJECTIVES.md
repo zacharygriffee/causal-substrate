@@ -373,6 +373,34 @@ worktree state, supplied JSON/files/stdin material, direct imports, local
 fixtures, or control-channel output while asking Causal to claim
 DHT/Hyperswarm-derived observation.
 
+## RBC Creation Tripwire
+
+Do not create or depend on `mesh-ecology-rbc` to make the first Edge/Layer/Causal
+public-swarm chain work. Causal must first demonstrate observation over
+public-swarm-derived material while preserving non-authority boundaries without
+RBC.
+
+RBC creation becomes eligible when that unguided chain exists and Causal plus at
+least one other active repo repeatedly need the same external evaluation receipt
+shape for a boundary question such as: may this observation, promotion,
+attachment, citation, branch comparison, dispatch request, or execution request
+be used under a scoped rulebook/capability view?
+
+Causal should signal the RBC creation tripwire only when it can provide concrete
+source refs for evaluation: observation refs, request/receipt refs, durable refs,
+writer refs, source repos, requested capability refs, rulebook refs, scope,
+expiry/null, and the reason Causal must cite an external evaluation without
+interpreting RBC itself. The desired first RBC lane is report-only:
+`allowed | denied | deferred`, `rulebookRef`, `capabilityRef`, `scope`,
+`expiry/null`, `reason`, evaluated source refs, evaluator/receipt refs, and
+non-authority posture.
+
+Do not signal RBC creation for canonical truth, Layer admission, proof-rung
+upgrades, quorum satisfaction, local saved-artifact checks, or any path that
+would let RBC replace public-swarm proof, Causal classification, Edge
+projection, Layer receipt semantics, Mesh dispatch, Platform consequence, or
+repo-local responsibility.
+
 ## Priority: Generic Causal Seam Surface
 
 Before depending on fresh Edge or Layer material, Causal Substrate should
