@@ -506,14 +506,16 @@ Immediate objective list:
    `docs/outward-public-material-scan-2026-06-03.md`.
 19. Cleared wait condition: Edge and Layer now have fresh committed adjacent
    material for Causal to inspect.
-   - Layer commit `33321fbe81abad42565c35b1b4cba5c926cbc5ea` strengthens
-     public proof consumer replay, causal-readiness consumer checks, unresolved
-     partial replay, and emits `causalReadinessConsumerAccepted: true` from
-     `npm run verify:public-hyperdht-seam-proof`.
-   - Edge commit `727bf1f9c34657769dc67476d297161668041580` adds
-     `compatible-handoff-readback`, with proof boundary
-     `handoff_export_file_readback_only`, `proofRungNotUpgraded: true`, and
-     read-only/non-authority posture.
+   - Layer commit `717ee49c1092929af72eb9c1e39dfb6e87f59a78` preserves a
+     retained public proof export bundle under
+     `proof-artifacts/layer-public-proof-export-bundle-latest/`, including
+     public endpoint, history index, proof bundle, causal readiness, evidence
+     detail, provenance, handoff, replay, negative matrix, and non-claim
+     material.
+   - Edge commit `d9043723fc0aeda2c6de5e510ef5df9826034275` adds compatible
+     Causal handoff export and handoff contract smoke paths. Current Edge
+     verification passes those paths; the older duplicate `uniqueStrings`
+     failure is historical, not a current blocker.
 20. Completed locally: add a narrow adjacent-material observation path over
    fresh Layer public proof/readiness material and Edge compatible handoff
    readback shapes. The command path preserves request ids/hashes, receipt
@@ -529,19 +531,18 @@ Immediate objective list:
    refs, durable refs, writer refs, source repo refs, proof labels, linkage
    status, and non-claims. This remains `saved_readback_seam` and does not
    claim live Causal swarm proof.
-22. Next Edge pressure: consume actual Edge compatible handoff readback once
-   Edge can emit it. At current Edge head, the CLI fails before output because
-   `src/local/edgeLayerReportOnlySeamSmoke.js` declares `uniqueStrings` twice;
-   Causal should not synthesize replacement Edge material or broaden local
-   fixtures around this failure.
-23. Coordination pressure: ask Edge and Layer for concrete exported artifacts,
-   not more shape descriptions. Current relevant heads are Edge
-   `7d240ba33acda4a30f5019bf6be81182030a2907` and Layer
-   `33321fbe81abad42565c35b1b4cba5c926cbc5ea`. Causal should consume actual
-   files such as Layer `causal-readiness.json`, `public-endpoint.json`,
-   `history-index.json`, `proof-bundle.json`, and Edge
-  compatible-handoff-readback/feed readback material when supplied. Until then,
-  do not broaden the adjacent-material adapter with more synthetic cases.
+22. Current Edge pressure: consume actual Edge compatible handoff export
+   material once Edge preserves it as a concrete artifact from current head.
+   Do not synthesize replacement Edge material, rerun old failed assumptions,
+   or broaden local fixtures around a missing artifact. The useful Causal work
+   is to consume the handed Edge export as `saved_readback_seam`, preserve
+   refs/non-claims, and classify it without claiming live Causal swarm proof.
+23. Coordination pressure: Layer's concrete export pressure is satisfied for
+   now; Edge is the current missing handoff-artifact source. Causal may
+   continue consuming actual Layer public proof files when a concrete question
+   exists, but the next repo-family convergence move is Edge handoff
+   consumption. Until that material is handed over, do not broaden the
+   adjacent-material adapter with more synthetic cases.
 
 This is not permission to claim Edge/Layer public seam proof. Causal may claim
 that only after it actually consumes Edge/Layer-derived durable public-swarm
@@ -572,13 +573,12 @@ or deliberately consuming fresh Edge/Layer public material:
   running that path over actual handed Layer/Edge outputs, or reading
   Edge/Layer-derived durable replicated seam history through public
   Hyperswarm, over another solo saved-artifact expansion:
-  - Layer `33321fbe81abad42565c35b1b4cba5c926cbc5ea` provides public proof
-    readback material with `causalReadinessConsumerAccepted: true`,
-    linked request/receipt/evidence triples, public/default HyperDHT proof
-    boundary fields, and non-authority/RBC false flags.
-  - Edge `727bf1f9c34657769dc67476d297161668041580` provides
-    compatible-handoff readback material with `handoff_export_file_readback_only`
-    proof boundary and no proof-rung upgrade.
+  - Layer `717ee49c1092929af72eb9c1e39dfb6e87f59a78` provides retained public
+    proof export bundle material that Causal has already consumed once as
+    actual saved adjacent material.
+  - Edge `d9043723fc0aeda2c6de5e510ef5df9826034275` provides compatible
+    handoff export capability; the next useful Causal move is to consume the
+    concrete artifact once Edge preserves or hands it over.
 - keep any new saved-artifact consumer checks explicitly lower than the source
   public swarm proof unless Causal itself reopens and reads durable replicated
   seam history over public Hyperswarm;
