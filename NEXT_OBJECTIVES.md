@@ -226,6 +226,13 @@ The local supplied-material lane can now:
   manifest-only lower proof, classify replica timeout as unresolved evidence,
   and prove local direct-peer replication remains below public/default swarm
   proof unless public reader evidence is present.
+- run the generic source and replica CLIs over the declared public Hyperswarm
+  path with `CAUSAL_SUBSTRATE_HYPERSWARM_BOOTSTRAP` unset, preserving a
+  Causal-owned generic public-swarm run under
+  `proof-artifacts/generic-causal-seam-public-swarm-2026-06-03/`; the replica
+  report classified the run as `compatible`, preserved neutral request/receipt
+  refs and hashes, and emitted a generic observation result with strongest rung
+  `durable_replicated_public_swarm_seam`.
 
 Strongest routinely proven rung in normal tests:
 `local_causal_observation_over_supplied_seam_history_material`.
@@ -313,10 +320,16 @@ Immediate objective list:
 7. Completed locally: prove durable observation result write and reopened
    readback.
 8. Preserve Edge/Layer/RBC/Mesh/Platform refs as causal input refs only.
-9. Next: run the generic source and replica CLIs over the declared public
-   Hyperswarm path with `CAUSAL_SUBSTRATE_HYPERSWARM_BOOTSTRAP` unset, then
-   preserve the resulting manifest, replica report, durable observation
-   result, and reopened readback as Causal-owned generic public-swarm proof.
+9. Completed public run: run the generic source and replica CLIs over the
+   declared public Hyperswarm path with `CAUSAL_SUBSTRATE_HYPERSWARM_BOOTSTRAP`
+   unset, then preserve the resulting manifest, replica report, durable
+   observation result, and reopened readback as Causal-owned generic
+   public-swarm proof.
+10. Next: expose a compact generic public seam proof index and generic consumer
+   handoff over
+   `proof-artifacts/generic-causal-seam-public-swarm-2026-06-03/`, preserving
+   the public source proof rung while keeping the index/readback below the live
+   public-swarm proof operation.
 
 This is not permission to claim Edge/Layer public seam proof. Causal may claim
 that only after it actually consumes Edge/Layer-derived durable public-swarm

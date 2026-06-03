@@ -1,0 +1,317 @@
+{
+  "artifactKind": "generic-causal-seam-public-replica-report",
+  "schema": "causal-substrate/generic-causal-seam-public-replica-report/v1",
+  "schemaVersion": 1,
+  "emittedAt": "2026-06-03T14:01:00.000Z",
+  "lane": "generic_causal_seam_public_swarm",
+  "status": "compatible",
+  "namespaceParts": [
+    "causal-substrate",
+    "v1",
+    "generic-causal-seam-public-swarm",
+    "generic",
+    "causal",
+    "seam",
+    "public",
+    "2026-06-03"
+  ],
+  "sourceManifest": {
+    "artifactKind": "generic-causal-seam-public-source-manifest",
+    "schema": "causal-substrate/generic-causal-seam-public-source-manifest/v1",
+    "schemaVersion": 1,
+    "emittedAt": "2026-06-03T14:00:00.000Z",
+    "lane": "generic_causal_seam_public_swarm",
+    "namespaceParts": [
+      "causal-substrate",
+      "v1",
+      "generic-causal-seam-public-swarm",
+      "generic",
+      "causal",
+      "seam",
+      "public",
+      "2026-06-03"
+    ],
+    "source": {
+      "sourceCoreKeyHex": "0e27f3751762210471ba2294d590022c542dbad95f9a26e65c0c21099ffd37c0",
+      "topicHex": "e35f221bfe98145b0c10a94b60888fb33065eb244e81c60e2e07790f7f54b9b6",
+      "sourceRecordId": "generic-causal-seam-durable-record:733101f5212e0ddc",
+      "seamHistoryHash": "sha256:71ef7fed05cfdb51687c60f68ce375c88d4a7e33bcf6b618cb450782a73aca7c",
+      "sourceRefs": [
+        "generic-public-seam-history:2026-06-03:neutral-compatible",
+        "sha256:7777777777777777777777777777777777777777777777777777777777777777",
+        "neutral-source-repo",
+        "neutral-receipt-repo",
+        "neutral/request/v1",
+        "neutral/receipt/v1",
+        "generic-core:request:0",
+        "generic-core:receipt:1",
+        "generic-writer:request",
+        "generic-writer:receipt",
+        "generic-request:2026-06-03:linked",
+        "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "generic-receipt:2026-06-03:linked",
+        "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "neutral_generic_seam_history_material"
+      ]
+    },
+    "proofPosture": {
+      "sourceManifestOnly": true,
+      "publicSwarmObservationProofClaimedNow": false,
+      "replicaMustReadDurableMaterial": true,
+      "lowerProofRungsRemainLowerUntilReplicaReport": true
+    },
+    "boundary": {
+      "acceptsCanonicalHistory": false,
+      "admitsLayerEvidence": false,
+      "interpretsRbc": false,
+      "grantsAuthority": false,
+      "publishesToMesh": false,
+      "writesProductionContinuity": false,
+      "opensSwarmBySourceCommand": true,
+      "opensCorestoreBySourceCommand": true,
+      "writesDurableHistoryBySourceCommand": true,
+      "replicaReadProvenByThisArtifact": false
+    }
+  },
+  "replicatedRecord": {
+    "artifactKind": "generic_causal_seam_durable_record",
+    "schema": "causal-substrate/generic-causal-seam-durable-record/v1",
+    "schemaVersion": 1,
+    "recordId": "generic-causal-seam-durable-record:733101f5212e0ddc",
+    "recordedAt": "2026-06-03T14:00:00.000Z",
+    "seamHistory": {
+      "historyId": "generic-public-seam-history:2026-06-03:neutral-compatible",
+      "historyHash": "sha256:7777777777777777777777777777777777777777777777777777777777777777",
+      "sourceRepos": [
+        "neutral-source-repo",
+        "neutral-receipt-repo"
+      ],
+      "sourceSchemaRefs": [
+        "neutral/request/v1",
+        "neutral/receipt/v1"
+      ],
+      "transportProof": {
+        "evidenceSource": "local_artifact_fixture",
+        "publicSwarmTransportHappened": false,
+        "testnetSwarmTransportHappened": false,
+        "controlPlaneOnly": true,
+        "durableFeedBackedHistoryObserved": false,
+        "receivingRepoObservedReplicatedPath": false,
+        "receiptOrResultCausallyReferencesSources": true
+      },
+      "durableRefs": [
+        "generic-core:request:0",
+        "generic-core:receipt:1"
+      ],
+      "writerRefs": [
+        "generic-writer:request",
+        "generic-writer:receipt"
+      ],
+      "requests": [
+        {
+          "id": "generic-request:2026-06-03:linked",
+          "hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "sourceRepo": "neutral-source-repo",
+          "durableRef": "generic-core:request:0",
+          "writerRef": "generic-writer:request",
+          "schemaRef": "neutral/request/v1",
+          "observedProofRung": "local_artifact_seam"
+        }
+      ],
+      "receipts": [
+        {
+          "id": "generic-receipt:2026-06-03:linked",
+          "hash": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "sourceRepo": "neutral-receipt-repo",
+          "durableRef": "generic-core:receipt:1",
+          "writerRef": "generic-writer:receipt",
+          "schemaRef": "neutral/receipt/v1",
+          "sourceRequestId": "generic-request:2026-06-03:linked",
+          "sourceRequestHash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "observedProofRung": "local_artifact_seam"
+        }
+      ],
+      "evidenceRefs": [],
+      "linkage": [
+        {
+          "requestId": "generic-request:2026-06-03:linked",
+          "requestHash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "receiptId": "generic-receipt:2026-06-03:linked",
+          "receiptHash": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+        }
+      ],
+      "proofLabels": [
+        "neutral_generic_seam_history_material"
+      ],
+      "warnings": []
+    },
+    "seamHistoryHash": "sha256:71ef7fed05cfdb51687c60f68ce375c88d4a7e33bcf6b618cb450782a73aca7c",
+    "seamHistoryHashAlgorithm": "sha256-stable-json",
+    "sourceRefs": [
+      "generic-public-seam-history:2026-06-03:neutral-compatible",
+      "sha256:7777777777777777777777777777777777777777777777777777777777777777",
+      "neutral-source-repo",
+      "neutral-receipt-repo",
+      "neutral/request/v1",
+      "neutral/receipt/v1",
+      "generic-core:request:0",
+      "generic-core:receipt:1",
+      "generic-writer:request",
+      "generic-writer:receipt",
+      "generic-request:2026-06-03:linked",
+      "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "generic-receipt:2026-06-03:linked",
+      "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "neutral_generic_seam_history_material"
+    ],
+    "durableHistoryMaterial": true
+  },
+  "observationResult": {
+    "schema": "causal-substrate/generic-causal-seam-observation/v1",
+    "schemaVersion": 1,
+    "repo": "causal-substrate",
+    "lane": "generic-causal-seam-surface",
+    "proofCommand": "run-generic-causal-seam-public-replica-device",
+    "generatedAt": "2026-06-03T14:01:00.000Z",
+    "observationId": "generic-causal-seam-observation:a62e468587ecfa48",
+    "observationHash": "sha256:71ca759d8708004eb7fbdd87b3553a49de8bbf4c0e4f3c5644edf15b3c6d20c2",
+    "observedHistoryId": "generic-public-seam-history:2026-06-03:neutral-compatible",
+    "observedHistoryHash": "sha256:7777777777777777777777777777777777777777777777777777777777777777",
+    "sourceRefsPreserved": {
+      "requestIds": [
+        "generic-request:2026-06-03:linked"
+      ],
+      "requestHashes": [
+        "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ],
+      "receiptIds": [
+        "generic-receipt:2026-06-03:linked"
+      ],
+      "receiptHashes": [
+        "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      ],
+      "sourceRepos": [
+        "neutral-source-repo",
+        "neutral-receipt-repo"
+      ],
+      "durableRefs": [
+        "generic-core:request:0",
+        "generic-core:receipt:1"
+      ],
+      "writerRefs": [
+        "generic-writer:request",
+        "generic-writer:receipt"
+      ],
+      "evidenceIds": []
+    },
+    "strongestProofRung": "durable_replicated_public_swarm_seam",
+    "operationProofRung": "durable_replicated_public_swarm_seam",
+    "sourceProofRung": "durable_replicated_public_swarm_seam",
+    "finalClassification": "compatible",
+    "classification": "compatible",
+    "classifiedHappenings": [
+      {
+        "happeningId": "generic-causal-happening:bdcc41df484fc81f",
+        "classification": "linked_request_receipt",
+        "requestId": "generic-request:2026-06-03:linked",
+        "requestHash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "receiptId": "generic-receipt:2026-06-03:linked",
+        "receiptHash": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "sourceRefs": [
+          "generic-request:2026-06-03:linked",
+          "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "generic-core:request:0",
+          "generic-writer:request",
+          "generic-receipt:2026-06-03:linked",
+          "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "generic-core:receipt:1",
+          "generic-writer:receipt"
+        ],
+        "detail": "receipt references a request with matching id and hash"
+      }
+    ],
+    "damageFindings": [],
+    "unresolvedFindings": [],
+    "overclaimFindings": [],
+    "proof": {
+      "strongestProofRung": "durable_replicated_public_swarm_seam",
+      "operationProofRung": "durable_replicated_public_swarm_seam",
+      "sourceProofRung": "durable_replicated_public_swarm_seam",
+      "proofLabels": [
+        "neutral_generic_seam_history_material"
+      ],
+      "proofRungUpgradeClaimed": false
+    },
+    "transportBooleans": {
+      "publicSwarmTransportHappened": true,
+      "testnetSwarmTransportHappened": false,
+      "controlPlaneOnly": false,
+      "durableFeedBackedHistoryObserved": true,
+      "receivingRepoObservedReplicatedPath": true,
+      "durableObservationResultEmitted": true,
+      "receiptOrResultCausallyReferencesSources": true,
+      "reopenedReadbackDerivedFromDurableHistory": true
+    },
+    "publicSwarmTransportHappened": true,
+    "testnetSwarmTransportHappened": false,
+    "controlPlaneOnly": false,
+    "consumerProjection": {
+      "genericConsumersMayRead": true,
+      "edgeMayConsumeAsObservationOnlyInput": true,
+      "layerMayConsumeAsObservationOnlyFeedback": true,
+      "spineMayConsumeAsPostureEvidence": true,
+      "writesConsumerState": false
+    },
+    "nonClaims": {
+      "canonicalHistoryClaimed": false,
+      "layerEvidenceAdmitted": false,
+      "layerAdmissionDecided": false,
+      "rbcInterpreted": false,
+      "quorumSatisfied": false,
+      "authorityGranted": false,
+      "meshPublished": false,
+      "productionContinuityWritten": false
+    },
+    "deferredAttachmentPoints": {
+      "referentPromotion": null,
+      "branchCompatibilityGraph": null,
+      "canonicalContinuityState": null,
+      "rbcInterpretation": null,
+      "layerAdmission": null,
+      "meshPublication": null,
+      "authorityDecisions": null,
+      "productionCausalHistory": null
+    },
+    "nextPressure": "hand-generic-observation-to-test-consumer",
+    "warnings": [
+      "generic-causal-seam-observation-does-not-grant-authority",
+      "generic-causal-seam-observation-preserves-consumer-refs-as-input-only"
+    ]
+  },
+  "readerProof": {
+    "sourceManifestConsumed": true,
+    "inputReadByCausalSubstrate": true,
+    "durableCorestoreHistoryRead": true,
+    "dhtOrHyperswarmInputObservedByCausalSubstrate": true,
+    "replicatedViaHyperswarmTransport": true,
+    "publicHyperswarmInputObservedByCausalSubstrate": true,
+    "sourceCoreKeyHex": "0e27f3751762210471ba2294d590022c542dbad95f9a26e65c0c21099ffd37c0",
+    "replicaCoreKeyHex": "0e27f3751762210471ba2294d590022c542dbad95f9a26e65c0c21099ffd37c0",
+    "topicHex": "e35f221bfe98145b0c10a94b60888fb33065eb244e81c60e2e07790f7f54b9b6",
+    "replicatedRecordCount": 1,
+    "evidenceSource": "reader_observed_replicated_public_swarm_path"
+  },
+  "unresolvedFindings": [],
+  "damageFindings": [],
+  "overclaimFindings": [],
+  "boundary": {
+    "acceptsCanonicalHistory": false,
+    "admitsLayerEvidence": false,
+    "interpretsRbc": false,
+    "grantsAuthority": false,
+    "publishesToMesh": false,
+    "writesProductionContinuity": false,
+    "observationOnly": true,
+    "writesConsumerState": false
+  }
+}

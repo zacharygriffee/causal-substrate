@@ -1,0 +1,58 @@
+{
+  "artifactKind": "generic-causal-seam-public-source-manifest",
+  "schema": "causal-substrate/generic-causal-seam-public-source-manifest/v1",
+  "schemaVersion": 1,
+  "emittedAt": "2026-06-03T14:00:00.000Z",
+  "lane": "generic_causal_seam_public_swarm",
+  "namespaceParts": [
+    "causal-substrate",
+    "v1",
+    "generic-causal-seam-public-swarm",
+    "generic",
+    "causal",
+    "seam",
+    "public",
+    "2026-06-03"
+  ],
+  "source": {
+    "sourceCoreKeyHex": "0e27f3751762210471ba2294d590022c542dbad95f9a26e65c0c21099ffd37c0",
+    "topicHex": "e35f221bfe98145b0c10a94b60888fb33065eb244e81c60e2e07790f7f54b9b6",
+    "sourceRecordId": "generic-causal-seam-durable-record:733101f5212e0ddc",
+    "seamHistoryHash": "sha256:71ef7fed05cfdb51687c60f68ce375c88d4a7e33bcf6b618cb450782a73aca7c",
+    "sourceRefs": [
+      "generic-public-seam-history:2026-06-03:neutral-compatible",
+      "sha256:7777777777777777777777777777777777777777777777777777777777777777",
+      "neutral-source-repo",
+      "neutral-receipt-repo",
+      "neutral/request/v1",
+      "neutral/receipt/v1",
+      "generic-core:request:0",
+      "generic-core:receipt:1",
+      "generic-writer:request",
+      "generic-writer:receipt",
+      "generic-request:2026-06-03:linked",
+      "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "generic-receipt:2026-06-03:linked",
+      "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "neutral_generic_seam_history_material"
+    ]
+  },
+  "proofPosture": {
+    "sourceManifestOnly": true,
+    "publicSwarmObservationProofClaimedNow": false,
+    "replicaMustReadDurableMaterial": true,
+    "lowerProofRungsRemainLowerUntilReplicaReport": true
+  },
+  "boundary": {
+    "acceptsCanonicalHistory": false,
+    "admitsLayerEvidence": false,
+    "interpretsRbc": false,
+    "grantsAuthority": false,
+    "publishesToMesh": false,
+    "writesProductionContinuity": false,
+    "opensSwarmBySourceCommand": true,
+    "opensCorestoreBySourceCommand": true,
+    "writesDurableHistoryBySourceCommand": true,
+    "replicaReadProvenByThisArtifact": false
+  }
+}
