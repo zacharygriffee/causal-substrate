@@ -539,6 +539,22 @@ missing request/receipt ids. It does not claim live Causal public-swarm proof.
 Next still requires direct public-observer use over a Causal-observable source
 manifest or equivalent live Edge/Layer lifecycle descriptor.
 
+Spine now records Causal's current lane as:
+
+```text
+causal-adjacent-layer-public-material-observed-waiting-for-edge-public-process-material
+```
+
+That means Causal should not add another solo matrix, saved adjacent wrapper, or
+descriptor-only public observer variant right now. The next useful Causal input
+is concrete material from Edge's public process lifecycle or Layer's held public
+participant: request/receipt ids and hashes, source proof rung, transport
+evidence, durable feed/readback refs, writer refs, linkage status, warnings,
+and non-claims. If Causal receives only descriptors, CLI instructions, dirty
+worktree state, source imports, tests, or saved local fixtures, classify the
+result as lower-rung/preflight material and do not claim live Causal swarm
+observation.
+
 ## RBC Creation Tripwire
 
 Do not create or depend on `mesh-ecology-rbc` to make the first Edge/Layer/Causal
@@ -739,6 +755,17 @@ Immediate objective list:
    a concrete consumer response to the current-posture handoff, a distinct
    overclaim risk to guard, or fresh Edge/Layer live public-swarm material
    intended for direct Causal reading.
+32. Current adjacent pressure: Edge commit
+   `ccad5b6361da4bb0b662eb97138a868d21a33864` adds
+   `compatible-public-process-up/probe/status/down`, but the green process
+   lifecycle test path is still local-bootstrapper scoped. Causal should wait
+   for the public/default HyperDHT execution result, or a preserved unresolved
+   flake packet, before claiming a new Edge public process observation.
+33. Current Layer support pressure: Layer commit
+   `3e23ab27c01d1c195cfe5945b98dc471cbc9a850` adds a held default-public
+   participant smoke. Causal may consume its committed output as saved adjacent
+   material if a consumer needs that observation, but must not label that saved
+   artifact as Causal's own live public-swarm read.
 
 This is not permission to claim Edge/Layer public seam proof. Causal may claim
 that only after it actually consumes Edge/Layer-derived durable public-swarm
@@ -764,19 +791,19 @@ or deliberately consuming fresh Edge/Layer public material:
   and
   `proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/public-seam-proof-index.json`
   as observation-only material;
-- fresh Edge/Layer material is now present and Causal now has a narrow
-  adjacent-material observation CLI/test path for the expected shapes. Prefer
-  running that path over actual handed Layer/Edge outputs, or reading
-  Edge/Layer-derived durable replicated seam history through public
-  Hyperswarm, over another solo saved-artifact expansion:
-  - Layer `eec35bcd0c08014c9af5f09f9bad3a50d06e66b6` provides retained
-    public proof bundle integrity, freshness, damage-detection, compact
-    handoff snapshot, and public HyperDHT verification material. Causal has
-    already consumed Layer public material once as actual saved adjacent
+- fresh Edge/Layer material should now mean current lifecycle material, not
+  older retained handoff loops. Prefer running the adjacent-material path over
+  actual handed outputs from:
+  - Edge `ccad5b6361da4bb0b662eb97138a868d21a33864`, once its
+    `compatible-public-process-up/probe/status/down` path has been executed
+    against default public HyperDHT or a second-host compatible endpoint and
+    preserved linked result or unresolved flake evidence.
+  - Layer `3e23ab27c01d1c195cfe5945b98dc471cbc9a850`, if Edge or Spine needs
+    Causal to observe the held public participant output as saved adjacent
     material.
-  - Edge `48b05293fa72da601f41da6cc887e93e189e9f9c` provided a retained
-    compatible handoff export bundle that Causal has consumed as saved
-    adjacent material.
+  Reading Edge/Layer-derived durable replicated seam history through public
+  Hyperswarm remains stronger than another saved-artifact expansion, but only
+  if Causal itself performs that durable public reader operation.
 - Causal has now read an Edge/Layer-derived adjacent seam-history envelope
   through public Hyperswarm under
   `proof-artifacts/edge-layer-derived-adjacent-public-swarm-2026-06-03/`.
