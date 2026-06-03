@@ -440,6 +440,23 @@ causal public-observer status
 causal public-observer down
 ```
 
+Current implementation:
+`npm run public-observer -- up|status|observe|down` through
+`scripts/causal-public-observer.ts`.
+
+The lifecycle commands occupy `local_artifact_seam`: they write/read observer
+posture, preserve Edge/Layer/source descriptor refs and hashes, and name the
+`durable_replicated_public_swarm_seam` pressure they serve. They do not claim
+swarm proof.
+
+The `observe` command emits instructions only until
+`CAUSAL_SUBSTRATE_REAL_HYPERSWARM=1` and
+`CAUSAL_SUBSTRATE_HYPERSWARM_PUBLIC=1` are set with
+`CAUSAL_SUBSTRATE_HYPERSWARM_BOOTSTRAP` unset. When enabled, it consumes a
+source manifest through Causal's public Hyperswarm replica reader, writes the
+bounded replica report/readback, and labels durable replicated public swarm
+proof only if the reader actually consumes durable material through that path.
+
 The exact command names may follow existing CLI conventions, but the behavior
 should be concrete: accept Edge/Layer endpoint or durable-history descriptors,
 read durable replicated material through the declared public swarm path when
@@ -464,7 +481,8 @@ canonical history, interpret RBC, publish Mesh, or grant authority.
 
 Next Causal progress should produce one of:
 
-- a public observer `up/status/down` lane or one-shot `observe` command tied to
+- completed locally: a public observer `up/status/down` lane plus one-shot
+  `observe` command tied to
   Edge/Layer public descriptors;
 - a fresh observation over live Edge/Layer public-swarm-derived material;
 - an unresolved public observation when the chain flakes or the receipt/evidence
@@ -472,9 +490,12 @@ Next Causal progress should produce one of:
 - a compact Spine/Edge/Layer handoff from that live observation preserving
   source refs without upgrading proof.
 
+Next: run the public observer against a fresh Edge/Layer public descriptor or
+durable-history source manifest when the chain produces one. If the public
+swarm attempt flakes, preserve the resulting unresolved observation honestly.
 Do not spend another cycle only expanding posture handoffs, generic matrices,
-or saved-artifact indexes unless that work directly supports the public observer
-chain above.
+saved-artifact indexes, or lifecycle-status files unless that work directly
+supports the public observer chain above.
 
 ## RBC Creation Tripwire
 
