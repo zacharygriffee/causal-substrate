@@ -566,7 +566,13 @@ Immediate objective list:
    useful round-trip machinery. It still does not by itself give Causal a
    retained current Edge handoff artifact under Edge `proof-artifacts/`, so the
    scan's no-substitute conclusion remains active.
-26. Coordination pressure: Layer's concrete export pressure is satisfied for
+26. Rechecked Edge after `106ff13937ef3abcd9756046720f93f16ec41266`; Edge's
+   objective text now says the same thing explicitly. Edge can round-trip
+   compatible handoff export material through Causal's adjacent-material CLI,
+   but there is still no current retained compatible Causal handoff export
+   artifact in Edge `proof-artifacts/`. See the recheck section in
+   `docs/edge-compatible-handoff-artifact-scan-2026-06-03.md`.
+27. Coordination pressure: Layer's concrete export pressure is satisfied for
    now; Edge is the current missing handoff-artifact source. Causal may
    continue consuming actual Layer public proof files when a concrete question
    exists, but the next repo-family convergence move is Edge handoff
