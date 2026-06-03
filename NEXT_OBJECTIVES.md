@@ -210,6 +210,16 @@ The local supplied-material lane can now:
   consumer handoff readback from the completed next-run saved-artifact chain,
   preserving refs and public source proof labels while keeping all operations
   lower than the live public swarm source proof.
+- expose a generic Causal seam endpoint descriptor, generic seam-history input
+  envelope, and generic observation result envelope through code exports;
+  classify neutral linked, damaged, unresolved, and overclaim-prone seam
+  material while preserving refs, proof rungs, transport booleans, non-claims,
+  deferred attachment points, warnings, and `nextPressure`.
+- prove Causal-owned generic test consumers/smokes can consume the generic
+  descriptor and observation result without Edge or Layer participation,
+  including durable local observation result write and reopened readback.
+- reject descriptor-declared or label-declared public swarm proof unless the
+  input carries explicit reader-observed replicated public-swarm-path evidence.
 
 Strongest routinely proven rung in normal tests:
 `local_causal_observation_over_supplied_seam_history_material`.
@@ -274,21 +284,26 @@ as the current contract.
 
 Immediate objective list:
 
-1. Expose a library-neutral Causal endpoint descriptor shape.
-2. Expose a generic seam-history input envelope that can accept compatible
+1. Completed locally: expose a library-neutral Causal endpoint descriptor
+   shape.
+2. Completed locally: expose a generic seam-history input envelope that can accept compatible
    request, receipt, evidence, durable, writer, and linkage refs from any repo
    or library.
-3. Expose a generic observation result envelope with classifications, damage
-   findings, unresolved findings, overclaim findings, proof fields, transport
-   booleans, non-claims, deferred attachment points, and `nextPressure`.
-4. Add Causal-owned test consumers/smokes that consume the generic descriptor,
-   input envelope, and observation result without Edge or Layer participation.
-5. Make public swarm transport booleans evidence-derived, never descriptor-,
-   env-, bootstrap-, manifest-, command-name-, or declared-rung-derived.
-6. Add a standalone public-swarm lane using neutral compatible seam-history
+3. Completed locally: expose a generic observation result envelope with
+   classifications, damage findings, unresolved findings, overclaim findings,
+   proof fields, transport booleans, non-claims, deferred attachment points,
+   and `nextPressure`.
+4. Completed locally: add Causal-owned test consumers/smokes that consume the
+   generic descriptor, input envelope, and observation result without Edge or
+   Layer participation.
+5. Completed locally: make public swarm transport booleans evidence-derived,
+   never descriptor-, env-, bootstrap-, manifest-, command-name-, or
+   declared-rung-derived.
+6. Next: add a standalone public-swarm lane using neutral compatible seam-history
    material so Causal can prove its own generic observer seam without waiting
    for Edge/Layer.
-7. Prove durable observation result write and reopened readback.
+7. Completed locally: prove durable observation result write and reopened
+   readback.
 8. Preserve Edge/Layer/RBC/Mesh/Platform refs as causal input refs only.
 
 This is not permission to claim Edge/Layer public seam proof. Causal may claim
