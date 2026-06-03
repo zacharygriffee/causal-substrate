@@ -497,6 +497,21 @@ Do not spend another cycle only expanding posture handoffs, generic matrices,
 saved-artifact indexes, or lifecycle-status files unless that work directly
 supports the public observer chain above.
 
+Current pressure after the latest work: Causal has the public observer
+`up/status/down/observe` CLI surface. The next Causal objective should be a live
+observer use, not another lifecycle wrapper:
+
+```text
+CAUSAL_SUBSTRATE_REAL_HYPERSWARM=1 \
+CAUSAL_SUBSTRATE_HYPERSWARM_PUBLIC=1 \
+npm run public-observer -- observe ...
+```
+
+using a fresh Edge/Layer public descriptor or durable-history source manifest
+when available. If Edge/Layer are not ready, Causal should stay poised with the
+observer CLI and avoid adding more generic matrices or saved handoff summaries
+unless they remove a concrete blocker for the live observe run.
+
 ## RBC Creation Tripwire
 
 Do not create or depend on `mesh-ecology-rbc` to make the first Edge/Layer/Causal
