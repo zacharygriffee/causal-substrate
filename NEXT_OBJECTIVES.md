@@ -280,6 +280,13 @@ The local supplied-material lane can now:
   compatible/damaged/unresolved honestly, and does not claim live Causal swarm
   proof, Layer evidence admission, RBC interpretation, Mesh publication,
   authority, or production continuity.
+- consume actual Layer public/default HyperDHT proof output from
+  `mesh-ecology-layer` and preserve Causal's read-only adjacent observation
+  under `proof-artifacts/adjacent-public-material-2026-06-03/`; the Causal
+  operation is `saved_readback_seam`, the Layer material classified
+  `compatible`, and Causal preserved request/receipt/evidence ids and hashes,
+  durable refs, writer refs, source repo refs, proof labels, linkage status,
+  and non-claims without claiming live Causal swarm proof.
 
 Strongest routinely proven rung in normal tests:
 `local_causal_observation_over_supplied_seam_history_material`.
@@ -515,21 +522,26 @@ Immediate objective list:
    classifying compatible, damaged, or unresolved. This remains
    `saved_readback_seam` over supplied/exported material and does not claim
    live Causal swarm proof.
-21. Next: run the adjacent-material observation CLI against actual committed
-   Layer public proof/readiness output and Edge compatible handoff readback
-   output when those artifacts are handed to Causal, or have Causal itself read
-   Edge/Layer-derived durable replicated seam history through the declared
-   public Hyperswarm path. Do not add more local adjacent-material expansion
-   unless it removes a concrete consumer ambiguity or protects against a
-   concrete overclaim.
-22. Coordination pressure: ask Edge and Layer for concrete exported artifacts,
+21. Completed saved readback: run the adjacent-material observation CLI
+   against actual Layer public proof/readiness output and preserve the result
+   under `proof-artifacts/adjacent-public-material-2026-06-03/`. The source
+   material classified `compatible`; Causal preserved request/receipt/evidence
+   refs, durable refs, writer refs, source repo refs, proof labels, linkage
+   status, and non-claims. This remains `saved_readback_seam` and does not
+   claim live Causal swarm proof.
+22. Next Edge pressure: consume actual Edge compatible handoff readback once
+   Edge can emit it. At current Edge head, the CLI fails before output because
+   `src/local/edgeLayerReportOnlySeamSmoke.js` declares `uniqueStrings` twice;
+   Causal should not synthesize replacement Edge material or broaden local
+   fixtures around this failure.
+23. Coordination pressure: ask Edge and Layer for concrete exported artifacts,
    not more shape descriptions. Current relevant heads are Edge
    `7d240ba33acda4a30f5019bf6be81182030a2907` and Layer
    `33321fbe81abad42565c35b1b4cba5c926cbc5ea`. Causal should consume actual
    files such as Layer `causal-readiness.json`, `public-endpoint.json`,
    `history-index.json`, `proof-bundle.json`, and Edge
-   compatible-handoff-readback/feed readback material when supplied. Until then,
-   do not broaden the adjacent-material adapter with more synthetic cases.
+  compatible-handoff-readback/feed readback material when supplied. Until then,
+  do not broaden the adjacent-material adapter with more synthetic cases.
 
 This is not permission to claim Edge/Layer public seam proof. Causal may claim
 that only after it actually consumes Edge/Layer-derived durable public-swarm

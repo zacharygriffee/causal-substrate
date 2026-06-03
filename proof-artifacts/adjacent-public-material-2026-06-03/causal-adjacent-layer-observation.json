@@ -1,0 +1,110 @@
+{
+  "artifactKind": "causal-adjacent-public-material-observation",
+  "schema": "causal-substrate/adjacent-public-material-observation/v1",
+  "schemaVersion": 1,
+  "observationId": "causal-adjacent-public-material-observation:05f64d0e29cfa224",
+  "observationHash": "sha256:4faeb37104ce2943587b9aa6a15fcb7c4cc8f36cece44a79e3c5abe516136209",
+  "emittedAt": "2026-06-03T19:00:00.000Z",
+  "sourcePaths": {
+    "layerPublicMaterial": "/home/zevilz/work/mesh-ecology/causal-substrate/proof-artifacts/adjacent-public-material-2026-06-03/layer-public-proof-result.json"
+  },
+  "observedSources": {
+    "layerMaterialObserved": true,
+    "edgeHandoffReadbackObserved": false
+  },
+  "classification": "compatible",
+  "sourceClassifications": {
+    "layer": "compatible"
+  },
+  "preservedRefs": {
+    "requestIds": [
+      "compatible-layer-report-only-seam-request:layer-owned-public-smoke:3:v0"
+    ],
+    "requestHashes": [
+      "sha256:68434376fec661767f24d0077d889985388e9c02e9fbb82670a58504d1045da6"
+    ],
+    "receiptIds": [
+      "layer-report-only-edge-seam-receipt:compatible-layer-report-only-seam-request:layer-owned-public-smoke:3:v0"
+    ],
+    "receiptHashes": [
+      "sha256:f4a263a0b741b2940606f2f377e6a2bfbca3d06c83920f8ea3c6ea2584e11924"
+    ],
+    "evidenceIds": [
+      "layer-owned-edge-seam-evidence:compatible-layer-report-only-seam-request:layer-owned-public-smoke:3:v0:2"
+    ],
+    "evidenceHashes": [
+      "sha256:b21d45811bca2eeefdc852adc38f814d46de1534cf591227490ad7e4f613246d"
+    ],
+    "durableRefs": [
+      "/tmp/layer-public-hyperdht-seam-proof-Xvl1Cg/layer",
+      "44a3d3c9e0f7514ec419532a4d06c58140158e2a0d28918fe00889905a9b7404",
+      "edge-layer-report-only-seam-view",
+      "layer-owned-edge-seam-evidence",
+      "layer-public-hyperdht-seam-proof-382832"
+    ],
+    "writerRefs": [
+      "autobase-writer:44a3d3c9e0f7514ec419532a4d06c58140158e2a0d28918fe00889905a9b7404",
+      "autobase-writer:d130eccec20f9d541dfc5af7c7710d96b18969b136751ad3c6126b779b48625d"
+    ],
+    "sourceRepos": [
+      "compatible-public-seam-peer",
+      "mesh-ecology-layer"
+    ],
+    "proofRungs": [
+      "default_public_hyperdht_hyperswarm_feed_backed"
+    ],
+    "linkageStatuses": [
+      "request_receipt_evidence_linked"
+    ]
+  },
+  "proof": {
+    "operationProofRung": "saved_readback_seam",
+    "strongestSourceProofRungObserved": "default_public_hyperdht_hyperswarm_feed_backed",
+    "layerPublicProofObserved": true,
+    "edgeReadbackProofRungNotUpgraded": false,
+    "liveCausalSwarmProofClaimed": false,
+    "proofRungUpgradeClaimed": false
+  },
+  "validation": {
+    "status": "adjacent-public-material-observation-ready",
+    "layerRefsPreserved": true,
+    "layerRequestReceiptEvidenceLinked": true,
+    "layerPublicBoundaryPreserved": true,
+    "layerCausalReadinessAccepted": true,
+    "edgeRefsPreserved": true,
+    "edgeReadbackOnly": true,
+    "edgeProofRungNotUpgraded": true,
+    "noCanonicalHistoryClaim": true,
+    "noLayerAdmissionClaim": true,
+    "noEvidenceAdmissionClaim": true,
+    "noRbcInterpretationClaim": true,
+    "noQuorumClaim": true,
+    "noAuthorityClaim": true,
+    "noMeshPublicationClaim": true,
+    "noProductionContinuityWriteClaim": true,
+    "issues": []
+  },
+  "boundary": {
+    "readsSavedAdjacentMaterialOnly": true,
+    "opensSwarm": false,
+    "opensCorestore": false,
+    "callsEdge": false,
+    "callsLayer": false,
+    "writesEdgeState": false,
+    "writesLayerState": false,
+    "acceptsCanonicalHistory": false,
+    "admitsLayerEvidence": false,
+    "interpretsRbc": false,
+    "claimsQuorum": false,
+    "grantsAuthority": false,
+    "publishesToMesh": false,
+    "writesProductionContinuity": false
+  },
+  "nextPressure": "handoff-adjacent-observation-to-spine-or-consumer-without-proof-upgrade",
+  "warnings": [
+    "adjacent-public-material-observation-reads-saved-exported-material-only",
+    "adjacent-public-material-observation-does-not-claim-live-causal-swarm-proof",
+    "adjacent-public-material-observation-does-not-admit-layer-evidence-or-interpret-rbc"
+  ],
+  "rejections": []
+}

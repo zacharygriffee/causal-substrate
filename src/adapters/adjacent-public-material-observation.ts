@@ -376,7 +376,8 @@ function assessLayerPublicMaterial(value: unknown): SourceAssessment {
 
 function assessEdgeHandoffReadback(value: unknown): SourceAssessment {
   if (value === undefined) return emptyAssessment("unresolved");
-  const readback = maybeRecord(value);
+  const container = maybeRecord(value);
+  const readback = maybeRecord(container?.handoffReadback) ?? container;
   if (!readback) return withIssue(emptyAssessment("unresolved"), "edge-handoff-readback-not-object");
   const entries = Array.isArray(readback.handoffEntries) ? readback.handoffEntries.filter(isRecord) : [];
   const issues: string[] = [];

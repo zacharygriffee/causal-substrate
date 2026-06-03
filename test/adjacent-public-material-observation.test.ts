@@ -110,7 +110,7 @@ test("classifies unresolved Layer readiness without treating timeout or missing 
 
 test("observes Edge compatible handoff readback as lower-rung exported material", () => {
   const observation = buildAdjacentPublicMaterialObservation({
-    edgeHandoffReadback: buildEdgeHandoffReadback(),
+    edgeHandoffReadback: { handoffReadback: buildEdgeHandoffReadback() },
     emittedAt: "2026-06-03T18:03:00.000Z",
   });
 
