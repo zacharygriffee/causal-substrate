@@ -140,6 +140,7 @@ test("observes Edge compatible handoff readback as lower-rung exported material"
   assert.ok(observation.preservedRefs.sourceRepos.includes("mesh-ecology-edge"));
   assert.ok(observation.preservedRefs.sourceRepos.includes("mesh-ecology-layer"));
   assert.ok(observation.preservedRefs.proofRungs.includes("consumer_handoff_seam"));
+  assert.ok(observation.preservedRefs.linkageStatuses.includes("linkedPairCount:1"));
 });
 
 test("adjacent public material CLI consumes Layer and Edge shapes", async () => {

@@ -299,6 +299,14 @@ The local supplied-material lane can now:
   handoff export JSON in `proof-artifacts/`, and prevents treating Edge CLI
   capability, tests, dirty worktree state, or Causal-generated smoke material
   as handed Edge artifact proof.
+- consume actual Edge compatible handoff readback material from
+  `mesh-ecology-edge` commit `48b0529` and preserve Causal's read-only
+  adjacent observation under
+  `proof-artifacts/adjacent-edge-compatible-handoff-2026-06-03/`; the Causal
+  operation is `saved_readback_seam`, the Edge material classified
+  `compatible`, and Causal preserved request/receipt ids and hashes, durable
+  refs, writer refs, source repo refs, proof labels, linkage status, and
+  non-claims without claiming live Causal swarm proof.
 
 Strongest routinely proven rung in normal tests:
 `local_causal_observation_over_supplied_seam_history_material`.
@@ -548,12 +556,13 @@ Immediate objective list:
    lower-rung Edge handoff readback input. This prevents wrapper mismatch when
    the concrete Edge export pack is handed over, but it does not synthesize
    Edge material or claim that Causal has consumed a current Edge artifact.
-23. Current Edge pressure: consume actual Edge compatible handoff export
-   material once Edge preserves it as a concrete artifact from current head.
-   Do not synthesize replacement Edge material, rerun old failed assumptions,
-   or broaden local fixtures around a missing artifact. The useful Causal work
-   is to consume the handed Edge export as `saved_readback_seam`, preserve
-   refs/non-claims, and classify it without claiming live Causal swarm proof.
+23. Completed saved readback: consume actual Edge compatible handoff readback
+   material from Edge commit `48b0529` and preserve the result under
+   `proof-artifacts/adjacent-edge-compatible-handoff-2026-06-03/`. The source
+   material classified `compatible`; Causal preserved request/receipt refs,
+   durable refs, writer refs, source repo refs, proof labels, linkage status,
+   and non-claims. This remains `saved_readback_seam` and does not claim live
+   Causal swarm proof.
 24. Completed local inspection: Edge current head exposes compatible Causal
    handoff export capability, but no concrete current Edge compatible handoff
    export JSON was present in Edge `proof-artifacts/` during Causal inspection.
@@ -572,12 +581,12 @@ Immediate objective list:
    but there is still no current retained compatible Causal handoff export
    artifact in Edge `proof-artifacts/`. See the recheck section in
    `docs/edge-compatible-handoff-artifact-scan-2026-06-03.md`.
-27. Coordination pressure: Layer's concrete export pressure is satisfied for
-   now; Edge is the current missing handoff-artifact source. Causal may
-   continue consuming actual Layer public proof files when a concrete question
-   exists, but the next repo-family convergence move is Edge handoff
-   consumption. Until that material is handed over, do not broaden the
-   adjacent-material adapter with more synthetic cases.
+27. Coordination pressure: Layer and Edge concrete saved-adjacent artifact
+   pressures are satisfied for now. Do not broaden the adjacent-material
+   adapter with more synthetic cases. The next stronger move is either a
+   concrete consumer request for the saved observations, or Causal itself
+   reading Edge/Layer-derived durable replicated seam history through the
+   declared public Hyperswarm path.
 
 This is not permission to claim Edge/Layer public seam proof. Causal may claim
 that only after it actually consumes Edge/Layer-derived durable public-swarm

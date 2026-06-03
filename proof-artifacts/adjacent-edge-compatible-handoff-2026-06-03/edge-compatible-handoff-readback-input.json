@@ -1,0 +1,127 @@
+{
+  "artifactKind": "edge_compatible_swarm_seam_handoff_readback",
+  "schemaVersion": "edge-compatible-swarm-seam-handoff-readback.v0",
+  "readbackId": "edge-compatible-swarm-seam-handoff-readback:07a272d978aad196",
+  "createdAt": "2026-06-03T22:00:00.000Z",
+  "sourcePath": "proof-artifacts/edge-compatible-handoff-export-bundle-2026-06-03/compatible-handoff-export.json",
+  "sourceHandoffMaterialRef": "edge-compatible-swarm-seam-handoff-material:c5ba706a37c580bd",
+  "sourceJournalReadbackRef": "edge-compatible-swarm-seam-journal-readback:7246b10bb042545b",
+  "sourceHandoffExportReceiptRef": "edge-compatible-swarm-seam-handoff-export-file-receipt:edge-compatible-swarm-seam-handoff-material:c5ba706a37c580bd",
+  "readbackMode": "exported_compatible_handoff_material_readback",
+  "proofBoundary": "handoff_export_file_readback_only",
+  "entryCount": 1,
+  "targetConsumers": [
+    "mesh-ecology-layer",
+    "causal-substrate"
+  ],
+  "compatibleContractReady": true,
+  "compatibleContractStatus": "compatible_handoff_contract_ready_for_adjacent_observation",
+  "issues": [],
+  "warningCount": 0,
+  "warnings": [],
+  "strongestProofRung": "not_proven",
+  "proofRungNotUpgraded": true,
+  "handoffEntries": [
+    {
+      "sourceOperatorIntentRef": "operator-intent:edge-compatible-handoff-export-bundle:2026-06-03",
+      "sourceCompatibleAttemptRef": "edge-compatible-swarm-seam-attempt:ee8e6454cc0fddac",
+      "sourceAttemptRef": "edge-compatible-flow:handoff-export-bundle:2026-06-03",
+      "sourceLineage": {
+        "sourceLayerProofRequestPlanRef": null,
+        "sourceLayerProofHistoryRef": null,
+        "sourceLayerProofSummaryRef": null,
+        "sourceLayerArtifactRef": null,
+        "sourceEndpointDescriptorRef": null
+      },
+      "seamLabel": "compatible_saved_readback_report_only_handoff_export",
+      "sourceRepo": "mesh-ecology-edge",
+      "targetRepo": "causal-substrate-compatible-consumer",
+      "requestId": "edge-compatible-request:handoff-export-bundle:2026-06-03",
+      "requestHash": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "receiptId": "compatible-receipt:handoff-export-bundle:2026-06-03",
+      "receiptHash": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "durableRefs": {
+        "edgeStorageRoot": "/home/zevilz/work/mesh-ecology/mesh-ecology-edge/.edge-state/edge-compatible-handoff-export-bundle-2026-06-03/edge-request-storage",
+        "remoteStorageRoot": "/home/zevilz/work/mesh-ecology/mesh-ecology-edge/.edge-state/edge-compatible-handoff-export-bundle-2026-06-03/compatible-endpoint-receipt-storage",
+        "namespace": "edge-compatible-handoff-export-bundle",
+        "autobaseKey": "1111111111111111111111111111111111111111111111111111111111111111"
+      },
+      "writerRefs": {
+        "edgeWriterRef": null,
+        "receiptWriterRef": null,
+        "journalWriterRef": "autobase-writer:cbc024822dd4bd02e4db25b965c921fdba12a23267c7ae2d3982343da22fca08"
+      },
+      "transportProof": {
+        "bootstrapMode": "saved_readback_only",
+        "transportKind": "saved_export",
+        "deviceBoundaryCrossed": false,
+        "swarmDiscoveredPeer": false,
+        "ipcReplicationRelayUsed": false
+      },
+      "strongestProofRung": "saved_readback_seam",
+      "linkageStatus": {
+        "linkedPairCount": 1,
+        "unlinkedCount": 0,
+        "receiptReferencesRequest": true
+      },
+      "nonClaims": {
+        "compatibleSwarmSeamAttemptOnly": true,
+        "compatibleAttemptIsNotSeamTransport": true,
+        "compatibleAttemptDoesNotRunSeam": true,
+        "compatibleAttemptDoesNotMutateLayer": true,
+        "compatibleAttemptDoesNotAdmitEvidence": true,
+        "compatibleAttemptDoesNotAcceptResult": true,
+        "compatibleAttemptDoesNotExecute": true,
+        "compatibleAttemptDoesNotGrantAuthority": true,
+        "sourceMaterialDoesNotClaimLiveSwarm": true,
+        "sourceMaterialDoesNotClaimDeviceBoundary": true,
+        "sourceMaterialDoesNotInterpretLayerAdmission": true,
+        "sourceMaterialDoesNotInterpretCausalTruth": true,
+        "sourceMaterialDoesNotInterpretRbc": true,
+        "sourceMaterialDoesNotPublishMesh": true,
+        "sourceMaterialDoesNotGrantAuthority": true,
+        "sourceMaterialDoesNotClaimProductionDurability": true
+      }
+    }
+  ],
+  "consumerProjection": {
+    "sourceHandoffMaterialRef": "edge-compatible-swarm-seam-handoff-material:c5ba706a37c580bd",
+    "sourceJournalReadbackRef": "edge-compatible-swarm-seam-journal-readback:7246b10bb042545b",
+    "latestOperatorIntentRef": "operator-intent:edge-compatible-handoff-export-bundle:2026-06-03",
+    "latestRequestRef": "edge-compatible-request:handoff-export-bundle:2026-06-03",
+    "latestReceiptRef": "compatible-receipt:handoff-export-bundle:2026-06-03",
+    "strongestProofRung": "not_proven",
+    "proofBoundary": "handoff_export_file_readback_only",
+    "nextPosture": "handoff_material_ready_for_layer_or_causal_observation"
+  },
+  "nextPosture": "handoff_material_ready_for_layer_or_causal_observation",
+  "readOnly": true,
+  "actionControls": [],
+  "reportOnly": true,
+  "mutatesLayer": false,
+  "mutatesRepo": false,
+  "admitsEvidence": false,
+  "acceptsResult": false,
+  "appliesResult": false,
+  "mergesResult": false,
+  "executesWork": false,
+  "dispatchesAgent": false,
+  "invokesAgent": false,
+  "callsPlatform": false,
+  "grantsAuthority": false,
+  "autoExecutes": false,
+  "nonClaimFlags": {
+    "compatibleHandoffReadbackOnly": true,
+    "readbackDoesNotRunSeam": true,
+    "readbackDoesNotRetrySeam": true,
+    "readbackDoesNotDeliverHandoff": true,
+    "readbackDoesNotUpgradeProofRung": true,
+    "readbackDoesNotInterpretLayerAdmission": true,
+    "readbackDoesNotInterpretCausalTruth": true,
+    "readbackDoesNotMutateLayer": true,
+    "readbackDoesNotAdmitEvidence": true,
+    "readbackDoesNotAcceptResult": true,
+    "readbackDoesNotExecute": true,
+    "readbackDoesNotGrantAuthority": true
+  }
+}

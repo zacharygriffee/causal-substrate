@@ -412,9 +412,12 @@ function assessEdgeHandoffReadback(value: unknown): SourceAssessment {
     writerRefs: collectStrings(entries.flatMap((entry) => Object.values(maybeRecord(entry.writerRefs) ?? {}))),
     sourceRepos: collectStrings(entries.flatMap((entry) => [entry.sourceRepo, entry.targetRepo])),
     proofRungs: collectStrings([readback.strongestProofRung, ...entries.map((entry) => entry.strongestProofRung)]),
-    linkageStatuses: collectStrings(entries.map((entry) => stringValue(maybeRecord(entry.linkageStatus)?.linkedPairCount) !== undefined
-      ? `linkedPairCount:${String(maybeRecord(entry.linkageStatus)?.linkedPairCount)}`
-      : undefined)),
+    linkageStatuses: collectStrings(entries.map((entry) => {
+      const linkedPairCount = maybeRecord(entry.linkageStatus)?.linkedPairCount;
+      return typeof linkedPairCount === "number" || typeof linkedPairCount === "string"
+        ? `linkedPairCount:${String(linkedPairCount)}`
+        : undefined;
+    })),
     issues,
     edgeReadbackOnly: readbackOnly,
     edgeProofRungNotUpgraded: proofRungNotUpgraded,
