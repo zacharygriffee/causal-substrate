@@ -1,0 +1,161 @@
+{
+  "schema": "causal-substrate/generic-causal-seam-observation/v1",
+  "schemaVersion": 1,
+  "repo": "causal-substrate",
+  "lane": "generic-causal-seam-surface",
+  "proofCommand": "run-generic-causal-seam-public-replica-device",
+  "generatedAt": "2026-06-03T20:31:00.000Z",
+  "observationId": "generic-causal-seam-observation:1178ac86db54e7ef",
+  "observationHash": "sha256:0fbe466b9488bd37dab12955c195082221f959b562550dbb8a45e3709d1d04e1",
+  "observedHistoryId": "edge-layer-derived-adjacent-seam-history:2026-06-03",
+  "observedHistoryHash": "sha256:e7b5967965a3f30925e915f53fc3d4071d7fb3bcd186b227b6c7d1e0a3d86024",
+  "sourceRefsPreserved": {
+    "requestIds": [
+      "compatible-layer-report-only-seam-request:layer-owned-public-smoke:3:v0",
+      "edge-compatible-request:handoff-export-bundle:2026-06-03"
+    ],
+    "requestHashes": [
+      "sha256:68434376fec661767f24d0077d889985388e9c02e9fbb82670a58504d1045da6",
+      "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+    ],
+    "receiptIds": [
+      "layer-report-only-edge-seam-receipt:compatible-layer-report-only-seam-request:layer-owned-public-smoke:3:v0",
+      "compatible-receipt:handoff-export-bundle:2026-06-03"
+    ],
+    "receiptHashes": [
+      "sha256:f4a263a0b741b2940606f2f377e6a2bfbca3d06c83920f8ea3c6ea2584e11924",
+      "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    ],
+    "sourceRepos": [
+      "compatible-public-seam-peer",
+      "mesh-ecology-layer",
+      "mesh-ecology-edge",
+      "causal-substrate-compatible-consumer",
+      "causal-substrate"
+    ],
+    "durableRefs": [
+      "/tmp/layer-public-hyperdht-seam-proof-Xvl1Cg/layer",
+      "44a3d3c9e0f7514ec419532a4d06c58140158e2a0d28918fe00889905a9b7404",
+      "edge-layer-report-only-seam-view",
+      "layer-owned-edge-seam-evidence",
+      "layer-public-hyperdht-seam-proof-382832",
+      "/home/zevilz/work/mesh-ecology/mesh-ecology-edge/.edge-state/edge-compatible-handoff-export-bundle-2026-06-03/edge-request-storage",
+      "/home/zevilz/work/mesh-ecology/mesh-ecology-edge/.edge-state/edge-compatible-handoff-export-bundle-2026-06-03/compatible-endpoint-receipt-storage",
+      "edge-compatible-handoff-export-bundle",
+      "1111111111111111111111111111111111111111111111111111111111111111"
+    ],
+    "writerRefs": [
+      "autobase-writer:44a3d3c9e0f7514ec419532a4d06c58140158e2a0d28918fe00889905a9b7404",
+      "autobase-writer:d130eccec20f9d541dfc5af7c7710d96b18969b136751ad3c6126b779b48625d",
+      "autobase-writer:cbc024822dd4bd02e4db25b965c921fdba12a23267c7ae2d3982343da22fca08"
+    ],
+    "evidenceIds": [
+      "layer-owned-edge-seam-evidence:compatible-layer-report-only-seam-request:layer-owned-public-smoke:3:v0:2"
+    ]
+  },
+  "strongestProofRung": "durable_replicated_public_swarm_seam",
+  "operationProofRung": "durable_replicated_public_swarm_seam",
+  "sourceProofRung": "durable_replicated_public_swarm_seam",
+  "finalClassification": "compatible_with_warnings",
+  "classification": "compatible_with_warnings",
+  "classifiedHappenings": [
+    {
+      "happeningId": "generic-causal-happening:8a2414b830748472",
+      "classification": "linked_request_receipt",
+      "requestId": "compatible-layer-report-only-seam-request:layer-owned-public-smoke:3:v0",
+      "requestHash": "sha256:68434376fec661767f24d0077d889985388e9c02e9fbb82670a58504d1045da6",
+      "receiptId": "layer-report-only-edge-seam-receipt:compatible-layer-report-only-seam-request:layer-owned-public-smoke:3:v0",
+      "receiptHash": "sha256:f4a263a0b741b2940606f2f377e6a2bfbca3d06c83920f8ea3c6ea2584e11924",
+      "sourceRefs": [
+        "compatible-layer-report-only-seam-request:layer-owned-public-smoke:3:v0",
+        "sha256:68434376fec661767f24d0077d889985388e9c02e9fbb82670a58504d1045da6",
+        "/tmp/layer-public-hyperdht-seam-proof-Xvl1Cg/layer",
+        "autobase-writer:44a3d3c9e0f7514ec419532a4d06c58140158e2a0d28918fe00889905a9b7404",
+        "layer-report-only-edge-seam-receipt:compatible-layer-report-only-seam-request:layer-owned-public-smoke:3:v0",
+        "sha256:f4a263a0b741b2940606f2f377e6a2bfbca3d06c83920f8ea3c6ea2584e11924",
+        "44a3d3c9e0f7514ec419532a4d06c58140158e2a0d28918fe00889905a9b7404",
+        "autobase-writer:d130eccec20f9d541dfc5af7c7710d96b18969b136751ad3c6126b779b48625d"
+      ],
+      "detail": "receipt references a request with matching id and hash"
+    },
+    {
+      "happeningId": "generic-causal-happening:af2b9b7761b67fb3",
+      "classification": "linked_request_receipt",
+      "requestId": "edge-compatible-request:handoff-export-bundle:2026-06-03",
+      "requestHash": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "receiptId": "compatible-receipt:handoff-export-bundle:2026-06-03",
+      "receiptHash": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "sourceRefs": [
+        "edge-compatible-request:handoff-export-bundle:2026-06-03",
+        "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "/home/zevilz/work/mesh-ecology/mesh-ecology-edge/.edge-state/edge-compatible-handoff-export-bundle-2026-06-03/edge-request-storage",
+        "autobase-writer:cbc024822dd4bd02e4db25b965c921fdba12a23267c7ae2d3982343da22fca08",
+        "compatible-receipt:handoff-export-bundle:2026-06-03",
+        "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "/home/zevilz/work/mesh-ecology/mesh-ecology-edge/.edge-state/edge-compatible-handoff-export-bundle-2026-06-03/compatible-endpoint-receipt-storage"
+      ],
+      "detail": "receipt references a request with matching id and hash"
+    }
+  ],
+  "damageFindings": [],
+  "unresolvedFindings": [],
+  "overclaimFindings": [],
+  "proof": {
+    "strongestProofRung": "durable_replicated_public_swarm_seam",
+    "operationProofRung": "durable_replicated_public_swarm_seam",
+    "sourceProofRung": "durable_replicated_public_swarm_seam",
+    "proofLabels": [
+      "edge_layer_derived_saved_adjacent_material",
+      "source_observations_saved_readback_seam",
+      "target_public_hyperswarm_read_by_causal_replica"
+    ],
+    "proofRungUpgradeClaimed": false
+  },
+  "transportBooleans": {
+    "publicSwarmTransportHappened": true,
+    "testnetSwarmTransportHappened": false,
+    "controlPlaneOnly": false,
+    "durableFeedBackedHistoryObserved": true,
+    "receivingRepoObservedReplicatedPath": true,
+    "durableObservationResultEmitted": true,
+    "receiptOrResultCausallyReferencesSources": true,
+    "reopenedReadbackDerivedFromDurableHistory": true
+  },
+  "publicSwarmTransportHappened": true,
+  "testnetSwarmTransportHappened": false,
+  "controlPlaneOnly": false,
+  "consumerProjection": {
+    "genericConsumersMayRead": true,
+    "edgeMayConsumeAsObservationOnlyInput": true,
+    "layerMayConsumeAsObservationOnlyFeedback": true,
+    "spineMayConsumeAsPostureEvidence": true,
+    "writesConsumerState": false
+  },
+  "nonClaims": {
+    "canonicalHistoryClaimed": false,
+    "layerEvidenceAdmitted": false,
+    "layerAdmissionDecided": false,
+    "rbcInterpreted": false,
+    "quorumSatisfied": false,
+    "authorityGranted": false,
+    "meshPublished": false,
+    "productionContinuityWritten": false
+  },
+  "deferredAttachmentPoints": {
+    "referentPromotion": null,
+    "branchCompatibilityGraph": null,
+    "canonicalContinuityState": null,
+    "rbcInterpretation": null,
+    "layerAdmission": null,
+    "meshPublication": null,
+    "authorityDecisions": null,
+    "productionCausalHistory": null
+  },
+  "nextPressure": "hand-generic-observation-to-test-consumer",
+  "warnings": [
+    "input_material_started_as_saved_adjacent_observations",
+    "public_swarm_proof_only_after_causal_replica_reads_durable_material",
+    "generic-causal-seam-observation-does-not-grant-authority",
+    "generic-causal-seam-observation-preserves-consumer-refs-as-input-only"
+  ]
+}

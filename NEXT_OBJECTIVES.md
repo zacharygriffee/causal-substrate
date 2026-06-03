@@ -307,6 +307,14 @@ The local supplied-material lane can now:
   `compatible`, and Causal preserved request/receipt ids and hashes, durable
   refs, writer refs, source repo refs, proof labels, linkage status, and
   non-claims without claiming live Causal swarm proof.
+- run Causal's public Hyperswarm source/replica lane over seam-history
+  material derived from the saved Layer and Edge adjacent observations under
+  `proof-artifacts/edge-layer-derived-adjacent-public-swarm-2026-06-03/`;
+  the replica report reached `compatible`, the observation result reached
+  `compatible_with_warnings`, and Causal proved it read the derived durable
+  material through the declared public Hyperswarm path with strongest rung
+  `durable_replicated_public_swarm_seam` while preserving the warning that the
+  source material began as saved adjacent observations.
 
 Strongest routinely proven rung in normal tests:
 `local_causal_observation_over_supplied_seam_history_material`.
@@ -587,6 +595,21 @@ Immediate objective list:
    concrete consumer request for the saved observations, or Causal itself
    reading Edge/Layer-derived durable replicated seam history through the
    declared public Hyperswarm path.
+28. Completed public run: publish a seam-history envelope derived from the
+   saved Layer and Edge adjacent observations and read it back through Causal's
+   declared public Hyperswarm source/replica lane under
+   `proof-artifacts/edge-layer-derived-adjacent-public-swarm-2026-06-03/`.
+   The replica report reached `compatible`, the observation result reached
+   `compatible_with_warnings`, and the strongest proof rung for Causal's read
+   operation is `durable_replicated_public_swarm_seam`. The warning remains
+   important: the run proves Causal read Edge/Layer-derived durable material
+   over public swarm; it does not prove Edge or Layer themselves published live
+   seam history directly to Causal.
+29. Next: do not add another saved-adjacent or derived public-swarm artifact
+   unless a concrete consumer asks for this material, a distinct overclaim risk
+   needs guarding, or Edge/Layer produce a live public-swarm handoff intended
+   for direct Causal reading. Otherwise report the current posture to Spine or
+   the requesting consumer with exact artifact refs and proof rungs.
 
 This is not permission to claim Edge/Layer public seam proof. Causal may claim
 that only after it actually consumes Edge/Layer-derived durable public-swarm
@@ -622,10 +645,14 @@ or deliberately consuming fresh Edge/Layer public material:
     handoff snapshot, and public HyperDHT verification material. Causal has
     already consumed Layer public material once as actual saved adjacent
     material.
-  - Edge `cbbabf4eb3a2481966c8d9ec3cb827c00f80c4b1` provides compatible
-    Causal observation round-trip capability; the next useful Causal move is
-    still to consume the concrete current Edge handoff artifact once Edge
-    preserves or hands it over.
+  - Edge `48b05293fa72da601f41da6cc887e93e189e9f9c` provided a retained
+    compatible handoff export bundle that Causal has consumed as saved
+    adjacent material.
+- Causal has now read an Edge/Layer-derived adjacent seam-history envelope
+  through public Hyperswarm under
+  `proof-artifacts/edge-layer-derived-adjacent-public-swarm-2026-06-03/`.
+  Treat this as Causal public read proof over derived material, not direct
+  Edge/Layer live publication to Causal.
 - keep any new saved-artifact consumer checks explicitly lower than the source
   public swarm proof unless Causal itself reopens and reads durable replicated
   seam history over public Hyperswarm;

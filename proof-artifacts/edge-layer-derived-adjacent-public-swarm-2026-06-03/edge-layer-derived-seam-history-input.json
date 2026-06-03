@@ -1,0 +1,143 @@
+{
+  "historyId": "edge-layer-derived-adjacent-seam-history:2026-06-03",
+  "historyHash": "sha256:e7b5967965a3f30925e915f53fc3d4071d7fb3bcd186b227b6c7d1e0a3d86024",
+  "sourceRepos": [
+    "compatible-public-seam-peer",
+    "mesh-ecology-layer",
+    "mesh-ecology-edge",
+    "causal-substrate-compatible-consumer",
+    "causal-substrate"
+  ],
+  "sourceSchemaRefs": [
+    "causal-substrate/adjacent-public-material-observation/v1",
+    "causal-substrate/adjacent-public-material-observation/v1",
+    "edge-compatible-swarm-seam-handoff-readback.v0",
+    "layer-edge-seam-public-hyperdht-proof-result.v0"
+  ],
+  "transportProof": {
+    "evidenceSource": "causal_saved_adjacent_observations_packaged_for_public_hyperswarm_read",
+    "publicSwarmTransportHappened": false,
+    "testnetSwarmTransportHappened": false,
+    "controlPlaneOnly": false,
+    "durableFeedBackedHistoryObserved": false,
+    "receivingRepoObservedReplicatedPath": false,
+    "durableObservationResultEmitted": false,
+    "receiptOrResultCausallyReferencesSources": true,
+    "reopenedReadbackDerivedFromDurableHistory": false
+  },
+  "durableRefs": [
+    "/tmp/layer-public-hyperdht-seam-proof-Xvl1Cg/layer",
+    "44a3d3c9e0f7514ec419532a4d06c58140158e2a0d28918fe00889905a9b7404",
+    "edge-layer-report-only-seam-view",
+    "layer-owned-edge-seam-evidence",
+    "layer-public-hyperdht-seam-proof-382832",
+    "/home/zevilz/work/mesh-ecology/mesh-ecology-edge/.edge-state/edge-compatible-handoff-export-bundle-2026-06-03/edge-request-storage",
+    "/home/zevilz/work/mesh-ecology/mesh-ecology-edge/.edge-state/edge-compatible-handoff-export-bundle-2026-06-03/compatible-endpoint-receipt-storage",
+    "edge-compatible-handoff-export-bundle",
+    "1111111111111111111111111111111111111111111111111111111111111111"
+  ],
+  "writerRefs": [
+    "autobase-writer:44a3d3c9e0f7514ec419532a4d06c58140158e2a0d28918fe00889905a9b7404",
+    "autobase-writer:d130eccec20f9d541dfc5af7c7710d96b18969b136751ad3c6126b779b48625d",
+    "autobase-writer:cbc024822dd4bd02e4db25b965c921fdba12a23267c7ae2d3982343da22fca08"
+  ],
+  "requests": [
+    {
+      "id": "compatible-layer-report-only-seam-request:layer-owned-public-smoke:3:v0",
+      "hash": "sha256:68434376fec661767f24d0077d889985388e9c02e9fbb82670a58504d1045da6",
+      "sourceRepo": "mesh-ecology-layer",
+      "durableRef": "/tmp/layer-public-hyperdht-seam-proof-Xvl1Cg/layer",
+      "writerRef": "autobase-writer:44a3d3c9e0f7514ec419532a4d06c58140158e2a0d28918fe00889905a9b7404",
+      "schemaRef": "causal-substrate/adjacent-public-material-observation/v1#layer-request-ref",
+      "causalParentRefs": [
+        "causal-adjacent-public-material-observation:05f64d0e29cfa224"
+      ],
+      "linkageStatus": "request_receipt_evidence_linked",
+      "observedProofRung": "saved_readback_seam"
+    },
+    {
+      "id": "edge-compatible-request:handoff-export-bundle:2026-06-03",
+      "hash": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "sourceRepo": "mesh-ecology-edge",
+      "durableRef": "/home/zevilz/work/mesh-ecology/mesh-ecology-edge/.edge-state/edge-compatible-handoff-export-bundle-2026-06-03/edge-request-storage",
+      "writerRef": "autobase-writer:cbc024822dd4bd02e4db25b965c921fdba12a23267c7ae2d3982343da22fca08",
+      "schemaRef": "causal-substrate/adjacent-public-material-observation/v1#edge-request-ref",
+      "causalParentRefs": [
+        "causal-adjacent-public-material-observation:05f1daafbf9227db"
+      ],
+      "linkageStatus": "linkedPairCount:1",
+      "observedProofRung": "saved_readback_seam"
+    }
+  ],
+  "receipts": [
+    {
+      "id": "layer-report-only-edge-seam-receipt:compatible-layer-report-only-seam-request:layer-owned-public-smoke:3:v0",
+      "hash": "sha256:f4a263a0b741b2940606f2f377e6a2bfbca3d06c83920f8ea3c6ea2584e11924",
+      "sourceRepo": "mesh-ecology-layer",
+      "durableRef": "44a3d3c9e0f7514ec419532a4d06c58140158e2a0d28918fe00889905a9b7404",
+      "writerRef": "autobase-writer:d130eccec20f9d541dfc5af7c7710d96b18969b136751ad3c6126b779b48625d",
+      "schemaRef": "causal-substrate/adjacent-public-material-observation/v1#layer-receipt-ref",
+      "causalParentRefs": [
+        "causal-adjacent-public-material-observation:05f64d0e29cfa224",
+        "compatible-layer-report-only-seam-request:layer-owned-public-smoke:3:v0"
+      ],
+      "linkageStatus": "request_receipt_evidence_linked",
+      "observedProofRung": "saved_readback_seam",
+      "sourceRequestId": "compatible-layer-report-only-seam-request:layer-owned-public-smoke:3:v0",
+      "sourceRequestHash": "sha256:68434376fec661767f24d0077d889985388e9c02e9fbb82670a58504d1045da6"
+    },
+    {
+      "id": "compatible-receipt:handoff-export-bundle:2026-06-03",
+      "hash": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "sourceRepo": "mesh-ecology-edge",
+      "durableRef": "/home/zevilz/work/mesh-ecology/mesh-ecology-edge/.edge-state/edge-compatible-handoff-export-bundle-2026-06-03/compatible-endpoint-receipt-storage",
+      "writerRef": "autobase-writer:cbc024822dd4bd02e4db25b965c921fdba12a23267c7ae2d3982343da22fca08",
+      "schemaRef": "causal-substrate/adjacent-public-material-observation/v1#edge-receipt-ref",
+      "causalParentRefs": [
+        "causal-adjacent-public-material-observation:05f1daafbf9227db",
+        "edge-compatible-request:handoff-export-bundle:2026-06-03"
+      ],
+      "linkageStatus": "linkedPairCount:1",
+      "observedProofRung": "saved_readback_seam",
+      "sourceRequestId": "edge-compatible-request:handoff-export-bundle:2026-06-03",
+      "sourceRequestHash": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+    }
+  ],
+  "evidenceRefs": [
+    {
+      "id": "layer-owned-edge-seam-evidence:compatible-layer-report-only-seam-request:layer-owned-public-smoke:3:v0:2",
+      "hash": "sha256:b21d45811bca2eeefdc852adc38f814d46de1534cf591227490ad7e4f613246d",
+      "sourceRepo": "mesh-ecology-layer",
+      "durableRef": "/tmp/layer-public-hyperdht-seam-proof-Xvl1Cg/layer",
+      "writerRef": "autobase-writer:44a3d3c9e0f7514ec419532a4d06c58140158e2a0d28918fe00889905a9b7404",
+      "schemaRef": "causal-substrate/adjacent-public-material-observation/v1#layer-evidence-ref",
+      "causalParentRefs": [
+        "causal-adjacent-public-material-observation:05f64d0e29cfa224"
+      ],
+      "observedProofRung": "saved_readback_seam"
+    }
+  ],
+  "linkage": [
+    {
+      "requestId": "compatible-layer-report-only-seam-request:layer-owned-public-smoke:3:v0",
+      "requestHash": "sha256:68434376fec661767f24d0077d889985388e9c02e9fbb82670a58504d1045da6",
+      "receiptId": "layer-report-only-edge-seam-receipt:compatible-layer-report-only-seam-request:layer-owned-public-smoke:3:v0",
+      "receiptHash": "sha256:f4a263a0b741b2940606f2f377e6a2bfbca3d06c83920f8ea3c6ea2584e11924"
+    },
+    {
+      "requestId": "edge-compatible-request:handoff-export-bundle:2026-06-03",
+      "requestHash": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "receiptId": "compatible-receipt:handoff-export-bundle:2026-06-03",
+      "receiptHash": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    }
+  ],
+  "proofLabels": [
+    "edge_layer_derived_saved_adjacent_material",
+    "source_observations_saved_readback_seam",
+    "target_public_hyperswarm_read_by_causal_replica"
+  ],
+  "warnings": [
+    "input_material_started_as_saved_adjacent_observations",
+    "public_swarm_proof_only_after_causal_replica_reads_durable_material"
+  ]
+}
