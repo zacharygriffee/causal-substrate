@@ -560,7 +560,13 @@ Immediate objective list:
    See `docs/edge-compatible-handoff-artifact-scan-2026-06-03.md`. Causal
    should not use Edge source code, tests, dirty worktree changes, or a local
    Causal-generated smoke as a substitute for the handed artifact.
-25. Coordination pressure: Layer's concrete export pressure is satisfied for
+25. Scan status update: the Edge scan above observed Edge before commit
+   `cbbabf4eb3a2481966c8d9ec3cb827c00f80c4b1`. Edge has since committed
+   Causal adjacent observation import/feed/read/card capability, and that is
+   useful round-trip machinery. It still does not by itself give Causal a
+   retained current Edge handoff artifact under Edge `proof-artifacts/`, so the
+   scan's no-substitute conclusion remains active.
+26. Coordination pressure: Layer's concrete export pressure is satisfied for
    now; Edge is the current missing handoff-artifact source. Causal may
    continue consuming actual Layer public proof files when a concrete question
    exists, but the next repo-family convergence move is Edge handoff
@@ -596,12 +602,15 @@ or deliberately consuming fresh Edge/Layer public material:
   running that path over actual handed Layer/Edge outputs, or reading
   Edge/Layer-derived durable replicated seam history through public
   Hyperswarm, over another solo saved-artifact expansion:
-  - Layer `717ee49c1092929af72eb9c1e39dfb6e87f59a78` provides retained public
-    proof export bundle material that Causal has already consumed once as
-    actual saved adjacent material.
-  - Edge `d9043723fc0aeda2c6de5e510ef5df9826034275` provides compatible
-    handoff export capability; the next useful Causal move is to consume the
-    concrete artifact once Edge preserves or hands it over.
+  - Layer `eec35bcd0c08014c9af5f09f9bad3a50d06e66b6` provides retained
+    public proof bundle integrity, freshness, damage-detection, compact
+    handoff snapshot, and public HyperDHT verification material. Causal has
+    already consumed Layer public material once as actual saved adjacent
+    material.
+  - Edge `cbbabf4eb3a2481966c8d9ec3cb827c00f80c4b1` provides compatible
+    Causal observation round-trip capability; the next useful Causal move is
+    still to consume the concrete current Edge handoff artifact once Edge
+    preserves or hands it over.
 - keep any new saved-artifact consumer checks explicitly lower than the source
   public swarm proof unless Causal itself reopens and reads durable replicated
   seam history over public Hyperswarm;
