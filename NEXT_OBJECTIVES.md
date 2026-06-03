@@ -265,6 +265,12 @@ The local supplied-material lane can now:
   `duplicate_id` happening, and still proved Causal read durable replicated
   material through the declared public swarm path with strongest source rung
   `durable_replicated_public_swarm_seam`.
+- scan adjacent Edge and Layer worktrees for fresh public endpoint/history
+  material and record the result in
+  `docs/outward-public-material-scan-2026-06-03.md`; this is
+  `local_artifact_seam` operator inspection only, found no committed fresh
+  adjacent public proof material ready for Causal observation, and prevents
+  treating dirty adjacent worktree state as Causal-consumable public proof.
 
 Strongest routinely proven rung in normal tests:
 `local_causal_observation_over_supplied_seam_history_material`.
@@ -409,6 +415,14 @@ Immediate objective list:
    or fresh public-swarm objective names the remaining branch. Receipt without
    request and proof-label overclaim remain available branches, but should not
    be run just to add more artifacts.
+18. Completed local inspection: scan Edge and Layer for fresh public
+   endpoint/history material ready for Causal observation. The scan found only
+   already-consumed Edge receipts and dirty Layer public HyperDHT worktree
+   changes, not committed adjacent proof artifacts. See
+   `docs/outward-public-material-scan-2026-06-03.md`.
+19. Next: wait for committed Layer public endpoint/proof/readback material,
+   committed fresh Edge public endpoint/history material, or a real generic
+   consumer request before adding more Causal lower-rung material.
 
 This is not permission to claim Edge/Layer public seam proof. Causal may claim
 that only after it actually consumes Edge/Layer-derived durable public-swarm
