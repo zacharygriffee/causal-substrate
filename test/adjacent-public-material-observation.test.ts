@@ -156,6 +156,28 @@ test("classifies unresolved Layer lifecycle smoke linkage without upgrading proo
   assert.equal(observation.boundary.opensSwarm, false);
 });
 
+test("classifies unresolved Layer device-boundary handoff without treating timeout as damage", () => {
+  const observation = buildAdjacentPublicMaterialObservation({
+    layerPublicMaterial: buildLayerDeviceBoundaryUnresolvedHandoff(),
+    emittedAt: "2026-06-04T03:16:00.000Z",
+  });
+
+  assertAdjacentPublicMaterialObservation(observation);
+  assert.equal(observation.classification, "unresolved");
+  assert.equal(observation.sourceClassifications.layer, "unresolved");
+  assert.equal(observation.validation.layerRefsPreserved, true);
+  assert.equal(observation.validation.layerRequestReceiptEvidenceLinked, false);
+  assert.equal(observation.validation.layerPublicBoundaryPreserved, false);
+  assert.equal(observation.proof.layerPublicProofObserved, false);
+  assert.equal(observation.proof.liveCausalSwarmProofClaimed, false);
+  assert.ok(observation.validation.issues.includes("layer-device-boundary-public-swarm-timeout"));
+  assert.ok(observation.preservedRefs.durableRefs.includes("device:edge-public-client"));
+  assert.ok(observation.preservedRefs.durableRefs.includes("device:layer-public-participant"));
+  assert.ok(observation.preservedRefs.durableRefs.includes("8c4c6941ef676bb0496a71a7f193956b321e61b844cc0939d8dbed45f18aecf7"));
+  assert.ok(observation.preservedRefs.linkageStatuses.includes("unresolved_public_swarm_timeout"));
+  assert.equal(observation.boundary.admitsLayerEvidence, false);
+});
+
 test("observes Edge compatible handoff readback as lower-rung exported material", () => {
   const observation = buildAdjacentPublicMaterialObservation({
     edgeHandoffReadback: {
@@ -363,6 +385,70 @@ function buildLayerLifecycleSmoke(): any {
     admitsEvidence: false,
     acceptsResult: false,
     executesWork: false,
+    grantsAuthority: false,
+    rbcEnforced: false,
+  };
+}
+
+function buildLayerDeviceBoundaryUnresolvedHandoff(): any {
+  return {
+    artifactKind: "layer_public_device_boundary_handoff_packet",
+    schemaVersion: "layer-public-device-boundary-handoff-packet.v0",
+    packetStatus: "device_boundary_handoff_unresolved_or_blocked",
+    sourceClassificationRef: "proof-artifacts/layer-convergence/layer-public-device-boundary-classification.json",
+    classification: "unresolved_public_swarm_timeout",
+    sourceMaterialKind: "held_participant_or_unknown_result",
+    deviceBoundaryCrossed: false,
+    sourceDeviceRef: "device:edge-public-client",
+    layerDeviceRef: "device:layer-public-participant",
+    distinctDeviceRefsObserved: true,
+    distinctDeviceFingerprintsObserved: true,
+    syntheticClassifierFixture: false,
+    deviceBoundaryProofClaimed: false,
+    issues: ["public_swarm_timeout_or_connection_not_observed"],
+    proofSummary: {
+      artifactKind: "layer_public_device_boundary_compatible_client_result",
+      namespace: "layer-device-boundary-convergence",
+      strongestProofRung: null,
+      requestCount: null,
+      receiptCount: null,
+      evidenceCount: null,
+      linkedPairCount: null,
+      unlinkedCount: null,
+      latestRequestHash: null,
+      latestReceiptHash: null,
+      latestEvidenceRef: null,
+    },
+    preservedRefs: {
+      requestRefs: [],
+      receiptRefs: [],
+      layerWriterRef: null,
+      autobaseKey: "8c4c6941ef676bb0496a71a7f193956b321e61b844cc0939d8dbed45f18aecf7",
+      topicHex: "5d676672f0280751974c640ae3846f9075d42b36a9dbddb3a1a0e670b2589f18",
+    },
+    expectedNonClaims: {
+      readOnly: true,
+      reportOnly: true,
+      mutatesLayer: false,
+      admitsEvidence: false,
+      grantsAuthority: false,
+      rbcEnforced: false,
+      meshPublished: false,
+      productionDurabilityClaimed: false,
+    },
+    operationProof: {
+      builtFromClassificationOnly: true,
+      sourceRefsPreserved: true,
+      realDeviceBoundaryProofConsumed: false,
+      noLayerRuntimeImportRequired: true,
+      noLayerMutation: true,
+      noAuthorityGrant: true,
+      noRbcEnforcement: true,
+    },
+    readOnly: true,
+    reportOnly: true,
+    mutatesLayer: false,
+    admitsEvidence: false,
     grantsAuthority: false,
     rbcEnforced: false,
   };

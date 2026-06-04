@@ -107,6 +107,7 @@ interface SourceAssessment {
   layerCausalReadinessAccepted?: boolean | undefined;
   layerRequestReceiptEvidenceLinked?: boolean | undefined;
   layerLifecycleObserved?: boolean | undefined;
+  layerDeviceBoundaryObserved?: boolean | undefined;
   edgeReadbackOnly?: boolean | undefined;
   edgeProofRungNotUpgraded?: boolean | undefined;
 }
@@ -123,6 +124,7 @@ export function buildAdjacentPublicMaterialObservation(input: {
   const issues = [...layer.issues, ...edge.issues];
   const layerObserved = input.layerPublicMaterial !== undefined;
   const edgeObserved = input.edgeHandoffReadback !== undefined;
+  const sourcePaths = sanitizeSourcePaths(input.sourcePaths ?? {});
 
   if (!layerObserved && !edgeObserved) issues.push("no-adjacent-material-observed");
 
@@ -147,7 +149,7 @@ export function buildAdjacentPublicMaterialObservation(input: {
   const observationId = input.observationId ??
     `causal-adjacent-public-material-observation:${hash(stableJson({
       emittedAt: input.emittedAt,
-      sourcePaths: input.sourcePaths ?? {},
+      sourcePaths,
       preservedRefs,
     })).slice(0, 16)}`;
   const observationHash = `sha256:${hash(stableJson({
@@ -167,7 +169,7 @@ export function buildAdjacentPublicMaterialObservation(input: {
     observationId,
     observationHash,
     emittedAt: input.emittedAt,
-    sourcePaths: { ...(input.sourcePaths ?? {}) },
+    sourcePaths,
     observedSources: {
       layerMaterialObserved: layerObserved,
       edgeHandoffReadbackObserved: edgeObserved,
@@ -281,6 +283,9 @@ function assessLayerPublicMaterial(value: unknown): SourceAssessment {
   if (value === undefined) return emptyAssessment("unresolved");
   const material = maybeRecord(value);
   if (!material) return withIssue(emptyAssessment("unresolved"), "layer-material-not-object");
+  if (material.artifactKind === "layer_public_device_boundary_handoff_packet") {
+    return assessLayerPublicDeviceBoundaryHandoffPacket(material);
+  }
   if (material.artifactKind === "layer_public_seam_lifecycle_smoke_result") {
     return assessLayerPublicSeamLifecycleSmoke(material);
   }
@@ -375,6 +380,77 @@ function assessLayerPublicMaterial(value: unknown): SourceAssessment {
     layerPublicBoundaryPreserved: publicBoundary,
     layerCausalReadinessAccepted: causalReadinessAccepted,
     layerRequestReceiptEvidenceLinked: linked,
+  };
+}
+
+function assessLayerPublicDeviceBoundaryHandoffPacket(material: Record<string, unknown>): SourceAssessment {
+  const proofSummary = maybeRecord(material.proofSummary);
+  const preservedRefs = maybeRecord(material.preservedRefs);
+  const operationProof = maybeRecord(material.operationProof);
+  const expectedNonClaims = maybeRecord(material.expectedNonClaims);
+  const classification = stringValue(material.classification);
+  const issues: string[] = [];
+  const requestRefs = Array.isArray(preservedRefs?.requestRefs) ? preservedRefs.requestRefs.filter(isRecord) : [];
+  const receiptRefs = Array.isArray(preservedRefs?.receiptRefs) ? preservedRefs.receiptRefs.filter(isRecord) : [];
+  const deviceBoundaryProofClaimed = material.deviceBoundaryProofClaimed === true;
+  const unresolvedTimeout = classification === "unresolved_public_swarm_timeout" ||
+    (Array.isArray(material.issues) && material.issues.includes("public_swarm_timeout_or_connection_not_observed"));
+
+  if (unresolvedTimeout) issues.push("layer-device-boundary-public-swarm-timeout");
+  if (deviceBoundaryProofClaimed && material.deviceBoundaryCrossed !== true) {
+    issues.push("layer-device-boundary-proof-overclaim");
+  }
+  if (hasAuthorityOverclaim(material) || hasAuthorityOverclaim(operationProof)) {
+    issues.push("layer-adjacent-material-overclaim");
+  }
+  if (expectedNonClaims?.admitsEvidence !== false ||
+      expectedNonClaims?.grantsAuthority !== false ||
+      expectedNonClaims?.rbcEnforced !== false) {
+    issues.push("layer-device-boundary-non-claim-missing");
+  }
+
+  const sourceDeviceRef = stringValue(material.sourceDeviceRef);
+  const layerDeviceRef = stringValue(material.layerDeviceRef);
+  const linked = deviceBoundaryProofClaimed === true &&
+    material.deviceBoundaryCrossed === true &&
+    requestRefs.length > 0 &&
+    receiptRefs.length > 0;
+
+  return {
+    classification: issues.some((issue) => issue.includes("overclaim"))
+      ? "damaged"
+      : issues.length > 0
+        ? "unresolved"
+        : linked
+          ? "compatible"
+          : "unresolved",
+    requestIds: collectStrings(requestRefs.map((entry) => entry.eventId)),
+    requestHashes: collectStrings(requestRefs.map((entry) => entry.eventHash)),
+    receiptIds: collectStrings(receiptRefs.map((entry) => entry.eventId)),
+    receiptHashes: collectStrings(receiptRefs.map((entry) => entry.eventHash)),
+    evidenceIds: collectStrings([proofSummary?.latestEvidenceRef]),
+    evidenceHashes: [],
+    durableRefs: collectStrings([
+      sourceDeviceRef,
+      layerDeviceRef,
+      preservedRefs?.autobaseKey,
+      preservedRefs?.topicHex,
+      material.sourceClassificationRef,
+    ]),
+    writerRefs: collectStrings([preservedRefs?.layerWriterRef]),
+    sourceRepos: ["mesh-ecology-layer"],
+    proofRungs: collectStrings([proofSummary?.strongestProofRung]),
+    linkageStatuses: collectStrings([
+      classification,
+      material.packetStatus,
+      typeof proofSummary?.linkedPairCount === "number" ? `linkedPairCount:${proofSummary.linkedPairCount}` : undefined,
+      typeof proofSummary?.unlinkedCount === "number" ? `unlinkedCount:${proofSummary.unlinkedCount}` : undefined,
+    ]),
+    issues,
+    layerPublicBoundaryPreserved: deviceBoundaryProofClaimed === true && material.deviceBoundaryCrossed === true,
+    layerCausalReadinessAccepted: false,
+    layerRequestReceiptEvidenceLinked: linked,
+    layerDeviceBoundaryObserved: true,
   };
 }
 
@@ -513,6 +589,11 @@ function assessEdgeHandoffReadback(value: unknown): SourceAssessment {
 }
 
 function hasLayerRefs(assessment: SourceAssessment): boolean {
+  if (assessment.layerDeviceBoundaryObserved === true) {
+    return assessment.durableRefs.length > 0 &&
+      assessment.sourceRepos.includes("mesh-ecology-layer") &&
+      assessment.linkageStatuses.length > 0;
+  }
   if (assessment.layerLifecycleObserved === true) {
     return assessment.requestHashes.length > 0 &&
       assessment.receiptHashes.length > 0 &&
@@ -611,6 +692,27 @@ function collectStrings(values: unknown[]): string[] {
     if (Array.isArray(value)) return value.filter((entry): entry is string => typeof entry === "string" && entry.trim() !== "");
     return [];
   }));
+}
+
+function sanitizeSourcePaths(
+  sourcePaths: AdjacentPublicMaterialObservation["sourcePaths"],
+): AdjacentPublicMaterialObservation["sourcePaths"] {
+  return {
+    ...(sourcePaths.layerPublicMaterial
+      ? { layerPublicMaterial: sanitizeSourcePath(sourcePaths.layerPublicMaterial) }
+      : {}),
+    ...(sourcePaths.edgeHandoffReadback
+      ? { edgeHandoffReadback: sanitizeSourcePath(sourcePaths.edgeHandoffReadback) }
+      : {}),
+  };
+}
+
+function sanitizeSourcePath(value: string): string {
+  const marker = "/mesh-ecology/";
+  const markerIndex = value.indexOf(marker);
+  if (markerIndex >= 0) return value.slice(markerIndex + marker.length);
+  if (value.startsWith("/")) return "<local-path-not-committed>";
+  return value;
 }
 
 function unique(values: string[]): string[] {

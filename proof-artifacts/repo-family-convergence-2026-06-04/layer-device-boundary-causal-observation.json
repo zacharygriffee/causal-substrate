@@ -1,0 +1,96 @@
+{
+  "artifactKind": "causal-adjacent-public-material-observation",
+  "schema": "causal-substrate/adjacent-public-material-observation/v1",
+  "schemaVersion": 1,
+  "observationId": "causal-adjacent-public-material-observation:32c438618c3bad3c",
+  "observationHash": "sha256:6a8aa3ff852c8c9f7973fe9c1c71a375259c92d0840a4fd30e0f520923ee49bf",
+  "emittedAt": "2026-06-04T03:16:00.000Z",
+  "sourcePaths": {
+    "layerPublicMaterial": "mesh-ecology-layer/proof-artifacts/layer-convergence-20260604T031354Z/layer-public-device-boundary-handoff-packet.json"
+  },
+  "observedSources": {
+    "layerMaterialObserved": true,
+    "edgeHandoffReadbackObserved": false
+  },
+  "classification": "unresolved",
+  "sourceClassifications": {
+    "layer": "unresolved"
+  },
+  "preservedRefs": {
+    "requestIds": [],
+    "requestHashes": [],
+    "receiptIds": [],
+    "receiptHashes": [],
+    "evidenceIds": [],
+    "evidenceHashes": [],
+    "durableRefs": [
+      "device:edge-public-client",
+      "device:layer-public-participant",
+      "8c4c6941ef676bb0496a71a7f193956b321e61b844cc0939d8dbed45f18aecf7",
+      "5d676672f0280751974c640ae3846f9075d42b36a9dbddb3a1a0e670b2589f18",
+      "proof-artifacts/layer-convergence-20260604T031354Z/layer-public-device-boundary-classification.json"
+    ],
+    "writerRefs": [],
+    "sourceRepos": [
+      "mesh-ecology-layer"
+    ],
+    "proofRungs": [],
+    "linkageStatuses": [
+      "unresolved_public_swarm_timeout",
+      "device_boundary_handoff_unresolved_or_blocked"
+    ]
+  },
+  "proof": {
+    "operationProofRung": "saved_readback_seam",
+    "layerPublicProofObserved": false,
+    "edgeReadbackProofRungNotUpgraded": false,
+    "liveCausalSwarmProofClaimed": false,
+    "proofRungUpgradeClaimed": false
+  },
+  "validation": {
+    "status": "adjacent-public-material-observation-incomplete",
+    "layerRefsPreserved": true,
+    "layerRequestReceiptEvidenceLinked": false,
+    "layerPublicBoundaryPreserved": false,
+    "layerCausalReadinessAccepted": false,
+    "edgeRefsPreserved": true,
+    "edgeReadbackOnly": true,
+    "edgeProofRungNotUpgraded": true,
+    "noCanonicalHistoryClaim": true,
+    "noLayerAdmissionClaim": true,
+    "noEvidenceAdmissionClaim": true,
+    "noRbcInterpretationClaim": true,
+    "noQuorumClaim": true,
+    "noAuthorityClaim": true,
+    "noMeshPublicationClaim": true,
+    "noProductionContinuityWriteClaim": true,
+    "issues": [
+      "layer-device-boundary-public-swarm-timeout"
+    ]
+  },
+  "boundary": {
+    "readsSavedAdjacentMaterialOnly": true,
+    "opensSwarm": false,
+    "opensCorestore": false,
+    "callsEdge": false,
+    "callsLayer": false,
+    "writesEdgeState": false,
+    "writesLayerState": false,
+    "acceptsCanonicalHistory": false,
+    "admitsLayerEvidence": false,
+    "interpretsRbc": false,
+    "claimsQuorum": false,
+    "grantsAuthority": false,
+    "publishesToMesh": false,
+    "writesProductionContinuity": false
+  },
+  "nextPressure": "inspect-adjacent-material-before-consuming",
+  "warnings": [
+    "adjacent-public-material-observation-reads-saved-exported-material-only",
+    "adjacent-public-material-observation-does-not-claim-live-causal-swarm-proof",
+    "adjacent-public-material-observation-does-not-admit-layer-evidence-or-interpret-rbc"
+  ],
+  "rejections": [
+    "layer-device-boundary-public-swarm-timeout"
+  ]
+}

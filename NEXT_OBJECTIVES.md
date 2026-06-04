@@ -13,6 +13,23 @@ Causal Substrate does not claim canonical truth, Layer admission, RBC
 interpretation, quorum satisfaction, Mesh publication, authority, or production
 continuity.
 
+## Current Convergence Posture
+
+Causal now recognizes Layer's `layer_public_device_boundary_handoff_packet`
+shape as adjacent supplied material. The repo-family convergence run at
+`mesh-ecology-layer/proof-artifacts/layer-convergence-20260604T031354Z/`
+remains `unresolved_public_swarm_timeout`; Causal observes that handoff as
+`unresolved`, preserves the device refs, Autobase key, topic, classification,
+and source refs it actually carries, and does not mark it damaged merely
+because request/receipt/evidence refs are absent from the timeout packet.
+
+This is not live Causal public-swarm observation. The Causal proof rung remains
+`saved_readback_seam` / supplied adjacent material until Causal itself reads
+durable replicated public-swarm-derived seam history. Next pressure for Causal
+is to stay ready to observe fresh Edge/Layer convergence material and only add
+narrow adapter support when a real consumer packet exposes a concrete shape
+gap.
+
 ## Prototype Alignment
 
 Use `/home/zevilz/work/prototypes/mesh-ecology-prototype` as a conceptual and
@@ -114,8 +131,8 @@ The local supplied-material lane can now:
   `proof-artifacts/public-hyperswarm-single-machine-2026-06-01/`, including
   reader report, checked report readbacks, Edge handoff bundle, handoff
   readback, and proof summary.
-- preserve a two-device public Hyperswarm/Corestore seam-history run from
-  `platform-lab` to `mesh-lab` under
+- preserve a two-device public Hyperswarm/Corestore seam-history run from an
+  operator-selected source device to an operator-selected replica device under
   `proof-artifacts/public-hyperswarm-device-to-device-2026-06-01/`, including
   source manifest, replica report, checked replica report readback, Edge
   handoff bundle, handoff readback, and proof summary.
@@ -159,8 +176,8 @@ The local supplied-material lane can now:
   preserving the current seam-history input and labeling it as
   `local_refresh_input_package_over_saved_public_hyperswarm_material` until a
   public Hyperswarm reader consumes refreshed durable material.
-- run the prepared source and replica commands on the standby devices
-  `platform-lab` and `mesh-lab` with public Hyperswarm enabled and
+- run the prepared source and replica commands on operator-selected standby
+  devices with public Hyperswarm enabled and
   `CAUSAL_SUBSTRATE_HYPERSWARM_BOOTSTRAP` unset, producing a refreshed source
   manifest and replica report under
   `proof-artifacts/public-hyperswarm-device-to-device-operator-refresh/`.
@@ -191,8 +208,9 @@ The local supplied-material lane can now:
   `public-proof-index-consumer-handoff-readback.json`, proving through code that
   the saved handoff remains readable, preserves source refs, and keeps
   consumer suitability/non-claim boundaries without upgrading proof.
-- run the prepared next public-swarm-only device objective on `platform-lab`
-  and `mesh-lab` with `CAUSAL_SUBSTRATE_HYPERSWARM_BOOTSTRAP` unset, producing
+- run the prepared next public-swarm-only device objective on
+  operator-selected standby devices with `CAUSAL_SUBSTRATE_HYPERSWARM_BOOTSTRAP`
+  unset, producing
   `public-source-manifest.json` and `public-replica-reader-report.json` under
   `proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/`.
 - derive the next public replica report into local saved-artifact readback,
