@@ -85,6 +85,12 @@ adjacent material. Preserve proof labels exactly. Do not upgrade Causal's own
 operation rung unless Causal itself reads durable replicated history over public
 swarm.
 
+Mechanics-first rule: do not expand cockpit/TUI-facing observation surfaces
+before the live Edge/Layer public-swarm mechanics chain is repeatable. Causal's
+next useful contribution is bounded observation over concrete Edge/Layer output
+from that chain, or a separately scoped Causal-owned public swarm reader if the
+family proof requires Causal itself to cross swarm.
+
 Process cleanup boundary: Causal should not start Layer or Edge live
 participants unless its objective explicitly requires it. If it does start any
 component process, it must stop it before finishing or hand off pid/control-dir
