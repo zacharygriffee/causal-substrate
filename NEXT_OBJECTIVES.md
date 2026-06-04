@@ -834,11 +834,23 @@ compatible seam-history material over public swarm.
 
 The current refreshed saved-artifact readiness, consumer handoff, next public
 run, next Edge handoff contract, and next proof index list is complete. The
-next list should first harden the generic Causal seam surface above and prove
-it with Causal-owned test consumers/smokes. After that, build outward moves
-around either preparing another explicit public-swarm-only device objective
-from the latest index, handing the current proof index to a generic consumer,
-or deliberately consuming fresh Edge/Layer public material:
+next move is not another generic expansion. Consume the current Layer public
+device-boundary handoff:
+
+```text
+mesh-ecology-layer/proof-artifacts/layer-convergence-20260604T040145Z/layer-public-device-boundary-handoff-packet.json
+```
+
+The output should preserve Layer request id/hash, Layer receipt id/hash,
+receipt writer ref, evidence ref, Autobase key, topic, device refs,
+classification, proof labels, and non-claims. It should classify the Layer
+source proof as compatible public device-boundary material while labeling
+Causal's own operation as selected adjacent material or saved readback unless
+Causal itself reads durable replicated public-swarm history.
+
+After that, build outward moves around either handing the Causal observation to
+Edge/Spine, preparing a direct Causal public reader over Edge/Layer-derived
+history, or responding to a concrete consumer ambiguity:
 
 - prepare another public-swarm-only device objective from
   `proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/public-seam-proof-index.json`
@@ -857,12 +869,12 @@ or deliberately consuming fresh Edge/Layer public material:
     process artifact copies. Treat the current attempt as same-device/default
     public or saved-readback lifecycle evidence unless a returned second-host
     artifact proves an actual device boundary.
-  - Layer's current two-device public device-boundary lab output only after the
-    compatible-client result has been returned and classified. Causal may
-    observe `device_boundary_public_swarm_complete` or
-    `unresolved_public_swarm_timeout` as bounded causal input, but must preserve
-    Layer receipt/evidence refs without admitting evidence, deciding Layer
-    policy, or upgrading proof beyond what Layer's result actually claims.
+  - Layer's current two-device public device-boundary lab output at
+    `proof-artifacts/layer-convergence-20260604T040145Z/`. Causal may observe
+    `device_boundary_public_swarm_complete` as bounded causal input, but must
+    preserve Layer receipt/evidence refs without admitting evidence, deciding
+    Layer policy, or upgrading Causal's operation proof beyond what Causal
+    actually read.
   Reading Edge/Layer-derived durable replicated seam history through public
   Hyperswarm remains stronger than another saved-artifact expansion, but only
   if Causal itself performs that durable public reader operation.
