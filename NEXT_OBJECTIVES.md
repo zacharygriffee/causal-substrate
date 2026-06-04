@@ -65,6 +65,31 @@ emit no canonical truth, Layer admission, RBC, Mesh, authority, or production
 continuity claim. Do not call it live Causal public-swarm observation unless
 Causal itself reads durable replicated history over swarm.
 
+Layer now has a supervised current-live public participant lifecycle, and Edge
+can preserve its current-live participant refs separately from retained Layer
+held proof refs. The next family proof target is:
+
+```text
+Layer current-live public participant up
+-> Edge probes current-live-descriptor.json while Layer is alive
+-> Edge emits linked public result evidence or unresolved flake packet
+-> Layer down/readback preserves final durable history
+-> Causal observes the resulting Edge/Layer material
+```
+
+Causal should wait for that concrete Edge/Layer output unless asked to inspect
+the existing saved attempt pack. When it lands, consume the Edge attempt packet,
+Layer descriptor/readback refs, request/receipt/evidence ids and hashes, writer
+refs, transport labels, and unresolved/compatible classification as bounded
+adjacent material. Preserve proof labels exactly. Do not upgrade Causal's own
+operation rung unless Causal itself reads durable replicated history over public
+swarm.
+
+Process cleanup boundary: Causal should not start Layer or Edge live
+participants unless its objective explicitly requires it. If it does start any
+component process, it must stop it before finishing or hand off pid/control-dir
+state explicitly. Live helper processes left behind by tests are not proof.
+
 ## Prototype Alignment
 
 Use `/home/zevilz/work/prototypes/mesh-ecology-prototype` as a conceptual and
