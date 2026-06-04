@@ -9,6 +9,7 @@ import {
 interface CliArgs {
   layerPublicMaterial?: string | undefined;
   edgeHandoffReadback?: string | undefined;
+  edgePublicProcessExport?: string | undefined;
   output?: string | undefined;
   emittedAt: string;
 }
@@ -21,17 +22,19 @@ void main().catch((error) => {
 async function main(): Promise<void> {
   const args = parseArgs(process.argv.slice(2));
   if (!args.output) throw new Error("output_required_for_adjacent_public_material_observation");
-  if (!args.layerPublicMaterial && !args.edgeHandoffReadback) {
+  if (!args.layerPublicMaterial && !args.edgeHandoffReadback && !args.edgePublicProcessExport) {
     throw new Error("adjacent_material_input_required");
   }
 
   const observation = buildAdjacentPublicMaterialObservation({
     layerPublicMaterial: args.layerPublicMaterial ? await readJson(args.layerPublicMaterial) : undefined,
     edgeHandoffReadback: args.edgeHandoffReadback ? await readJson(args.edgeHandoffReadback) : undefined,
+    edgePublicProcessExport: args.edgePublicProcessExport ? await readJson(args.edgePublicProcessExport) : undefined,
     emittedAt: args.emittedAt,
     sourcePaths: {
       ...(args.layerPublicMaterial ? { layerPublicMaterial: path.resolve(args.layerPublicMaterial) } : {}),
       ...(args.edgeHandoffReadback ? { edgeHandoffReadback: path.resolve(args.edgeHandoffReadback) } : {}),
+      ...(args.edgePublicProcessExport ? { edgePublicProcessExport: path.resolve(args.edgePublicProcessExport) } : {}),
     },
   });
   assertAdjacentPublicMaterialObservation(observation);
@@ -63,6 +66,11 @@ function parseArgs(argv: string[]): CliArgs {
       index += 1;
       continue;
     }
+    if (arg === "--edge-public-process-export") {
+      args.edgePublicProcessExport = requireNext(argv, index, arg);
+      index += 1;
+      continue;
+    }
     if (arg === "--output") {
       args.output = requireNext(argv, index, arg);
       index += 1;
@@ -87,7 +95,7 @@ function requireNext(argv: string[], index: number, flag: string): string {
 
 function printUsage(): void {
   process.stdout.write([
-    "Usage: tsx scripts/observe-adjacent-public-material.ts --output path [--layer-public-material path] [--edge-handoff-readback path] [--emitted-at iso]",
+    "Usage: tsx scripts/observe-adjacent-public-material.ts --output path [--layer-public-material path] [--edge-handoff-readback path] [--edge-public-process-export path] [--emitted-at iso]",
     "",
     "Reads supplied/exported adjacent Layer or Edge material and writes a Causal observation artifact.",
     "The command preserves ids, hashes, durable refs, writer refs, source refs, proof labels, linkage status, and non-claims.",

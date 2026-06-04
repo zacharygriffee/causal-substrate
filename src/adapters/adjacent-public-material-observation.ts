@@ -18,10 +18,12 @@ export interface AdjacentPublicMaterialObservation {
   sourcePaths: {
     layerPublicMaterial?: string | undefined;
     edgeHandoffReadback?: string | undefined;
+    edgePublicProcessExport?: string | undefined;
   };
   observedSources: {
     layerMaterialObserved: boolean;
     edgeHandoffReadbackObserved: boolean;
+    edgePublicProcessExportObserved: boolean;
   };
   classification: AdjacentPublicMaterialClassification;
   sourceClassifications: {
@@ -110,20 +112,26 @@ interface SourceAssessment {
   layerDeviceBoundaryObserved?: boolean | undefined;
   edgeReadbackOnly?: boolean | undefined;
   edgeProofRungNotUpgraded?: boolean | undefined;
+  edgePublicProcessExportObserved?: boolean | undefined;
 }
 
 export function buildAdjacentPublicMaterialObservation(input: {
   layerPublicMaterial?: unknown;
   edgeHandoffReadback?: unknown;
+  edgePublicProcessExport?: unknown;
   emittedAt: string;
   sourcePaths?: AdjacentPublicMaterialObservation["sourcePaths"] | undefined;
   observationId?: string | undefined;
 }): AdjacentPublicMaterialObservation {
   const layer = assessLayerPublicMaterial(input.layerPublicMaterial);
-  const edge = assessEdgeHandoffReadback(input.edgeHandoffReadback);
+  const edgeHandoff = assessEdgeHandoffReadback(input.edgeHandoffReadback);
+  const edgeProcess = assessEdgePublicProcessExport(input.edgePublicProcessExport);
+  const edge = mergeAssessments(edgeHandoff, edgeProcess);
   const issues = [...layer.issues, ...edge.issues];
   const layerObserved = input.layerPublicMaterial !== undefined;
-  const edgeObserved = input.edgeHandoffReadback !== undefined;
+  const edgeHandoffObserved = input.edgeHandoffReadback !== undefined;
+  const edgeProcessObserved = input.edgePublicProcessExport !== undefined;
+  const edgeObserved = edgeHandoffObserved || edgeProcessObserved;
   const sourcePaths = sanitizeSourcePaths(input.sourcePaths ?? {});
 
   if (!layerObserved && !edgeObserved) issues.push("no-adjacent-material-observed");
@@ -153,7 +161,7 @@ export function buildAdjacentPublicMaterialObservation(input: {
       preservedRefs,
     })).slice(0, 16)}`;
   const observationHash = `sha256:${hash(stableJson({
-    observedSources: { layerObserved, edgeObserved },
+    observedSources: { layerObserved, edgeHandoffObserved, edgeProcessObserved },
     classification,
     preservedRefs,
     issues,
@@ -172,7 +180,8 @@ export function buildAdjacentPublicMaterialObservation(input: {
     sourcePaths,
     observedSources: {
       layerMaterialObserved: layerObserved,
-      edgeHandoffReadbackObserved: edgeObserved,
+      edgeHandoffReadbackObserved: edgeHandoffObserved,
+      edgePublicProcessExportObserved: edgeProcessObserved,
     },
     classification,
     sourceClassifications: {
@@ -594,6 +603,143 @@ function assessEdgeHandoffReadback(value: unknown): SourceAssessment {
   };
 }
 
+function assessEdgePublicProcessExport(value: unknown): SourceAssessment {
+  if (value === undefined) return emptyAssessment("unresolved");
+  const container = maybeRecord(value);
+  const processExport = maybeRecord(container?.processExport) ?? container;
+  if (!processExport) return withIssue(emptyAssessment("unresolved"), "edge-public-process-export-not-object");
+  const readback = maybeRecord(processExport.processReadback);
+  const card = maybeRecord(processExport.processCard);
+  const entries = Array.isArray(readback?.entries) ? readback.entries.filter(isRecord) : [];
+  const issues: string[] = [];
+  const artifactKind = stringValue(processExport.artifactKind);
+  const exportMode = stringValue(processExport.exportMode);
+  const operationProof = maybeRecord(processExport.operationProof);
+  const nonClaims = maybeRecord(processExport.nonClaimFlags);
+  const proofRungNotUpgraded = processExport.proofRungNotUpgraded === true;
+  const readbackOnly = processExport.proofBoundary === "edge_public_process_export_over_reopened_lifecycle_feed" &&
+    processExport.operationProofRung === "saved_readback_seam";
+  const targetConsumers = Array.isArray(processExport.targetConsumers) ? processExport.targetConsumers : [];
+  const intendedForCausal = targetConsumers.includes("causal-substrate");
+  const requestIds = collectStrings(processExport.requestIds);
+  const requestHashes = collectStrings(processExport.requestHashes);
+  const receiptIds = collectStrings(processExport.receiptIds);
+  const receiptHashes = collectStrings(processExport.receiptHashes);
+  const writerRefs = collectStrings(processExport.writerRefs);
+  const durableRefs = collectStrings([
+    processExport.sourceProcessReadbackRef,
+    processExport.sourceProcessCardRef,
+    processExport.autobaseKey,
+    processExport.namespace,
+    processExport.latestEndpointDescriptorRef,
+    processExport.durableFeedReadbackRefs,
+    ...entries.map((entry) => entry.packetId),
+    ...entries.map((entry) => entry.journalEventHash),
+    ...entries.map((entry) => entry.endpointDescriptorRef),
+  ]);
+  const linked = requestIds.length > 0 && requestHashes.length > 0 &&
+    receiptIds.length > 0 && receiptHashes.length > 0;
+  const defaultPublicAttemptCount = numberValue(processExport.defaultPublicAttemptCount) ?? 0;
+  const sawDefaultPublicAttempt = defaultPublicAttemptCount > 0 ||
+    entries.some((entry) => entry.defaultPublicHyperDhtAttempted === true);
+  const exportIsVisible =
+    artifactKind === "edge_compatible_swarm_seam_public_process_export" &&
+    exportMode === "edge_public_process_lifecycle_visibility_for_adjacent_material_consumption";
+
+  if (!exportIsVisible) issues.push("edge-public-process-export-kind-or-mode-mismatch");
+  if (!intendedForCausal) issues.push("edge-public-process-export-not-targeted-to-causal");
+  if (!readbackOnly) issues.push("edge-public-process-export-boundary-not-readback-only");
+  if (!proofRungNotUpgraded) issues.push("edge-public-process-proof-rung-upgrade-overclaim");
+  if (!sawDefaultPublicAttempt) issues.push("edge-public-process-default-public-attempt-missing");
+  if (durableRefs.length === 0) issues.push("edge-public-process-durable-refs-missing");
+  if (writerRefs.length === 0) issues.push("edge-public-process-writer-refs-missing");
+  if (!linked) issues.push("edge-public-process-request-receipt-linkage-unresolved");
+  if (hasAuthorityOverclaim(processExport) || hasAuthorityOverclaim(operationProof) || hasAuthorityOverclaim(nonClaims)) {
+    issues.push("edge-public-process-export-overclaim");
+  }
+
+  return {
+    classification: issues.some((issue) => issue.includes("overclaim") || issue.includes("mismatch"))
+      ? "damaged"
+      : issues.length > 0
+        ? "unresolved"
+        : "compatible",
+    requestIds,
+    requestHashes,
+    receiptIds,
+    receiptHashes,
+    evidenceIds: [],
+    evidenceHashes: [],
+    durableRefs,
+    writerRefs,
+    sourceRepos: collectStrings([
+      "mesh-ecology-edge",
+      card?.latestTargetRepo,
+      ...entries.map((entry) => entry.targetRepo),
+    ]),
+    proofRungs: collectStrings([
+      processExport.sourceProofRung,
+      processExport.operationProofRung,
+      card?.strongestProofRung,
+      ...entries.map((entry) => entry.operationProofRung),
+    ]),
+    linkageStatuses: collectStrings([
+      stringValue(processExport.latestProcessStatus),
+      stringValue(card?.latestProcessStatus),
+      linked ? "edge_public_process_request_receipt_linked" : "edge_public_process_request_receipt_unresolved",
+      defaultPublicAttemptCount > 0
+        ? `defaultPublicAttemptCount:${defaultPublicAttemptCount}`
+        : undefined,
+      typeof processExport.deviceBoundaryObservedCount === "number"
+        ? `deviceBoundaryObservedCount:${processExport.deviceBoundaryObservedCount}`
+        : undefined,
+      typeof processExport.probeFailureCount === "number"
+        ? `probeFailureCount:${processExport.probeFailureCount}`
+        : undefined,
+    ]),
+    issues,
+    edgeReadbackOnly: readbackOnly,
+    edgeProofRungNotUpgraded: proofRungNotUpgraded,
+    edgePublicProcessExportObserved: true,
+  };
+}
+
+function mergeAssessments(...assessments: SourceAssessment[]): SourceAssessment {
+  const observed = assessments.filter((assessment) =>
+    assessment.requestIds.length > 0 ||
+    assessment.requestHashes.length > 0 ||
+    assessment.receiptIds.length > 0 ||
+    assessment.receiptHashes.length > 0 ||
+    assessment.durableRefs.length > 0 ||
+    assessment.writerRefs.length > 0 ||
+    assessment.issues.length > 0
+  );
+  if (observed.length === 0) return emptyAssessment("unresolved");
+  const issues = observed.flatMap((assessment) => assessment.issues);
+  return {
+    classification: issues.some((issue) => issue.includes("overclaim") || issue.includes("mismatch"))
+      ? "damaged"
+      : issues.length > 0
+        ? "unresolved"
+        : "compatible",
+    requestIds: unique(observed.flatMap((assessment) => assessment.requestIds)),
+    requestHashes: unique(observed.flatMap((assessment) => assessment.requestHashes)),
+    receiptIds: unique(observed.flatMap((assessment) => assessment.receiptIds)),
+    receiptHashes: unique(observed.flatMap((assessment) => assessment.receiptHashes)),
+    evidenceIds: unique(observed.flatMap((assessment) => assessment.evidenceIds)),
+    evidenceHashes: unique(observed.flatMap((assessment) => assessment.evidenceHashes)),
+    durableRefs: unique(observed.flatMap((assessment) => assessment.durableRefs)),
+    writerRefs: unique(observed.flatMap((assessment) => assessment.writerRefs)),
+    sourceRepos: unique(observed.flatMap((assessment) => assessment.sourceRepos)),
+    proofRungs: unique(observed.flatMap((assessment) => assessment.proofRungs)),
+    linkageStatuses: unique(observed.flatMap((assessment) => assessment.linkageStatuses)),
+    issues,
+    edgeReadbackOnly: observed.every((assessment) => assessment.edgeReadbackOnly !== false),
+    edgeProofRungNotUpgraded: observed.every((assessment) => assessment.edgeProofRungNotUpgraded !== false),
+    edgePublicProcessExportObserved: observed.some((assessment) => assessment.edgePublicProcessExportObserved === true),
+  };
+}
+
 function hasLayerRefs(assessment: SourceAssessment): boolean {
   if (assessment.layerDeviceBoundaryObserved === true) {
     return assessment.durableRefs.length > 0 &&
@@ -621,6 +767,13 @@ function numberValue(value: unknown): number | undefined {
 }
 
 function hasEdgeRefs(assessment: SourceAssessment): boolean {
+  if (assessment.edgePublicProcessExportObserved === true) {
+    return assessment.durableRefs.length > 0 &&
+      assessment.writerRefs.length > 0 &&
+      assessment.sourceRepos.includes("mesh-ecology-edge") &&
+      assessment.proofRungs.length > 0 &&
+      assessment.linkageStatuses.length > 0;
+  }
   return assessment.requestIds.length > 0 &&
     assessment.requestHashes.length > 0 &&
     assessment.receiptIds.length > 0 &&
@@ -692,8 +845,9 @@ function arrayOf(value: string | undefined): string[] {
   return value ? [value] : [];
 }
 
-function collectStrings(values: unknown[]): string[] {
-  return unique(values.flatMap((value) => {
+function collectStrings(values: unknown): string[] {
+  const list = Array.isArray(values) ? values : [values];
+  return unique(list.flatMap((value) => {
     if (typeof value === "string" && value.trim() !== "") return [value];
     if (Array.isArray(value)) return value.filter((entry): entry is string => typeof entry === "string" && entry.trim() !== "");
     return [];
@@ -709,6 +863,9 @@ function sanitizeSourcePaths(
       : {}),
     ...(sourcePaths.edgeHandoffReadback
       ? { edgeHandoffReadback: sanitizeSourcePath(sourcePaths.edgeHandoffReadback) }
+      : {}),
+    ...(sourcePaths.edgePublicProcessExport
+      ? { edgePublicProcessExport: sanitizeSourcePath(sourcePaths.edgePublicProcessExport) }
       : {}),
   };
 }

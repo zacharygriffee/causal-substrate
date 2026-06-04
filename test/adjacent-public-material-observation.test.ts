@@ -256,6 +256,55 @@ test("observes Edge compatible handoff readback as lower-rung exported material"
   assert.ok(observation.preservedRefs.linkageStatuses.includes("linkedPairCount:1"));
 });
 
+test("observes unresolved Edge live public process export as adjacent material", () => {
+  const observation = buildAdjacentPublicMaterialObservation({
+    edgePublicProcessExport: buildEdgePublicProcessExport({ linked: false }),
+    emittedAt: "2026-06-04T11:10:00.000Z",
+  });
+
+  assertAdjacentPublicMaterialObservation(observation);
+  assert.equal(observation.classification, "unresolved");
+  assert.equal(observation.sourceClassifications.edge, "unresolved");
+  assert.equal(observation.observedSources.edgePublicProcessExportObserved, true);
+  assert.equal(observation.proof.operationProofRung, "saved_readback_seam");
+  assert.equal(observation.proof.edgeReadbackProofRungNotUpgraded, true);
+  assert.equal(observation.validation.edgeRefsPreserved, true);
+  assert.equal(observation.validation.edgeReadbackOnly, true);
+  assert.equal(observation.validation.edgeProofRungNotUpgraded, true);
+  assert.ok(observation.validation.issues.includes("edge-public-process-request-receipt-linkage-unresolved"));
+  assert.deepEqual(observation.preservedRefs.requestIds, []);
+  assert.deepEqual(observation.preservedRefs.receiptIds, []);
+  assert.ok(observation.preservedRefs.durableRefs.includes("edge-compatible-swarm-seam-public-process-readback:live-process"));
+  assert.ok(observation.preservedRefs.durableRefs.includes("edge-compatible-endpoint-descriptor:layer-current-live-public-seam:smoke"));
+  assert.ok(observation.preservedRefs.writerRefs.includes("autobase-writer:edge-live-process"));
+  assert.ok(observation.preservedRefs.sourceRepos.includes("mesh-ecology-edge"));
+  assert.ok(observation.preservedRefs.proofRungs.includes("saved_readback_seam"));
+  assert.ok(observation.preservedRefs.linkageStatuses.includes("edge_public_process_request_receipt_unresolved"));
+  assert.ok(observation.preservedRefs.linkageStatuses.includes("defaultPublicAttemptCount:1"));
+  assert.equal(observation.boundary.opensSwarm, false);
+  assert.equal(observation.boundary.callsEdge, false);
+  assert.equal(observation.boundary.admitsLayerEvidence, false);
+});
+
+test("observes linked Edge live public process export as compatible adjacent material", () => {
+  const observation = buildAdjacentPublicMaterialObservation({
+    edgePublicProcessExport: buildEdgePublicProcessExport({ linked: true }),
+    emittedAt: "2026-06-04T11:11:00.000Z",
+  });
+
+  assertAdjacentPublicMaterialObservation(observation);
+  assert.equal(observation.classification, "compatible");
+  assert.equal(observation.sourceClassifications.edge, "compatible");
+  assert.equal(observation.observedSources.edgePublicProcessExportObserved, true);
+  assert.equal(observation.validation.edgeRefsPreserved, true);
+  assert.equal(observation.proof.liveCausalSwarmProofClaimed, false);
+  assert.deepEqual(observation.preservedRefs.requestIds, ["edge-public-process-request:smoke"]);
+  assert.deepEqual(observation.preservedRefs.requestHashes, [`sha256:${"8".repeat(64)}`]);
+  assert.deepEqual(observation.preservedRefs.receiptIds, ["layer-public-process-receipt:smoke"]);
+  assert.deepEqual(observation.preservedRefs.receiptHashes, [`sha256:${"9".repeat(64)}`]);
+  assert.ok(observation.preservedRefs.linkageStatuses.includes("edge_public_process_request_receipt_linked"));
+});
+
 test("adjacent public material CLI consumes Layer and Edge shapes", async () => {
   const tempRoot = await mkdtemp(path.join(tmpdir(), "adjacent-public-material-"));
   const layerPath = path.join(tempRoot, "layer-public-material.json");
@@ -286,6 +335,37 @@ test("adjacent public material CLI consumes Layer and Edge shapes", async () => 
     assert.equal(observation.classification, "compatible");
     assert.equal(observation.proof.operationProofRung, "saved_readback_seam");
     assert.equal(observation.proof.liveCausalSwarmProofClaimed, false);
+  } finally {
+    await rm(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test("adjacent public material CLI consumes Edge live public process export", async () => {
+  const tempRoot = await mkdtemp(path.join(tmpdir(), "adjacent-public-process-export-"));
+  const edgePath = path.join(tempRoot, "edge-public-process-export.json");
+  const outputPath = path.join(tempRoot, "adjacent-observation.json");
+  try {
+    await writeFile(edgePath, `${JSON.stringify({ processExport: buildEdgePublicProcessExport({ linked: false }) }, null, 2)}\n`, "utf8");
+    const run = await execFileAsync("npx", [
+      "tsx",
+      "scripts/observe-adjacent-public-material.ts",
+      "--edge-public-process-export",
+      edgePath,
+      "--output",
+      outputPath,
+      "--emitted-at",
+      "2026-06-04T11:12:00.000Z",
+    ], {
+      cwd: path.resolve("."),
+    });
+
+    assert.equal(run.stdout, "");
+    assert.equal(run.stderr, "");
+    const observation = JSON.parse(await readFile(outputPath, "utf8")) as unknown;
+    assertAdjacentPublicMaterialObservation(observation);
+    assert.equal(observation.classification, "unresolved");
+    assert.equal(observation.observedSources.edgePublicProcessExportObserved, true);
+    assert.equal(observation.validation.edgeRefsPreserved, true);
   } finally {
     await rm(tempRoot, { recursive: true, force: true });
   }
@@ -624,6 +704,94 @@ function buildEdgeHandoffReadback(): any {
       doesNotAdmitLayerEvidence: true,
       doesNotClaimCausalTruth: true,
       doesNotGrantAuthority: true,
+    },
+  };
+}
+
+function buildEdgePublicProcessExport({ linked }: { linked: boolean }): any {
+  const requestIds = linked ? ["edge-public-process-request:smoke"] : [];
+  const requestHashes = linked ? [`sha256:${"8".repeat(64)}`] : [];
+  const receiptIds = linked ? ["layer-public-process-receipt:smoke"] : [];
+  const receiptHashes = linked ? [`sha256:${"9".repeat(64)}`] : [];
+  return {
+    artifactKind: "edge_compatible_swarm_seam_public_process_export",
+    schemaVersion: "edge-compatible-swarm-seam-public-process-export.v0",
+    targetConsumers: ["causal-substrate", "spine"],
+    exportMode: "edge_public_process_lifecycle_visibility_for_adjacent_material_consumption",
+    sourceProcessReadbackRef: "edge-compatible-swarm-seam-public-process-readback:live-process",
+    sourceProcessCardRef: "edge-compatible-swarm-seam-public-process-card:live-process",
+    namespace: "edge-live-public-process-smoke",
+    autobaseKey: "edge-live-process-autobase",
+    latestEndpointDescriptorRef: "edge-compatible-endpoint-descriptor:layer-current-live-public-seam:smoke",
+    latestTargetRepo: "mesh-ecology-layer",
+    latestProcessStatus: linked
+      ? "edge_public_process_probe_result_linked"
+      : "edge_public_process_needs_inspection",
+    sourceProofRung: linked ? "swarm_discovered_peer" : "saved_readback_seam",
+    operationProofRung: "saved_readback_seam",
+    proofBoundary: "edge_public_process_export_over_reopened_lifecycle_feed",
+    proofRungNotUpgraded: true,
+    defaultPublicAttemptCount: 1,
+    probeFailureCount: 0,
+    deviceBoundaryRequiredCount: 0,
+    deviceBoundaryObservedCount: 0,
+    damagedOrUnresolvedVisible: !linked,
+    requestIds,
+    requestHashes,
+    receiptIds,
+    receiptHashes,
+    writerRefs: ["autobase-writer:edge-live-process"],
+    durableFeedReadbackRefs: [
+      "edge-compatible-swarm-seam-public-process-readback:live-process",
+      "edge-live-process-autobase",
+      `sha256:${"a".repeat(64)}`,
+    ],
+    processReadback: {
+      artifactKind: "edge_compatible_swarm_seam_public_process_readback",
+      entries: [
+        {
+          eventType: "probe_result",
+          endpointDescriptorRef: "edge-compatible-endpoint-descriptor:layer-current-live-public-seam:smoke",
+          targetRepo: "mesh-ecology-layer",
+          defaultPublicHyperDhtAttempted: true,
+          operationProofRung: linked ? "swarm_discovered_peer" : "not_proven",
+          packetId: "compatible-public-seam-process-event:live-probe",
+          journalEventHash: `sha256:${"a".repeat(64)}`,
+          journalWriterRef: "autobase-writer:edge-live-process",
+          linkedPairCount: linked ? 1 : 0,
+        },
+      ],
+    },
+    processCard: {
+      latestTargetRepo: "mesh-ecology-layer",
+      latestProcessStatus: linked
+        ? "edge_public_process_probe_result_linked"
+        : "edge_public_process_needs_inspection",
+      strongestProofRung: linked ? "swarm_discovered_peer" : "saved_readback_seam",
+    },
+    operationProof: {
+      causalObservationRan: false,
+      publicDeviceBoundaryClaimedByEdge: false,
+      layerAdmissionOccurred: false,
+      causalTruthClaimed: false,
+      rbcEnforced: false,
+      authorityGrantOccurred: false,
+    },
+    readOnly: true,
+    reportOnly: true,
+    mutatesLayer: false,
+    mutatesRepo: false,
+    admitsEvidence: false,
+    acceptsResult: false,
+    executesWork: false,
+    grantsAuthority: false,
+    rbcEnforced: false,
+    nonClaimFlags: {
+      exportDoesNotRunCausal: true,
+      exportDoesNotAdmitLayerEvidence: true,
+      exportDoesNotClaimCausalTruth: true,
+      exportDoesNotGrantAuthority: true,
+      exportDoesNotClaimProductionDurability: true,
     },
   };
 }
