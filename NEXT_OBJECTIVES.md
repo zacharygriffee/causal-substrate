@@ -48,6 +48,23 @@ this Causal observation through Edge's read-only operator projection path. Do
 not add another Causal-only saved-artifact expansion unless Edge or Spine
 reports a concrete consumer gap.
 
+Latest adjacent-material pointer: Edge has now consumed Layer's held public
+seam handoff shape into an Edge-compatible public process attempt pack at
+`mesh-ecology-edge/proof-artifacts/edge-layer-held-public-process-attempt-2026-06-04/`.
+That pack preserves Layer held participant topic/autobase/writer/latest
+request/receipt refs and records an Edge same-device public HyperDHT process
+attempt while explicitly keeping `deviceBoundaryObserved: false`,
+`publicDeviceBoundaryClaimedByEdge: false`, and
+`retainedLayerParticipantLivenessClaimedByEdge: false`.
+
+If Causal resumes work before a stronger live Edge/Layer run lands, the narrow
+next Causal move is to consume that Edge adjacent handoff index or attempt
+packet as saved material only, preserve Layer-held refs plus Edge process refs,
+classify the same-device public attempt as below device-boundary proof, and
+emit no canonical truth, Layer admission, RBC, Mesh, authority, or production
+continuity claim. Do not call it live Causal public-swarm observation unless
+Causal itself reads durable replicated history over swarm.
+
 ## Prototype Alignment
 
 Use `/home/zevilz/work/prototypes/mesh-ecology-prototype` as a conceptual and
