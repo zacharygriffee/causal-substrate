@@ -16,19 +16,23 @@ continuity.
 ## Current Convergence Posture
 
 Causal now recognizes Layer's `layer_public_device_boundary_handoff_packet`
-shape as adjacent supplied material. The repo-family convergence run at
-`mesh-ecology-layer/proof-artifacts/layer-convergence-20260604T031354Z/`
-remains `unresolved_public_swarm_timeout`; Causal observes that handoff as
-`unresolved`, preserves the device refs, Autobase key, topic, classification,
-and source refs it actually carries, and does not mark it damaged merely
-because request/receipt/evidence refs are absent from the timeout packet.
+shape as adjacent supplied material. The previous repo-family convergence run
+at `mesh-ecology-layer/proof-artifacts/layer-convergence-20260604T031354Z/`
+remains useful timeout evidence, but the current Layer convergence material is
+`mesh-ecology-layer/proof-artifacts/layer-convergence-20260604T040145Z/`.
+That run classified `device_boundary_public_swarm_complete` and preserved one
+compatible request id/hash, one Layer receipt id/hash, the receipt writer ref,
+one Layer evidence ref, distinct device refs/fingerprints, observed public
+swarm connections, and non-claims.
 
-This is not live Causal public-swarm observation. The Causal proof rung remains
-`saved_readback_seam` / supplied adjacent material until Causal itself reads
-durable replicated public-swarm-derived seam history. Next pressure for Causal
-is to stay ready to observe fresh Edge/Layer convergence material and only add
-narrow adapter support when a real consumer packet exposes a concrete shape
-gap.
+This is still not live Causal public-swarm observation unless Causal itself
+reads durable replicated public-swarm-derived seam history. The immediate
+Causal task is to consume the new Layer handoff as selected adjacent public
+device-boundary material, preserve the request/receipt/evidence refs and proof
+labels, classify it as compatible public device-boundary input only at the
+source-proof level, and keep Causal's own operation rung honest as supplied or
+saved readback material. If Causal needs a live reader later, add it as a
+separate Causal-owned public swarm lane.
 
 ## Prototype Alignment
 
