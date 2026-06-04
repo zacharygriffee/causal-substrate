@@ -34,6 +34,20 @@ source-proof level, and keep Causal's own operation rung honest as supplied or
 saved readback material. If Causal needs a live reader later, add it as a
 separate Causal-owned public swarm lane.
 
+Current result: Causal consumed the completed Layer handoff at
+`mesh-ecology-layer/proof-artifacts/layer-convergence-20260604T040145Z/layer-public-device-boundary-handoff-packet.json`
+and preserved the bounded observation at
+`proof-artifacts/layer-convergence-20260604T040145Z/layer-device-boundary-observation.json`.
+The observation classified the source material as `compatible`, preserved the
+Layer request id/hash, receipt id/hash, receipt writer ref, evidence ref,
+Autobase key, topic, proof rung, linkage status, and non-claims, and kept
+Causal's own operation proof rung as `saved_readback_seam`.
+
+Next pressure now moves to Edge consuming either the original Layer handoff or
+this Causal observation through Edge's read-only operator projection path. Do
+not add another Causal-only saved-artifact expansion unless Edge or Spine
+reports a concrete consumer gap.
+
 ## Prototype Alignment
 
 Use `/home/zevilz/work/prototypes/mesh-ecology-prototype` as a conceptual and
@@ -833,9 +847,8 @@ compatible seam-history material over public swarm.
 ## Next Outward Moves
 
 The current refreshed saved-artifact readiness, consumer handoff, next public
-run, next Edge handoff contract, and next proof index list is complete. The
-next move is not another generic expansion. Consume the current Layer public
-device-boundary handoff:
+run, next Edge handoff contract, and next proof index list is complete. Causal
+has consumed the current Layer public device-boundary handoff:
 
 ```text
 mesh-ecology-layer/proof-artifacts/layer-convergence-20260604T040145Z/layer-public-device-boundary-handoff-packet.json
@@ -848,9 +861,9 @@ source proof as compatible public device-boundary material while labeling
 Causal's own operation as selected adjacent material or saved readback unless
 Causal itself reads durable replicated public-swarm history.
 
-After that, build outward moves around either handing the Causal observation to
-Edge/Spine, preparing a direct Causal public reader over Edge/Layer-derived
-history, or responding to a concrete consumer ambiguity:
+Build outward moves around handing the Causal observation to Edge/Spine,
+preparing a direct Causal public reader over Edge/Layer-derived history only if
+needed, or responding to a concrete consumer ambiguity:
 
 - prepare another public-swarm-only device objective from
   `proof-artifacts/public-hyperswarm-device-to-device-operator-refresh-next/public-seam-proof-index.json`

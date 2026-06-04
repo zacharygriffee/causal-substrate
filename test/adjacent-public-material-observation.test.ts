@@ -178,6 +178,49 @@ test("classifies unresolved Layer device-boundary handoff without treating timeo
   assert.equal(observation.boundary.admitsLayerEvidence, false);
 });
 
+test("observes completed Layer device-boundary handoff as compatible adjacent material", () => {
+  const observation = buildAdjacentPublicMaterialObservation({
+    layerPublicMaterial: buildLayerDeviceBoundaryCompleteHandoff(),
+    emittedAt: "2026-06-04T05:20:00.000Z",
+  });
+
+  assertAdjacentPublicMaterialObservation(observation);
+  assert.equal(observation.classification, "compatible");
+  assert.equal(observation.sourceClassifications.layer, "compatible");
+  assert.deepEqual(observation.preservedRefs.requestIds, [
+    "compatible-layer-report-only-seam-request:two-device-public-client:v0",
+  ]);
+  assert.deepEqual(observation.preservedRefs.requestHashes, [
+    "sha256:329f6154dcf79612c1287cfe1a160f3c19bdf7b973cc455c02be3690124d3e7a",
+  ]);
+  assert.deepEqual(observation.preservedRefs.receiptIds, [
+    "layer-report-only-edge-seam-receipt:compatible-layer-report-only-seam-request:two-device-public-client:v0",
+  ]);
+  assert.deepEqual(observation.preservedRefs.receiptHashes, [
+    "sha256:89065e33bdcae4a1c29774c8ed08e8b655433004221e4456d6cd8cdf5740196f",
+  ]);
+  assert.ok(observation.preservedRefs.evidenceIds.includes(
+    "layer-owned-edge-seam-evidence:compatible-layer-report-only-seam-request:two-device-public-client:v0:0",
+  ));
+  assert.ok(observation.preservedRefs.writerRefs.includes(
+    "autobase-writer:70d13f7ee7773d745300ca7178a9bbf643276d3311a31bf6d63d5d8b4a0d6693",
+  ));
+  assert.ok(observation.preservedRefs.durableRefs.includes(
+    "bfe596e9381a81a9b37b82a4c9abe864d1518500688d687a08aa027d333fc622",
+  ));
+  assert.ok(observation.preservedRefs.proofRungs.includes("default_public_hyperdht_hyperswarm_feed_backed"));
+  assert.ok(observation.preservedRefs.linkageStatuses.includes("device_boundary_public_swarm_complete"));
+  assert.equal(observation.validation.layerRefsPreserved, true);
+  assert.equal(observation.validation.layerRequestReceiptEvidenceLinked, true);
+  assert.equal(observation.validation.layerPublicBoundaryPreserved, true);
+  assert.equal(observation.validation.layerCausalReadinessAccepted, true);
+  assert.equal(observation.proof.operationProofRung, "saved_readback_seam");
+  assert.equal(observation.proof.layerPublicProofObserved, true);
+  assert.equal(observation.proof.liveCausalSwarmProofClaimed, false);
+  assert.equal(observation.boundary.opensSwarm, false);
+  assert.equal(observation.boundary.admitsLayerEvidence, false);
+});
+
 test("observes Edge compatible handoff readback as lower-rung exported material", () => {
   const observation = buildAdjacentPublicMaterialObservation({
     edgeHandoffReadback: {
@@ -445,6 +488,88 @@ function buildLayerDeviceBoundaryUnresolvedHandoff(): any {
       noAuthorityGrant: true,
       noRbcEnforcement: true,
     },
+    readOnly: true,
+    reportOnly: true,
+    mutatesLayer: false,
+    admitsEvidence: false,
+    grantsAuthority: false,
+    rbcEnforced: false,
+  };
+}
+
+function buildLayerDeviceBoundaryCompleteHandoff(): any {
+  return {
+    artifactKind: "layer_public_device_boundary_handoff_packet",
+    schemaVersion: "layer-public-device-boundary-handoff-packet.v0",
+    packetStatus: "device_boundary_handoff_ready_for_edge_or_causal",
+    sourceClassificationRef: "proof-artifacts/layer-convergence-20260604T040145Z/layer-public-device-boundary-classification.json",
+    classification: "device_boundary_public_swarm_complete",
+    sourceMaterialKind: "returned_device_boundary_result",
+    deviceBoundaryCrossed: true,
+    sourceDeviceRef: "device:edge-public-client",
+    layerDeviceRef: "device:layer-public-participant",
+    distinctDeviceRefsObserved: true,
+    distinctDeviceFingerprintsObserved: true,
+    syntheticClassifierFixture: false,
+    deviceBoundaryProofClaimed: true,
+    issues: [],
+    proofSummary: {
+      artifactKind: "layer_public_device_boundary_compatible_client_result",
+      namespace: "layer-device-boundary-convergence-layer-convergence-20260604T040145Z",
+      strongestProofRung: "default_public_hyperdht_hyperswarm_feed_backed",
+      requestCount: 1,
+      receiptCount: 1,
+      evidenceCount: 1,
+      linkedPairCount: 1,
+      unlinkedCount: 0,
+      latestRequestHash: "sha256:329f6154dcf79612c1287cfe1a160f3c19bdf7b973cc455c02be3690124d3e7a",
+      latestReceiptHash: "sha256:89065e33bdcae4a1c29774c8ed08e8b655433004221e4456d6cd8cdf5740196f",
+      latestEvidenceRef: "layer-owned-edge-seam-evidence:compatible-layer-report-only-seam-request:two-device-public-client:v0:0",
+    },
+    preservedRefs: {
+      requestRefs: [
+        {
+          eventId: "compatible-layer-report-only-seam-request:two-device-public-client:v0",
+          eventHash: "sha256:329f6154dcf79612c1287cfe1a160f3c19bdf7b973cc455c02be3690124d3e7a",
+        },
+      ],
+      receiptRefs: [
+        {
+          eventId: "layer-report-only-edge-seam-receipt:compatible-layer-report-only-seam-request:two-device-public-client:v0",
+          eventHash: "sha256:89065e33bdcae4a1c29774c8ed08e8b655433004221e4456d6cd8cdf5740196f",
+          writerRef: "autobase-writer:70d13f7ee7773d745300ca7178a9bbf643276d3311a31bf6d63d5d8b4a0d6693",
+          sourceRequestId: "compatible-layer-report-only-seam-request:two-device-public-client:v0",
+          sourceRequestHash: "sha256:329f6154dcf79612c1287cfe1a160f3c19bdf7b973cc455c02be3690124d3e7a",
+          validationIssues: [],
+        },
+      ],
+      layerWriterRef: null,
+      autobaseKey: "bfe596e9381a81a9b37b82a4c9abe864d1518500688d687a08aa027d333fc622",
+      topicHex: "a4d774d58afe44c5736a4430aecf92fa73633af1c582b7c98f892c1306777f57",
+      participantResultRef: "proof-artifacts/layer-convergence-20260604T040145Z/layer-participant-result.json",
+    },
+    expectedNonClaims: {
+      readOnly: true,
+      reportOnly: true,
+      mutatesLayer: false,
+      admitsEvidence: false,
+      grantsAuthority: false,
+      rbcEnforced: false,
+      meshPublished: false,
+      productionDurabilityClaimed: false,
+    },
+    operationProof: {
+      builtFromClassificationOnly: true,
+      sourceRefsPreserved: true,
+      realDeviceBoundaryProofConsumed: true,
+      syntheticFixtureOnly: false,
+      noLayerRuntimeImportRequired: true,
+      noLayerMutation: true,
+      noAuthorityGrant: true,
+      noRbcEnforcement: true,
+    },
+    nextAdjacentRepoAction: "edge_or_causal_consume_layer_device_boundary_handoff_packet",
+    nextPosture: "handoff_layer_device_boundary_material_to_edge_or_causal",
     readOnly: true,
     reportOnly: true,
     mutatesLayer: false,

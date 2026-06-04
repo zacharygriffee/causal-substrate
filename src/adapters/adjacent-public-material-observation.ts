@@ -393,6 +393,9 @@ function assessLayerPublicDeviceBoundaryHandoffPacket(material: Record<string, u
   const requestRefs = Array.isArray(preservedRefs?.requestRefs) ? preservedRefs.requestRefs.filter(isRecord) : [];
   const receiptRefs = Array.isArray(preservedRefs?.receiptRefs) ? preservedRefs.receiptRefs.filter(isRecord) : [];
   const deviceBoundaryProofClaimed = material.deviceBoundaryProofClaimed === true;
+  const readyForAdjacentConsumers =
+    material.packetStatus === "device_boundary_handoff_ready_for_edge_or_causal" ||
+      material.nextAdjacentRepoAction === "edge_or_causal_consume_layer_device_boundary_handoff_packet";
   const unresolvedTimeout = classification === "unresolved_public_swarm_timeout" ||
     (Array.isArray(material.issues) && material.issues.includes("public_swarm_timeout_or_connection_not_observed"));
 
@@ -437,7 +440,10 @@ function assessLayerPublicDeviceBoundaryHandoffPacket(material: Record<string, u
       preservedRefs?.topicHex,
       material.sourceClassificationRef,
     ]),
-    writerRefs: collectStrings([preservedRefs?.layerWriterRef]),
+    writerRefs: collectStrings([
+      preservedRefs?.layerWriterRef,
+      ...receiptRefs.map((entry) => entry.writerRef),
+    ]),
     sourceRepos: ["mesh-ecology-layer"],
     proofRungs: collectStrings([proofSummary?.strongestProofRung]),
     linkageStatuses: collectStrings([
@@ -448,7 +454,7 @@ function assessLayerPublicDeviceBoundaryHandoffPacket(material: Record<string, u
     ]),
     issues,
     layerPublicBoundaryPreserved: deviceBoundaryProofClaimed === true && material.deviceBoundaryCrossed === true,
-    layerCausalReadinessAccepted: false,
+    layerCausalReadinessAccepted: linked && readyForAdjacentConsumers,
     layerRequestReceiptEvidenceLinked: linked,
     layerDeviceBoundaryObserved: true,
   };

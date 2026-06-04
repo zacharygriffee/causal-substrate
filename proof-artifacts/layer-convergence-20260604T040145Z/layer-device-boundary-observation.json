@@ -1,0 +1,109 @@
+{
+  "artifactKind": "causal-adjacent-public-material-observation",
+  "schema": "causal-substrate/adjacent-public-material-observation/v1",
+  "schemaVersion": 1,
+  "observationId": "causal-adjacent-public-material-observation:4cf6049b74f32e77",
+  "observationHash": "sha256:bc4af6edf3135fb274944a701fd914e52ca9d2663d64bfc104307632f47feb0f",
+  "emittedAt": "2026-06-04T05:20:00.000Z",
+  "sourcePaths": {
+    "layerPublicMaterial": "mesh-ecology-layer/proof-artifacts/layer-convergence-20260604T040145Z/layer-public-device-boundary-handoff-packet.json"
+  },
+  "observedSources": {
+    "layerMaterialObserved": true,
+    "edgeHandoffReadbackObserved": false
+  },
+  "classification": "compatible",
+  "sourceClassifications": {
+    "layer": "compatible"
+  },
+  "preservedRefs": {
+    "requestIds": [
+      "compatible-layer-report-only-seam-request:two-device-public-client:v0"
+    ],
+    "requestHashes": [
+      "sha256:329f6154dcf79612c1287cfe1a160f3c19bdf7b973cc455c02be3690124d3e7a"
+    ],
+    "receiptIds": [
+      "layer-report-only-edge-seam-receipt:compatible-layer-report-only-seam-request:two-device-public-client:v0"
+    ],
+    "receiptHashes": [
+      "sha256:89065e33bdcae4a1c29774c8ed08e8b655433004221e4456d6cd8cdf5740196f"
+    ],
+    "evidenceIds": [
+      "layer-owned-edge-seam-evidence:compatible-layer-report-only-seam-request:two-device-public-client:v0:0"
+    ],
+    "evidenceHashes": [],
+    "durableRefs": [
+      "device:edge-public-client",
+      "device:layer-public-participant",
+      "bfe596e9381a81a9b37b82a4c9abe864d1518500688d687a08aa027d333fc622",
+      "a4d774d58afe44c5736a4430aecf92fa73633af1c582b7c98f892c1306777f57",
+      "proof-artifacts/layer-convergence-20260604T040145Z/layer-public-device-boundary-classification.json"
+    ],
+    "writerRefs": [
+      "autobase-writer:70d13f7ee7773d745300ca7178a9bbf643276d3311a31bf6d63d5d8b4a0d6693"
+    ],
+    "sourceRepos": [
+      "mesh-ecology-layer"
+    ],
+    "proofRungs": [
+      "default_public_hyperdht_hyperswarm_feed_backed"
+    ],
+    "linkageStatuses": [
+      "device_boundary_public_swarm_complete",
+      "device_boundary_handoff_ready_for_edge_or_causal",
+      "linkedPairCount:1",
+      "unlinkedCount:0"
+    ]
+  },
+  "proof": {
+    "operationProofRung": "saved_readback_seam",
+    "strongestSourceProofRungObserved": "default_public_hyperdht_hyperswarm_feed_backed",
+    "layerPublicProofObserved": true,
+    "edgeReadbackProofRungNotUpgraded": false,
+    "liveCausalSwarmProofClaimed": false,
+    "proofRungUpgradeClaimed": false
+  },
+  "validation": {
+    "status": "adjacent-public-material-observation-ready",
+    "layerRefsPreserved": true,
+    "layerRequestReceiptEvidenceLinked": true,
+    "layerPublicBoundaryPreserved": true,
+    "layerCausalReadinessAccepted": true,
+    "edgeRefsPreserved": true,
+    "edgeReadbackOnly": true,
+    "edgeProofRungNotUpgraded": true,
+    "noCanonicalHistoryClaim": true,
+    "noLayerAdmissionClaim": true,
+    "noEvidenceAdmissionClaim": true,
+    "noRbcInterpretationClaim": true,
+    "noQuorumClaim": true,
+    "noAuthorityClaim": true,
+    "noMeshPublicationClaim": true,
+    "noProductionContinuityWriteClaim": true,
+    "issues": []
+  },
+  "boundary": {
+    "readsSavedAdjacentMaterialOnly": true,
+    "opensSwarm": false,
+    "opensCorestore": false,
+    "callsEdge": false,
+    "callsLayer": false,
+    "writesEdgeState": false,
+    "writesLayerState": false,
+    "acceptsCanonicalHistory": false,
+    "admitsLayerEvidence": false,
+    "interpretsRbc": false,
+    "claimsQuorum": false,
+    "grantsAuthority": false,
+    "publishesToMesh": false,
+    "writesProductionContinuity": false
+  },
+  "nextPressure": "handoff-adjacent-observation-to-spine-or-consumer-without-proof-upgrade",
+  "warnings": [
+    "adjacent-public-material-observation-reads-saved-exported-material-only",
+    "adjacent-public-material-observation-does-not-claim-live-causal-swarm-proof",
+    "adjacent-public-material-observation-does-not-admit-layer-evidence-or-interpret-rbc"
+  ],
+  "rejections": []
+}
