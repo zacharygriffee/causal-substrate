@@ -94,13 +94,13 @@
       "layer-owned-edge-seam-evidence:compatible-layer-report-only-seam-request:layer-owned-public-smoke:3:v0:2"
     ],
     "durableRefs": [
-      "/tmp/layer-public-hyperdht-seam-proof-Xvl1Cg/layer",
+      "layer-public-hyperdht-seam-proof-runtime:<sanitized-layer-device>",
       "44a3d3c9e0f7514ec419532a4d06c58140158e2a0d28918fe00889905a9b7404",
       "edge-layer-report-only-seam-view",
       "layer-owned-edge-seam-evidence",
       "layer-public-hyperdht-seam-proof-382832",
-      "/home/zevilz/work/mesh-ecology/mesh-ecology-edge/.edge-state/edge-compatible-handoff-export-bundle-2026-06-03/edge-request-storage",
-      "/home/zevilz/work/mesh-ecology/mesh-ecology-edge/.edge-state/edge-compatible-handoff-export-bundle-2026-06-03/compatible-endpoint-receipt-storage",
+      "edge-compatible-handoff-export-bundle:edge-request-storage",
+      "edge-compatible-handoff-export-bundle:compatible-endpoint-receipt-storage",
       "edge-compatible-handoff-export-bundle",
       "1111111111111111111111111111111111111111111111111111111111111111"
     ],

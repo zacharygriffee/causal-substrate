@@ -546,6 +546,14 @@ observer CLI and avoid adding more generic matrices, descriptor preflights, or
 saved handoff summaries unless they remove a concrete blocker for the live
 observe run.
 
+Completed handoff hygiene: the current Causal posture consumer handoff now
+sanitizes downstream durable refs so exported material does not leak local temp
+paths, workspace paths, SSH/device-local details, or private network addresses.
+This remains `consumer_handoff_seam`; it preserves current posture for
+Spine/Edge/Layer/generic consumers without upgrading proof. Next still remains
+the public observer `observe` run against a fresh Causal-readable Edge/Layer
+source manifest when one exists.
+
 Completed preflight: Causal ran the enabled public observer against the current
 retained Edge descriptor and Layer public endpoint under
 `proof-artifacts/public-observer-descriptor-preflight-2026-06-03/`. The result
