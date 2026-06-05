@@ -67,23 +67,31 @@ Causal itself reads durable replicated history over swarm.
 
 Layer now has a supervised current-live public participant lifecycle, and Edge
 can preserve its current-live participant refs separately from retained Layer
-held proof refs. The next family proof target is:
+held proof refs. The repo-family posture has since corrected the default target:
+Edge should not default to direct remote Layer access. Each device should run
+local component instances with their own storage; when Edge needs Layer
+material, a local Layer replica should replicate selected remote Layer history
+through public swarm, then Edge should talk to that local Layer replica over a
+swarm seam. Direct remote Layer access is an explicit configured exception.
+
+The next family proof target is:
 
 ```text
-Layer current-live public participant up
--> Edge probes current-live-descriptor.json while Layer is alive
+remote Layer history
+-> local Layer replica with Layer-owned storage reads/replicates it through public swarm
+-> Edge probes local Layer replica over an Edge <-> Layer swarm seam
 -> Edge emits linked public result evidence or unresolved flake packet
--> Layer down/readback preserves final durable history
+-> Layer local replica down/readback preserves durable local replica history
 -> Causal observes the resulting Edge/Layer material
 ```
 
-Causal should wait for that concrete Edge/Layer output unless asked to inspect
-the existing saved attempt pack. When it lands, consume the Edge attempt packet,
-Layer descriptor/readback refs, request/receipt/evidence ids and hashes, writer
-refs, transport labels, and unresolved/compatible classification as bounded
-adjacent material. Preserve proof labels exactly. Do not upgrade Causal's own
-operation rung unless Causal itself reads durable replicated history over public
-swarm.
+Causal should wait for that concrete Edge/local-Layer-replica output unless
+asked to inspect the existing saved attempt pack. When it lands, consume the
+Edge attempt packet, Layer replica descriptor/readback refs,
+request/receipt/evidence ids and hashes, writer refs, transport labels, and
+unresolved/compatible classification as bounded adjacent material. Preserve
+proof labels exactly. Do not upgrade Causal's own operation rung unless Causal
+itself reads durable replicated history over public swarm.
 
 Mechanics-first rule: do not expand cockpit/TUI-facing observation surfaces
 before the live Edge/Layer public-swarm mechanics chain is repeatable. Causal's
