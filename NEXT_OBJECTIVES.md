@@ -976,6 +976,31 @@ needed, or responding to a concrete consumer ambiguity:
 - defer ontology, referent promotion, canonical continuity, RBC, Mesh,
   authority, Layer admission, and production continuity.
 
+## Platform/Conduit Forward Posture
+
+Causal may eventually observe Platform lifecycle receipts, component posture
+descriptors, storage refs, seam descriptor refs, and cleanup/readback evidence
+as selected causal input. Treat that material as device-local Platform posture
+unless Causal itself reads durable replicated Platform evidence over public
+swarm.
+
+Platform is not a normal replicated causal branch. It represents one device's
+runtime/capability surface: staging artifacts, starting/stopping component
+instances, assigning local storage roots, reporting health, and recording
+device-local consequences. Causal can classify Platform receipts as bounded
+happenings and preserve `deviceRef`, `platformRef`, `componentInstanceRef`,
+storage refs, lifecycle refs, seam descriptor refs, cleanup handles, and proof
+labels. Causal must not turn Platform contact into canonical truth, Layer
+admission, repo-family seam proof, RBC, Mesh, authority, or production
+durability.
+
+Do not wait on Conduit for current Causal observation work. Conduit becomes
+relevant when the observed seam history comes from carrier-neutral multiplexed
+streams, browser/non-node contexts, WebRTC/WebSocket/IPC bridges, constrained
+participants, or cross-carrier session routing. Until that exists, direct
+public HyperDHT/Protomux Platform contact evidence should be labeled as
+Platform contact proof only.
+
 ## Handoff Expectations
 
 When handing material back to Edge, Layer, or Spine, include:
