@@ -85,6 +85,12 @@ remote Layer history
 -> Causal observes the resulting Edge/Layer material
 ```
 
+Current Layer local-replica status: `mesh-ecology-layer` commit `2737bc0` adds
+a lower-rung `layer_public_seam_local_replica_result` with distinct source and
+replica storage plus reopened readback. It is labeled `separate_storage` and
+explicitly does not claim public swarm/device-boundary proof because it uses
+local direct replication for deterministic testing.
+
 Causal should wait for that concrete Edge/local-Layer-replica output unless
 asked to inspect the existing saved attempt pack. When it lands, consume the
 Edge attempt packet, Layer replica descriptor/readback refs,
@@ -92,6 +98,11 @@ request/receipt/evidence ids and hashes, writer refs, transport labels, and
 unresolved/compatible classification as bounded adjacent material. Preserve
 proof labels exactly. Do not upgrade Causal's own operation rung unless Causal
 itself reads durable replicated history over public swarm.
+
+Do not start a new Causal-only expansion from Layer's lower-rung local replica
+smoke. Resume when Layer produces public-swarm local replica output, Edge emits
+the local-replica seam attempt/export, or the repo family explicitly asks
+Causal to inspect the lower-rung artifact as saved material.
 
 Mechanics-first rule: do not expand cockpit/TUI-facing observation surfaces
 before the live Edge/Layer public-swarm mechanics chain is repeatable. Causal's
