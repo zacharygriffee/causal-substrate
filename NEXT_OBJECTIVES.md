@@ -85,11 +85,14 @@ remote Layer history
 -> Causal observes the resulting Edge/Layer material
 ```
 
-Current Layer local-replica status: `mesh-ecology-layer` commit `2737bc0` adds
-a lower-rung `layer_public_seam_local_replica_result` with distinct source and
-replica storage plus reopened readback. It is labeled `separate_storage` and
-explicitly does not claim public swarm/device-boundary proof because it uses
-local direct replication for deterministic testing.
+Current Layer local-replica status: `mesh-ecology-layer` commit `e6357d2`
+adds a default public-HyperDHT local replica result with distinct source and
+replica storage, public swarm transport observed, and reopened readback. Edge
+commit `fef8f78` consumed that Layer result, preserved
+`sourceLayerLocalReplicaRefs`, emitted an unresolved remote-only process export,
+and downed cleanly. Causal's existing adjacent public material observer
+classified that Edge export as `unresolved` saved material without claiming
+live Causal swarm proof.
 
 Causal should wait for that concrete Edge/local-Layer-replica output unless
 asked to inspect the existing saved attempt pack. When it lands, consume the
@@ -99,10 +102,11 @@ unresolved/compatible classification as bounded adjacent material. Preserve
 proof labels exactly. Do not upgrade Causal's own operation rung unless Causal
 itself reads durable replicated history over public swarm.
 
-Do not start a new Causal-only expansion from Layer's lower-rung local replica
-smoke. Resume when Layer produces public-swarm local replica output, Edge emits
-the local-replica seam attempt/export, or the repo family explicitly asks
-Causal to inspect the lower-rung artifact as saved material.
+Do not start a new Causal-only expansion from the completed local replica
+history proof. Resume when Layer exposes a live local replica participant and
+Edge emits linked request/receipt output or a fresh unresolved flake packet.
+If asked to inspect intermediate material, consume it as saved adjacent material
+only and preserve proof labels exactly.
 
 Mechanics-first rule: do not expand cockpit/TUI-facing observation surfaces
 before the live Edge/Layer public-swarm mechanics chain is repeatable. Causal's
