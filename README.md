@@ -35,6 +35,7 @@ If you are approaching the repo as a human trying to place it in the ecosystem, 
 - [`docs/inspectability-contract.md`](./docs/inspectability-contract.md): current bounded explanation contract and the remaining inspectability gaps
 - [`docs/first-finished-version.md`](./docs/first-finished-version.md): what the first finished version establishes, what it leaves open, and what is deferred
 - [`docs/transport-finish-line.md`](./docs/transport-finish-line.md): what transport proves for the first finished version and what remains supplementary
+- [`docs/standalone-seam-posture.md`](./docs/standalone-seam-posture.md): long-term two-seam posture: standalone generic API adoption plus canonical Mesh Ecology public-swarm proof
 - [`docs/comparison-boundary.md`](./docs/comparison-boundary.md): what comparison vocabulary and artifacts belong here versus in adjacent strategy layers
 - [`docs/doctrine-notes/15-peer-observer-operator-boundary.md`](./docs/doctrine-notes/15-peer-observer-operator-boundary.md): transport/runtime versus continuity versus coordination boundary
 - [`docs/doctrine-notes/16-preservation-vs-branch-promotion.md`](./docs/doctrine-notes/16-preservation-vs-branch-promotion.md): preserve broadly, branch narrowly
@@ -86,6 +87,12 @@ Current implementation bias:
 - Hyperbee should remain secondary unless indexing needs force it
 
 The current consumer posture also includes a mesh-agnostic adapter seam: persisted continuity records can be reconstructed into explicit continuity, inspectability, transition, and derived discovery surfaces without importing swarm, peer, or authority ownership into the core substrate.
+
+The long-term seam posture is two-sided: `causal-substrate` should be usable by
+non-Mesh consumers through a generic API seam, while Mesh Ecology family proof
+remains canonical only through durable replicated public-swarm seam history
+that Causal itself reads and reopens. See
+[`docs/standalone-seam-posture.md`](./docs/standalone-seam-posture.md).
 
 ## Quick start
 

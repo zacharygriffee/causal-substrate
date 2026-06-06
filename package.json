@@ -18,6 +18,7 @@
     "build": "tsc -p tsconfig.build.json",
     "check": "tsc -p tsconfig.json --noEmit && npm run labs:validate",
     "example": "tsx examples/minimal-continuity.ts",
+    "example:generic-api-seam": "tsx examples/generic-api-seam.ts",
     "labs:validate": "tsx scripts/validate-labs.ts",
     "prepare": "npm run build",
     "prototype:workstation": "tsx prototypes/continuity-workstation.ts",

@@ -55,6 +55,21 @@ The current `v1` record families are:
 - `referent-state-estimate`
 - `exchange-artifact`
 
+## Current seam posture
+
+The current long-term seam posture is two-sided:
+
+- generic API seam: a library-neutral adoption surface for standalone
+  consumers, local tools, examples, and tests;
+- Mesh Ecology canonical seam: durable replicated public-swarm seam history
+  read by Causal itself, followed by durable observation emission and reopened
+  readback.
+
+The API seam can carry real causal observation material, but it does not
+silently upgrade into Mesh Ecology canonical proof. Supplied JSON, direct API
+calls, saved readbacks, manifests, fixtures, and handoff documents remain lower
+proof rungs unless Causal performs the swarm-backed durable read path.
+
 ## Current stable implementation posture
 
 The current stable implementation posture is:
@@ -107,6 +122,7 @@ After this document, the most useful follow-ups are:
 
 - [Doctrine](./doctrine.md)
 - [Corestore Record Schema v1](./corestore-record-schema-v1.md)
+- [Standalone Seam Posture](./standalone-seam-posture.md)
 - [Doctrine Notes](./doctrine-notes/README.md)
 - [Adjacent Boundaries](./adjacent-boundaries.md)
 - [Consumer Adoption Guide](./consumer-adoption.md)

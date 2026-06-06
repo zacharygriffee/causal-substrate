@@ -1,16 +1,22 @@
 import assert from "node:assert/strict";
+import { execFile } from "node:child_process";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { promisify } from "node:util";
 
 import {
   assertGenericCausalEndpointDescriptor,
+  assertGenericCausalSeamApiConsumerHandoff,
   assertGenericCausalSeamObservation,
+  buildGenericCausalSeamApiConsumerHandoff,
   buildGenericCausalEndpointDescriptor,
   buildGenericCausalSeamObservation,
   type GenericCausalSeamHistoryEnvelope,
 } from "../src/index.js";
+
+const execFileAsync = promisify(execFile);
 
 function compatibleGenericEnvelope(): GenericCausalSeamHistoryEnvelope {
   return {
@@ -202,4 +208,101 @@ test("generic Causal seam observation durable write and reopened readback preser
   } finally {
     await rm(dir, { recursive: true, force: true });
   }
+});
+
+test("generic API consumer handoff preserves neutral observation without upgrading proof", () => {
+  const observation = buildGenericCausalSeamObservation({
+    seamHistory: compatibleGenericEnvelope(),
+    proofCommand: "tsx --test test/generic-causal-seam-surface.test.ts",
+    generatedAt: "2026-06-03T12:03:00.000Z",
+  });
+  const handoff = buildGenericCausalSeamApiConsumerHandoff({
+    observation,
+    emittedAt: "2026-06-03T12:04:00.000Z",
+    sourcePath: "examples/generic-api-seam.ts",
+  });
+
+  assertGenericCausalSeamApiConsumerHandoff(handoff);
+  assert.equal(handoff.observationSummary.observationId, observation.observationId);
+  assert.equal(handoff.observationSummary.observationHash, observation.observationHash);
+  assert.equal(handoff.observationSummary.observedHistoryId, observation.observedHistoryId);
+  assert.equal(handoff.observationSummary.observedHistoryHash, observation.observedHistoryHash);
+  assert.equal(handoff.observationSummary.finalClassification, "compatible");
+  assert.equal(handoff.observationSummary.sourceProofRung, "local_artifact_seam");
+  assert.equal(handoff.observationSummary.operationProofRung, "local_artifact_seam");
+  assert.equal(handoff.observationSummary.strongestProofRung, "local_artifact_seam");
+  assert.equal(handoff.proof.consumerHandoffOperationProofRung, "consumer_handoff_seam");
+  assert.equal(handoff.proof.canonicalSwarmProofClaimed, false);
+  assert.equal(handoff.proof.proofRungUpgradeClaimed, false);
+  assert.deepEqual(handoff.preservedRefs.requestIds, observation.sourceRefsPreserved.requestIds);
+  assert.deepEqual(handoff.preservedRefs.requestHashes, observation.sourceRefsPreserved.requestHashes);
+  assert.deepEqual(handoff.preservedRefs.receiptIds, observation.sourceRefsPreserved.receiptIds);
+  assert.deepEqual(handoff.preservedRefs.receiptHashes, observation.sourceRefsPreserved.receiptHashes);
+  assert.deepEqual(handoff.preservedRefs.sourceRepos, observation.sourceRefsPreserved.sourceRepos);
+  assert.deepEqual(handoff.preservedRefs.durableRefs, observation.sourceRefsPreserved.durableRefs);
+  assert.deepEqual(handoff.preservedRefs.writerRefs, observation.sourceRefsPreserved.writerRefs);
+  assert.deepEqual(handoff.preservedRefs.evidenceIds, observation.sourceRefsPreserved.evidenceIds);
+  assert.equal(handoff.nonClaims.canonicalHistoryClaimed, false);
+  assert.equal(handoff.nonClaims.rbcInterpreted, false);
+  assert.equal(handoff.nonClaims.meshPublished, false);
+  assert.equal(handoff.boundary.directApiHandoffOnly, true);
+  assert.equal(handoff.boundary.opensHyperswarm, false);
+  assert.equal(handoff.boundary.opensCorestore, false);
+  assert.equal(handoff.boundary.writesConsumerState, false);
+  assert.equal(handoff.boundary.satisfiesQuorum, false);
+  assert.equal(handoff.boundary.proofRungUpgradeClaimed, false);
+  assert.equal(handoff.consumerFit.lowerRungApiMaterial, true);
+  assert.equal(handoff.consumerFit.meshEcologyCanonicalProofRequiresSwarmRead, true);
+  assert.equal(handoff.validation.sourceRefsPreserved, true);
+  assert.equal(handoff.validation.proofRungsPreserved, true);
+  assert.equal(handoff.validation.noCanonicalSwarmProofClaim, true);
+});
+
+test("generic API consumer handoff stays lower-rung even when descriptor declares public swarm capability", () => {
+  const descriptor = buildGenericCausalEndpointDescriptor({
+    endpointId: "causal-generic-seam:endpoint:declared-public",
+    declaredPublicSwarmCapable: true,
+    proofRung: "public_swarm_seam",
+  });
+  const observation = buildGenericCausalSeamObservation({
+    seamHistory: compatibleGenericEnvelope(),
+    proofCommand: "tsx --test test/generic-causal-seam-surface.test.ts",
+    generatedAt: "2026-06-03T12:05:00.000Z",
+  });
+  const handoff = buildGenericCausalSeamApiConsumerHandoff({
+    observation,
+    emittedAt: "2026-06-03T12:06:00.000Z",
+  });
+
+  assertGenericCausalEndpointDescriptor(descriptor);
+  assertGenericCausalSeamApiConsumerHandoff(handoff);
+  assert.equal(descriptor.transportPosture.declaredPublicSwarmCapable, true);
+  assert.equal(descriptor.transportPosture.publicSwarmTransportProvenByDescriptor, false);
+  assert.equal(handoff.observationSummary.strongestProofRung, "local_artifact_seam");
+  assert.equal(handoff.proof.strongestProofRung, "local_artifact_seam");
+  assert.equal(handoff.proof.consumerHandoffOperationProofRung, "consumer_handoff_seam");
+  assert.equal(handoff.proof.canonicalSwarmProofClaimed, false);
+  assert.equal(handoff.boundary.opensHyperswarm, false);
+  assert.equal(handoff.consumerFit.lowerRungApiMaterial, true);
+  assert.equal(handoff.consumerFit.meshEcologyCanonicalProofRequiresSwarmRead, true);
+});
+
+test("generic API seam example emits descriptor observation and handoff JSON", async () => {
+  const { stdout } = await execFileAsync("npx", ["tsx", "examples/generic-api-seam.ts"]);
+  const output: unknown = JSON.parse(stdout);
+  const record = output as {
+    descriptor?: unknown;
+    observation?: unknown;
+    handoff?: unknown;
+  };
+
+  assertGenericCausalEndpointDescriptor(record.descriptor);
+  assertGenericCausalSeamObservation(record.observation);
+  assertGenericCausalSeamApiConsumerHandoff(record.handoff);
+  assert.equal(record.observation.finalClassification, "compatible");
+  assert.equal(record.observation.strongestProofRung, "local_artifact_seam");
+  assert.equal(record.handoff.proof.consumerHandoffOperationProofRung, "consumer_handoff_seam");
+  assert.equal(record.handoff.proof.canonicalSwarmProofClaimed, false);
+  assert.equal(record.handoff.boundary.opensHyperswarm, false);
+  assert.equal(record.handoff.consumerFit.lowerRungApiMaterial, true);
 });

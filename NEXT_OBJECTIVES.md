@@ -3,6 +3,58 @@
 Status: lane guide, not a fixed task list. Causal Substrate agents should
 choose the next small operational improvement inside the causal observer role.
 
+## Long-Term Direction
+
+Causal Substrate should mature into a standalone observer-scoped continuity
+substrate whose seams can be used by systems outside Mesh Ecology. Adjacent repo
+pressure remains the strongest source of concrete requirements, but it should
+harden the generic contract rather than making Edge, Layer, Platform, Conduit,
+Spine, Virtualia, or any other family vocabulary mandatory.
+
+The long-term target is a two-seam posture:
+
+- Mesh Ecology canonical seam: durable replicated public-swarm seam history
+  read by Causal itself, followed by durable observation emission and reopened
+  readback.
+- Generic API seam: library-neutral descriptors, seam-history envelopes,
+  observations, proof-rung checks, and consumer handoffs for non-Mesh consumers
+  or lower-rung local/API use.
+
+See [`docs/standalone-seam-posture.md`](./docs/standalone-seam-posture.md).
+
+## Active Objectives
+
+Working scope for this session:
+
+- `causal-substrate` is the writable focus.
+- Edge, Layer, Platform, Conduit, Spine, Virtualia, and other repo families are
+  reference-only unless a later instruction explicitly changes that boundary.
+- Do not expand adjacent-material matrices just because related family
+  artifacts exist. Require a concrete Causal consumer need, a distinct
+  overclaim risk, or fresh public-swarm material intended for Causal
+  observation.
+
+Current objective list:
+
+1. Preserve Causal's observer role and proof-rung honesty: selected files,
+   supplied JSON, readbacks, fixtures, and saved artifacts remain lower-rung
+   material unless Causal itself performs the stronger read.
+2. Wait for fresh Edge/Layer output or a consumer-driven ambiguity before
+   adding new saved-artifact layers over existing runs.
+3. Use the generic seam surface only when it resolves a real consumer ambiguity,
+   guards a concrete overclaim risk, or prepares a named public-swarm attempt.
+4. Prepare or run a Causal-owned public-swarm reader only when the objective
+   requires Causal itself to read durable replicated seam history.
+5. Treat Platform or Conduit material as bounded causal input only after
+   concrete artifacts are available; preserve their refs without claiming
+   Platform authority, Conduit/RBC interpretation, Mesh publication, Layer
+   admission, or production continuity.
+6. For any handoff, include source artifact refs, ids, hashes, writer refs,
+   classifications, linkage status, strongest proof rung, non-claims, and next
+   pressure.
+7. Keep process hygiene explicit: if Causal starts any live helper process, stop
+   it before finishing or hand off pid/control-dir state clearly.
+
 ## Current Pressure: Reassessment/Wait For Fresh Causal Consumer Need
 
 Causal Substrate has no new solo pressure from the Platform-Conduit visibility

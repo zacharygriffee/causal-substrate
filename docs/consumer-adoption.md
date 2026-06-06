@@ -40,6 +40,45 @@ For the first finished version, the generic bounded consumer surface should be s
 
 without needing raw branch replay as its default interface.
 
+Long-term, this repo has two adoption seams:
+
+- generic API seam for standalone consumers that need bounded causal
+  observation without Mesh Ecology transport;
+- canonical public-swarm seam for Mesh Ecology family proof, where Causal
+  itself reads durable replicated seam history and emits a reopened durable
+  observation result.
+
+The API seam is real adoption material, but it does not claim the same proof
+rung as the Mesh Ecology swarm seam.
+
+## Adoption pattern: standalone API consumer
+
+This is the non-Mesh pattern.
+
+Use `causal-substrate` to represent and classify:
+
+- request, receipt, evidence, durable, writer, and linkage refs
+- proof labels and transport booleans
+- bounded observation results
+- compatible, unresolved, damaged, incompatible, and overclaimed happenings
+- explicit non-claims and next pressure
+
+Keep the adopting system responsible for:
+
+- its own domain vocabulary
+- its own authority, policy, admission, publication, or execution decisions
+- its own transport if it is not using the Mesh Ecology public-swarm lane
+
+Practical rule:
+
+- let `causal-substrate` preserve and classify causal evidence
+- let the consumer decide how that bounded observation affects its own system
+
+Minimal example:
+
+- run `npm run example:generic-api-seam` to see a neutral descriptor,
+  observation, and API consumer handoff with lower-rung proof preserved.
+
 ## Adoption pattern: universe or geometry consumer
 
 This is the `Virtualia`-like pattern.

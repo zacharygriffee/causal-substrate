@@ -8,6 +8,12 @@ independent causal-observer competence across compatible seam-history
 libraries, without turning Causal into an authority, Layer admission engine,
 RBC evaluator, Mesh publisher, or production continuity writer.
 
+This generic seam is also the long-term API adoption surface for non-Mesh
+consumers. For the Mesh Ecology repo family, durable replicated public-swarm
+history remains the canonical seam proof path. API submissions, fixtures,
+saved readbacks, and direct handoffs are valid lower-rung material, but they do
+not replace the family swarm seam.
+
 ## Standing Boundary
 
 Causal Substrate may stand on its own by proving that it can:
@@ -104,6 +110,13 @@ Causal should emit an observation result with:
 - `deferredAttachmentPoints`
 - `nextPressure`
 
+For direct API consumers, Causal may also emit a
+`generic-causal-seam-api-consumer-handoff` built from a valid observation. The
+handoff preserves observation ids/hashes, source refs, classifications, proof
+rungs, non-claims, and next pressure while explicitly staying a direct API
+handoff. It does not open Hyperswarm, open Corestore, write consumer state, or
+upgrade proof into the Mesh Ecology canonical swarm seam.
+
 Allowed top-level classifications:
 
 - `compatible`
@@ -194,6 +207,12 @@ Consumers should be able to use Causal output as:
 
 Consumer fit does not let Causal mutate consumer state. It emits bounded
 observation material only.
+
+For non-Mesh consumers, this surface is sufficient as an API contract when the
+consumer only needs bounded causal observation. For Mesh Ecology consumers, the
+same surface can describe the material, but canonical proof requires Causal's
+public-swarm reader to observe durable replicated history and produce a durable
+readback.
 
 ## Deferred Attachment Points
 
