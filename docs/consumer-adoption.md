@@ -79,12 +79,22 @@ Preferred API path:
 - build input with `buildGenericCausalSeamHistoryEnvelope`
 - validate input with `assertGenericCausalSeamHistoryEnvelope`
 - classify with `buildGenericCausalSeamObservation`
+- persist the observation JSON when the consumer needs a saved artifact
+- reopen saved observation material with
+  `buildGenericCausalSeamApiObservationReadback` or
+  `npm run readback:generic-api-observation`
 - hand off with `buildGenericCausalSeamApiConsumerHandoff`
 
 Minimal example:
 
 - run `npm run example:generic-api-seam` to see a neutral descriptor,
-  observation, and API consumer handoff with lower-rung proof preserved.
+  observation, saved-readback artifact, and API consumer handoff with
+  lower-rung proof preserved.
+
+The saved-readback artifact is direct API evidence only. It preserves the
+source observation's proof labels and refs, marks its own operation as
+`saved_readback_seam`, and still requires the Mesh Ecology public-swarm lane
+for canonical family proof.
 
 ## Adoption pattern: universe or geometry consumer
 

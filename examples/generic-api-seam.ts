@@ -1,9 +1,11 @@
 import {
   assertGenericCausalEndpointDescriptor,
   assertGenericCausalSeamApiConsumerHandoff,
+  assertGenericCausalSeamApiObservationReadback,
   assertGenericCausalSeamObservation,
   buildGenericCausalEndpointDescriptor,
   buildGenericCausalSeamApiConsumerHandoff,
+  buildGenericCausalSeamApiObservationReadback,
   buildGenericCausalSeamHistoryEnvelope,
   buildGenericCausalSeamObservation,
 } from "../src/index.js";
@@ -98,8 +100,15 @@ const handoff = buildGenericCausalSeamApiConsumerHandoff({
   sourcePath: "examples/generic-api-seam.ts",
 });
 
+const readback = buildGenericCausalSeamApiObservationReadback({
+  observation,
+  emittedAt: "2026-06-03T12:09:00.000Z",
+  sourcePath: "examples/generic-api-seam.ts",
+});
+
 assertGenericCausalEndpointDescriptor(descriptor);
 assertGenericCausalSeamObservation(observation);
 assertGenericCausalSeamApiConsumerHandoff(handoff);
+assertGenericCausalSeamApiObservationReadback(readback);
 
-process.stdout.write(`${JSON.stringify({ descriptor, observation, handoff }, null, 2)}\n`);
+process.stdout.write(`${JSON.stringify({ descriptor, observation, readback, handoff }, null, 2)}\n`);

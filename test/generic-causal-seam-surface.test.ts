@@ -9,9 +9,11 @@ import { promisify } from "node:util";
 import {
   assertGenericCausalEndpointDescriptor,
   assertGenericCausalSeamApiConsumerHandoff,
+  assertGenericCausalSeamApiObservationReadback,
   assertGenericCausalSeamHistoryEnvelope,
   assertGenericCausalSeamObservation,
   buildGenericCausalSeamApiConsumerHandoff,
+  buildGenericCausalSeamApiObservationReadback,
   buildGenericCausalEndpointDescriptor,
   buildGenericCausalSeamHistoryEnvelope,
   buildGenericCausalSeamObservation,
@@ -362,6 +364,166 @@ test("generic Causal seam observation durable write and reopened readback preser
   }
 });
 
+test("generic API observation readback preserves a saved direct API observation without swarm upgrade", () => {
+  const observation = buildGenericCausalSeamObservation({
+    seamHistory: compatibleGenericEnvelope(),
+    proofCommand: "tsx --test test/generic-causal-seam-surface.test.ts",
+    generatedAt: "2026-06-03T12:02:30.000Z",
+  });
+  const readback = buildGenericCausalSeamApiObservationReadback({
+    observation,
+    emittedAt: "2026-06-03T12:02:31.000Z",
+    sourcePath: "tmp/generic-causal-seam-observation.json",
+  });
+
+  assertGenericCausalSeamApiObservationReadback(readback);
+  assert.equal(readback.observationSummary.observationId, observation.observationId);
+  assert.equal(readback.observationSummary.observationHash, observation.observationHash);
+  assert.equal(readback.observationSummary.sourceProofRung, "local_artifact_seam");
+  assert.equal(readback.observationSummary.operationProofRung, "local_artifact_seam");
+  assert.equal(readback.proof.sourceProofRung, "local_artifact_seam");
+  assert.equal(readback.proof.sourceOperationProofRung, "local_artifact_seam");
+  assert.equal(readback.proof.sourceStrongestProofRung, "local_artifact_seam");
+  assert.equal(readback.proof.readbackOperationProofRung, "saved_readback_seam");
+  assert.equal(readback.proof.readbackStrongestProofRung, "saved_readback_seam");
+  assert.equal(readback.proof.canonicalSwarmProofClaimed, false);
+  assert.equal(readback.proof.proofRungUpgradeClaimed, false);
+  assert.deepEqual(readback.preservedRefs.requestIds, observation.sourceRefsPreserved.requestIds);
+  assert.deepEqual(readback.preservedRefs.requestHashes, observation.sourceRefsPreserved.requestHashes);
+  assert.deepEqual(readback.preservedRefs.receiptIds, observation.sourceRefsPreserved.receiptIds);
+  assert.deepEqual(readback.preservedRefs.receiptHashes, observation.sourceRefsPreserved.receiptHashes);
+  assert.deepEqual(readback.preservedRefs.sourceRepos, observation.sourceRefsPreserved.sourceRepos);
+  assert.deepEqual(readback.preservedRefs.durableRefs, observation.sourceRefsPreserved.durableRefs);
+  assert.deepEqual(readback.preservedRefs.writerRefs, observation.sourceRefsPreserved.writerRefs);
+  assert.deepEqual(readback.preservedRefs.evidenceIds, observation.sourceRefsPreserved.evidenceIds);
+  assert.equal(readback.boundary.directApiReadbackOnly, true);
+  assert.equal(readback.boundary.opensHyperswarm, false);
+  assert.equal(readback.boundary.opensCorestore, false);
+  assert.equal(readback.boundary.writesConsumerState, false);
+  assert.equal(readback.consumerFit.lowerRungApiMaterial, true);
+  assert.equal(readback.consumerFit.savedReadbackMaterial, true);
+  assert.equal(readback.consumerFit.meshEcologyCanonicalProofRequiresSwarmRead, true);
+  assert.equal(readback.validation.sourceRefsPreserved, true);
+  assert.equal(readback.validation.proofRungsPreserved, true);
+  assert.equal(readback.validation.noCanonicalSwarmProofClaim, true);
+});
+
+test("generic API observation readback preserves public swarm source proof while staying saved-readback operation", () => {
+  const envelope = compatibleGenericEnvelope();
+  envelope.transportProof = {
+    evidenceSource: "reader_observed_replicated_public_swarm_path",
+    publicSwarmTransportHappened: true,
+    testnetSwarmTransportHappened: false,
+    controlPlaneOnly: false,
+    durableFeedBackedHistoryObserved: true,
+    receivingRepoObservedReplicatedPath: true,
+    durableObservationResultEmitted: true,
+    receiptOrResultCausallyReferencesSources: true,
+    reopenedReadbackDerivedFromDurableHistory: true,
+  };
+  envelope.proofLabels = ["neutral_public_swarm_generic_seam_history_material"];
+  const observation = buildGenericCausalSeamObservation({
+    seamHistory: envelope,
+    proofCommand: "tsx --test test/generic-causal-seam-surface.test.ts",
+    generatedAt: "2026-06-03T12:02:32.000Z",
+    durableObservationResultEmitted: true,
+    reopenedReadbackDerivedFromDurableHistory: true,
+  });
+  const readback = buildGenericCausalSeamApiObservationReadback({
+    observation,
+    emittedAt: "2026-06-03T12:02:33.000Z",
+  });
+
+  assertGenericCausalSeamApiObservationReadback(readback);
+  assert.equal(observation.strongestProofRung, "durable_replicated_public_swarm_seam");
+  assert.equal(readback.proof.sourceProofRung, "durable_replicated_public_swarm_seam");
+  assert.equal(readback.proof.sourceStrongestProofRung, "durable_replicated_public_swarm_seam");
+  assert.equal(readback.proof.readbackOperationProofRung, "saved_readback_seam");
+  assert.equal(readback.proof.readbackStrongestProofRung, "durable_replicated_public_swarm_seam");
+  assert.equal(readback.boundary.directApiReadbackOnly, true);
+  assert.equal(readback.boundary.opensHyperswarm, false);
+  assert.equal(readback.boundary.opensCorestore, false);
+  assert.equal(readback.proof.proofRungUpgradeClaimed, false);
+});
+
+test("generic API observation readback assertion rejects mutated refs non-claims and proof posture", () => {
+  const observation = buildGenericCausalSeamObservation({
+    seamHistory: compatibleGenericEnvelope(),
+    proofCommand: "tsx --test test/generic-causal-seam-surface.test.ts",
+    generatedAt: "2026-06-03T12:02:34.000Z",
+  });
+  const readback = buildGenericCausalSeamApiObservationReadback({
+    observation,
+    emittedAt: "2026-06-03T12:02:35.000Z",
+  });
+
+  assert.throws(
+    () => assertGenericCausalSeamApiObservationReadback({
+      ...readback,
+      preservedRefs: {
+        ...readback.preservedRefs,
+        requestIds: ["mutated-request"],
+      },
+    }),
+    /validation\.integrityHash_must_equal_sha256:/,
+  );
+  assert.throws(
+    () => assertGenericCausalSeamApiObservationReadback({
+      ...readback,
+      nonClaims: {
+        ...readback.nonClaims,
+        authorityGranted: true,
+      },
+    }),
+    /validation\.integrityHash_must_equal_sha256:|nonClaims\.authorityGranted_must_equal_false/,
+  );
+  assert.throws(
+    () => assertGenericCausalSeamApiObservationReadback({
+      ...readback,
+      proof: {
+        ...readback.proof,
+        readbackOperationProofRung: "public_swarm_seam",
+      },
+    }),
+    /proof\.readbackOperationProofRung_must_equal_saved_readback_seam/,
+  );
+});
+
+test("generic API observation readback CLI reopens saved observation JSON", async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), "generic-api-observation-readback-"));
+  try {
+    const observation = buildGenericCausalSeamObservation({
+      seamHistory: compatibleGenericEnvelope(),
+      proofCommand: "tsx --test test/generic-causal-seam-surface.test.ts",
+      generatedAt: "2026-06-03T12:02:36.000Z",
+    });
+    const observationPath = path.join(dir, "generic-causal-seam-observation.json");
+    const readbackPath = path.join(dir, "generic-causal-seam-api-observation-readback.json");
+    await writeFile(observationPath, `${JSON.stringify(observation, null, 2)}\n`, "utf8");
+
+    await execFileAsync("npx", [
+      "tsx",
+      "scripts/readback-generic-causal-seam-api-observation.ts",
+      "--observation",
+      observationPath,
+      "--output",
+      readbackPath,
+      "--emitted-at",
+      "2026-06-03T12:02:37.000Z",
+    ]);
+    const readback: unknown = JSON.parse(await readFile(readbackPath, "utf8"));
+
+    assertGenericCausalSeamApiObservationReadback(readback);
+    assert.equal(readback.observationSummary.observationHash, observation.observationHash);
+    assert.equal(readback.proof.readbackOperationProofRung, "saved_readback_seam");
+    assert.equal(readback.proof.sourceProofRung, "local_artifact_seam");
+    assert.equal(readback.boundary.opensHyperswarm, false);
+    assert.equal(readback.boundary.opensCorestore, false);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
 test("generic API consumer handoff preserves neutral observation without upgrading proof", () => {
   const observation = buildGenericCausalSeamObservation({
     seamHistory: compatibleGenericEnvelope(),
@@ -445,14 +607,19 @@ test("generic API seam example emits descriptor observation and handoff JSON", a
   const record = output as {
     descriptor?: unknown;
     observation?: unknown;
+    readback?: unknown;
     handoff?: unknown;
   };
 
   assertGenericCausalEndpointDescriptor(record.descriptor);
   assertGenericCausalSeamObservation(record.observation);
+  assertGenericCausalSeamApiObservationReadback(record.readback);
   assertGenericCausalSeamApiConsumerHandoff(record.handoff);
   assert.equal(record.observation.finalClassification, "compatible");
   assert.equal(record.observation.strongestProofRung, "local_artifact_seam");
+  assert.equal(record.readback.proof.readbackOperationProofRung, "saved_readback_seam");
+  assert.equal(record.readback.proof.sourceProofRung, "local_artifact_seam");
+  assert.equal(record.readback.boundary.opensHyperswarm, false);
   assert.equal(record.handoff.proof.consumerHandoffOperationProofRung, "consumer_handoff_seam");
   assert.equal(record.handoff.proof.canonicalSwarmProofClaimed, false);
   assert.equal(record.handoff.boundary.opensHyperswarm, false);

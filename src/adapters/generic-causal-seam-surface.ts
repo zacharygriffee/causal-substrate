@@ -12,6 +12,12 @@ export const GENERIC_CAUSAL_SEAM_API_CONSUMER_HANDOFF_SCHEMA =
 export const GENERIC_CAUSAL_SEAM_API_CONSUMER_HANDOFF_ARTIFACT_KIND =
   "generic-causal-seam-api-consumer-handoff" as const;
 
+export const GENERIC_CAUSAL_SEAM_API_OBSERVATION_READBACK_SCHEMA =
+  "causal-substrate/generic-causal-seam-api-observation-readback/v1" as const;
+
+export const GENERIC_CAUSAL_SEAM_API_OBSERVATION_READBACK_ARTIFACT_KIND =
+  "generic-causal-seam-api-observation-readback" as const;
+
 export type GenericCausalSeamProofRung =
   | "local_artifact_seam"
   | "saved_readback_seam"
@@ -273,6 +279,69 @@ export interface GenericCausalSeamApiConsumerHandoff {
     nonClaimsPreserved: boolean;
     noCanonicalSwarmProofClaim: true;
     status: "generic-causal-seam-api-consumer-handoff-ready";
+  };
+  warnings: string[];
+}
+
+export interface GenericCausalSeamApiObservationReadback {
+  artifactKind: typeof GENERIC_CAUSAL_SEAM_API_OBSERVATION_READBACK_ARTIFACT_KIND;
+  schema: typeof GENERIC_CAUSAL_SEAM_API_OBSERVATION_READBACK_SCHEMA;
+  schemaVersion: 1;
+  artifactId: string;
+  emittedAt: string;
+  sourcePath?: string | undefined;
+  observationSummary: {
+    observationId: string;
+    observationHash: string;
+    observedHistoryId: string;
+    observedHistoryHash: string;
+    finalClassification: GenericCausalSeamClassification;
+    sourceProofRung: GenericCausalSeamProofRung;
+    operationProofRung: GenericCausalSeamProofRung;
+    strongestProofRung: GenericCausalSeamProofRung;
+    nextPressure: string;
+  };
+  preservedRefs: GenericCausalSeamObservation["sourceRefsPreserved"];
+  proof: {
+    sourceProofRung: GenericCausalSeamProofRung;
+    sourceOperationProofRung: GenericCausalSeamProofRung;
+    sourceStrongestProofRung: GenericCausalSeamProofRung;
+    readbackOperationProofRung: "saved_readback_seam";
+    readbackStrongestProofRung: GenericCausalSeamProofRung;
+    savedApiObservationReadbackOnly: true;
+    canonicalSwarmProofClaimed: false;
+    proofRungUpgradeClaimed: false;
+  };
+  consumerFit: {
+    genericConsumersMayRead: boolean;
+    lowerRungApiMaterial: true;
+    savedReadbackMaterial: true;
+    meshEcologyCanonicalProofRequiresSwarmRead: true;
+    consumerStateWritten: false;
+  };
+  nonClaims: GenericCausalNonClaims;
+  boundary: {
+    directApiReadbackOnly: true;
+    opensHyperswarm: false;
+    opensCorestore: false;
+    writesConsumerState: false;
+    acceptsCanonicalHistory: false;
+    admitsLayerEvidence: false;
+    decidesLayerAdmission: false;
+    interpretsRbc: false;
+    satisfiesQuorum: false;
+    grantsAuthority: false;
+    publishesToMesh: false;
+    writesProductionContinuity: false;
+    proofRungUpgradeClaimed: false;
+  };
+  validation: {
+    sourceRefsPreserved: boolean;
+    proofRungsPreserved: boolean;
+    nonClaimsPreserved: boolean;
+    noCanonicalSwarmProofClaim: true;
+    integrityHash: string;
+    status: "generic-causal-seam-api-observation-readback-ready";
   };
   warnings: string[];
 }
@@ -603,6 +672,83 @@ export function buildGenericCausalSeamApiConsumerHandoff(input: {
   };
 }
 
+export function buildGenericCausalSeamApiObservationReadback(input: {
+  observation: GenericCausalSeamObservation;
+  emittedAt: string;
+  sourcePath?: string | undefined;
+}): GenericCausalSeamApiObservationReadback {
+  assertGenericCausalSeamObservation(input.observation);
+  const artifactId = `generic-causal-seam-api-observation-readback:${hash(stableJson({
+    observationId: input.observation.observationId,
+    observationHash: input.observation.observationHash,
+    emittedAt: input.emittedAt,
+  })).slice(0, 16)}`;
+  const proofRungsPreserved =
+    input.observation.proof.sourceProofRung === input.observation.sourceProofRung &&
+    input.observation.proof.operationProofRung === input.observation.operationProofRung &&
+    input.observation.proof.strongestProofRung === input.observation.strongestProofRung;
+
+  const readback: Omit<GenericCausalSeamApiObservationReadback, "validation"> & {
+    validation: Omit<GenericCausalSeamApiObservationReadback["validation"], "integrityHash"> & {
+      integrityHash: string;
+    };
+  } = {
+    artifactKind: GENERIC_CAUSAL_SEAM_API_OBSERVATION_READBACK_ARTIFACT_KIND,
+    schema: GENERIC_CAUSAL_SEAM_API_OBSERVATION_READBACK_SCHEMA,
+    schemaVersion: 1,
+    artifactId,
+    emittedAt: input.emittedAt,
+    ...(input.sourcePath ? { sourcePath: input.sourcePath } : {}),
+    observationSummary: {
+      observationId: input.observation.observationId,
+      observationHash: input.observation.observationHash,
+      observedHistoryId: input.observation.observedHistoryId,
+      observedHistoryHash: input.observation.observedHistoryHash,
+      finalClassification: input.observation.finalClassification,
+      sourceProofRung: input.observation.sourceProofRung,
+      operationProofRung: input.observation.operationProofRung,
+      strongestProofRung: input.observation.strongestProofRung,
+      nextPressure: input.observation.nextPressure,
+    },
+    preservedRefs: clonePreservedRefs(input.observation.sourceRefsPreserved),
+    proof: {
+      sourceProofRung: input.observation.sourceProofRung,
+      sourceOperationProofRung: input.observation.operationProofRung,
+      sourceStrongestProofRung: input.observation.strongestProofRung,
+      readbackOperationProofRung: "saved_readback_seam",
+      readbackStrongestProofRung: strongestRung([input.observation.strongestProofRung, "saved_readback_seam"]),
+      savedApiObservationReadbackOnly: true,
+      canonicalSwarmProofClaimed: false,
+      proofRungUpgradeClaimed: false,
+    },
+    consumerFit: {
+      genericConsumersMayRead: input.observation.consumerProjection.genericConsumersMayRead,
+      lowerRungApiMaterial: true,
+      savedReadbackMaterial: true,
+      meshEcologyCanonicalProofRequiresSwarmRead: true,
+      consumerStateWritten: false,
+    },
+    nonClaims: nonClaims(),
+    boundary: apiObservationReadbackBoundary(),
+    validation: {
+      sourceRefsPreserved: true,
+      proofRungsPreserved,
+      nonClaimsPreserved: true,
+      noCanonicalSwarmProofClaim: true,
+      integrityHash: "",
+      status: "generic-causal-seam-api-observation-readback-ready",
+    },
+    warnings: [
+      "generic-api-observation-readback-does-not-open-hyperswarm",
+      "generic-api-observation-readback-does-not-open-corestore",
+      "generic-api-observation-readback-does-not-upgrade-proof-rung",
+      "mesh-ecology-canonical-proof-requires-causal-public-swarm-read",
+    ],
+  };
+  readback.validation.integrityHash = apiObservationReadbackIntegrityHash(readback);
+  return readback;
+}
+
 export function assertGenericCausalEndpointDescriptor(value: unknown): asserts value is GenericCausalEndpointDescriptor {
   const candidate = assertRecord(value, "generic causal endpoint descriptor");
   assertEqual(candidate.schema, GENERIC_CAUSAL_SEAM_ENDPOINT_DESCRIPTOR_SCHEMA, "schema");
@@ -772,6 +918,109 @@ export function assertGenericCausalSeamApiConsumerHandoff(
   assertEqual(validation.nonClaimsPreserved, true, "validation.nonClaimsPreserved");
   assertEqual(validation.noCanonicalSwarmProofClaim, true, "validation.noCanonicalSwarmProofClaim");
   assertEqual(validation.status, "generic-causal-seam-api-consumer-handoff-ready", "validation.status");
+
+  const nonClaimsValue = assertRecord(candidate.nonClaims, "nonClaims");
+  for (const key of [
+    "canonicalHistoryClaimed",
+    "layerEvidenceAdmitted",
+    "layerAdmissionDecided",
+    "rbcInterpreted",
+    "quorumSatisfied",
+    "authorityGranted",
+    "meshPublished",
+    "productionContinuityWritten",
+  ]) {
+    assertEqual(nonClaimsValue[key], false, `nonClaims.${key}`);
+  }
+}
+
+export function assertGenericCausalSeamApiObservationReadback(
+  value: unknown,
+): asserts value is GenericCausalSeamApiObservationReadback {
+  const candidate = assertRecord(value, "generic causal seam api observation readback");
+  assertEqual(candidate.artifactKind, GENERIC_CAUSAL_SEAM_API_OBSERVATION_READBACK_ARTIFACT_KIND, "artifactKind");
+  assertEqual(candidate.schema, GENERIC_CAUSAL_SEAM_API_OBSERVATION_READBACK_SCHEMA, "schema");
+  assertEqual(candidate.schemaVersion, 1, "schemaVersion");
+  assertString(candidate.artifactId, "artifactId");
+  assertString(candidate.emittedAt, "emittedAt");
+
+  const observationSummary = assertRecord(candidate.observationSummary, "observationSummary");
+  assertString(observationSummary.observationId, "observationSummary.observationId");
+  assertString(observationSummary.observationHash, "observationSummary.observationHash");
+  assertString(observationSummary.observedHistoryId, "observationSummary.observedHistoryId");
+  assertString(observationSummary.observedHistoryHash, "observationSummary.observedHistoryHash");
+  assertString(observationSummary.finalClassification, "observationSummary.finalClassification");
+  assertString(observationSummary.sourceProofRung, "observationSummary.sourceProofRung");
+  assertString(observationSummary.operationProofRung, "observationSummary.operationProofRung");
+  assertString(observationSummary.strongestProofRung, "observationSummary.strongestProofRung");
+  assertString(observationSummary.nextPressure, "observationSummary.nextPressure");
+
+  const preservedRefsValue = assertRecord(candidate.preservedRefs, "preservedRefs");
+  for (const key of [
+    "requestIds",
+    "requestHashes",
+    "receiptIds",
+    "receiptHashes",
+    "sourceRepos",
+    "durableRefs",
+    "writerRefs",
+    "evidenceIds",
+  ]) {
+    assertStringArray(preservedRefsValue[key], `preservedRefs.${key}`);
+  }
+
+  const proof = assertRecord(candidate.proof, "proof");
+  assertEqual(proof.sourceProofRung, observationSummary.sourceProofRung, "proof.sourceProofRung");
+  assertEqual(proof.sourceOperationProofRung, observationSummary.operationProofRung, "proof.sourceOperationProofRung");
+  assertEqual(proof.sourceStrongestProofRung, observationSummary.strongestProofRung, "proof.sourceStrongestProofRung");
+  assertEqual(proof.readbackOperationProofRung, "saved_readback_seam", "proof.readbackOperationProofRung");
+  assertString(proof.readbackStrongestProofRung, "proof.readbackStrongestProofRung");
+  assertEqual(proof.savedApiObservationReadbackOnly, true, "proof.savedApiObservationReadbackOnly");
+  assertEqual(proof.canonicalSwarmProofClaimed, false, "proof.canonicalSwarmProofClaimed");
+  assertEqual(proof.proofRungUpgradeClaimed, false, "proof.proofRungUpgradeClaimed");
+
+  const consumerFit = assertRecord(candidate.consumerFit, "consumerFit");
+  assertBoolean(consumerFit.genericConsumersMayRead, "consumerFit.genericConsumersMayRead");
+  assertEqual(consumerFit.lowerRungApiMaterial, true, "consumerFit.lowerRungApiMaterial");
+  assertEqual(consumerFit.savedReadbackMaterial, true, "consumerFit.savedReadbackMaterial");
+  assertEqual(
+    consumerFit.meshEcologyCanonicalProofRequiresSwarmRead,
+    true,
+    "consumerFit.meshEcologyCanonicalProofRequiresSwarmRead",
+  );
+  assertEqual(consumerFit.consumerStateWritten, false, "consumerFit.consumerStateWritten");
+
+  const boundary = assertRecord(candidate.boundary, "boundary");
+  assertEqual(boundary.directApiReadbackOnly, true, "boundary.directApiReadbackOnly");
+  for (const key of [
+    "opensHyperswarm",
+    "opensCorestore",
+    "writesConsumerState",
+    "acceptsCanonicalHistory",
+    "admitsLayerEvidence",
+    "decidesLayerAdmission",
+    "interpretsRbc",
+    "satisfiesQuorum",
+    "grantsAuthority",
+    "publishesToMesh",
+    "writesProductionContinuity",
+    "proofRungUpgradeClaimed",
+  ]) {
+    assertEqual(boundary[key], false, `boundary.${key}`);
+  }
+
+  const validation = assertRecord(candidate.validation, "validation");
+  assertEqual(validation.sourceRefsPreserved, true, "validation.sourceRefsPreserved");
+  assertEqual(validation.proofRungsPreserved, true, "validation.proofRungsPreserved");
+  assertEqual(validation.nonClaimsPreserved, true, "validation.nonClaimsPreserved");
+  assertEqual(validation.noCanonicalSwarmProofClaim, true, "validation.noCanonicalSwarmProofClaim");
+  assertString(validation.integrityHash, "validation.integrityHash");
+  assertEqual(
+    validation.integrityHash,
+    apiObservationReadbackIntegrityHash(candidate as unknown as GenericCausalSeamApiObservationReadback),
+    "validation.integrityHash",
+  );
+  assertEqual(validation.status, "generic-causal-seam-api-observation-readback-ready", "validation.status");
 
   const nonClaimsValue = assertRecord(candidate.nonClaims, "nonClaims");
   for (const key of [
@@ -1022,6 +1271,49 @@ function apiHandoffBoundary(): GenericCausalSeamApiConsumerHandoff["boundary"] {
   };
 }
 
+function apiObservationReadbackBoundary(): GenericCausalSeamApiObservationReadback["boundary"] {
+  return {
+    directApiReadbackOnly: true,
+    opensHyperswarm: false,
+    opensCorestore: false,
+    writesConsumerState: false,
+    acceptsCanonicalHistory: false,
+    admitsLayerEvidence: false,
+    decidesLayerAdmission: false,
+    interpretsRbc: false,
+    satisfiesQuorum: false,
+    grantsAuthority: false,
+    publishesToMesh: false,
+    writesProductionContinuity: false,
+    proofRungUpgradeClaimed: false,
+  };
+}
+
+function apiObservationReadbackIntegrityHash(input: GenericCausalSeamApiObservationReadback): string {
+  return `sha256:${hash(stableJson({
+    artifactKind: input.artifactKind,
+    schema: input.schema,
+    schemaVersion: input.schemaVersion,
+    artifactId: input.artifactId,
+    emittedAt: input.emittedAt,
+    sourcePath: input.sourcePath,
+    observationSummary: input.observationSummary,
+    preservedRefs: input.preservedRefs,
+    proof: input.proof,
+    consumerFit: input.consumerFit,
+    nonClaims: input.nonClaims,
+    boundary: input.boundary,
+    warnings: input.warnings,
+    validation: {
+      sourceRefsPreserved: input.validation.sourceRefsPreserved,
+      proofRungsPreserved: input.validation.proofRungsPreserved,
+      nonClaimsPreserved: input.validation.nonClaimsPreserved,
+      noCanonicalSwarmProofClaim: input.validation.noCanonicalSwarmProofClaim,
+      status: input.validation.status,
+    },
+  }))}`;
+}
+
 function mergeTransportProof(
   target: GenericCausalSeamHistoryEnvelope["transportProof"],
   input: GenericCausalSeamHistoryEnvelopeInput["transportProof"],
@@ -1071,6 +1363,21 @@ function cloneLinkage(linkage: GenericCausalSeamHistoryEnvelope["linkage"]): Gen
     ...(entry.receiptId ? { receiptId: entry.receiptId } : {}),
     ...(entry.receiptHash ? { receiptHash: entry.receiptHash } : {}),
   }));
+}
+
+function clonePreservedRefs(
+  refs: GenericCausalSeamObservation["sourceRefsPreserved"],
+): GenericCausalSeamObservation["sourceRefsPreserved"] {
+  return {
+    requestIds: [...refs.requestIds],
+    requestHashes: [...refs.requestHashes],
+    receiptIds: [...refs.receiptIds],
+    receiptHashes: [...refs.receiptHashes],
+    sourceRepos: [...refs.sourceRepos],
+    durableRefs: [...refs.durableRefs],
+    writerRefs: [...refs.writerRefs],
+    evidenceIds: [...refs.evidenceIds],
+  };
 }
 
 function unique(values: Array<string | undefined>): string[] {

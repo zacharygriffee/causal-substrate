@@ -117,12 +117,20 @@ Causal should emit an observation result with:
 - `deferredAttachmentPoints`
 - `nextPressure`
 
-For direct API consumers, Causal may also emit a
-`generic-causal-seam-api-consumer-handoff` built from a valid observation. The
-handoff preserves observation ids/hashes, source refs, classifications, proof
-rungs, non-claims, and next pressure while explicitly staying a direct API
-handoff. It does not open Hyperswarm, open Corestore, write consumer state, or
-upgrade proof into the Mesh Ecology canonical swarm seam.
+For direct API consumers, Causal may also emit two lower-rung API artifacts
+built from a valid observation:
+
+- `generic-causal-seam-api-observation-readback`, which reopens a saved
+  observation JSON and proves that the source refs, proof rungs, non-claims,
+  and boundary survived saved readback;
+- `generic-causal-seam-api-consumer-handoff`, which preserves observation
+  ids/hashes, source refs, classifications, proof rungs, non-claims, and next
+  pressure for bounded consumer use.
+
+These artifacts do not open Hyperswarm, open Corestore, write consumer state,
+or upgrade proof into the Mesh Ecology canonical swarm seam. A direct API
+readback uses `saved_readback_seam` as its operation proof rung while
+preserving the original observation's source proof rung exactly.
 
 Allowed top-level classifications:
 
