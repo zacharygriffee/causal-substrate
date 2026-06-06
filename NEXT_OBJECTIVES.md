@@ -3,6 +3,18 @@
 Status: lane guide, not a fixed task list. Causal Substrate agents should
 choose the next small operational improvement inside the causal observer role.
 
+## Current Pressure: Reassessment/Wait For Fresh Causal Consumer Need
+
+Causal Substrate has no new solo pressure from the Platform-Conduit visibility
+or Conduit RBC session-admission work. Those are Platform, Edge, Conduit, and
+RBC-boundary materials; they do not require Causal interpretation yet.
+
+Causal should remain ready to consume fresh concrete seam-history material when
+Edge, Layer, Platform, Conduit, or Spine produces a causal observer need. Do not
+expand saved adjacent-material matrices just because family artifacts exist.
+Only a Causal-owned public-swarm reader lane may upgrade Causal itself beyond
+saved/supplied material.
+
 ## Current Lane
 
 Causal Substrate observes and interprets selected seam-history material. It
