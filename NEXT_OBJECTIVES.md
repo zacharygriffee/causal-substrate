@@ -55,7 +55,37 @@ Current objective list:
 7. Keep process hygiene explicit: if Causal starts any live helper process, stop
    it before finishing or hand off pid/control-dir state clearly.
 
-## Current Pressure: Reassessment/Wait For Fresh Causal Consumer Need
+## Current Pressure: Generic Public Reader Branch Coverage Complete
+
+Causal Substrate has hardened the generic public-swarm reader branch coverage
+at commit `a0a1eeece76b1652ddcaf3fad6b5eccbb69bb50d`.
+
+Focused verification:
+
+```bash
+npx tsx --test test/generic-causal-seam-public-swarm.test.ts
+```
+
+Covered branches:
+
+```text
+compatible replicated durable read
+unresolved timeout without public proof success
+damaged hash mismatch
+damaged duplicate request id
+public-label overclaim without durable public proof upgrade
+```
+
+This is Causal-owned generic reader/classifier hardening. It does not claim
+canonical truth, Layer admission, RBC interpretation, quorum satisfaction, Mesh
+publication, authority, production continuity, `governed_seam`, or new
+device-boundary proof.
+
+Next posture: return to Spine reassessment. Do not add more Causal-only matrix
+expansion unless a concrete consumer need, fresh Causal-intended public-swarm
+material, or distinct overclaim risk appears.
+
+## Historical Pressure: Reassessment/Wait For Fresh Causal Consumer Need
 
 Causal Substrate has no new solo pressure from the Platform-Conduit visibility
 or Conduit RBC session-admission work. Those are Platform, Edge, Conduit, and
