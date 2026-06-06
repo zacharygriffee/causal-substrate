@@ -55,6 +55,27 @@ Current objective list:
 7. Keep process hygiene explicit: if Causal starts any live helper process, stop
    it before finishing or hand off pid/control-dir state clearly.
 
+## Current Coordination Posture: Folded Into Platform Pressure
+
+Spine is routing the next concrete family pressure to Platform for an
+operational hosted-component lift. Causal Substrate should remain ready, but it
+should not start another solo saved-material matrix from the current evidence.
+
+Resume Causal work only when one of these appears:
+
+- Platform emits fresh hosted-component proof/readback/status material with
+  causal-history refs, compatibility ambiguity, damaged linkage, unresolved
+  continuity, or overclaim risk that needs Causal classification.
+- Edge consumes that Platform result and produces concrete operator visibility
+  material that asks for causal interpretation.
+- Spine identifies a distinct Causal overclaim risk or a Causal-owned
+  public-swarm reader need.
+
+When Causal resumes, preserve source ids, hashes, refs, linkage status, proof
+rungs, classifications, and nonclaims. Do not interpret Platform lifecycle
+evidence as Causal truth, Layer admission, RBC governance, Mesh publication,
+production continuity, `governed_seam`, canonical truth, or authority.
+
 ## Current Pressure: Generic Public Reader Branch Coverage Complete
 
 Causal Substrate has hardened the generic public-swarm reader branch coverage
