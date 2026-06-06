@@ -73,6 +73,52 @@ function neutralSeamHistory(): GenericCausalSeamHistoryEnvelope {
   };
 }
 
+function damagedHashMismatchSeamHistory(): GenericCausalSeamHistoryEnvelope {
+  const history = neutralSeamHistory();
+  return {
+    ...history,
+    historyId: "generic-public-seam-history:damaged-hash-mismatch",
+    historyHash: `sha256:${"8".repeat(64)}`,
+    receipts: history.receipts.map((receipt) => ({
+      ...receipt,
+      sourceRequestHash: `sha256:${"d".repeat(64)}`,
+    })),
+    linkage: history.linkage.map((link) => ({
+      ...link,
+      requestHash: `sha256:${"a".repeat(64)}`,
+      receiptHash: `sha256:${"b".repeat(64)}`,
+    })),
+    proofLabels: ["neutral_generic_seam_history_material_damaged_hash_mismatch"],
+  };
+}
+
+function duplicateIdSeamHistory(): GenericCausalSeamHistoryEnvelope {
+  const history = neutralSeamHistory();
+  const duplicateRequest = {
+    ...history.requests[0]!,
+    hash: `sha256:${"c".repeat(64)}`,
+    durableRef: "generic-core:request:duplicate",
+  };
+  return {
+    ...history,
+    historyId: "generic-public-seam-history:duplicate-request-id",
+    historyHash: `sha256:${"9".repeat(64)}`,
+    durableRefs: [...history.durableRefs, "generic-core:request:duplicate"],
+    requests: [...history.requests, duplicateRequest],
+    proofLabels: ["neutral_generic_seam_history_material_duplicate_request_id"],
+  };
+}
+
+function publicLabelOverclaimSeamHistory(): GenericCausalSeamHistoryEnvelope {
+  const history = neutralSeamHistory();
+  return {
+    ...history,
+    historyId: "generic-public-seam-history:public-label-overclaim",
+    historyHash: `sha256:${"0".repeat(64)}`,
+    proofLabels: ["public_swarm_seam_declared_without_public_reader_evidence"],
+  };
+}
+
 function createDirectPeerHyperswarmFactory() {
   const topics = new Map<string, HyperswarmReplicationSwarm[]>();
   const swarms: HyperswarmReplicationSwarm[] = [];
@@ -130,6 +176,43 @@ function createNoPeerSwarmFactory() {
       },
     };
   };
+}
+
+async function runReplicatedSeamHistory(input: {
+  seamHistory: GenericCausalSeamHistoryEnvelope;
+  caseName: string;
+  emittedAt: string;
+  publicHyperswarmInputObservedByCausalSubstrate?: boolean | undefined;
+}): Promise<Awaited<ReturnType<typeof runGenericCausalSeamPublicReplicaReader>>> {
+  const sourceDir = await mkdtemp(path.join(tmpdir(), `generic-causal-${input.caseName}-source-`));
+  const replicaDir = await mkdtemp(path.join(tmpdir(), `generic-causal-${input.caseName}-replica-`));
+  const namespaceParts = ["generic", input.caseName, randomUUID()];
+  const createSwarm = createDirectPeerHyperswarmFactory();
+  const source = await openGenericCausalSeamPublicSourcePublisher({
+    storageDir: sourceDir,
+    createSwarm,
+    seamHistory: input.seamHistory,
+    emittedAt: input.emittedAt,
+    namespaceParts,
+  });
+
+  try {
+    return await runGenericCausalSeamPublicReplicaReader({
+      storageDir: replicaDir,
+      createSwarm,
+      sourceManifest: source.manifest,
+      emittedAt: input.emittedAt,
+      namespaceParts,
+      replicationTimeoutMs: 20_000,
+      flushTimeoutMs: 1_000,
+      publicHyperswarmInputObservedByCausalSubstrate:
+        input.publicHyperswarmInputObservedByCausalSubstrate ?? false,
+    });
+  } finally {
+    await source.close();
+    await rm(sourceDir, { recursive: true, force: true });
+    await rm(replicaDir, { recursive: true, force: true });
+  }
 }
 
 test("generic public run instructions stay instructions-only", () => {
@@ -281,4 +364,78 @@ test("generic replica reader emits compatible observation after replicated durab
     await rm(sourceDir, { recursive: true, force: true });
     await rm(replicaDir, { recursive: true, force: true });
   }
+});
+
+test("generic replica reader carries damaged hash-mismatch material through public reader classification", async () => {
+  const report = await runReplicatedSeamHistory({
+    seamHistory: damagedHashMismatchSeamHistory(),
+    caseName: "damaged-hash-mismatch",
+    emittedAt: "2026-06-03T13:08:00.000Z",
+  });
+
+  assert.equal(report.status, "damaged");
+  assert.equal(report.readerProof.replicatedViaHyperswarmTransport, true);
+  assert.equal(report.readerProof.publicHyperswarmInputObservedByCausalSubstrate, false);
+  assert.equal(report.observationResult?.finalClassification, "damaged");
+  assert.equal(report.observationResult?.sourceProofRung, "swarm_discovered_seam");
+  assert.equal(report.observationResult?.strongestProofRung, "swarm_discovered_seam");
+  assert.ok(report.damageFindings.some((finding) => finding.includes("hash does not match")));
+  assert.equal(report.observationResult?.classifiedHappenings[0]?.classification, "hash_mismatch");
+  assert.deepEqual(report.observationResult?.sourceRefsPreserved.requestIds, ["generic-request:linked"]);
+  assert.deepEqual(report.observationResult?.sourceRefsPreserved.receiptIds, ["generic-receipt:linked"]);
+  assert.equal(report.boundary.writesConsumerState, false);
+  assert.equal(report.boundary.grantsAuthority, false);
+  assert.equal(report.boundary.interpretsRbc, false);
+});
+
+test("generic replica reader carries duplicate id material as damaged without consumer-state writes", async () => {
+  const report = await runReplicatedSeamHistory({
+    seamHistory: duplicateIdSeamHistory(),
+    caseName: "duplicate-request-id",
+    emittedAt: "2026-06-03T13:09:00.000Z",
+  });
+
+  assert.equal(report.status, "damaged");
+  assert.equal(report.readerProof.replicatedViaHyperswarmTransport, true);
+  assert.equal(report.observationResult?.finalClassification, "damaged");
+  assert.equal(report.observationResult?.sourceProofRung, "swarm_discovered_seam");
+  assert.ok(report.damageFindings.some((finding) => finding.includes("duplicate request id")));
+  assert.ok(
+    report.observationResult?.classifiedHappenings.some((happening) =>
+      happening.classification === "duplicate_id"
+    ),
+  );
+  assert.deepEqual(report.observationResult?.sourceRefsPreserved.requestIds, [
+    "generic-request:linked",
+    "generic-request:linked",
+  ]);
+  assert.ok(report.replicatedRecord?.sourceRefs.includes("generic-core:request:duplicate"));
+  assert.equal(report.boundary.writesConsumerState, false);
+  assert.equal(report.boundary.publishesToMesh, false);
+  assert.equal(report.boundary.writesProductionContinuity, false);
+});
+
+test("generic replica reader reports public-label overclaim without durable public proof upgrade", async () => {
+  const report = await runReplicatedSeamHistory({
+    seamHistory: publicLabelOverclaimSeamHistory(),
+    caseName: "public-label-overclaim",
+    emittedAt: "2026-06-03T13:10:00.000Z",
+    publicHyperswarmInputObservedByCausalSubstrate: false,
+  });
+
+  assert.equal(report.status, "overclaimed");
+  assert.equal(report.readerProof.replicatedViaHyperswarmTransport, true);
+  assert.equal(report.readerProof.publicHyperswarmInputObservedByCausalSubstrate, false);
+  assert.equal(report.readerProof.evidenceSource, undefined);
+  assert.equal(report.observationResult?.finalClassification, "overclaimed");
+  assert.equal(report.observationResult?.publicSwarmTransportHappened, false);
+  assert.equal(report.observationResult?.testnetSwarmTransportHappened, true);
+  assert.equal(report.observationResult?.sourceProofRung, "swarm_discovered_seam");
+  assert.equal(report.observationResult?.strongestProofRung, "swarm_discovered_seam");
+  assert.notEqual(report.observationResult?.strongestProofRung, "durable_replicated_public_swarm_seam");
+  assert.ok(report.overclaimFindings[0]?.includes("not backed by public swarm transport evidence"));
+  assert.equal(report.observationResult?.proof.proofRungUpgradeClaimed, false);
+  assert.equal(report.boundary.writesConsumerState, false);
+  assert.equal(report.boundary.grantsAuthority, false);
+  assert.equal(report.boundary.publishesToMesh, false);
 });
