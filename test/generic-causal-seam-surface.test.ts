@@ -9,9 +9,11 @@ import { promisify } from "node:util";
 import {
   assertGenericCausalEndpointDescriptor,
   assertGenericCausalSeamApiConsumerHandoff,
+  assertGenericCausalSeamHistoryEnvelope,
   assertGenericCausalSeamObservation,
   buildGenericCausalSeamApiConsumerHandoff,
   buildGenericCausalEndpointDescriptor,
+  buildGenericCausalSeamHistoryEnvelope,
   buildGenericCausalSeamObservation,
   type GenericCausalSeamHistoryEnvelope,
 } from "../src/index.js";
@@ -19,7 +21,7 @@ import {
 const execFileAsync = promisify(execFile);
 
 function compatibleGenericEnvelope(): GenericCausalSeamHistoryEnvelope {
-  return {
+  return buildGenericCausalSeamHistoryEnvelope({
     historyId: "generic-seam-history:neutral-compatible",
     historyHash: `sha256:${"1".repeat(64)}`,
     sourceRepos: ["neutral-source-repo", "neutral-receipt-repo"],
@@ -87,7 +89,7 @@ function compatibleGenericEnvelope(): GenericCausalSeamHistoryEnvelope {
     ],
     proofLabels: ["local_neutral_generic_seam_history_material"],
     warnings: [],
-  };
+  });
 }
 
 test("generic Causal seam descriptor is declaration-only and consumer-readable", () => {
@@ -105,6 +107,156 @@ test("generic Causal seam descriptor is declaration-only and consumer-readable",
   assert.ok(descriptor.acceptedInputKinds.includes("generic-seam-history-envelope"));
   assert.ok(descriptor.emittedOutputKinds.includes("generic-causal-seam-observation"));
   assert.equal(descriptor.nonClaims.authorityGranted, false);
+});
+
+test("generic seam-history builder defaults direct API material to lower-rung control-plane posture", () => {
+  const envelope = buildGenericCausalSeamHistoryEnvelope({
+    historyId: "generic-seam-history:builder-default",
+    historyHash: `sha256:${"2".repeat(64)}`,
+  });
+
+  assertGenericCausalSeamHistoryEnvelope(envelope);
+  assert.equal(envelope.transportProof.evidenceSource, "direct_api_submission");
+  assert.equal(envelope.transportProof.publicSwarmTransportHappened, false);
+  assert.equal(envelope.transportProof.testnetSwarmTransportHappened, false);
+  assert.equal(envelope.transportProof.controlPlaneOnly, true);
+  assert.equal(envelope.transportProof.durableFeedBackedHistoryObserved, false);
+  assert.equal(envelope.transportProof.receivingRepoObservedReplicatedPath, false);
+  assert.equal(envelope.transportProof.receiptOrResultCausallyReferencesSources, true);
+  assert.equal(envelope.transportProof.reopenedReadbackDerivedFromDurableHistory, false);
+  assert.deepEqual(envelope.sourceRepos, []);
+  assert.deepEqual(envelope.requests, []);
+  assert.deepEqual(envelope.receipts, []);
+  assert.deepEqual(envelope.evidenceRefs, []);
+  assert.deepEqual(envelope.linkage, []);
+});
+
+test("generic seam-history builder creates a compatible neutral envelope for observation", () => {
+  const envelope = compatibleGenericEnvelope();
+  const observation = buildGenericCausalSeamObservation({
+    seamHistory: envelope,
+    proofCommand: "tsx --test test/generic-causal-seam-surface.test.ts",
+    generatedAt: "2026-06-03T11:59:00.000Z",
+  });
+
+  assertGenericCausalSeamHistoryEnvelope(envelope);
+  assertGenericCausalSeamObservation(observation);
+  assert.equal(observation.finalClassification, "compatible");
+  assert.equal(observation.classifiedHappenings[0]?.classification, "linked_request_receipt");
+  assert.equal(observation.strongestProofRung, "local_artifact_seam");
+});
+
+test("generic seam-history validator rejects missing history identity", () => {
+  assert.throws(
+    () => assertGenericCausalSeamHistoryEnvelope({
+      historyId: "",
+      historyHash: `sha256:${"3".repeat(64)}`,
+      sourceRepos: [],
+      sourceSchemaRefs: [],
+      transportProof: {},
+      durableRefs: [],
+      writerRefs: [],
+      requests: [],
+      receipts: [],
+      evidenceRefs: [],
+      linkage: [],
+      proofLabels: [],
+      warnings: [],
+    }),
+    /historyId_must_be_non_empty_string/,
+  );
+  assert.throws(
+    () => assertGenericCausalSeamHistoryEnvelope({
+      historyId: "generic-seam-history:missing-hash",
+      historyHash: "",
+      sourceRepos: [],
+      sourceSchemaRefs: [],
+      transportProof: {},
+      durableRefs: [],
+      writerRefs: [],
+      requests: [],
+      receipts: [],
+      evidenceRefs: [],
+      linkage: [],
+      proofLabels: [],
+      warnings: [],
+    }),
+    /historyHash_must_be_non_empty_string/,
+  );
+});
+
+test("generic seam-history validator rejects malformed request receipt and evidence records", () => {
+  assert.throws(
+    () => buildGenericCausalSeamHistoryEnvelope({
+      historyId: "generic-seam-history:bad-request",
+      historyHash: `sha256:${"4".repeat(64)}`,
+      requests: [
+        {
+          id: "",
+          hash: `sha256:${"a".repeat(64)}`,
+          sourceRepo: "neutral-source-repo",
+        },
+      ],
+    }),
+    /requests\.0\.id_must_be_non_empty_string/,
+  );
+  assert.throws(
+    () => buildGenericCausalSeamHistoryEnvelope({
+      historyId: "generic-seam-history:bad-receipt",
+      historyHash: `sha256:${"5".repeat(64)}`,
+      receipts: [
+        {
+          id: "neutral-receipt:bad",
+          hash: "",
+          sourceRepo: "neutral-receipt-repo",
+        },
+      ],
+    }),
+    /receipts\.0\.hash_must_be_non_empty_string/,
+  );
+  assert.throws(
+    () => buildGenericCausalSeamHistoryEnvelope({
+      historyId: "generic-seam-history:bad-evidence",
+      historyHash: `sha256:${"6".repeat(64)}`,
+      evidenceRefs: [
+        {
+          id: "neutral-evidence:bad",
+          hash: `sha256:${"c".repeat(64)}`,
+          sourceRepo: "",
+        },
+      ],
+    }),
+    /evidenceRefs\.0\.sourceRepo_must_be_non_empty_string/,
+  );
+});
+
+test("generic seam-history builder does not let direct API public labels upgrade proof", () => {
+  const envelope = buildGenericCausalSeamHistoryEnvelope({
+    historyId: "generic-seam-history:api-public-label",
+    historyHash: `sha256:${"7".repeat(64)}`,
+    requests: [
+      {
+        id: "neutral-request:api-public-label",
+        hash: `sha256:${"a".repeat(64)}`,
+        sourceRepo: "neutral-source-repo",
+        durableRef: "neutral-feed:request:0",
+        writerRef: "neutral-writer:request",
+      },
+    ],
+    proofLabels: ["public_swarm_seam_declared_by_direct_api"],
+  });
+  const observation = buildGenericCausalSeamObservation({
+    seamHistory: envelope,
+    proofCommand: "tsx --test test/generic-causal-seam-surface.test.ts",
+    generatedAt: "2026-06-03T11:59:30.000Z",
+  });
+
+  assertGenericCausalSeamHistoryEnvelope(envelope);
+  assertGenericCausalSeamObservation(observation);
+  assert.equal(observation.sourceProofRung, "local_artifact_seam");
+  assert.equal(observation.publicSwarmTransportHappened, false);
+  assert.equal(observation.finalClassification, "overclaimed");
+  assert.match(observation.overclaimFindings[0]!, /not backed by public swarm transport evidence/);
 });
 
 test("generic Causal seam observation classifies neutral linked material for test consumers", () => {

@@ -4,11 +4,11 @@ import {
   assertGenericCausalSeamObservation,
   buildGenericCausalEndpointDescriptor,
   buildGenericCausalSeamApiConsumerHandoff,
+  buildGenericCausalSeamHistoryEnvelope,
   buildGenericCausalSeamObservation,
-  type GenericCausalSeamHistoryEnvelope,
 } from "../src/index.js";
 
-const seamHistory: GenericCausalSeamHistoryEnvelope = {
+const seamHistory = buildGenericCausalSeamHistoryEnvelope({
   historyId: "generic-api-example-history:neutral-compatible",
   historyHash: `sha256:${"1".repeat(64)}`,
   sourceRepos: ["neutral-producer", "neutral-recorder"],
@@ -76,7 +76,7 @@ const seamHistory: GenericCausalSeamHistoryEnvelope = {
   ],
   proofLabels: ["direct_api_neutral_generic_seam_history_material"],
   warnings: [],
-};
+});
 
 const descriptor = buildGenericCausalEndpointDescriptor({
   endpointId: "generic-api-seam:neutral-example",

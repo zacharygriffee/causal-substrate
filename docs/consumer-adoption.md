@@ -74,6 +74,13 @@ Practical rule:
 - let `causal-substrate` preserve and classify causal evidence
 - let the consumer decide how that bounded observation affects its own system
 
+Preferred API path:
+
+- build input with `buildGenericCausalSeamHistoryEnvelope`
+- validate input with `assertGenericCausalSeamHistoryEnvelope`
+- classify with `buildGenericCausalSeamObservation`
+- hand off with `buildGenericCausalSeamApiConsumerHandoff`
+
 Minimal example:
 
 - run `npm run example:generic-api-seam` to see a neutral descriptor,

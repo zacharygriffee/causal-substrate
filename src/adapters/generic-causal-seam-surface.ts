@@ -103,6 +103,24 @@ export interface GenericCausalSeamHistoryEnvelope {
   warnings: string[];
 }
 
+export interface GenericCausalSeamHistoryEnvelopeInput {
+  historyId: string;
+  historyHash: string;
+  sourceRepos?: string[] | undefined;
+  sourceSchemaRefs?: string[] | undefined;
+  transportProof?: (Partial<GenericCausalTransportBooleans> & {
+    evidenceSource?: string | undefined;
+  }) | undefined;
+  durableRefs?: string[] | undefined;
+  writerRefs?: string[] | undefined;
+  requests?: GenericCausalSeamRefRecord[] | undefined;
+  receipts?: GenericCausalSeamReceiptRecord[] | undefined;
+  evidenceRefs?: GenericCausalSeamRefRecord[] | undefined;
+  linkage?: GenericCausalSeamHistoryEnvelope["linkage"] | undefined;
+  proofLabels?: string[] | undefined;
+  warnings?: string[] | undefined;
+}
+
 export interface GenericCausalTransportBooleans {
   publicSwarmTransportHappened: boolean;
   testnetSwarmTransportHappened: boolean;
@@ -259,6 +277,40 @@ export interface GenericCausalSeamApiConsumerHandoff {
   warnings: string[];
 }
 
+export function buildGenericCausalSeamHistoryEnvelope(
+  input: GenericCausalSeamHistoryEnvelopeInput,
+): GenericCausalSeamHistoryEnvelope {
+  const transportProof: GenericCausalSeamHistoryEnvelope["transportProof"] = {
+    evidenceSource: "direct_api_submission",
+    publicSwarmTransportHappened: false,
+    testnetSwarmTransportHappened: false,
+    controlPlaneOnly: true,
+    durableFeedBackedHistoryObserved: false,
+    receivingRepoObservedReplicatedPath: false,
+    durableObservationResultEmitted: false,
+    receiptOrResultCausallyReferencesSources: true,
+    reopenedReadbackDerivedFromDurableHistory: false,
+  };
+  mergeTransportProof(transportProof, input.transportProof);
+  const envelope: GenericCausalSeamHistoryEnvelope = {
+    historyId: input.historyId,
+    historyHash: input.historyHash,
+    sourceRepos: [...(input.sourceRepos ?? [])],
+    sourceSchemaRefs: [...(input.sourceSchemaRefs ?? [])],
+    transportProof,
+    durableRefs: [...(input.durableRefs ?? [])],
+    writerRefs: [...(input.writerRefs ?? [])],
+    requests: cloneRefRecords(input.requests ?? []),
+    receipts: cloneReceiptRecords(input.receipts ?? []),
+    evidenceRefs: cloneRefRecords(input.evidenceRefs ?? []),
+    linkage: cloneLinkage(input.linkage ?? []),
+    proofLabels: [...(input.proofLabels ?? [])],
+    warnings: [...(input.warnings ?? [])],
+  };
+  assertGenericCausalSeamHistoryEnvelope(envelope);
+  return envelope;
+}
+
 export function buildGenericCausalEndpointDescriptor(input: {
   endpointId: string;
   lane?: string;
@@ -309,6 +361,7 @@ export function buildGenericCausalSeamObservation(input: {
   durableObservationResultEmitted?: boolean;
   reopenedReadbackDerivedFromDurableHistory?: boolean;
 }): GenericCausalSeamObservation {
+  assertGenericCausalSeamHistoryEnvelope(input.seamHistory);
   const happenings: GenericCausalClassifiedHappening[] = [];
   const damageFindings: string[] = [];
   const unresolvedFindings: string[] = [];
@@ -562,6 +615,46 @@ export function assertGenericCausalEndpointDescriptor(value: unknown): asserts v
     false,
     "transportPosture.publicSwarmTransportProvenByDescriptor",
   );
+}
+
+export function assertGenericCausalSeamHistoryEnvelope(
+  value: unknown,
+): asserts value is GenericCausalSeamHistoryEnvelope {
+  const candidate = assertRecord(value, "generic causal seam history envelope");
+  assertString(candidate.historyId, "historyId");
+  assertString(candidate.historyHash, "historyHash");
+  assertStringArray(candidate.sourceRepos, "sourceRepos");
+  assertStringArray(candidate.sourceSchemaRefs, "sourceSchemaRefs");
+  assertStringArray(candidate.durableRefs, "durableRefs");
+  assertStringArray(candidate.writerRefs, "writerRefs");
+  assertStringArray(candidate.proofLabels, "proofLabels");
+  assertStringArray(candidate.warnings, "warnings");
+
+  const transportProof = assertRecord(candidate.transportProof, "transportProof");
+  if (transportProof.evidenceSource !== undefined) assertString(transportProof.evidenceSource, "transportProof.evidenceSource");
+  for (const key of [
+    "publicSwarmTransportHappened",
+    "testnetSwarmTransportHappened",
+    "controlPlaneOnly",
+    "durableFeedBackedHistoryObserved",
+    "receivingRepoObservedReplicatedPath",
+    "durableObservationResultEmitted",
+    "receiptOrResultCausallyReferencesSources",
+    "reopenedReadbackDerivedFromDurableHistory",
+  ]) {
+    if (transportProof[key] !== undefined) assertBoolean(transportProof[key], `transportProof.${key}`);
+  }
+
+  assertRefRecordArray(candidate.requests, "requests");
+  assertReceiptRecordArray(candidate.receipts, "receipts");
+  assertRefRecordArray(candidate.evidenceRefs, "evidenceRefs");
+  if (!Array.isArray(candidate.linkage)) throw new Error("linkage_must_be_array");
+  for (const [index, entry] of candidate.linkage.entries()) {
+    const linkage = assertRecord(entry, `linkage.${index}`);
+    for (const key of ["requestId", "requestHash", "receiptId", "receiptHash"]) {
+      if (linkage[key] !== undefined) assertString(linkage[key], `linkage.${index}.${key}`);
+    }
+  }
 }
 
 export function assertGenericCausalSeamObservation(value: unknown): asserts value is GenericCausalSeamObservation {
@@ -929,6 +1022,57 @@ function apiHandoffBoundary(): GenericCausalSeamApiConsumerHandoff["boundary"] {
   };
 }
 
+function mergeTransportProof(
+  target: GenericCausalSeamHistoryEnvelope["transportProof"],
+  input: GenericCausalSeamHistoryEnvelopeInput["transportProof"],
+): void {
+  if (!input) return;
+  if (input.evidenceSource !== undefined) target.evidenceSource = input.evidenceSource;
+  for (const key of [
+    "publicSwarmTransportHappened",
+    "testnetSwarmTransportHappened",
+    "controlPlaneOnly",
+    "durableFeedBackedHistoryObserved",
+    "receivingRepoObservedReplicatedPath",
+    "durableObservationResultEmitted",
+    "receiptOrResultCausallyReferencesSources",
+    "reopenedReadbackDerivedFromDurableHistory",
+  ] as const) {
+    if (input[key] !== undefined) target[key] = input[key];
+  }
+}
+
+function cloneRefRecords(records: GenericCausalSeamRefRecord[]): GenericCausalSeamRefRecord[] {
+  return records.map((record) => ({
+    id: record.id,
+    hash: record.hash,
+    sourceRepo: record.sourceRepo,
+    ...(record.durableRef ? { durableRef: record.durableRef } : {}),
+    ...(record.writerRef ? { writerRef: record.writerRef } : {}),
+    ...(record.schemaRef ? { schemaRef: record.schemaRef } : {}),
+    ...(record.causalParentRefs ? { causalParentRefs: [...record.causalParentRefs] } : {}),
+    ...(record.linkageStatus ? { linkageStatus: record.linkageStatus } : {}),
+    ...(record.observedProofRung ? { observedProofRung: record.observedProofRung } : {}),
+  }));
+}
+
+function cloneReceiptRecords(records: GenericCausalSeamReceiptRecord[]): GenericCausalSeamReceiptRecord[] {
+  return records.map((record) => ({
+    ...cloneRefRecords([record])[0]!,
+    ...(record.sourceRequestId ? { sourceRequestId: record.sourceRequestId } : {}),
+    ...(record.sourceRequestHash ? { sourceRequestHash: record.sourceRequestHash } : {}),
+  }));
+}
+
+function cloneLinkage(linkage: GenericCausalSeamHistoryEnvelope["linkage"]): GenericCausalSeamHistoryEnvelope["linkage"] {
+  return linkage.map((entry) => ({
+    ...(entry.requestId ? { requestId: entry.requestId } : {}),
+    ...(entry.requestHash ? { requestHash: entry.requestHash } : {}),
+    ...(entry.receiptId ? { receiptId: entry.receiptId } : {}),
+    ...(entry.receiptHash ? { receiptHash: entry.receiptHash } : {}),
+  }));
+}
+
 function unique(values: Array<string | undefined>): string[] {
   return [...new Set(values.filter((value): value is string => typeof value === "string" && value.length > 0))];
 }
@@ -976,6 +1120,36 @@ function assertStringArray(value: unknown, name: string): asserts value is strin
   if (!Array.isArray(value) || value.some((entry) => typeof entry !== "string")) {
     throw new Error(`${name}_must_be_string_array`);
   }
+}
+
+function assertRefRecordArray(value: unknown, name: string): asserts value is GenericCausalSeamRefRecord[] {
+  if (!Array.isArray(value)) throw new Error(`${name}_must_be_array`);
+  for (const [index, entry] of value.entries()) {
+    assertRefRecord(entry, `${name}.${index}`);
+  }
+}
+
+function assertReceiptRecordArray(value: unknown, name: string): asserts value is GenericCausalSeamReceiptRecord[] {
+  if (!Array.isArray(value)) throw new Error(`${name}_must_be_array`);
+  for (const [index, entry] of value.entries()) {
+    const receipt = assertRefRecord(entry, `${name}.${index}`);
+    if (receipt.sourceRequestId !== undefined) assertString(receipt.sourceRequestId, `${name}.${index}.sourceRequestId`);
+    if (receipt.sourceRequestHash !== undefined) assertString(receipt.sourceRequestHash, `${name}.${index}.sourceRequestHash`);
+  }
+}
+
+function assertRefRecord(value: unknown, name: string): Record<string, unknown> {
+  const record = assertRecord(value, name);
+  assertString(record.id, `${name}.id`);
+  assertString(record.hash, `${name}.hash`);
+  assertString(record.sourceRepo, `${name}.sourceRepo`);
+  if (record.durableRef !== undefined) assertString(record.durableRef, `${name}.durableRef`);
+  if (record.writerRef !== undefined) assertString(record.writerRef, `${name}.writerRef`);
+  if (record.schemaRef !== undefined) assertString(record.schemaRef, `${name}.schemaRef`);
+  if (record.causalParentRefs !== undefined) assertStringArray(record.causalParentRefs, `${name}.causalParentRefs`);
+  if (record.linkageStatus !== undefined) assertString(record.linkageStatus, `${name}.linkageStatus`);
+  if (record.observedProofRung !== undefined) assertString(record.observedProofRung, `${name}.observedProofRung`);
+  return record;
 }
 
 function assertEqual<T>(actual: unknown, expected: T, name: string): asserts actual is T {

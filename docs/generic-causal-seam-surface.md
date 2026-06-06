@@ -73,6 +73,13 @@ Causal should accept a library-neutral seam-history envelope:
 - `proofLabels`
 - `warnings`
 
+Standalone API consumers should prefer
+`buildGenericCausalSeamHistoryEnvelope` and
+`assertGenericCausalSeamHistoryEnvelope` instead of hand-authoring this shape.
+Those helpers default direct API submissions to lower-rung control-plane
+material and validate request, receipt, evidence, transport, linkage, proof
+label, and warning fields before observation classification.
+
 Each request and receipt record should carry:
 
 - stable id
