@@ -55,11 +55,38 @@ Current objective list:
 7. Keep process hygiene explicit: if Causal starts any live helper process, stop
    it before finishing or hand off pid/control-dir state clearly.
 
-## Current Coordination Posture: Folded Into Platform Pressure
+## Current Coordination Posture: Repo-Family Mechanics Chain Observed
 
-Spine is routing the next concrete family pressure to Platform for an
-operational hosted-component lift. Causal Substrate should remain ready, but it
-should not start another solo saved-material matrix from the current evidence.
+Causal Substrate consumed the selected Packs -> Bytes -> Conduit -> Platform ->
+Layer -> Edge mechanics chain as supplied artifacts and emitted a bounded
+compatible observation/readback. This was not live Causal public-swarm
+observation; Causal did not open swarm, call Edge, call Layer, call Platform,
+admit Layer evidence, interpret RBC, publish Mesh, write production continuity,
+or claim authority.
+
+Current observation:
+
+```text
+artifact: proof-artifacts/repo-family-mechanics-chain-20260608T170000Z/observation.json
+readback: proof-artifacts/repo-family-mechanics-chain-20260608T170000Z/readback.json
+observationId: causal-repo-family-mechanics-chain-observation:c18515f81e5ae7b7
+observationHash: sha256:c18515f81e5ae7b70b098ebae49d7442815043c881a02f647e8946c22a19fb58
+readbackHash: sha256:9eb573ec2d333cb04e2645c8b336026de1f2638d2e8a05b41494cefa07af8f31
+classification: compatible
+proofRung: local_supplied_material
+nextPressure: spine_reassessment_for_mechanics_work_but_too_complicated_tripwire
+```
+
+Command:
+
+```text
+npm run observe:repo-family-mechanics-chain -- --packs-proof ../mesh-ecology-packs/proof-artifacts/layer-installable-participation-bundle-20260608T150000Z/proof.json --bytes-proof ../mesh-ecology-bytes/proof-artifacts/layer-installable-bundle-public-seeder-20260608T153000Z/proof.json --conduit-proof ../conduit/proof-artifacts/layer-installable-bundle-retained-distribution-20260608T153500Z/proof.json --platform-activation-proof ../mesh-ecology-platform/proof-artifacts/layer-installable-bundle-human-approved-activation-20260608T161000Z/proof.json --platform-public-status-proof ../mesh-ecology-platform/proof-artifacts/layer-installable-bundle-activation-public-status-20260608T163000Z/proof.json --layer-status-review ../mesh-ecology-layer/proof-artifacts/layer-platform-hosted-status-review-20260608T164000Z/review.json --edge-visibility-review ../mesh-ecology-edge/proof-artifacts/layer-installable-bundle-activation-public-status-review-20260608T165000Z/edge-layer-installable-bundle-activation-public-status-review.json --output proof-artifacts/repo-family-mechanics-chain-20260608T170000Z/observation.json --readback-output proof-artifacts/repo-family-mechanics-chain-20260608T170000Z/readback.json --emitted-at 2026-06-08T17:00:00.000Z --read-at 2026-06-08T17:00:01.000Z
+```
+
+Next posture: Spine should reassess whether the family has reached the
+mechanics-work-but-too-complicated tripwire. Causal should not expand another
+saved-material matrix unless fresh public-swarm material or a concrete consumer
+ambiguity appears.
 
 Resume Causal work only when one of these appears:
 

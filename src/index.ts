@@ -23,6 +23,7 @@ export * from "./adapters/generic-consumer-comparison.js";
 export * from "./adapters/generic-causal-seam-surface.js";
 export * from "./adapters/generic-causal-seam-public-proof-index.js";
 export * from "./adapters/adjacent-public-material-observation.js";
+export * from "./adapters/repo-family-mechanics-chain-observation.js";
 export * from "./adapters/continuity-explanation-artifact.js";
 export * from "./adapters/adjacent-tool-interop.js";
 export * from "./adapters/edge-causal-review-evidence.js";

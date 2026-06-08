@@ -1,0 +1,152 @@
+{
+  "artifactKind": "causal-repo-family-mechanics-chain-observation",
+  "schema": "causal-substrate/repo-family-mechanics-chain-observation/v1",
+  "schemaVersion": 1,
+  "emittedAt": "2026-06-08T17:00:00.000Z",
+  "classification": "compatible",
+  "proof": {
+    "operationProofRung": "local_supplied_material",
+    "strongestSourceProofRungObserved": "semantic_only",
+    "publicSwarmSourceObserved": true,
+    "liveCausalSwarmProofClaimed": false,
+    "proofRungUpgradeClaimed": false
+  },
+  "sourcePaths": {
+    "packsProof": "/home/zevilz/work/mesh-ecology/mesh-ecology-packs/proof-artifacts/layer-installable-participation-bundle-20260608T150000Z/proof.json",
+    "bytesProof": "/home/zevilz/work/mesh-ecology/mesh-ecology-bytes/proof-artifacts/layer-installable-bundle-public-seeder-20260608T153000Z/proof.json",
+    "conduitProof": "/home/zevilz/work/mesh-ecology/conduit/proof-artifacts/layer-installable-bundle-retained-distribution-20260608T153500Z/proof.json",
+    "platformActivationProof": "/home/zevilz/work/mesh-ecology/mesh-ecology-platform/proof-artifacts/layer-installable-bundle-human-approved-activation-20260608T161000Z/proof.json",
+    "platformPublicStatusProof": "/home/zevilz/work/mesh-ecology/mesh-ecology-platform/proof-artifacts/layer-installable-bundle-activation-public-status-20260608T163000Z/proof.json",
+    "layerStatusReview": "/home/zevilz/work/mesh-ecology/mesh-ecology-layer/proof-artifacts/layer-platform-hosted-status-review-20260608T164000Z/review.json",
+    "edgeVisibilityReview": "/home/zevilz/work/mesh-ecology/mesh-ecology-edge/proof-artifacts/layer-installable-bundle-activation-public-status-review-20260608T165000Z/edge-layer-installable-bundle-activation-public-status-review.json"
+  },
+  "observedSources": {
+    "packsProof": true,
+    "bytesProof": true,
+    "conduitProof": true,
+    "platformActivationProof": true,
+    "platformPublicStatusProof": true,
+    "layerStatusReview": true,
+    "edgeVisibilityReview": true
+  },
+  "preservedRefs": {
+    "packsRefs": [
+      "packs-installable-participation-bundle:3d5fcff10259d8ef"
+    ],
+    "bytesRefs": [
+      "bytes-installable-bundle-public-seeder:1e55d9c8fb21a82c"
+    ],
+    "conduitRefs": [
+      "conduit-installable-bundle-retained-distribution:b4e75e04f75023e0"
+    ],
+    "platformRefs": [
+      "platform-installable-bundle-human-approved-activation:926a6d33ea94922a",
+      "platform-installable-bundle-activation-public-status:b1ad992e4514c70f"
+    ],
+    "layerRefs": [
+      "layer-platform-hosted-status-review:9328b73ee7e99c73"
+    ],
+    "edgeRefs": [
+      "edge-platform-installable-bundle-activation-public-status-review:45c97d565581712c"
+    ],
+    "sourceHashes": [
+      "dd6f82ba7d2f390f6bde4f1419a2397ab25592ff",
+      "sha256:2271d37081ab26bf58ced6b0422f615a364f73c75d0c19df408dc585f26da346",
+      "sha256:64fb14e44510ca38b701407f3a0c1c8f2d5662f4b9a96d39c6bdd4ff8d01d090",
+      "sha256:a9716acd33dc7581882a9cdd737ca3190d7f03289b5d34fe807948f40f405c47",
+      "sha256:8336a92111d30251139817f70580d955fd623a3994eb87c2166327d4da3335f2",
+      "sha256:3cf89a354e909e6c62b925194c58efe7d2c8209c84877ea17bb30db53c231eca",
+      "sha256:61a682bf2e424e785b0506b482881b24f367489d1d368c2bc9c6576b699d82ba",
+      "sha256:3d5fcff10259d8ef28324d7b6ae063477fa5fe18276b6948cfd71ef2e8ea58de",
+      "3d7c505650e52e0f4601a74b4414709ef205ffc9",
+      "0cadcb95dc4638c5f0f1a6cca4686486c8694d85294a1427484518969c061fc2",
+      "sha256:1e55d9c8fb21a82c96b3368192c1518878ad9a753aca16347f86efe010bc0f5f",
+      "b2b4e0e4b7002a408d92a8ba0c86964a4df59308",
+      "sha256:823c140ea28246778eb7c69172f4bc9289395ffbca920d5cab2cbd572beee4fd",
+      "sha256:b4e75e04f75023e0512ff3b9b8655c59475a7fd33c19d2f78396b7e796b64932",
+      "sha256:1e4deaa0c2336199dd13a8d2247f0a2ca06f550260ea7c049575de6af8a274a2",
+      "sha256:9f46c5fa645f0a9935ef8f8d65905a11c0abc18322c24a9648b24ecd61450f6c",
+      "sha256:76c37290a48f6fa2ea8a90c73c694cdccccb979128165203de479e7cf243f0c5",
+      "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sha256:dd8c09f33a24f39bb11b8199e850b2bf95dffde92bcaceeba70ed0f4b67358ae",
+      "sha256:73993c2021006db3356e1be93d89dd67ad0433c17e09d6b8156de225a4b2a040",
+      "sha256:f8679ff6fd85ca5266b40ac65e4c4578e26d8f1ee14abea59f135d0747c2aae6",
+      "sha256:1a9dc8183420ead1390de4697a513987203d2b2e624f74290740ccb687f933cf",
+      "sha256:926a6d33ea94922a6d8ad0b3fd846eb0c0ae24f337b871f5873caf124915ec3c",
+      "sha256:ff9c5f68f468943ab69ac346dbdad79f30274ec8f9a046ef4a1270dd554c45b1",
+      "sha256:e4162fa577a1b027d5b813dab85c6957dd09a243c5548bfa3e2aa337d4452405",
+      "sha256:1be0aa88b50ef96faf7008f329a6f0cf4585e590a48bc87c614e6c997de4eeb7",
+      "sha256:38e38af48202d7e83f3ac70cc25c78fc58c6be0deb30e3cd5024e6029e85d738",
+      "sha256:286c58604bcff4f685ce84f66a2f57ccd5cbc9fb1e91838a7fea97e0516fcca9",
+      "sha256:b1ad992e4514c70fc29b053fb74928fc6ad85c3e26e8fd9623d5d52a32c99562",
+      "edb210cb9f0986bfbc51b9540349fd01d7ef1d00",
+      "sha256:7f6e76b3db08a4c6c94063bed5aacea13541cd26b0aa0eb2da5e6c418a924455",
+      "sha256:b2f7fe0d2cec19f081e469d1e92fec49becff1389af2d6b80703047ee238d622",
+      "sha256:f09d219098f3613d8c00b60a7f3da7fc10aacaaccf2d3d7d7566c99f20d18d78",
+      "sha256:479c47b384f8f4f59f9fe8da8814f4af23a1a37824a754e4997e205c114df119"
+    ],
+    "proofRungs": [
+      "semantic_only",
+      "hyperswarm_discovered_feed_backed",
+      "local_supplied_material",
+      "public_hyperdht_platform_contact"
+    ],
+    "linkageStatuses": [
+      "installable_participation_bundle_verified",
+      "installable_bundle_public_seeder_live",
+      "installable_bundle_retained_distribution_reach_visible",
+      "installable_bundle_human_approved_activation_complete",
+      "installable_bundle_activation_public_status_contact_complete",
+      "layer_hosted_status_refs_verified_read_only",
+      "visible_for_operator_review"
+    ]
+  },
+  "chainFit": {
+    "packsLayerTarget": true,
+    "bytesPreservesLayerTarget": true,
+    "conduitPreservesLayerTarget": true,
+    "platformActivatedLayerTarget": true,
+    "platformPublicStatusSurfaced": true,
+    "layerVerifiedStatusRefs": true,
+    "edgeProjectedVisibility": true
+  },
+  "validation": {
+    "status": "repo-family-mechanics-chain-observation-ready",
+    "noCanonicalHistoryClaim": true,
+    "noLayerEvidenceAdmission": true,
+    "noRbcInterpretation": true,
+    "noAuthorityGrant": true,
+    "noMeshPublication": true,
+    "noProductionContinuityWrite": true,
+    "issues": []
+  },
+  "boundary": {
+    "readsSuppliedArtifactsOnly": true,
+    "opensSwarm": false,
+    "opensCorestore": false,
+    "callsEdge": false,
+    "callsLayer": false,
+    "callsPlatform": false,
+    "callsConduit": false,
+    "admitsLayerEvidence": false,
+    "acceptsCanonicalHistory": false,
+    "interpretsRbc": false,
+    "grantsAuthority": false,
+    "publishesToMesh": false,
+    "writesProductionContinuity": false
+  },
+  "nonClaims": {
+    "canonicalHistory": false,
+    "layerEvidenceAdmission": false,
+    "layerAdmission": false,
+    "rbcInterpretation": false,
+    "quorumSatisfaction": false,
+    "authority": false,
+    "meshPublication": false,
+    "productionContinuityWrite": false,
+    "liveCausalPublicSwarmObservation": false
+  },
+  "nextPressure": "spine_reassessment_for_mechanics_work_but_too_complicated_tripwire",
+  "observationId": "causal-repo-family-mechanics-chain-observation:c18515f81e5ae7b7",
+  "observationHash": "sha256:c18515f81e5ae7b70b098ebae49d7442815043c881a02f647e8946c22a19fb58"
+}
