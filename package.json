@@ -27,6 +27,8 @@
     "observe:layer-origin-receipt-runtime-evidence-hook": "tsx scripts/observe-layer-origin-receipt-runtime-evidence-hook.ts",
     "observe:repo-family-mechanics-chain": "tsx scripts/observe-repo-family-mechanics-chain.ts",
     "observe:adjacent-public-material": "tsx scripts/observe-adjacent-public-material.ts",
+    "observe:file-resource-lift-decision-compatibility": "tsx scripts/observe-file-resource-lift-decision-compatibility.ts",
+    "observe:file-resource-source-continuity-prerequisite": "tsx scripts/observe-file-resource-source-continuity-prerequisite.ts",
     "public-observer": "tsx scripts/causal-public-observer.ts",
     "readback:edge-layer-seam-history-handoff-bundle": "tsx scripts/readback-edge-layer-seam-history-handoff-bundle.ts",
     "readback:edge-layer-seam-history-hyperswarm-report": "tsx scripts/readback-edge-layer-seam-history-hyperswarm-report.ts",

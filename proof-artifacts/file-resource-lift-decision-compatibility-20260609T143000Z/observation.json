@@ -1,0 +1,67 @@
+{
+  "artifactKind": "causal_file_resource_lift_decision_compatibility_observation",
+  "schema": "causal-substrate/file-resource-lift-decision-compatibility-observation/v1",
+  "schemaVersion": 1,
+  "observationId": "causal-file-resource-lift-decision-compatibility:dfb1bc7e2c17a35d",
+  "observationHash": "sha256:c69d1b3c8558af823c1df1b3c3c8715d9f0a04dc3da071db97b17cdc33c4c18c",
+  "emittedAt": "2026-06-09T14:30:00.000Z",
+  "proofRung": "local_supplied_material",
+  "sourcePaths": {
+    "layerDecisionBoundaryReview": "/home/zevilz/work/mesh-ecology/mesh-ecology-layer/proof-artifacts/layer-file-resource-lift-decision-boundary-review-20260609T142000Z/review.json",
+    "layerDecisionBoundaryReviewReadback": "/home/zevilz/work/mesh-ecology/mesh-ecology-layer/proof-artifacts/layer-file-resource-lift-decision-boundary-review-20260609T142000Z/readback.json"
+  },
+  "sourceRefs": {
+    "layerDecisionBoundaryReviewRef": "layer-file-resource-lift-decision-boundary-review:90eb95d7c83ac57e",
+    "layerDecisionBoundaryReviewHash": "sha256:ac93ab2dd71fc77c50ac71575c40f70021a07ba306c3e0644c7618f8c1ddb2bc",
+    "layerDecisionBoundaryReviewReadbackRef": "layer-file-resource-lift-decision-boundary-review-readback:5266db27fa03107b",
+    "layerDecisionBoundaryReviewReadbackHash": "sha256:e6a1234fa765c994bff6b5e79cf0fa8ee44455a3060288a359cfb25f011fe64d",
+    "edgeOperatorDecisionRef": "edge-file-resource-lift-operator-decision:e1c2f5fde9c8034c",
+    "edgeOperatorDecisionHash": "sha256:edfe222417cd5bfaa48dc33c7e0adcf991834bd43d945852a34da31163c9c533",
+    "rbcReceiptRef": "rbc-evaluation-receipt:e437fd4c8cb9cfe3",
+    "rbcReceiptHash": "sha256:e437fd4c8cb9cfe37b0d9a26824e3a7eb2f44149e7c5b39ad964f440cfb83f18",
+    "studioLiftSourceCandidateRef": "studio-file-resource-lift-source-candidate-699e0600903df0ae5b25de81",
+    "bytesVisibilityEvidenceRef": "bytes-studio-file-resource-lift-visibility-evidence:a02c9a4c28a3247e"
+  },
+  "status": "file-resource-lift-compatibility-question-ready",
+  "classification": "compatibility_question_ready",
+  "interpretation": {
+    "concreteCompatibilityQuestionExists": true,
+    "sourceContinuityQuestionPreserved": true,
+    "viewsDoNotReplaceSourceContinuity": true,
+    "admissionCandidateBoundaryPreserved": true,
+    "convergenceNotAttempted": true
+  },
+  "validation": {
+    "layerReviewObserved": true,
+    "layerReadbackObserved": true,
+    "layerReadbackVerified": true,
+    "layerReviewIsReady": true,
+    "layerReviewIsHeld": false,
+    "noLayerAdmissionClaim": true,
+    "noAcceptedContinuityClaim": true,
+    "noCanonicalHistoryClaim": true,
+    "noViewAsSourceContinuityClaim": true,
+    "noAuthorityClaim": true,
+    "issues": []
+  },
+  "boundary": {
+    "observesLayerReviewOnly": true,
+    "opensLayerRuntime": false,
+    "writesLayerState": false,
+    "appendsCausalContinuity": false,
+    "admitsLayerEvidence": false,
+    "acceptsCanonicalHistory": false,
+    "attemptsConvergence": false,
+    "grantsAuthority": false
+  },
+  "nonClaims": {
+    "layerAdmission": false,
+    "acceptedContinuity": false,
+    "canonicalHistory": false,
+    "convergence": false,
+    "causalTruth": false,
+    "viewAsSourceContinuity": false,
+    "authority": false
+  },
+  "nextPressure": "spine_repo_family_reassessment_after_file_resource_lift_decision_boundary"
+}
