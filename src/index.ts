@@ -73,4 +73,5 @@ export * from "./adapters/edge-layer-seam-history-public-refresh-readiness-gate.
 export * from "./adapters/edge-layer-seam-history-public-refresh-input-package.js";
 export * from "./adapters/file-resource-lift-decision-compatibility-observation.js";
 export * from "./adapters/file-resource-source-continuity-prerequisite-observation.js";
+export * from "./adapters/file-resource-source-continuity-acceptance-observation.js";
 export * from "./prototypes/continuity-workstation.js";

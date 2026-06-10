@@ -1,0 +1,49 @@
+{
+  "artifactKind": "causal_file_resource_source_continuity_acceptance_observation",
+  "schema": "causal-substrate/file-resource-source-continuity-acceptance-observation/v1",
+  "schemaVersion": 1,
+  "observationId": "causal-file-resource-source-continuity-acceptance:67d84ef7ac55a9ff",
+  "observationHash": "sha256:e7e16479b5a12e99f6611cc6da9477cec41909c8efb4cb048adda2d0c9fa060c",
+  "emittedAt": "2026-06-10T08:25:00.000Z",
+  "proofRung": "local_supplied_material",
+  "sourceRefs": {
+    "layerAppendRef": "layer-file-resource-source-continuity-acceptance-append:39d884ab6a4811d3",
+    "layerAppendHash": "sha256:5a7f1ba438e7ef3b82698c8563c3fd092463cbbb0f3bb0422b3e83e033088721",
+    "layerAppendReadbackRef": "layer-file-resource-source-continuity-acceptance-append-readback:6b0be2393398c0cc",
+    "layerAppendReadbackHash": "sha256:dbc40c54ba4e4bb771942f6e9e4a7ba6a6ee5bcf4d61b2ab94ba1019b717dd43",
+    "edgeIntentRef": "edge-file-resource-source-continuity-acceptance-operator-intent:f7735f7dfc01c845",
+    "rbcReceiptRef": "rbc-evaluation-receipt:3b8f87586afe98d6",
+    "bytesVisibilityEvidenceRef": "bytes-studio-file-resource-lift-visibility-evidence:a02c9a4c28a3247e"
+  },
+  "status": "file-resource-source-continuity-acceptance-compatible",
+  "interpretation": {
+    "layerAcceptedSourceContinuityObserved": true,
+    "acceptedOnlyForLayerScope": true,
+    "causalCompatibilityObserved": true,
+    "causalAuthorityClaimed": false,
+    "globalCanonClaimed": false,
+    "productionDurabilityClaimed": false
+  },
+  "validation": {
+    "layerAppendObserved": true,
+    "layerAppendReadbackObserved": true,
+    "layerAppendHashVerified": true,
+    "acceptedSourceContinuityVisible": true,
+    "noGlobalCanonClaim": true,
+    "noProductionDurabilityClaim": true,
+    "noAuthorityClaim": true,
+    "issues": []
+  },
+  "nonClaims": {
+    "layerAdmission": false,
+    "durableAppend": false,
+    "causalContinuityAppend": false,
+    "canonicalAdmission": false,
+    "canonicalHistory": false,
+    "causalTruth": false,
+    "globalCanon": false,
+    "authority": false,
+    "productionDurability": false
+  },
+  "nextPressure": "bytes_post_acceptance_material_visibility_check"
+}
